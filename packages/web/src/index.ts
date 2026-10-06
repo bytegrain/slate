@@ -155,6 +155,21 @@ export { systemClock, FakeClock, type Clock } from './core/clock';
 export { tokenValue, tokenNumber } from './core/tokens';
 export { icons, type IconName } from './icons/generated/icons';
 
+// Wave-2 component logic (platform-free; identical to Slate.Core — tests/fixtures/components.json).
+export { positionPopover, positionAtPoint, type PopoverPlacement, type OverlayRect, type PositionRequest, type PositionResult } from './core/overlay/positioning';
+export {
+  buildMonth, navigateCalendar, pickRange, resolvePreset, defaultPresets, formatDate, parseDate, shortPattern, firstDayOfWeek,
+  isoWeek, isoDate, addDays, addMonths, addYears, dayOfWeek, daysInMonth, isoPattern, calendarRows,
+  type IsoDate, type Weekday, type DateRange, type CalendarOptions, type CalendarDay, type CalendarWeek, type CalendarMonth,
+  type CalendarKey, type DatePreset, type DatePresetKind,
+} from './core/date/calendar';
+export { moveIndex, Typeahead, foldText, filterOptions, groupIndices, type ListKey, type ListNavigationOptions, type OptionMatch, type TextRange } from './core/collections/list';
+export { TreeModel, type TreeKey, type TreeRow, type TreeNavigation, type TreeAccessors, type CheckState, type TreeLoadState } from './core/collections/tree';
+export {
+  paginationRange, pageCount, pageForFirstItem, avatarInitials, avatarTone, snapValue, sliderKey, valueToFraction, fractionToValue, setRangeThumb,
+  type PaginationItem, type AvatarTone, type SliderKey,
+} from './core/collections/widgets';
+
 declare global {
   interface HTMLElementTagNameMap {
     'sl-provider': SlProvider;

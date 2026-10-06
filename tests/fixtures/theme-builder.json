@@ -36,9 +36,12 @@
       "color.text.link": "#CC3600",
       "color.text.linkHover": "#A32B00",
       "color.text.onAccent": "#05181C",
+      "component.calendar.range": "#FFEDE6",
+      "component.calendar.selected": "#FF4908",
       "component.field.borderFocus": "#FF4908",
       "component.progress.fill": "#FF4908",
-      "component.selection.checked": "#FF4908"
+      "component.selection.checked": "#FF4908",
+      "component.tabs.indicator": "#FF4908"
     }
   },
   "dark-orange": {
@@ -57,9 +60,12 @@
       "color.accent.text": "#FF5A1F",
       "color.text.link": "#FF5A1F",
       "color.text.linkHover": "#FF7848",
+      "component.calendar.range": "#FF5A1F1F",
+      "component.calendar.selected": "#FF5A1F",
       "component.field.borderFocus": "#FF5A1F",
       "component.progress.fill": "#FF5A1F",
-      "component.selection.checked": "#FF5A1F"
+      "component.selection.checked": "#FF5A1F",
+      "component.tabs.indicator": "#FF5A1F"
     }
   },
   "light-yellow": {
@@ -79,9 +85,12 @@
       "color.text.link": "#707000",
       "color.text.linkHover": "#474700",
       "color.text.onAccent": "#05181C",
+      "component.calendar.range": "#F4F4E6",
+      "component.calendar.selected": "#8F8F00",
       "component.field.borderFocus": "#8F8F00",
       "component.progress.fill": "#8F8F00",
-      "component.selection.checked": "#8F8F00"
+      "component.selection.checked": "#8F8F00",
+      "component.tabs.indicator": "#8F8F00"
     }
   },
   "dark-navy": {
@@ -101,9 +110,12 @@
       "color.text.link": "#7878FF",
       "color.text.linkHover": "#A1A1FF",
       "color.text.onAccent": "#FFFFFF",
+      "component.calendar.range": "#5050FF1F",
+      "component.calendar.selected": "#5050FF",
       "component.field.borderFocus": "#5050FF",
       "component.progress.fill": "#5050FF",
-      "component.selection.checked": "#5050FF"
+      "component.selection.checked": "#5050FF",
+      "component.tabs.indicator": "#5050FF"
     }
   },
   "light-violet-soft": {
@@ -125,15 +137,22 @@
       "component.alert.radius": "12px",
       "component.badge.radius": "6px",
       "component.button.radius": "9px",
+      "component.calendar.range": "#EFECFE",
+      "component.calendar.selected": "#5B3DF5",
       "component.card.radius": "15px",
       "component.dialog.radius": "18px",
       "component.drawer.itemRadius": "9px",
       "component.field.borderFocus": "#5B3DF5",
       "component.field.radius": "9px",
+      "component.grid.radius": "15px",
+      "component.menu.itemRadius": "6px",
+      "component.popover.radius": "12px",
       "component.progress.fill": "#5B3DF5",
       "component.selection.boxRadius": "6px",
       "component.selection.checked": "#5B3DF5",
       "component.snackbar.radius": "12px",
+      "component.tabs.indicator": "#5B3DF5",
+      "component.tooltip.radius": "6px",
       "radius.2xl": "18px",
       "radius.lg": "12px",
       "radius.md": "9px",
@@ -158,8 +177,12 @@
       "component.dialog.radius": "0px",
       "component.drawer.itemRadius": "0px",
       "component.field.radius": "0px",
+      "component.grid.radius": "0px",
+      "component.menu.itemRadius": "0px",
+      "component.popover.radius": "0px",
       "component.selection.boxRadius": "0px",
       "component.snackbar.radius": "0px",
+      "component.tooltip.radius": "0px",
       "font.family.ui": "Inter, sans-serif",
       "radius.2xl": "0px",
       "radius.lg": "0px",
@@ -185,7 +208,8 @@
       "component.appBar.background": "#FCFCFD",
       "component.button.radius": "999px",
       "component.card.background": "#FCFCFD",
-      "component.drawer.activeItem": "#FCFCFD"
+      "component.drawer.activeItem": "#FCFCFD",
+      "component.grid.background": "#FCFCFD"
     }
   }
 }
