@@ -29,6 +29,7 @@ public sealed class CSharpEmitter : IEmitter
          .Line("{").Indent();
 
         WriteTree(w, build.Shared);
+        WriteValues(w, build.Shared, "Every shared token by path, as a CSS value (typography excluded).");
 
         w.Line()
          .Line("/// <summary>Theme names, in source order.</summary>")
@@ -40,12 +41,24 @@ public sealed class CSharpEmitter : IEmitter
         {
             w.Line($"public static class {Naming.CSharpIdentifier(theme.Name)}").Line("{").Indent();
             WriteTree(w, theme.Tokens);
+            WriteValues(w, theme.Tokens, $"Every {theme.Name} token by path, as a CSS value.");
             w.Outdent().Line("}");
         }
         w.Outdent().Line("}");
 
         w.Outdent().Line("}");
         return [new GeneratedFile("SlateTokens.g.cs", w.ToString())];
+    }
+
+    private static void WriteValues(Writer w, IEnumerable<Token> tokens, string summary)
+    {
+        w.Line()
+         .Line($"/// <summary>{summary}</summary>")
+         .Line("public static readonly IReadOnlyDictionary<string, string> Values = new Dictionary<string, string>")
+         .Line("{").Indent();
+        foreach (var t in tokens.Where(t => t.Value is not TypographyValue))
+            w.Line($"[{Literal(t.Path)}] = {Literal(CssEmitter.Value(t))},");
+        w.Outdent().Line("};");
     }
 
     private sealed class Node
