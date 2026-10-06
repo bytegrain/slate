@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>Slate.Wpf</RootNamespace>
+    <PackageId>Slate.Wpf</PackageId>
+    <Description>Slate for WPF: the Alloy design system as implicit styles for native controls, Slate controls (AppShell, SlateWindow, TextField, Card, ResponsiveGrid…) and snackbar/dialog services.</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Slate.Core\Slate.Core.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Alloy fonts (SIL OFL), shared with Avalonia from design/fonts. -->
+    <Resource Include="..\..\design\fonts\*.ttf" Link="Fonts\%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Slate.Wpf.Tests" />
+  </ItemGroup>
+</Project>

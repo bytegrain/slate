@@ -1,0 +1,10 @@
+<Application x:Class="Slate.Wpf.Demo.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sl="https://slate.dev/wpf"
+             StartupUri="MainWindow.xaml">
+  <Application.Resources>
+    <!-- One line adds Slate: tokens, fonts, native control styles. -->
+    <sl:SlateTheme Mode="System" Density="Compact" />
+  </Application.Resources>
+</Application>

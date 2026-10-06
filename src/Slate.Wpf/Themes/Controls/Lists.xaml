@@ -1,0 +1,65 @@
+<!-- ListBox / ListView rows: hover = background.hover; selected = selection.background + 2px mint indicator
+     (docs/design/color.md, "Accent and focus"). "Sl.NavList" is the drawer navigation variant. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sl="clr-namespace:Slate.Wpf">
+
+  <Style TargetType="ListBox">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ListBox">
+          <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+            <ScrollViewer Focusable="False">
+              <ItemsPresenter />
+            </ScrollViewer>
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="ListBoxItem">
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource Sl.FocusVisual}" />
+    <Setter Property="Padding" Value="10,0" />
+    <Setter Property="MinHeight" Value="30" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ListBoxItem">
+          <Border x:Name="Bd" Background="Transparent" MinHeight="{TemplateBinding MinHeight}" SnapsToDevicePixels="True">
+            <Grid>
+              <Border x:Name="Indicator" Width="2" HorizontalAlignment="Left" Background="{DynamicResource Sl.Brush.Selection.Indicator}" Visibility="Collapsed" />
+              <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+            </Grid>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Sl.Brush.Background.Hover}" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Sl.Brush.Selection.Background}" />
+              <Setter TargetName="Indicator" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- Drawer navigation: items are sl:NavItem (icon + label) or anything else. -->
+  <Style x:Key="Sl.NavList" TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+    <Setter Property="Padding" Value="8" />
+    <Setter Property="KeyboardNavigation.DirectionalNavigation" Value="Cycle" />
+  </Style>
+</ResourceDictionary>

@@ -1,0 +1,7 @@
+<!-- Embedded Alloy fonts (design/fonts, SIL OFL). Overrides the generated family keys with pack URIs,
+     falling back to the system fonts named in the tokens. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <FontFamily x:Key="Sl.Font.Family.Ui">pack://application:,,,/Slate.Wpf;component/Fonts/#Instrument Sans, Segoe UI</FontFamily>
+  <FontFamily x:Key="Sl.Font.Family.Mono">pack://application:,,,/Slate.Wpf;component/Fonts/#IBM Plex Mono, Cascadia Mono, Consolas</FontFamily>
+</ResourceDictionary>

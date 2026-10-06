@@ -1,0 +1,33 @@
+<UserControl x:Class="Slate.Wpf.Demo.Pages.DialogsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sl="https://slate.dev/wpf">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <sl:Container Size="Lg" Margin="0,28,0,48">
+      <sl:Stack Spacing="6">
+        <StackPanel>
+          <TextBlock Style="{DynamicResource Sl.Typography.Overline}" Foreground="{DynamicResource Sl.Brush.Accent.Text}" Text="DIALOGS" />
+          <TextBlock Style="{DynamicResource Sl.Typography.H2}" Margin="0,6,0,4" Text="In-window modal dialogs" />
+          <TextBlock Style="{DynamicResource Sl.Text.Secondary}" TextWrapping="Wrap"
+                     Text="IDialogService.ShowAsync returns a DialogResult; ConfirmAsync returns a bool. Focus is trapped and restored; Escape and the scrim follow each dialog's options." />
+        </StackPanel>
+
+        <sl:Card Header="Try them">
+          <WrapPanel>
+            <Button sl:Ui.Variant="Primary" Content="Rename (form)" Click="OnForm" Margin="0,0,8,8" />
+            <Button Content="Confirm" Click="OnConfirm" Margin="0,0,8,8" />
+            <Button sl:Ui.Variant="Danger" Content="Delete package…" Click="OnDestructive" Margin="0,0,8,8" />
+            <Button Content="Acknowledge" Click="OnAlert" Margin="0,0,8,8" />
+            <Button Content="Stacked dialogs" Click="OnStacked" Margin="0,0,8,8" />
+            <Button Content="Wide (Lg, full width)" Click="OnWide" Margin="0,0,8,8" />
+            <Button Content="Command palette (top)" Click="OnTop" Margin="0,0,8,8" />
+          </WrapPanel>
+        </sl:Card>
+
+        <sl:Card Header="Result">
+          <TextBlock x:Name="Result" Style="{DynamicResource Sl.Text.Mono}" Text="—" />
+        </sl:Card>
+      </sl:Stack>
+    </sl:Container>
+  </ScrollViewer>
+</UserControl>

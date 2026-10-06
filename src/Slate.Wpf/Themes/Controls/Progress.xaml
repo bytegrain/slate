@@ -1,0 +1,33 @@
+<!-- Linear progress (docs/design/components.md#progress): 6px muted track, accent fill; indeterminate uses a
+     30% glider that is static under reduced motion. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sl="clr-namespace:Slate.Wpf">
+  <Style TargetType="ProgressBar">
+    <Setter Property="Height" Value="6" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Muted}" />
+    <Setter Property="Maximum" Value="100" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ProgressBar">
+          <Grid SnapsToDevicePixels="True">
+            <Border x:Name="PART_Track" CornerRadius="3" Background="{TemplateBinding Background}">
+              <Border Height="1" VerticalAlignment="Top" Margin="2,0" Background="{DynamicResource Sl.Brush.Effect.Shade}" />
+            </Border>
+            <Border x:Name="PART_Indicator" CornerRadius="3" Background="{TemplateBinding Foreground}" HorizontalAlignment="Left" />
+            <sl:IndeterminateGlider x:Name="Glider" Visibility="Collapsed">
+              <Border CornerRadius="3" Background="{TemplateBinding Foreground}" />
+            </sl:IndeterminateGlider>
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsIndeterminate" Value="True">
+              <Setter TargetName="PART_Indicator" Property="Visibility" Value="Collapsed" />
+              <Setter TargetName="Glider" Property="Visibility" Value="Visible" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>

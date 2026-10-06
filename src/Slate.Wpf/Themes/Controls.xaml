@@ -1,0 +1,13 @@
+<!-- Implicit Alloy styles for native WPF controls. Merged by SlateTheme. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="pack://application:,,,/Slate.Wpf;component/Themes/Controls/Common.xaml" />
+    <ResourceDictionary Source="pack://application:,,,/Slate.Wpf;component/Themes/Controls/Buttons.xaml" />
+    <ResourceDictionary Source="pack://application:,,,/Slate.Wpf;component/Themes/Controls/Inputs.xaml" />
+    <ResourceDictionary Source="pack://application:,,,/Slate.Wpf;component/Themes/Controls/Selection.xaml" />
+    <ResourceDictionary Source="pack://application:,,,/Slate.Wpf;component/Themes/Controls/Progress.xaml" />
+    <ResourceDictionary Source="pack://application:,,,/Slate.Wpf;component/Themes/Controls/Menus.xaml" />
+    <ResourceDictionary Source="pack://application:,,,/Slate.Wpf;component/Themes/Controls/Lists.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

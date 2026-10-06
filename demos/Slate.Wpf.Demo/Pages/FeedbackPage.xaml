@@ -1,0 +1,51 @@
+<UserControl x:Class="Slate.Wpf.Demo.Pages.FeedbackPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sl="https://slate.dev/wpf">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <sl:Container Size="Lg" Margin="0,28,0,48">
+      <sl:Stack Spacing="6">
+        <StackPanel>
+          <TextBlock Style="{DynamicResource Sl.Typography.Overline}" Foreground="{DynamicResource Sl.Brush.Accent.Text}" Text="FEEDBACK" />
+          <TextBlock Style="{DynamicResource Sl.Typography.H2}" Margin="0,6,0,4" Text="Alerts and snackbars" />
+          <TextBlock Style="{DynamicResource Sl.Text.Secondary}" TextWrapping="Wrap"
+                     Text="Status is never colour alone: every state pairs a hue with an icon and words. Snackbar timing, queueing and de-duplication come from Slate.Core." />
+        </StackPanel>
+
+        <sl:Card Header="Alerts">
+          <sl:Stack Spacing="3">
+            <sl:Alert Severity="Info" Title="New tokens available" Content="Pull v0.2 to get the updated focus ring." />
+            <sl:Alert Severity="Success" Title="Deployed to production" Content="slate-web is live in 3 regions." IsDismissible="True" />
+            <sl:Alert Severity="Warning" Title="Usage at 80%" Content="Build minutes reset on the 1st.">
+              <sl:Alert.Actions>
+                <Button sl:Ui.Size="Small" Content="Upgrade" />
+              </sl:Alert.Actions>
+            </sl:Alert>
+            <sl:Alert Severity="Error" Title="Build failed" Content="3 tests failed in Slate.Wpf.Tests." IsDismissible="True">
+              <sl:Alert.Actions>
+                <Button sl:Ui.Size="Small" Content="View log" />
+              </sl:Alert.Actions>
+            </sl:Alert>
+            <sl:Alert Severity="Normal" Content="A neutral note with no severity." />
+          </sl:Stack>
+        </sl:Card>
+
+        <sl:Card Header="Snackbars" Subtitle="Max 3 visible; extras queue. Hover or focus pauses the timer. Escape dismisses the focused one.">
+          <sl:Stack Spacing="4">
+            <WrapPanel>
+              <Button Content="Simple" Click="OnSimple" Margin="0,0,8,8" />
+              <Button Content="Success" sl:Ui.Icon="check-circle" Click="OnSuccess" Margin="0,0,8,8" />
+              <Button Content="Error (8s)" sl:Ui.Icon="alert-circle" Click="OnError" Margin="0,0,8,8" />
+              <Button Content="With Undo" sl:Ui.Icon="trash" Click="OnAction" Margin="0,0,8,8" />
+              <Button Content="Sticky" Click="OnSticky" Margin="0,0,8,8" />
+              <Button Content="Burst of 6" Click="OnBurst" Margin="0,0,8,8" />
+              <Button Content="Duplicate ×3" Click="OnDuplicate" Margin="0,0,8,8" />
+              <Button sl:Ui.Variant="Ghost" Content="Clear all" Click="OnClear" Margin="0,0,8,8" />
+            </WrapPanel>
+            <TextBlock x:Name="LastClosed" Style="{DynamicResource Sl.Text.Tertiary}" Text="Close reasons appear here." />
+          </sl:Stack>
+        </sl:Card>
+      </sl:Stack>
+    </sl:Container>
+  </ScrollViewer>
+</UserControl>

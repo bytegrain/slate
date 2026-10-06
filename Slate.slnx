@@ -1,10 +1,16 @@
 <Solution>
+  <Folder Name="/demos/">
+    <Project Path="demos/Slate.Wpf.Demo/Slate.Wpf.Demo.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Slate.Core/Slate.Core.csproj" />
+    <Project Path="src/Slate.Wpf/Slate.Wpf.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Slate.Core.Tests/Slate.Core.Tests.csproj" />
     <Project Path="tests/Slate.Tokens.Tests/Slate.Tokens.Tests.csproj" />
+    <Project Path="tests/Slate.Wpf.ResourceTests/Slate.Wpf.ResourceTests.csproj" />
+    <Project Path="tests/Slate.Wpf.Tests/Slate.Wpf.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/Slate.Tokens.Cli/Slate.Tokens.Cli.csproj" />

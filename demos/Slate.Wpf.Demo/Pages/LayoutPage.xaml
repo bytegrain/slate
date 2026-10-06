@@ -1,0 +1,104 @@
+<UserControl x:Class="Slate.Wpf.Demo.Pages.LayoutPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sl="https://slate.dev/wpf">
+  <UserControl.Resources>
+    <Style x:Key="Cell" TargetType="Border">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Subtle}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="{DynamicResource Sl.CornerRadius.Md}" />
+      <Setter Property="Height" Value="44" />
+    </Style>
+    <Style x:Key="CellText" TargetType="TextBlock">
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="FontFamily" Value="{DynamicResource Sl.Font.Family.Mono}" />
+      <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Xs}" />
+      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Accent.Text}" />
+    </Style>
+  </UserControl.Resources>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <sl:Container Size="Lg" Margin="0,28,0,48">
+      <sl:Stack Spacing="6">
+        <StackPanel>
+          <TextBlock Style="{DynamicResource Sl.Typography.Overline}" Foreground="{DynamicResource Sl.Brush.Accent.Text}" Text="LAYOUT" />
+          <TextBlock Style="{DynamicResource Sl.Typography.H2}" Margin="0,6,0,4" Text="Shell, grid, stack, container" />
+          <TextBlock Style="{DynamicResource Sl.Text.Secondary}" TextWrapping="Wrap"
+                     Text="The same layout primitives ship on every platform. Resize the window to see the grid and drawer respond." />
+        </StackPanel>
+
+        <sl:Card Header="App shell drawer" Subtitle="Responsive switches to an overlay below 900px.">
+          <Border Style="{DynamicResource Sl.Segmented}">
+            <StackPanel Orientation="Horizontal">
+              <RadioButton Style="{DynamicResource Sl.SegmentedItem}" GroupName="Drawer" Content="Responsive" Tag="Responsive" IsChecked="True" Checked="OnDrawerMode" />
+              <RadioButton Style="{DynamicResource Sl.SegmentedItem}" GroupName="Drawer" Content="Persistent" Tag="Persistent" Checked="OnDrawerMode" />
+              <RadioButton Style="{DynamicResource Sl.SegmentedItem}" GroupName="Drawer" Content="Temporary" Tag="Temporary" Checked="OnDrawerMode" />
+              <RadioButton Style="{DynamicResource Sl.SegmentedItem}" GroupName="Drawer" Content="Mini" Tag="Mini" Checked="OnDrawerMode" />
+            </StackPanel>
+          </Border>
+        </sl:Card>
+
+        <sl:Card Header="ResponsiveGrid" Subtitle="12 columns. Xs=12, Sm=6, Md=4, Lg=3 — spans inherit upwards.">
+          <sl:ResponsiveGrid Spacing="3">
+            <Border Style="{StaticResource Cell}" sl:ResponsiveGrid.Sm="6" sl:ResponsiveGrid.Md="4" sl:ResponsiveGrid.Lg="3"><TextBlock Style="{StaticResource CellText}" Text="1" /></Border>
+            <Border Style="{StaticResource Cell}" sl:ResponsiveGrid.Sm="6" sl:ResponsiveGrid.Md="4" sl:ResponsiveGrid.Lg="3"><TextBlock Style="{StaticResource CellText}" Text="2" /></Border>
+            <Border Style="{StaticResource Cell}" sl:ResponsiveGrid.Sm="6" sl:ResponsiveGrid.Md="4" sl:ResponsiveGrid.Lg="3"><TextBlock Style="{StaticResource CellText}" Text="3" /></Border>
+            <Border Style="{StaticResource Cell}" sl:ResponsiveGrid.Sm="6" sl:ResponsiveGrid.Md="4" sl:ResponsiveGrid.Lg="3"><TextBlock Style="{StaticResource CellText}" Text="4" /></Border>
+            <Border Style="{StaticResource Cell}" sl:ResponsiveGrid.Md="8"><TextBlock Style="{StaticResource CellText}" Text="Md=8" /></Border>
+            <Border Style="{StaticResource Cell}" sl:ResponsiveGrid.Md="4"><TextBlock Style="{StaticResource CellText}" Text="Md=4" /></Border>
+          </sl:ResponsiveGrid>
+        </sl:Card>
+
+        <sl:Card Header="Stack" Subtitle="Token spacing (step × 4px), alignment, justify and Spacer.">
+          <sl:Stack Spacing="4">
+            <sl:Stack Orientation="Horizontal" Spacing="2">
+              <Button Content="Spacing 2" />
+              <Button Content="= 8px" />
+              <Button Content="gaps" />
+            </sl:Stack>
+            <Border BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="1" CornerRadius="{DynamicResource Sl.CornerRadius.Lg}" Padding="8">
+              <sl:Stack Orientation="Horizontal" Spacing="2" Align="Center">
+                <sl:Icon Kind="folder" />
+                <TextBlock Text="Projects / slate" />
+                <sl:Spacer />
+                <Button sl:Ui.Variant="Ghost" sl:Ui.Icon="settings" AutomationProperties.Name="Settings" />
+                <Button sl:Ui.Variant="Primary" Content="Share" />
+              </sl:Stack>
+            </Border>
+            <sl:Stack Orientation="Horizontal" Justify="Between">
+              <sl:Badge Content="Justify" />
+              <sl:Badge Content="Between" />
+              <sl:Badge Content="Spreads" />
+              <sl:Badge Content="Items" />
+            </sl:Stack>
+          </sl:Stack>
+        </sl:Card>
+
+        <sl:ResponsiveGrid Spacing="6">
+          <sl:Card sl:ResponsiveGrid.Md="4" Header="Elevated" Subtitle="Default">
+            <TextBlock Style="{DynamicResource Sl.Text.Secondary}" TextWrapping="Wrap" Text="Surface, e1 shadow, 10px radius." />
+          </sl:Card>
+          <sl:Card sl:ResponsiveGrid.Md="4" Header="Outlined" Variant="Outlined">
+            <TextBlock Style="{DynamicResource Sl.Text.Secondary}" TextWrapping="Wrap" Text="Hairline only, for dense dashboards." />
+          </sl:Card>
+          <sl:Card sl:ResponsiveGrid.Md="4" Header="Interactive" IsInteractive="True">
+            <TextBlock Style="{DynamicResource Sl.Text.Secondary}" TextWrapping="Wrap" Text="Lifts to e2 on hover." />
+            <sl:Card.Footer>
+              <Button sl:Ui.Size="Small" Content="Open" />
+            </sl:Card.Footer>
+          </sl:Card>
+        </sl:ResponsiveGrid>
+
+        <sl:Card Header="Container" Subtitle="Max widths from tokens: Sm 600 · Md 900 · Lg 1200 · Xl 1440 · Fluid">
+          <Border Background="{DynamicResource Sl.Brush.Background.Subtle}" CornerRadius="{DynamicResource Sl.CornerRadius.Md}" Padding="0,12">
+            <sl:Container Size="Sm">
+              <Border Style="{StaticResource Cell}"><TextBlock Style="{StaticResource CellText}" Text="Container Size=Sm (600px max)" /></Border>
+            </sl:Container>
+          </Border>
+        </sl:Card>
+      </sl:Stack>
+    </sl:Container>
+  </ScrollViewer>
+</UserControl>
