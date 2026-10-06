@@ -43,6 +43,11 @@
             <sl-nav-item href="#forms" icon="pencil" label="Form controls"></sl-nav-item>
             <sl-nav-item href="#feedback" icon="info" label="Feedback"></sl-nav-item>
             <sl-nav-item href="#layout" icon="home" label="Layout"></sl-nav-item>
+            <sl-nav-item href="#pickers" icon="chevron-down" label="Select &amp; pickers"></sl-nav-item>
+            <sl-nav-item href="#navigation" icon="menu" label="Navigation"></sl-nav-item>
+            <sl-nav-item href="#overlays" icon="layers" label="Overlays &amp; menus"></sl-nav-item>
+            <sl-nav-item href="#tree" icon="folder" label="Tree view"></sl-nav-item>
+            <sl-nav-item href="#display" icon="user" label="Avatar &amp; skeleton"></sl-nav-item>
             <sl-nav-item href="#playground" icon="settings" label="Playground"></sl-nav-item>
             <div class="sl-nav__heading">Systems</div>
             <sl-nav-item href="#snackbars" icon="bell" label="Snackbars"></sl-nav-item>
@@ -352,6 +357,208 @@
                   <sl-radio value="bottom-center" label="Bottom center"></sl-radio>
                   <sl-radio value="bottom-right" label="Bottom right"></sl-radio>
                 </sl-radio-group>
+              </sl-stack>
+            </sl-card>
+          </section>
+
+          <!-- Select & pickers -->
+          <section class="demo-section" id="pickers">
+            <div class="demo-section__head"><span class="demo-num">W1</span><sl-text variant="h3" as="h2">Select &amp; pickers</sl-text><sl-text tone="secondary">Select-only and searchable comboboxes, multi-select chips, dates and ranges, sliders and segmented choices — all form-associated and fully keyboard operable.</sl-text></div>
+            <sl-grid spacing="4">
+              <sl-grid-item xs="12" md="6">
+                <sl-card title="Select" subtitle="Single, searchable, multiple, creatable">
+                  <sl-stack spacing="4">
+                    <sl-select id="demo-region" label="Region" placeholder="Choose a region" helper-text="Groups, a disabled option and typeahead (type a letter)."></sl-select>
+                    <sl-select id="demo-assignee" label="Assignee" searchable clearable placeholder="Search people…"></sl-select>
+                    <sl-select id="demo-labels" label="Labels" multiple searchable creatable clearable max-visible-chips="3" placeholder="Add labels"></sl-select>
+                    <sl-select id="demo-variants" label="Filled · small" variant="filled" size="small" placeholder="Variant and size follow the field rules"></sl-select>
+                    <sl-select label="With error" error="Choose a target to continue." placeholder="Target" items='["Web","Blazor","WPF","Avalonia"]' required></sl-select>
+                  </sl-stack>
+                </sl-card>
+              </sl-grid-item>
+              <sl-grid-item xs="12" md="6">
+                <sl-stack spacing="4">
+                  <sl-card title="Date picker" subtitle="Typing, calendar keyboard, min/max, ranges and presets">
+                    <sl-stack spacing="4">
+                      <sl-date-picker label="Release date" clearable value="2026-10-06" helper-text="Type a date or press ↓ to open the calendar."></sl-date-picker>
+                      <sl-date-picker id="demo-range" label="Reporting period" selection="range" clearable></sl-date-picker>
+                      <sl-date-picker id="demo-weekdays" label="Weekdays only (min today)" variant="filled"></sl-date-picker>
+                    </sl-stack>
+                  </sl-card>
+                  <sl-card title="Slider &amp; segmented" subtitle="ARIA sliders and radio groups">
+                    <sl-stack spacing="5">
+                      <sl-slider label="Bandwidth limit (MB/s)" min="0" max="1000" step="50" value="400" show-value ticks></sl-slider>
+                      <sl-slider label="Price range" min="0" max="200" step="5" value="40" range-end="120" show-value tone="success"></sl-slider>
+                      <sl-segmented label="Range" items='["24h","7d","30d","All"]' value="7d"></sl-segmented>
+                      <sl-segmented label="View" size="small" full-width items='[{"value":"list","label":"List","icon":"menu"},{"value":"board","label":"Board","icon":"layers"},{"value":"files","label":"Files","icon":"folder"}]' value="board"></sl-segmented>
+                    </sl-stack>
+                  </sl-card>
+                </sl-stack>
+              </sl-grid-item>
+              <sl-grid-item xs="12">
+                <sl-card title="Inline calendar">
+                  <sl-date-picker inline selection="range" id="demo-inline"></sl-date-picker>
+                </sl-card>
+              </sl-grid-item>
+            </sl-grid>
+          </section>
+
+          <!-- Navigation -->
+          <section class="demo-section" id="navigation">
+            <div class="demo-section__head"><span class="demo-num">W2</span><sl-text variant="h3" as="h2">Navigation</sl-text><sl-text tone="secondary">Tabs in three variants (arrows move and select, Delete closes), breadcrumbs that collapse into a menu, and pagination that keeps your place when the page size changes.</sl-text></div>
+            <sl-stack spacing="4">
+              <sl-card title="Tabs" subtitle="line · pills · enclosed · vertical">
+                <sl-stack spacing="5">
+                  <sl-tabs value="overview">
+                    <sl-tab key="overview" label="Overview" icon="home"></sl-tab>
+                    <sl-tab key="deployments" label="Deployments" badge="12"></sl-tab>
+                    <sl-tab key="logs" label="Logs" icon="file"></sl-tab>
+                    <sl-tab key="settings" label="Settings" icon="settings" closable></sl-tab>
+                    <sl-tab key="locked" label="Billing" disabled></sl-tab>
+                    <sl-tab-panel key="overview"><sl-text tone="secondary">Overview panel — the indicator slides between tabs.</sl-text></sl-tab-panel>
+                    <sl-tab-panel key="deployments"><sl-text tone="secondary">12 deployments this week.</sl-text></sl-tab-panel>
+                    <sl-tab-panel key="logs"><sl-text variant="mono" tone="secondary">› compiling tokens… done</sl-text></sl-tab-panel>
+                    <sl-tab-panel key="settings"><sl-text tone="secondary">Closable tab — press Delete while it is focused.</sl-text></sl-tab-panel>
+                    <sl-tab-panel key="locked"></sl-tab-panel>
+                  </sl-tabs>
+                  <sl-stack direction="row" spacing="6" wrap>
+                    <sl-tabs variant="pills" size="small" value="day">
+                      <sl-tab key="day" label="Day"></sl-tab><sl-tab key="week" label="Week"></sl-tab><sl-tab key="month" label="Month"></sl-tab>
+                    </sl-tabs>
+                    <sl-tabs variant="enclosed" value="a">
+                      <sl-tab key="a" label="Button.razor" closable></sl-tab><sl-tab key="b" label="Card.razor" closable></sl-tab><sl-tab key="c" label="Theme.cs" closable></sl-tab>
+                    </sl-tabs>
+                  </sl-stack>
+                  <sl-tabs direction="column" value="profile">
+                    <sl-tab key="profile" label="Profile" icon="user"></sl-tab>
+                    <sl-tab key="security" label="Security"></sl-tab>
+                    <sl-tab key="notifications" label="Notifications" icon="bell" badge="3"></sl-tab>
+                    <sl-tab-panel key="profile"><sl-text tone="secondary">Vertical tabs use ↑/↓.</sl-text></sl-tab-panel>
+                    <sl-tab-panel key="security"><sl-text tone="secondary">Security settings.</sl-text></sl-tab-panel>
+                    <sl-tab-panel key="notifications"><sl-text tone="secondary">Notification settings.</sl-text></sl-tab-panel>
+                  </sl-tabs>
+                </sl-stack>
+              </sl-card>
+              <sl-card title="Breadcrumbs &amp; pagination">
+                <sl-stack spacing="5">
+                  <sl-breadcrumbs items='[{"label":"Workspace","href":"#","icon":"home"},{"label":"slate","href":"#"},{"label":"src","href":"#"},{"label":"Slate.Blazor","href":"#"},{"label":"Components","href":"#"},{"label":"Button.razor"}]' max-items="4"></sl-breadcrumbs>
+                  <sl-breadcrumbs separator="arrow-right" items='[{"label":"Library","href":"#"},{"label":"Inputs","href":"#"},{"label":"Text field"}]'></sl-breadcrumbs>
+                  <sl-pagination page="6" total-count="312" page-size="20" page-sizes="[10,20,50,100]"></sl-pagination>
+                  <sl-pagination page="1" page-count="8" siblings="2" size="small"></sl-pagination>
+                </sl-stack>
+              </sl-card>
+            </sl-stack>
+          </section>
+
+          <!-- Overlays -->
+          <section class="demo-section" id="overlays">
+            <div class="demo-section__head"><span class="demo-num">W3</span><sl-text variant="h3" as="h2">Overlays &amp; menus</sl-text><sl-text tone="secondary">Popovers, tooltips and menus share one positioning engine with Slate.Core: they flip and shift to stay on screen, render in the top layer, and close on Escape or outside clicks.</sl-text></div>
+            <sl-grid spacing="4">
+              <sl-grid-item xs="12" md="6">
+                <sl-card title="Menus" subtitle="Shortcuts, checkable items, submenus, context menu">
+                  <sl-stack spacing="4">
+                    <sl-stack direction="row" spacing="2" wrap>
+                      <sl-menu id="demo-menu">
+                        <sl-button slot="trigger" end-icon="chevron-down">Actions</sl-button>
+                        <sl-menu-item label="Rename" icon="pencil" shortcut="F2"></sl-menu-item>
+                        <sl-menu-item label="Duplicate" icon="copy" shortcut="⌘D"></sl-menu-item>
+                        <sl-menu-item label="Export" icon="download">
+                          <sl-menu-item slot="submenu" label="CSV"></sl-menu-item>
+                          <sl-menu-item slot="submenu" label="JSON"></sl-menu-item>
+                          <sl-menu-item slot="submenu" label="XAML resources"></sl-menu-item>
+                        </sl-menu-item>
+                        <sl-menu-item label="Archived (disabled)" disabled></sl-menu-item>
+                        <sl-menu-item separator></sl-menu-item>
+                        <sl-menu-item label="Delete" icon="trash" tone="danger" shortcut="⌫"></sl-menu-item>
+                      </sl-menu>
+                      <sl-menu placement="bottom-end">
+                        <sl-button slot="trigger" variant="ghost" icon-only start-icon="settings" label="View options"></sl-button>
+                        <sl-menu-item label="Show hidden files" checked="false"></sl-menu-item>
+                        <sl-menu-item label="Show file extensions" checked></sl-menu-item>
+                        <sl-menu-item label="Compact rows" checked="false"></sl-menu-item>
+                      </sl-menu>
+                    </sl-stack>
+                    <sl-menu context-menu>
+                      <div slot="trigger" class="demo-context">Right-click (or Shift+F10) anywhere in this area</div>
+                      <sl-menu-item label="Open" shortcut="↵"></sl-menu-item>
+                      <sl-menu-item label="Copy path" icon="copy" shortcut="⌥⌘C"></sl-menu-item>
+                      <sl-menu-item separator></sl-menu-item>
+                      <sl-menu-item label="Move to bin" icon="trash" tone="danger"></sl-menu-item>
+                    </sl-menu>
+                  </sl-stack>
+                </sl-card>
+              </sl-grid-item>
+              <sl-grid-item xs="12" md="6">
+                <sl-card title="Popover &amp; tooltip">
+                  <sl-stack spacing="4">
+                    <sl-stack direction="row" spacing="2" wrap>
+                      <sl-popover placement="bottom-start">
+                        <sl-button slot="anchor" start-icon="settings">Filters</sl-button>
+                        <sl-stack spacing="3" style="width: 260px">
+                          <sl-text variant="title">Filter deployments</sl-text>
+                          <sl-checkbox checked label="Production"></sl-checkbox>
+                          <sl-checkbox label="Preview"></sl-checkbox>
+                          <sl-select label="Branch" size="small" items='["main","feat/data-grid","fix/focus-ring"]' value="main"></sl-select>
+                        </sl-stack>
+                      </sl-popover>
+                      <sl-popover placement="top" modal>
+                        <sl-button slot="anchor" variant="solid" tone="accent">Modal popover</sl-button>
+                        <sl-stack spacing="3" style="width: 240px">
+                          <sl-text-field label="Rename" value="slate-web" size="small"></sl-text-field>
+                          <sl-stack direction="row" spacing="2" justify="end"><sl-button size="small">Cancel</sl-button><sl-button size="small" variant="solid" tone="accent">Save</sl-button></sl-stack>
+                        </sl-stack>
+                      </sl-popover>
+                    </sl-stack>
+                    <sl-stack direction="row" spacing="2" wrap>
+                      <sl-tooltip text="Copy link" shortcut="⌘C"><sl-button icon-only start-icon="copy" label="Copy link"></sl-button></sl-tooltip>
+                      <sl-tooltip text="Below" placement="bottom"><sl-button>Bottom</sl-button></sl-tooltip>
+                      <sl-tooltip text="To the right" placement="right"><sl-button>Right</sl-button></sl-tooltip>
+                      <sl-tooltip placement="top" delay="0"><sl-button>Rich</sl-button><span slot="content"><b>Rich</b> tooltip content</span></sl-tooltip>
+                    </sl-stack>
+                  </sl-stack>
+                </sl-card>
+              </sl-grid-item>
+            </sl-grid>
+          </section>
+
+          <!-- Tree -->
+          <section class="demo-section" id="tree">
+            <div class="demo-section__head"><span class="demo-num">W4</span><sl-text variant="h3" as="h2">Tree view</sl-text><sl-text tone="secondary">Keyboard-first trees: ← → to collapse/expand, * expands siblings, typeahead, multi-select with Shift/Ctrl, tri-state checkboxes, filtering with highlights and lazy loading.</sl-text></div>
+            <sl-grid spacing="4">
+              <sl-grid-item xs="12" md="6">
+                <sl-card title="Files" subtitle="Single selection · filter · lazy folder">
+                  <sl-stack spacing="3">
+                    <sl-text-field id="demo-tree-filter" size="small" start-icon="search" placeholder="Filter files" clearable></sl-text-field>
+                    <sl-tree-view id="demo-tree"></sl-tree-view>
+                  </sl-stack>
+                </sl-card>
+              </sl-grid-item>
+              <sl-grid-item xs="12" md="6">
+                <sl-card title="Packages" subtitle="Checkbox selection · dense">
+                  <sl-tree-view id="demo-tree-check" selection-mode="checkbox" dense></sl-tree-view>
+                </sl-card>
+              </sl-grid-item>
+            </sl-grid>
+          </section>
+
+          <!-- Display -->
+          <section class="demo-section" id="display">
+            <div class="demo-section__head"><span class="demo-num">W5</span><sl-text variant="h3" as="h2">Avatar &amp; skeleton</sl-text><sl-text tone="secondary">Initials and tones are derived from the name identically on every platform.</sl-text></div>
+            <sl-card>
+              <sl-stack spacing="5">
+                <sl-stack direction="row" spacing="3" align="center" wrap>
+                  <sl-avatar name="Aaron Griffin" status="online" size="large"></sl-avatar>
+                  <sl-avatar name="Jo Marsh" status="away"></sl-avatar>
+                  <sl-avatar name="Rae Kim" status="busy"></sl-avatar>
+                  <sl-avatar name="Lin Tao" status="offline" size="small"></sl-avatar>
+                  <sl-avatar name="Build Bot" tone="neutral"></sl-avatar>
+                  <span class="sl-avatar-group"><sl-avatar name="Ada Lovelace"></sl-avatar><sl-avatar name="Grace Hopper"></sl-avatar><sl-avatar name="Linus T"></sl-avatar><sl-avatar name="+5" tone="neutral"></sl-avatar></span>
+                </sl-stack>
+                <sl-stack direction="row" spacing="4" align="start">
+                  <sl-skeleton shape="circle"></sl-skeleton>
+                  <div style="flex: 1"><sl-skeleton lines="3"></sl-skeleton></div>
+                  <sl-skeleton shape="rect" width="160px" height="72px"></sl-skeleton>
+                </sl-stack>
               </sl-stack>
             </sl-card>
           </section>

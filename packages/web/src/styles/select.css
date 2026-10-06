@@ -1,0 +1,215 @@
+/* Select / combobox — docs/design/css-classes.md#select. Builds on .sl-field (field.css) and the overlay panel.
+   Tokens: component.field.*, component.popover.*, component.menu.*. */
+
+.sl-select__control { cursor: pointer; }
+.sl-select--searchable .sl-select__control { cursor: text; }
+
+.sl-select__trigger {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0 var(--_px);
+  font-family: inherit;
+  font-size: var(--sl-font-size-md);
+  text-align: left;
+  color: var(--sl-color-text-primary);
+  background: transparent;
+  border: 0;
+  outline: none;
+  cursor: inherit;
+}
+
+.sl-select__value {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--sl-space-1);
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sl-select__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sl-select__placeholder { color: var(--sl-color-text-placeholder); }
+
+.sl-select__input {
+  flex: 1 1 60px;
+  min-width: 60px;
+  padding: 0;
+}
+
+.sl-select--searchable .sl-select__value { padding-left: var(--_px); }
+
+.sl-select--multiple .sl-field__control {
+  height: auto;
+  min-height: var(--_h);
+}
+
+.sl-select--multiple .sl-select__value {
+  flex-wrap: wrap;
+  padding-block: 3px;
+}
+
+.sl-select--multiple .sl-select__trigger { height: auto; min-height: calc(var(--_h) - 2px); }
+
+.sl-select__chevron {
+  display: flex;
+  flex: none;
+  align-items: center;
+  padding-right: var(--_px);
+  color: var(--sl-color-text-tertiary);
+  transition: transform var(--sl-motion-duration-fast) var(--sl-motion-easing-standard);
+  pointer-events: none;
+}
+
+.sl-select.is-open .sl-select__chevron { transform: rotate(180deg); }
+
+.sl-select__spinner {
+  display: flex;
+  flex: none;
+  align-items: center;
+  padding-right: var(--sl-space-2);
+}
+
+.sl-select__chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--sl-space-0-5);
+  max-width: 180px;
+  height: calc(var(--_h) - 10px);
+  min-height: 20px;
+  padding: 0 var(--sl-space-0-5) 0 var(--sl-space-1-5);
+  font-size: var(--sl-font-size-xs);
+  font-weight: var(--sl-font-weight-medium);
+  color: var(--sl-color-text-primary);
+  background: var(--sl-color-background-muted);
+  border-radius: var(--sl-radius-sm);
+  box-shadow: inset 0 0 0 var(--sl-border-width-hairline) var(--sl-color-border-default);
+}
+
+.sl-select__chip-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.sl-select__chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  color: var(--sl-color-text-tertiary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--sl-radius-xs);
+  cursor: pointer;
+}
+
+.sl-select__chip-remove:hover { color: var(--sl-color-text-primary); background: var(--sl-color-background-pressed); }
+.sl-select__chip-remove .sl-icon { width: 12px; height: 12px; }
+.sl-select__chip--more { padding-right: var(--sl-space-1-5); color: var(--sl-color-text-secondary); }
+
+/* ---- Listbox (inside .sl-popover-panel) ---- */
+
+.sl-select__listbox {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-height: 320px;
+}
+
+.sl-select__group { display: flex; flex-direction: column; gap: 1px; }
+
+.sl-select__group-label {
+  padding: var(--sl-space-1-5) var(--sl-space-2) var(--sl-space-1);
+  font: var(--sl-typography-overline);
+  letter-spacing: var(--sl-typography-overline-letter-spacing);
+  text-transform: uppercase;
+  color: var(--sl-color-text-tertiary);
+}
+
+.sl-select__option {
+  display: flex;
+  align-items: center;
+  gap: var(--sl-space-2);
+  min-height: var(--sl-component-menu-item-height);
+  padding: 0 var(--sl-space-2);
+  color: var(--sl-color-text-primary);
+  border-radius: var(--sl-component-menu-item-radius);
+  cursor: default;
+  user-select: none;
+}
+
+.sl-select__option:hover,
+.sl-select__option.is-active { background: var(--sl-component-menu-item-hover); }
+
+.sl-select__option.is-selected { font-weight: var(--sl-font-weight-medium); }
+
+.sl-select__option.is-disabled {
+  opacity: var(--sl-opacity-disabled);
+  pointer-events: none;
+}
+
+.sl-select__option-check {
+  display: inline-flex;
+  flex: none;
+  width: var(--sl-size-icon-md);
+  color: var(--sl-color-accent-text);
+}
+
+.sl-select__option-check .sl-icon { visibility: hidden; }
+.sl-select__option.is-selected .sl-select__option-check .sl-icon { visibility: visible; }
+
+/* Multiple: a checkbox-like box instead of a tick. */
+.sl-select__option-box {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--sl-component-selection-box-size);
+  height: var(--sl-component-selection-box-size);
+  color: var(--sl-color-text-on-accent);
+  background: var(--sl-color-background-sunken);
+  border: var(--sl-border-width-hairline) solid var(--sl-component-selection-border);
+  border-radius: var(--sl-component-selection-box-radius);
+}
+
+.sl-select__option-box .sl-icon { width: 12px; height: 12px; visibility: hidden; }
+
+.sl-select__option.is-selected .sl-select__option-box {
+  background: var(--sl-component-selection-checked);
+  border-color: var(--sl-component-selection-checked);
+}
+
+.sl-select__option.is-selected .sl-select__option-box .sl-icon { visibility: visible; }
+
+.sl-select__option-icon { display: inline-flex; flex: none; color: var(--sl-color-text-tertiary); }
+
+.sl-select__option-text { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+
+.sl-select__option-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.sl-select__option-label mark {
+  font-weight: var(--sl-font-weight-semibold);
+  color: var(--sl-color-accent-text);
+  background: transparent;
+}
+
+.sl-select__option-description {
+  font: var(--sl-typography-caption);
+  color: var(--sl-color-text-tertiary);
+}
+
+.sl-select__option--create { color: var(--sl-color-accent-text); }
+
+.sl-select__empty {
+  padding: var(--sl-space-3) var(--sl-space-2);
+  font: var(--sl-typography-caption);
+  text-align: center;
+  color: var(--sl-color-text-tertiary);
+}

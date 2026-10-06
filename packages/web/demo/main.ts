@@ -260,6 +260,14 @@ const samples: Record<string, { markup: string; skip?: string[] }> = {
   Card: { markup: '<sl-card title="Deployments" subtitle="Last 7 days"><sl-text tone="secondary">Card body content.</sl-text><div slot="footer"><sl-button size="small">View all</sl-button></div></sl-card>' },
   Alert: { markup: '<sl-alert title="Deployed to production">slate-web is live in 3 regions.</sl-alert>' },
   Badge: { markup: '<sl-badge>Ready</sl-badge>' },
+  Select: { markup: `<sl-select label="Region" placeholder="Choose…" items='["Europe West","Europe North","US East","São Paulo"]'></sl-select>`, skip: ['Value'] },
+  DatePicker: { markup: '<sl-date-picker label="Due date" value="2026-10-06"></sl-date-picker>', skip: ['Value', 'Min', 'Max', 'Format'] },
+  SegmentedControl: { markup: `<sl-segmented items='["Day","Week","Month"]' value="Week"></sl-segmented>`, skip: ['Value'] },
+  Slider: { markup: '<sl-slider label="Volume" value="40" show-value></sl-slider>' },
+  Avatar: { markup: '<sl-avatar name="Aaron Griffin" status="online"></sl-avatar>', skip: ['Image'] },
+  Pagination: { markup: '<sl-pagination page="3" page-count="12"></sl-pagination>' },
+  Skeleton: { markup: '<sl-skeleton lines="3"></sl-skeleton>', skip: ['Width', 'Height'] },
+  Tooltip: { markup: '<sl-tooltip text="Copy link" shortcut="⌘C"><sl-button start-icon="copy">Hover me</sl-button></sl-tooltip>' },
 };
 const kebabCase = (n: string) => n.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 const propName = (component: string, option: string) =>
@@ -457,4 +465,80 @@ if (params.get('accent') || params.get('radius')) {
     document.getElementById('radius-value')!.textContent = `${themeState.radiusScale.toFixed(2)}×`;
   }
   applyThemeState();
+}
+
+// ---- Wave-2 demo data ----
+type Selectish = HTMLElement & { items: unknown[]; value?: unknown; values?: unknown[] };
+const region = document.getElementById('demo-region') as Selectish | null;
+if (region) {
+  region.items = [
+    { value: 'eu-west', label: 'Europe West', group: 'Europe', description: 'London · lowest latency for you' },
+    { value: 'eu-north', label: 'Europe North', group: 'Europe', disabled: true, description: 'Stockholm · at capacity' },
+    { value: 'us-east', label: 'US East', group: 'Americas', description: 'Virginia' },
+    { value: 'sa-east', label: 'São Paulo', group: 'Americas', description: 'Brazil' },
+    { value: 'ap-south', label: 'Asia Pacific South', group: 'Asia Pacific', description: 'Mumbai' },
+  ];
+  region.value = 'eu-west';
+}
+const people = ['Aaron Griffin', 'Jo Marsh', 'Rae Kim', 'Lin Tao', 'Ada Lovelace', 'Grace Hopper', 'Linus Torvalds', 'Margaret Hamilton', 'Zoë Ångström'];
+const assignee = document.getElementById('demo-assignee') as Selectish | null;
+if (assignee) assignee.items = people.map((p) => ({ value: p, label: p, icon: 'user' }));
+const labels = document.getElementById('demo-labels') as Selectish | null;
+if (labels) {
+  labels.items = ['bug', 'feature', 'a11y', 'performance', 'tokens', 'blazor', 'wpf', 'avalonia', 'web'].map((l) => ({ value: l, label: l, group: ['bug', 'feature'].includes(l) ? 'Type' : ['blazor', 'wpf', 'avalonia', 'web'].includes(l) ? 'Platform' : 'Area' }));
+  labels.values = ['bug', 'a11y'];
+}
+const variantSelect = document.getElementById('demo-variants') as Selectish | null;
+if (variantSelect) variantSelect.items = ['Compact', 'Comfortable'];
+
+type Pickerish = HTMLElement & { presets?: unknown[]; disabledDates?: (d: string) => boolean; min?: string };
+const range = document.getElementById('demo-range') as Pickerish | null;
+if (range) range.presets = [
+  { label: 'Today', kind: 'today' },
+  { label: 'Last 7 days', kind: 'last7-days' },
+  { label: 'Last 30 days', kind: 'last30-days' },
+  { label: 'This month', kind: 'this-month' },
+  { label: 'Last month', kind: 'last-month' },
+  { label: 'This year', kind: 'this-year' },
+];
+const weekdays = document.getElementById('demo-weekdays') as Pickerish | null;
+if (weekdays) {
+  const now = new Date();
+  weekdays.min = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  weekdays.disabledDates = (d) => {
+    const day = new Date(`${d}T00:00:00Z`).getUTCDay();
+    return day === 0 || day === 6;
+  };
+}
+
+type Treeish = HTMLElement & { items: unknown[]; expanded: unknown[]; filter?: string; hasChildren?: (n: unknown) => boolean; loadChildren?: (n: unknown) => Promise<unknown[]>; selectedItems?: unknown[] };
+const files = document.getElementById('demo-tree') as Treeish | null;
+if (files) {
+  files.hasChildren = (n) => (n as { lazy?: boolean }).lazy === true;
+  files.loadChildren = (n) =>
+    new Promise((resolve) =>
+      setTimeout(() => resolve([1, 2, 3].map((i) => ({ id: `${(n as { id: string }).id}/${i}`, label: `generated-${i}.json`, icon: 'file' }))), 700),
+    );
+  files.items = [
+    { id: 'src', label: 'src', icon: 'folder', children: [
+      { id: 'core', label: 'Slate.Core', icon: 'folder', children: [{ id: 'q', label: 'SnackbarQueue.cs', icon: 'file' }, { id: 'd', label: 'DialogStack.cs', icon: 'file' }, { id: 'tb', label: 'ThemeBuilder.cs', icon: 'file' }] },
+      { id: 'blazor', label: 'Slate.Blazor', icon: 'folder', children: [{ id: 'btn', label: 'SlButton.razor', icon: 'file' }, { id: 'sel', label: 'SlSelect.razor', icon: 'file' }] },
+      { id: 'remote', label: 'remote (lazy)', icon: 'folder', lazy: true },
+    ] },
+    { id: 'design', label: 'design', icon: 'folder', children: [{ id: 'tokens', label: 'tokens', icon: 'folder', children: [{ id: 'light', label: 'light.json', icon: 'file' }, { id: 'dark', label: 'dark.json', icon: 'file' }] }, { id: 'icons', label: 'icons.json', icon: 'file' }] },
+    { id: 'readme', label: 'README.md', icon: 'file' },
+  ];
+  files.expanded = ['src', 'core'];
+  document.getElementById('demo-tree-filter')?.addEventListener('sl-value-changed', (e) => {
+    files.filter = (e as CustomEvent<{ value: string }>).detail.value;
+  });
+}
+const packages = document.getElementById('demo-tree-check') as Treeish | null;
+if (packages) {
+  packages.items = [
+    { id: 'npm', label: 'npm', icon: 'layers', children: [{ id: 'web', label: '@slate/web' }] },
+    { id: 'nuget', label: 'NuGet', icon: 'layers', children: [{ id: 'core-pkg', label: 'Slate.Core' }, { id: 'blazor-pkg', label: 'Slate.Blazor' }, { id: 'wpf-pkg', label: 'Slate.Wpf' }, { id: 'ava-pkg', label: 'Slate.Avalonia' }] },
+  ];
+  packages.expanded = ['npm', 'nuget'];
+  packages.selectedItems = ['web', 'core-pkg'];
 }

@@ -1,0 +1,159 @@
+/* Date picker & calendar — docs/design/css-classes.md#date-picker. Tokens: component.calendar.*. */
+
+.sl-date-picker__trigger {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--_h);
+  padding: 0;
+  color: var(--sl-color-text-tertiary);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.sl-date-picker__trigger:hover { color: var(--sl-color-text-primary); }
+
+.sl-date-picker__trigger:focus-visible {
+  outline: var(--sl-focus-ring-width) solid var(--sl-color-focus-ring);
+  outline-offset: calc(var(--sl-focus-ring-width) * -1);
+}
+
+.sl-date-picker__input { font-variant-numeric: tabular-nums; }
+
+.sl-calendar {
+  display: flex;
+  gap: var(--sl-space-3);
+  padding: var(--sl-space-2);
+  font-family: var(--sl-font-family-ui);
+  color: var(--sl-color-text-primary);
+}
+
+.sl-date-picker--inline .sl-calendar {
+  display: inline-flex;
+  background: var(--sl-component-popover-background);
+  border-radius: var(--sl-component-popover-radius);
+  box-shadow: var(--sl-shadow-e1);
+}
+
+.sl-calendar__presets {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 128px;
+  padding-right: var(--sl-space-3);
+  border-right: var(--sl-border-width-hairline) solid var(--sl-color-border-default);
+}
+
+.sl-calendar__presets[hidden] { display: none; }
+
+.sl-calendar__preset {
+  display: flex;
+  align-items: center;
+  min-height: var(--sl-component-menu-item-height);
+  padding: 0 var(--sl-space-2);
+  font: inherit;
+  font-size: var(--sl-font-size-sm);
+  text-align: left;
+  color: var(--sl-color-text-primary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--sl-component-menu-item-radius);
+  cursor: pointer;
+}
+
+.sl-calendar__preset:hover,
+.sl-calendar__preset.is-selected { background: var(--sl-component-menu-item-hover); }
+
+.sl-calendar__preset:focus-visible {
+  outline: var(--sl-focus-ring-width) solid var(--sl-color-focus-ring);
+  outline-offset: calc(var(--sl-focus-ring-width) * -1);
+}
+
+.sl-calendar__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sl-space-2);
+}
+
+.sl-calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sl-space-2);
+}
+
+.sl-calendar__title {
+  font: var(--sl-typography-label);
+  font-weight: var(--sl-font-weight-semibold);
+}
+
+.sl-calendar__nav { display: flex; gap: var(--sl-space-0-5); }
+
+.sl-calendar__grid {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.sl-calendar__weekday {
+  width: var(--sl-component-calendar-day-size);
+  height: 24px;
+  padding: 0;
+  font: var(--sl-typography-overline);
+  font-weight: var(--sl-font-weight-medium);
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--sl-color-text-tertiary);
+}
+
+.sl-calendar__cell { padding: 1px 0; }
+
+.sl-calendar__day {
+  position: relative;
+  display: block;
+  width: var(--sl-component-calendar-day-size);
+  height: var(--sl-component-calendar-day-size);
+  margin: 0;
+  padding: 0;
+  font-family: var(--sl-font-family-mono);
+  font-size: var(--sl-font-size-xs);
+  color: var(--sl-color-text-primary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--sl-radius-md);
+  cursor: pointer;
+}
+
+.sl-calendar__day:hover:not(:disabled) { background: var(--sl-color-background-hover); }
+.sl-calendar__day.is-outside { color: var(--sl-color-text-tertiary); }
+.sl-calendar__day.is-today { box-shadow: inset 0 0 0 var(--sl-border-width-hairline) var(--sl-component-calendar-today); }
+
+.sl-calendar__day.is-in-range,
+.sl-calendar__day.is-in-preview {
+  background: var(--sl-component-calendar-range);
+  border-radius: 0;
+}
+
+.sl-calendar__day.is-range-start { border-radius: var(--sl-radius-md) 0 0 var(--sl-radius-md); }
+.sl-calendar__day.is-range-end { border-radius: 0 var(--sl-radius-md) var(--sl-radius-md) 0; }
+.sl-calendar__day.is-range-start.is-range-end { border-radius: var(--sl-radius-md); }
+
+.sl-calendar__day.is-selected,
+.sl-calendar__day.is-selected:hover {
+  color: var(--sl-color-text-on-accent);
+  background: var(--sl-component-calendar-selected);
+}
+
+.sl-calendar__day:focus-visible {
+  z-index: 1;
+  outline: var(--sl-focus-ring-width) solid var(--sl-color-focus-ring);
+  outline-offset: 1px;
+}
+
+.sl-calendar__day:disabled {
+  color: var(--sl-color-text-tertiary);
+  opacity: var(--sl-opacity-disabled);
+  text-decoration: line-through;
+  cursor: not-allowed;
+}

@@ -20,6 +20,8 @@ interface ComponentSpec {
   web: string;
   options: Record<string, OptionSpec>;
   parts?: string[];
+  /** Options of the child element of a compound component (e.g. sl-menu-item, sl-tab). */
+  item?: Record<string, string>;
 }
 interface ApiSpec {
   enums: Record<string, string[]>;
@@ -46,7 +48,20 @@ const partFixtures: Record<string, string[]> = {
   Alert: ['<sl-alert title="T" dismissible>m</sl-alert>'],
   Card: ['<sl-card title="T" subtitle="S">b<div slot="footer">f</div></sl-card>'],
   Dialog: ['<sl-dialog title="T"><div slot="footer">f</div></sl-dialog>'],
+  Select: [
+    '<sl-select label="L" multiple values=\'["a"]\' items=\'[{"value":"a","label":"A","group":"G"}]\'></sl-select>',
+    '<sl-select items="[]"></sl-select>',
+  ],
+  Menu: ['<sl-menu></sl-menu>', '<sl-menu-item label="A" shortcut="⌘K"></sl-menu-item>', '<sl-menu-item separator></sl-menu-item>'],
+  Tabs: ['<sl-tabs></sl-tabs>', '<sl-tab key="a" label="A"></sl-tab>', '<sl-tab-panel key="a"></sl-tab-panel>'],
+  DatePicker: ['<sl-date-picker presets=\'[{"label":"Today","kind":"today"}]\'></sl-date-picker>'],
+  TreeView: [
+    '<sl-tree-view selection-mode="checkbox" expanded=\'["a"]\' items=\'[{"id":"a","label":"A","icon":"folder","children":[{"id":"b","label":"B"}]}]\'></sl-tree-view>',
+  ],
 };
+
+/** Child elements of compound components, checked against the contract's `item` options. */
+const itemElements: Record<string, string> = { Menu: 'sl-menu-item', Tabs: 'sl-tab' };
 
 /** Markup used to check enum values; children are included so delegated options (drawer, radios) are visible. */
 const enumFixtures: Record<string, string> = {
@@ -59,6 +74,8 @@ const enumFixtures: Record<string, string> = {
 const invisibleValues = new Set(['Button.Type']);
 
 const camel = (name: string) => name[0].toLowerCase() + name.slice(1);
+/** "sl-menu + sl-menu-item" → "sl-menu" (the first element is the component's root). */
+const rootTag = (web: string) => web.split('+')[0].trim();
 const webProperty = (component: string, option: string) => propertyExceptions[`${component}.${option}`] ?? camel(option);
 const kebab = (name: string) => name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 
@@ -80,7 +97,7 @@ afterEach(cleanup);
 
 describe('canonical component API (design/api/components.json)', () => {
   for (const [name, spec] of Object.entries(api.components).filter(([, s]) => (s as { status?: string }).status !== 'planned')) {
-    const tag = spec.web;
+    const tag = rootTag(spec.web);
 
     describe(`${name} → <${tag}>`, () => {
       const options = Object.entries(spec.options).filter(([, o]) => !o.platforms || o.platforms.includes('web'));
@@ -108,6 +125,19 @@ describe('canonical component API (design/api/components.json)', () => {
           .filter((slot) => !slots.includes(slot));
         expect(missing).toEqual([]);
       });
+
+      if (spec.item && itemElements[name]) {
+        it(`<${itemElements[name]}> exposes every item option`, () => {
+          const child = itemElements[name];
+          const ctor = customElements.get(child) as unknown as typeof LitElement;
+          document.createElement(child);
+          const missing = Object.entries(spec.item!)
+            .filter(([, type]) => type !== 'slot' && type !== 'event')
+            .map(([option]) => camel(option))
+            .filter((prop) => !ctor.elementProperties.has(prop));
+          expect(missing).toEqual([]);
+        });
+      }
 
       if (spec.parts?.length) {
         it('renders every documented part', async () => {

@@ -288,3 +288,14 @@ body {
 @media (max-width: 899.98px) {
   .demo-playground { grid-template-columns: minmax(0, 1fr); }
 }
+
+.demo-context {
+  display: grid;
+  place-items: center;
+  min-height: 96px;
+  padding: var(--sl-space-4);
+  font-size: var(--sl-font-size-sm);
+  color: var(--sl-color-text-tertiary);
+  border: var(--sl-border-width-hairline) dashed var(--sl-color-border-strong);
+  border-radius: var(--sl-radius-lg);
+}

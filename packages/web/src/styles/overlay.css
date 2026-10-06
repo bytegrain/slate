@@ -1,0 +1,198 @@
+/* Overlays — popover panels, tooltips and menus (docs/design/css-classes.md#overlays).
+   Panels are `position: fixed` and promoted to the top layer with popover="manual" when the browser supports it;
+   positioning (left/top/max-height, data-side, --_arrow) is computed by Slate.Core's positioning rules.
+   Tokens: component.popover.*, component.menu.*, component.tooltip.*. */
+
+.sl-popover-panel {
+  position: fixed;
+  inset: auto;
+  z-index: var(--sl-z-dropdown);
+  box-sizing: border-box;
+  min-width: 160px;
+  max-width: min(480px, calc(100vw - 16px));
+  margin: 0;
+  padding: var(--sl-component-popover-padding);
+  overflow: auto;
+  font-family: var(--sl-font-family-ui);
+  font-size: var(--sl-font-size-md);
+  line-height: var(--sl-font-line-height-normal);
+  color: var(--sl-color-text-primary);
+  background: var(--sl-component-popover-background);
+  border: 0;
+  border-radius: var(--sl-component-popover-radius);
+  box-shadow: var(--sl-component-popover-shadow);
+  overscroll-behavior: contain;
+  animation: sl-overlay-in var(--sl-motion-duration-fast) var(--sl-motion-easing-emphasized);
+}
+
+/* UA popover styles centre the element; Slate positions it explicitly. */
+.sl-popover-panel:popover-open { inset: auto; }
+.sl-popover-panel[hidden] { display: none; }
+
+.sl-popover-panel[data-side="bottom"] { --_enter-y: -4px; }
+.sl-popover-panel[data-side="top"] { --_enter-y: 4px; }
+.sl-popover-panel[data-side="left"] { --_enter-x: 4px; }
+.sl-popover-panel[data-side="right"] { --_enter-x: -4px; }
+
+@keyframes sl-overlay-in {
+  from {
+    opacity: 0;
+    transform: translate(var(--_enter-x, 0), var(--_enter-y, 0));
+  }
+}
+
+/* General-purpose popover (sl-popover): roomier padding and an arrow. */
+.sl-popover__panel {
+  padding: calc(var(--sl-component-popover-padding) * 4);
+  overflow: visible;
+}
+
+.sl-popover__arrow {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--sl-component-popover-background);
+  border: var(--sl-border-width-hairline) solid var(--sl-color-border-default);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.sl-popover__panel[data-side="bottom"] > .sl-popover__arrow { top: -6px; left: calc(var(--_arrow, 50%) - 5px); border-right: 0; border-bottom: 0; }
+.sl-popover__panel[data-side="top"] > .sl-popover__arrow { bottom: -6px; left: calc(var(--_arrow, 50%) - 5px); border-left: 0; border-top: 0; }
+.sl-popover__panel[data-side="right"] > .sl-popover__arrow { left: -6px; top: calc(var(--_arrow, 50%) - 5px); border-right: 0; border-top: 0; }
+.sl-popover__panel[data-side="left"] > .sl-popover__arrow { right: -6px; top: calc(var(--_arrow, 50%) - 5px); border-left: 0; border-bottom: 0; }
+
+.sl-popover__anchor { display: contents; }
+
+/* ---- Tooltip ---- */
+
+.sl-tooltip {
+  position: fixed;
+  inset: auto;
+  z-index: var(--sl-z-tooltip);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sl-space-2);
+  box-sizing: border-box;
+  max-width: 280px;
+  margin: 0;
+  padding: var(--sl-space-1) var(--sl-space-2);
+  font: var(--sl-typography-caption);
+  font-weight: var(--sl-font-weight-medium);
+  color: var(--sl-component-tooltip-foreground);
+  background: var(--sl-component-tooltip-background);
+  border: 0;
+  border-radius: var(--sl-component-tooltip-radius);
+  box-shadow: var(--sl-shadow-e2);
+  pointer-events: none;
+  animation: sl-overlay-in var(--sl-motion-duration-fast) var(--sl-motion-easing-standard);
+}
+
+.sl-tooltip:popover-open { inset: auto; }
+.sl-tooltip[hidden] { display: none; }
+
+.sl-tooltip .sl-kbd {
+  color: inherit;
+  background: transparent;
+  border-color: color-mix(in srgb, var(--sl-component-tooltip-foreground) 35%, transparent);
+  box-shadow: none;
+}
+
+.sl-tooltip__anchor { display: contents; }
+
+/* ---- Menu ---- */
+
+.sl-menu__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 200px;
+}
+
+.sl-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sl-space-2);
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--sl-component-menu-item-height);
+  margin: 0;
+  padding: 0 var(--sl-space-2);
+  font-family: inherit;
+  font-size: var(--sl-font-size-md);
+  text-align: left;
+  text-decoration: none;
+  color: var(--_tone-fg, var(--sl-color-text-primary));
+  background: transparent;
+  border: 0;
+  border-radius: var(--sl-component-menu-item-radius);
+  outline: none;
+  cursor: default;
+  user-select: none;
+}
+
+.sl-menu-item:hover,
+.sl-menu-item:focus-visible,
+.sl-menu-item.is-active,
+.sl-menu-item.is-expanded {
+  background: var(--sl-component-menu-item-hover);
+}
+
+.sl-menu-item.sl-tone-neutral { --_icon: var(--sl-color-text-tertiary); }
+
+.sl-menu-item__icon,
+.sl-menu-item__check,
+.sl-menu-item__chevron {
+  display: inline-flex;
+  flex: none;
+  color: var(--_icon, var(--_tone-fg));
+}
+
+.sl-menu-item__check { width: var(--sl-size-icon-md); color: var(--sl-color-accent-text); }
+.sl-menu-item__check .sl-icon { visibility: hidden; }
+.sl-menu-item.is-checked .sl-menu-item__check .sl-icon { visibility: visible; }
+
+.sl-menu-item__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sl-menu-item__shortcut {
+  flex: none;
+  margin-left: var(--sl-space-4);
+  font-family: var(--sl-font-family-mono);
+  font-size: var(--sl-font-size-2xs);
+  color: var(--sl-color-text-tertiary);
+}
+
+.sl-menu-item__chevron { margin-left: auto; color: var(--sl-color-text-tertiary); }
+
+.sl-menu-item.is-disabled,
+.sl-menu-item[aria-disabled="true"] {
+  opacity: var(--sl-opacity-disabled);
+  pointer-events: none;
+}
+
+.sl-menu-separator {
+  height: var(--sl-border-width-hairline);
+  margin: var(--sl-space-1) calc(var(--sl-component-popover-padding) * -1);
+  background: var(--sl-color-border-default);
+}
+
+.sl-menu-label {
+  padding: var(--sl-space-1-5) var(--sl-space-2) var(--sl-space-1);
+  font: var(--sl-typography-overline);
+  letter-spacing: var(--sl-typography-overline-letter-spacing);
+  text-transform: uppercase;
+  color: var(--sl-color-text-tertiary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sl-popover-panel,
+  .sl-tooltip { animation: none; }
+}
+
+.sl-menu__trigger { display: contents; }

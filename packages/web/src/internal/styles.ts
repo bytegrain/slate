@@ -1,5 +1,6 @@
 import { css, unsafeCSS, type CSSResult } from 'lit';
 import baseCss from '../styles/base.css?inline';
+import iconCss from '../styles/icon.css?inline';
 import typographyCss from '../styles/typography.css?inline';
 import layoutCss from '../styles/layout.css?inline';
 import gridCss from '../styles/grid.css?inline';
@@ -10,6 +11,12 @@ import selectionCss from '../styles/selection.css?inline';
 import feedbackCss from '../styles/feedback.css?inline';
 import snackbarCss from '../styles/snackbar.css?inline';
 import dialogCss from '../styles/dialog.css?inline';
+import overlayCss from '../styles/overlay.css?inline';
+import selectCss from '../styles/select.css?inline';
+import navigationCss from '../styles/navigation.css?inline';
+import calendarCss from '../styles/calendar.css?inline';
+import treeCss from '../styles/tree.css?inline';
+import widgetsCss from '../styles/widgets.css?inline';
 
 /*
  * Components adopt the exact stylesheets that make up slate.css, so a web component and the same
@@ -28,10 +35,17 @@ export const styles = {
   feedback: unsafeCSS(feedbackCss),
   snackbar: unsafeCSS(snackbarCss),
   dialog: unsafeCSS(dialogCss),
+  overlay: unsafeCSS(overlayCss),
+  select: unsafeCSS(selectCss),
+  navigation: unsafeCSS(navigationCss),
+  calendar: unsafeCSS(calendarCss),
+  tree: unsafeCSS(treeCss),
+  widgets: unsafeCSS(widgetsCss),
 } satisfies Record<string, CSSResult>;
 
 /** Reset applied inside every shadow root. */
 export const hostReset = css`
+  ${unsafeCSS(iconCss)}
   :host {
     box-sizing: border-box;
   }

@@ -333,17 +333,18 @@ describe('display components', () => {
 describe('icons inside components', () => {
   it('every component that renders icons ships the icon styles', async () => {
     const { elements } = await import('../src/index');
+    const { wave2Elements } = await import('../src/wave2');
     let checked = 0;
-    for (const [tag, ctor] of Object.entries(elements)) {
+    for (const [tag, ctor] of Object.entries({ ...elements, ...wave2Elements })) {
       const css = ([] as unknown[]).concat((ctor as unknown as { styles?: unknown }).styles ?? []).map(String).join('\n');
       const source = ctor.toString();
       if (/renderIcon\b|<svg/.test(source)) {
         checked++;
-        // The base .sl-icon rule (size + stroke) from typography.css, not just a descendant selector.
+        // The base .sl-icon rule (size + stroke) from base.css, not just a descendant selector.
         expect.soft(/\.sl-icon\s*\{[^}]*stroke:/.test(css), `${tag} renders icons but lacks the base .sl-icon rule`).toBe(true);
       }
     }
-    expect(checked).toBeGreaterThanOrEqual(6);
+    expect(checked).toBeGreaterThanOrEqual(12);
   });
 
   it('rendered icons carry stroke attributes even without CSS', async () => {

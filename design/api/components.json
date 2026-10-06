@@ -1204,8 +1204,7 @@
         "option",
         "group",
         "empty"
-      ],
-      "status": "planned"
+      ]
     },
     "Menu": {
       "web": "sl-menu + sl-menu-item",
@@ -1254,8 +1253,7 @@
         "item",
         "separator",
         "shortcut"
-      ],
-      "status": "planned"
+      ]
     },
     "Tabs": {
       "web": "sl-tabs + sl-tab + sl-tab-panel",
@@ -1305,8 +1303,7 @@
         "indicator",
         "panel",
         "overflow"
-      ],
-      "status": "planned"
+      ]
     },
     "Tooltip": {
       "web": "sl-tooltip",
@@ -1338,8 +1335,7 @@
         "Disabled": {
           "kind": "bool"
         }
-      },
-      "status": "planned"
+      }
     },
     "Popover": {
       "web": "sl-popover",
@@ -1385,8 +1381,7 @@
       "parts": [
         "panel",
         "arrow"
-      ],
-      "status": "planned"
+      ]
     },
     "DatePicker": {
       "web": "sl-date-picker",
@@ -1483,8 +1478,7 @@
         "grid",
         "day",
         "presets"
-      ],
-      "status": "planned"
+      ]
     },
     "TreeView": {
       "web": "sl-tree-view",
@@ -1555,8 +1549,7 @@
         "label",
         "checkbox",
         "children"
-      ],
-      "status": "planned"
+      ]
     },
     "SegmentedControl": {
       "web": "sl-segmented",
@@ -1593,8 +1586,7 @@
         "ValueChanged": {
           "kind": "event"
         }
-      },
-      "status": "planned"
+      }
     },
     "Slider": {
       "web": "sl-slider",
@@ -1646,8 +1638,7 @@
         "ValueChanged": {
           "kind": "event"
         }
-      },
-      "status": "planned"
+      }
     },
     "Avatar": {
       "web": "sl-avatar",
@@ -1676,8 +1667,7 @@
           "kind": "param",
           "type": "online|away|busy|offline|null"
         }
-      },
-      "status": "planned"
+      }
     },
     "Breadcrumbs": {
       "web": "sl-breadcrumbs",
@@ -1701,8 +1691,7 @@
         "ItemClick": {
           "kind": "event"
         }
-      },
-      "status": "planned"
+      }
     },
     "Pagination": {
       "web": "sl-pagination",
@@ -1746,8 +1735,7 @@
         "PageSizeChanged": {
           "kind": "event"
         }
-      },
-      "status": "planned"
+      }
     },
     "Skeleton": {
       "web": "sl-skeleton",
@@ -1776,8 +1764,7 @@
           "kind": "bool",
           "default": true
         }
-      },
-      "status": "planned"
+      }
     }
   }
 }

@@ -1,0 +1,16 @@
+/* Icons. Folded into every component's shadow-root reset and bundled into slate.css, so an icon is
+   always sized and stroked no matter which other stylesheets a component loads. */
+.sl-icon {
+  display: inline-block;
+  flex: none;
+  width: var(--sl-size-icon-md);
+  height: var(--sl-size-icon-md);
+  vertical-align: middle;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sl-icon--sm { width: var(--sl-size-icon-sm); height: var(--sl-size-icon-sm); }
+.sl-icon--lg { width: var(--sl-size-icon-lg); height: var(--sl-size-icon-lg); }

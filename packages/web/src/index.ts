@@ -230,3 +230,7 @@ declare global {
     'sl-dialog': SlDialog;
   }
 }
+
+// Wave-2 components (popover, tooltip, menu, select, tabs, date picker, tree view, segmented, slider, avatar,
+// breadcrumbs, pagination, skeleton) — registered on import.
+export * from './wave2';
