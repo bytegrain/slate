@@ -1,8 +1,14 @@
-/* Checkbox, radio and switch — docs/design/components.md */
+/* Checkbox, radio and switch — docs/design/components.md, docs/design/configurability.md
+   Markup roots: .sl-checkbox / .sl-radio / .sl-switch + sl-tone-{tone} [--small|--large] [--label-start]
+   Sizes and colours come from component.selection.* tokens; the checked colour follows the tone
+   (accent uses component.selection.checked). */
 
 .sl-checkbox,
 .sl-radio,
 .sl-switch {
+  --_scale: 1;
+  --_box: calc(var(--sl-component-selection-box-size) * var(--_scale));
+
   display: inline-flex;
   align-items: flex-start;
   gap: var(--sl-space-2);
@@ -12,6 +18,27 @@
   color: var(--sl-color-text-primary);
   cursor: pointer;
   user-select: none;
+}
+
+.sl-checkbox.sl-tone-accent,
+.sl-radio.sl-tone-accent,
+.sl-switch.sl-tone-accent {
+  --_tone: var(--sl-component-selection-checked);
+}
+
+.sl-checkbox--small,
+.sl-radio--small,
+.sl-switch--small { --_scale: 0.875; font-size: var(--sl-font-size-sm); }
+
+.sl-checkbox--large,
+.sl-radio--large,
+.sl-switch--large { --_scale: 1.25; font-size: var(--sl-font-size-lg); }
+
+/* Label before the control. */
+.sl-checkbox--label-start,
+.sl-radio--label-start {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
 }
 
 .sl-checkbox__text,
@@ -35,12 +62,12 @@
   display: grid;
   flex: none;
   place-content: center;
-  width: 16px;
-  height: 16px;
-  margin: 2.5px 0 0;
+  width: var(--_box);
+  height: var(--_box);
+  margin: calc((1.5em - var(--_box)) / 2) 0 0;
   background: var(--sl-color-background-sunken);
-  border: var(--sl-border-width-hairline) solid var(--sl-color-border-control);
-  border-radius: var(--sl-radius-sm);
+  border: var(--sl-border-width-hairline) solid var(--sl-component-selection-border);
+  border-radius: var(--sl-component-selection-box-radius);
   box-shadow: var(--sl-shadow-inset);
   appearance: none;
   cursor: inherit;
@@ -54,22 +81,22 @@
 .sl-checkbox__input:checked,
 .sl-checkbox__input:indeterminate,
 .sl-checkbox__input.is-indeterminate {
-  background: var(--sl-color-accent-default);
-  border-color: var(--sl-color-accent-default);
+  background: var(--_tone);
+  border-color: var(--_tone);
   box-shadow: var(--sl-shadow-primary);
 }
 
 .sl-checkbox:hover .sl-checkbox__input:is(:checked, :indeterminate, .is-indeterminate) {
-  background: var(--sl-color-accent-hover);
-  border-color: var(--sl-color-accent-hover);
+  background: var(--_tone-hover);
+  border-color: var(--_tone-hover);
 }
 
 .sl-checkbox__input:checked::after {
   content: "";
-  width: 9px;
-  height: 5px;
-  margin-top: -2px;
-  border: 2px solid var(--sl-color-text-on-accent);
+  width: calc(var(--_box) * 0.56);
+  height: calc(var(--_box) * 0.31);
+  margin-top: calc(var(--_box) * -0.12);
+  border: 2px solid var(--_on-tone);
   border-top: 0;
   border-right: 0;
   transform: rotate(-45deg);
@@ -77,12 +104,12 @@
 
 .sl-checkbox__input:is(:indeterminate, .is-indeterminate)::after {
   content: "";
-  width: 8px;
+  width: calc(var(--_box) * 0.5);
   height: 2px;
   margin-top: 0;
   border: 0;
   border-radius: 1px;
-  background: var(--sl-color-text-on-accent);
+  background: var(--_on-tone);
   transform: none;
 }
 
@@ -92,11 +119,11 @@
   display: grid;
   flex: none;
   place-content: center;
-  width: 16px;
-  height: 16px;
-  margin: 2.5px 0 0;
+  width: var(--_box);
+  height: var(--_box);
+  margin: calc((1.5em - var(--_box)) / 2) 0 0;
   background: var(--sl-color-background-sunken);
-  border: var(--sl-border-width-hairline) solid var(--sl-color-border-control);
+  border: var(--sl-border-width-hairline) solid var(--sl-component-selection-border);
   border-radius: var(--sl-radius-full);
   box-shadow: var(--sl-shadow-inset);
   appearance: none;
@@ -110,18 +137,18 @@
 
 .sl-radio__input:checked,
 .sl-radio__input.is-checked {
-  background: var(--sl-color-accent-default);
-  border-color: var(--sl-color-accent-default);
+  background: var(--_tone);
+  border-color: var(--_tone);
   box-shadow: var(--sl-shadow-primary);
 }
 
 .sl-radio__input:checked::after,
 .sl-radio__input.is-checked::after {
   content: "";
-  width: 6px;
-  height: 6px;
+  width: calc(var(--_box) * 0.375);
+  height: calc(var(--_box) * 0.375);
   border-radius: var(--sl-radius-full);
-  background: var(--sl-color-text-on-accent);
+  background: var(--_on-tone);
 }
 
 .sl-radio-group {
@@ -154,8 +181,11 @@
 /* ---- Switch ---- */
 
 .sl-switch {
-  /* 20×36 compact, 24×44 comfortable — derived from the active control height. */
-  --_th: calc((var(--sl-size-control-md) + 8px) / 2);
+  /* Comfortable density scales switches up (--_density-scale is set by <sl-provider> / [data-sl-density]). */
+  --_th: calc(var(--sl-component-selection-switch-height) * var(--_scale) * var(--_density-scale, 1));
+  --_tw: calc(var(--sl-component-selection-switch-width) * var(--_scale) * var(--_density-scale, 1));
+  --_thumb: calc(var(--sl-component-selection-thumb-size) * var(--_scale) * var(--_density-scale, 1));
+  --_inset: calc((var(--_th) - var(--_thumb)) / 2);
   align-items: center;
 }
 
@@ -163,10 +193,16 @@
 .sl-switch--label-start { flex-direction: row-reverse; justify-content: flex-end; }
 .sl-switch--spread { display: flex; justify-content: space-between; }
 
+.sl-switch__control {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+
 .sl-switch__input {
   position: relative;
   flex: none;
-  width: calc(var(--_th) * 2 - 4px);
+  width: var(--_tw);
   height: var(--_th);
   margin: 0;
   background: var(--sl-color-control-track);
@@ -177,28 +213,26 @@
   transition: background-color var(--sl-motion-duration-fast) var(--sl-motion-easing-standard);
 }
 
-.sl-switch__input::before {
-  content: "";
+.sl-switch__thumb {
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: calc(var(--_th) - 4px);
-  height: calc(var(--_th) - 4px);
+  top: var(--_inset);
+  left: var(--_inset);
+  width: var(--_thumb);
+  height: var(--_thumb);
   border-radius: var(--sl-radius-full);
   background: linear-gradient(var(--sl-color-control-thumb), var(--sl-color-control-thumb-shade));
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 0 0 0.5px rgb(0 0 0 / 0.1);
+  pointer-events: none;
   transition: transform var(--sl-motion-duration-fast) var(--sl-motion-easing-standard);
 }
 
-.sl-switch__input:checked {
-  background: var(--sl-color-accent-default);
+.sl-switch__input:checked { background: var(--_tone); }
+
+.sl-switch__input:checked + .sl-switch__thumb {
+  transform: translateX(calc(var(--_tw) - var(--_thumb) - var(--_inset) * 2));
 }
 
-.sl-switch__input:checked::before {
-  transform: translateX(calc(var(--_th) - 4px));
-}
-
-.sl-switch:hover .sl-switch__input:checked { background: var(--sl-color-accent-hover); }
+.sl-switch:hover .sl-switch__input:checked { background: var(--_tone-hover); }
 
 /* ---- Shared states ---- */
 
@@ -215,4 +249,9 @@
 .sl-switch.is-disabled {
   opacity: var(--sl-opacity-disabled);
   cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sl-switch__thumb,
+  .sl-switch__input { transition: none; }
 }

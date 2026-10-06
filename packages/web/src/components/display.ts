@@ -7,6 +7,9 @@ import { hostReset, styles } from '../internal/styles';
 import { isIconName, renderIcon } from '../internal/icon';
 import { icons, iconStrokeWidth, iconViewBox } from '../icons/generated/icons';
 import type { Severity } from '../core/snackbar-queue';
+import type { AlertVariant, BadgeVariant, ControlSize, Tone } from '../core/defaults';
+import { TitledElement } from '../internal/title';
+import { iconButtonClasses } from './button';
 
 /** <sl-icon name="check" size="sm|md|lg" label="…"> — decorative unless labelled. */
 export class SlIcon extends LitElement {
@@ -108,79 +111,121 @@ export class SlText extends LitElement {
   }
 }
 
-export type BadgeTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'accent';
+export type BadgeTone = Tone;
 
-/** <sl-badge tone="success" dot>Ready</sl-badge> */
+/** <sl-badge tone="success" variant="soft|solid|outlined" size="small" dot icon="check">Ready</sl-badge> */
 export class SlBadge extends LitElement {
   static override properties = {
     tone: { reflect: true },
+    variant: { reflect: true },
+    size: { reflect: true },
     dot: { type: Boolean, reflect: true },
+    icon: {},
   };
-  static override styles = [hostReset, styles.feedback, css`:host { display: inline-flex; vertical-align: middle; }`];
+  static override styles = [hostReset, styles.typography, styles.tone, styles.feedback, css`:host { display: inline-flex; vertical-align: middle; }`];
 
-  declare tone: BadgeTone;
+  declare tone: Tone;
+  declare variant: BadgeVariant;
+  declare size: 'small' | 'medium';
   declare dot: boolean;
+  declare icon: string | undefined;
 
   constructor() {
     super();
     this.tone = 'neutral';
+    this.variant = 'soft';
+    this.size = 'medium';
     this.dot = false;
   }
 
   override render() {
-    return html`<span class="sl-badge ${this.tone === 'neutral' ? '' : `sl-badge--${this.tone}`}" part="base"
-      >${this.dot ? html`<span class="sl-badge__dot" aria-hidden="true"></span>` : nothing}<slot></slot
+    const classes = {
+      'sl-badge': true,
+      [`sl-badge--${this.variant}`]: true,
+      [`sl-tone-${this.tone}`]: true,
+      'sl-badge--small': this.size === 'small',
+    };
+    return html`<span class=${classMap(classes)} part="base"
+      >${this.dot ? html`<span class="sl-badge__dot" part="dot" aria-hidden="true"></span>` : nothing}${renderIcon(this.icon, 'sl-badge__icon')}<slot></slot
     ></span>`;
   }
 }
 
-/** <sl-spinner size="sm" label="Loading"> */
+/** <sl-spinner size="small" tone="accent" label="Loading"> — neutral follows the text colour. */
 export class SlSpinner extends LitElement {
-  static override properties = { size: { reflect: true }, label: {} };
-  static override styles = [hostReset, styles.base, styles.feedback, css`:host { display: inline-flex; vertical-align: middle; }`];
+  static override properties = { size: { reflect: true }, tone: { reflect: true }, label: {} };
+  static override styles = [hostReset, styles.base, styles.tone, styles.feedback, css`:host { display: inline-flex; vertical-align: middle; }`];
 
-  declare size: 'sm' | 'md' | 'lg';
+  declare size: ControlSize;
+  declare tone: Tone;
   declare label: string;
 
   constructor() {
     super();
-    this.size = 'md';
+    this.size = 'medium';
+    this.tone = 'neutral';
     this.label = 'Loading';
   }
 
   override render() {
-    return html`<span class="sl-spinner sl-spinner--${this.size}" part="base" role="status" aria-label=${this.label}></span>`;
+    const classes = {
+      'sl-spinner': true,
+      [`sl-spinner--${this.size}`]: this.size !== 'medium',
+      [`sl-tone-${this.tone}`]: true,
+    };
+    return html`<span class=${classMap(classes)} part="base" role="status" aria-label=${this.label}></span>`;
   }
 }
 
-/** <sl-progress value="40" label="Uploading"> — omit value for indeterminate. */
+/**
+ * <sl-progress value="40" label="Uploading" tone="success" size="small" show-value>
+ * Indeterminate when `indeterminate` is set or no value is given.
+ */
 export class SlProgress extends LitElement {
   static override properties = {
     value: { type: Number },
     max: { type: Number },
+    indeterminate: { type: Boolean, reflect: true },
+    tone: { reflect: true },
+    size: { reflect: true },
     label: {},
+    showValue: { type: Boolean, attribute: 'show-value', reflect: true },
   };
-  static override styles = [hostReset, styles.base, styles.feedback, css`:host { display: block; }`];
+  static override styles = [hostReset, styles.base, styles.tone, styles.feedback, css`:host { display: block; }`];
 
   declare value: number | undefined;
   declare max: number;
+  declare indeterminate: boolean;
+  declare tone: Tone;
+  declare size: ControlSize;
   declare label: string | undefined;
+  declare showValue: boolean;
 
   constructor() {
     super();
     this.max = 100;
+    this.indeterminate = false;
+    this.tone = 'accent';
+    this.size = 'medium';
+    this.showValue = false;
   }
 
-  get indeterminate(): boolean {
-    return this.value === undefined || this.value === null || Number.isNaN(this.value);
+  get isIndeterminate(): boolean {
+    return this.indeterminate || this.value === undefined || this.value === null || Number.isNaN(this.value);
   }
 
   override render() {
-    const indeterminate = this.indeterminate;
+    const indeterminate = this.isIndeterminate;
     const clamped = indeterminate ? 0 : Math.min(this.max, Math.max(0, this.value!));
     const percent = this.max > 0 ? (clamped / this.max) * 100 : 0;
-    return html`<div
-      class="sl-progress ${indeterminate ? 'sl-progress--indeterminate' : ''}"
+    const classes = {
+      'sl-progress': true,
+      [`sl-tone-${this.tone}`]: true,
+      [`sl-progress--${this.size}`]: this.size !== 'medium',
+      'sl-progress--indeterminate': indeterminate,
+    };
+    const bar = html`<div
+      class=${classMap(classes)}
       part="base"
       role="progressbar"
       aria-label=${ifDefined(this.label)}
@@ -191,6 +236,10 @@ export class SlProgress extends LitElement {
       style=${styleMap({ '--_value': `${percent}%` })}
     >
       <div class="sl-progress__bar" part="bar"></div>
+    </div>`;
+    if (!this.showValue) return bar;
+    return html`<div class="sl-progress-row">
+      ${bar}<span class="sl-progress__value" part="value" aria-hidden="true">${indeterminate ? '' : `${Math.round(percent)}%`}</span>
     </div>`;
   }
 }
@@ -207,22 +256,44 @@ export function severityIcon(severity: Severity): string {
   return severityIcons[severity] ?? 'info';
 }
 
+const severityTones: Record<Severity, Tone> = {
+  normal: 'neutral',
+  info: 'info',
+  success: 'success',
+  warning: 'warning',
+  error: 'danger',
+};
+
+/** Mirrors Slate.SeverityExtensions.ToTone. */
+export function severityTone(severity: Severity): Tone {
+  return severityTones[severity] ?? 'neutral';
+}
+
 /**
- * <sl-alert severity="warning" heading="Usage at 80%" dismissible>Message<sl-button slot="actions">…</sl-button></sl-alert>
- * Errors announce assertively (role=alert); others only when `live` is set (they appeared dynamically).
+ * <sl-alert severity="warning" variant="soft|outlined|solid" title="Usage at 80%" dismissible dense>
+ *   Message <sl-button slot="actions">…</sl-button>
+ * </sl-alert>
+ * `icon` overrides the severity icon ("none" hides it). Errors announce assertively (role=alert); others
+ * only when `live` is set (they appeared dynamically). Fires a cancelable `sl-dismissed` before hiding.
  */
-export class SlAlert extends LitElement {
+export class SlAlert extends TitledElement {
   static override properties = {
     severity: { reflect: true },
-    heading: {},
+    variant: { reflect: true },
+    title: {},
+    icon: {},
+    dense: { type: Boolean, reflect: true },
     dismissible: { type: Boolean, reflect: true },
     live: { type: Boolean },
     hasActions: { state: true },
   };
-  static override styles = [hostReset, styles.typography, styles.button, styles.feedback, css`:host { display: block; }`];
+  static override styles = [hostReset, styles.typography, styles.tone, styles.button, styles.feedback, css`:host { display: block; }`];
 
   declare severity: Severity;
-  declare heading: string | undefined;
+  declare variant: AlertVariant;
+  declare title: string;
+  declare icon: string | undefined;
+  declare dense: boolean;
   declare dismissible: boolean;
   declare live: boolean;
   declare hasActions: boolean;
@@ -230,6 +301,9 @@ export class SlAlert extends LitElement {
   constructor() {
     super();
     this.severity = 'info';
+    this.variant = 'soft';
+    this.title = '';
+    this.dense = false;
     this.dismissible = false;
     this.live = false;
     this.hasActions = false;
@@ -240,25 +314,34 @@ export class SlAlert extends LitElement {
     this.hasActions = !!this.querySelector(':scope > [slot="actions"]');
   }
 
-  /** Hides the alert. Fires a cancelable `sl-dismiss` first. */
+  /** Hides the alert. Fires a cancelable `sl-dismissed` first. */
   dismiss(): void {
-    const proceed = this.dispatchEvent(new CustomEvent('sl-dismiss', { bubbles: true, composed: true, cancelable: true }));
+    const proceed = this.dispatchEvent(new CustomEvent('sl-dismissed', { bubbles: true, composed: true, cancelable: true }));
     if (proceed) this.hidden = true;
   }
 
   override render() {
     const role = this.severity === 'error' ? 'alert' : this.live ? 'status' : undefined;
-    return html`<div class="sl-alert ${this.severity === 'normal' ? '' : `sl-alert--${this.severity}`}" part="base" role=${ifDefined(role)}>
-      ${renderIcon(severityIcon(this.severity), 'sl-alert__icon')}
+    const icon = this.icon === 'none' ? undefined : (this.icon ?? severityIcon(this.severity));
+    const classes = {
+      'sl-alert': true,
+      [`sl-alert--${this.variant}`]: true,
+      [`sl-alert--${this.severity}`]: true,
+      [`sl-tone-${severityTone(this.severity)}`]: true,
+      'sl-alert--dense': this.dense,
+    };
+    return html`<div class=${classMap(classes)} part="base" role=${ifDefined(role)}>
+      ${icon ? html`<span class="sl-alert__icon" part="icon">${renderIcon(icon)}</span>` : nothing}
       <div class="sl-alert__content">
-        ${this.heading ? html`<strong class="sl-alert__title">${this.heading}</strong>` : nothing}
-        <div class="sl-alert__message"><slot></slot></div>
+        ${this.title ? html`<strong class="sl-alert__title" part="title">${this.title}</strong>` : nothing}
+        <div class="sl-alert__message" part="message"><slot></slot></div>
       </div>
-      <div class="sl-alert__actions" ?hidden=${!this.hasActions && !this.dismissible}>
+      <div class="sl-alert__actions" part="actions" ?hidden=${!this.hasActions && !this.dismissible}>
         <slot name="actions" @slotchange=${this.onActionsChange}></slot>
         ${this.dismissible
           ? html`<button
-              class="sl-button sl-button--ghost sl-button--sm sl-button--icon sl-alert__close"
+              class="${iconButtonClasses} sl-button--small sl-alert__close"
+              part="close"
               type="button"
               aria-label="Dismiss"
               @click=${this.dismiss}

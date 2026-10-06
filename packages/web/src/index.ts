@@ -5,19 +5,22 @@
  *   import { snackbar, dialog } from '@slate/web';   // registers every <sl-*> element
  */
 import { SlProvider } from './components/provider';
-import { SlAppBar, SlAppShell, SlCard, SlContainer, SlDivider, SlDrawer, SlGrid, SlGridItem, SlSpacer, SlStack, SlToolbar } from './components/layout';
+import { SlAppBar, SlAppShell, SlCard, SlContainer, SlDivider, SlDrawer, SlGrid, SlGridItem, SlNavItem, SlSpacer, SlStack, SlToolbar } from './components/layout';
 import { SlAlert, SlBadge, SlIcon, SlKbd, SlProgress, SlSpinner, SlText } from './components/display';
 import { SlButton } from './components/button';
 import { SlTextField } from './components/text-field';
 import { SlCheckbox, SlRadio, SlRadioGroup, SlSwitch } from './components/selection';
 import { SlSnackbarHost } from './components/snackbar-host';
 import { SlDialog } from './components/dialog';
+import { configureDefaults as configureCoreDefaults, type DefaultsPatch, type SlateDefaults } from './core/defaults';
+import { snackbar } from './services/snackbar';
 
 export const elements = {
   'sl-provider': SlProvider,
   'sl-app-shell': SlAppShell,
   'sl-app-bar': SlAppBar,
   'sl-drawer': SlDrawer,
+  'sl-nav-item': SlNavItem,
   'sl-container': SlContainer,
   'sl-grid': SlGrid,
   'sl-grid-item': SlGridItem,
@@ -58,6 +61,7 @@ export {
   SlAppShell,
   SlAppBar,
   SlDrawer,
+  SlNavItem,
   SlContainer,
   SlGrid,
   SlGridItem,
@@ -84,13 +88,42 @@ export {
 };
 
 export type { ThemeMode, Density } from './components/provider';
-export type { ButtonVariant, ControlSize } from './components/button';
 export type { TextFieldType } from './components/text-field';
 export type { BadgeTone, TextVariant, TextTone } from './components/display';
-export type { DrawerVariant, ContainerSize } from './components/layout';
+export { severityTone } from './components/display';
+export type { DrawerVariant, ContainerSize, ResponsiveBreakpoint } from './components/layout';
 export type { DialogTone } from './components/dialog';
 
+// Configuration vocabulary, defaults and runtime themes (docs/design/configurability.md).
+export type {
+  Tone,
+  ButtonVariant,
+  FieldVariant,
+  CardVariant,
+  BadgeVariant,
+  AlertVariant,
+  ControlSize,
+  Radius,
+  Placement,
+  Direction,
+  SlateDefaults,
+  DefaultsPatch,
+} from './core/defaults';
+export { tones, getDefaults, resetDefaults, onDefaultsChanged } from './core/defaults';
+export { createTheme, applyTheme, themeToCss, cssVariable, type SlateTheme, type SlateThemeOptions, type ThemeBase } from './core/theme/builder';
+export { SlateColor } from './core/theme/color';
+
 export { snackbar, SnackbarService } from './services/snackbar';
+
+/**
+ * Sets app-wide component defaults (mirrors Slate.SlateDefaults). Snackbar defaults reconfigure the
+ * shared snackbar service; everything else is read by components at render time.
+ */
+export function configureDefaults(patch: DefaultsPatch): Readonly<SlateDefaults> {
+  const result = configureCoreDefaults(patch);
+  if (patch.snackbar) snackbar.configure(patch.snackbar);
+  return result;
+}
 export { dialog, type DialogAction, type DialogShowOptions, type MessageBoxOptions } from './services/dialog';
 
 export {
@@ -128,6 +161,7 @@ declare global {
     'sl-app-shell': SlAppShell;
     'sl-app-bar': SlAppBar;
     'sl-drawer': SlDrawer;
+    'sl-nav-item': SlNavItem;
     'sl-container': SlContainer;
     'sl-grid': SlGrid;
     'sl-grid-item': SlGridItem;

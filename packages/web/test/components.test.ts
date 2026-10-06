@@ -8,32 +8,49 @@ import { $, cleanup, fixture, key, settle, shadow } from './helpers';
 afterEach(cleanup);
 
 describe('sl-button', () => {
-  it('renders the class contract for variant and size', async () => {
-    const el = await fixture<SlButton>('<sl-button variant="primary" size="sm">Deploy</sl-button>');
+  it('renders the class contract for variant, tone and size', async () => {
+    const el = await fixture<SlButton>('<sl-button variant="solid" tone="accent" size="small" radius="full">Deploy</sl-button>');
     const btn = $(el, 'button');
-    expect(btn.className).toContain('sl-button');
-    expect(btn.className).toContain('sl-button--primary');
-    expect(btn.className).toContain('sl-button--sm');
+    expect([...btn.classList]).toEqual(expect.arrayContaining(['sl-button', 'sl-button--solid', 'sl-tone-accent', 'sl-button--small', 'sl-radius-full']));
     expect(btn.getAttribute('type')).toBe('button');
   });
 
-  it('secondary/medium are the defaults and add no modifiers', async () => {
+  it('outlined + neutral + medium are the defaults', async () => {
     const el = await fixture<SlButton>('<sl-button>Save</sl-button>');
-    expect($(el, 'button').className.trim().split(/\s+/)).toEqual(['sl-button']);
+    expect($(el, 'button').className.trim().split(/\s+/).sort()).toEqual(['sl-button', 'sl-button--outlined', 'sl-tone-neutral']);
   });
 
   it('icon-only buttons are square and labelled', async () => {
-    const el = await fixture<SlButton>('<sl-button icon="search" label="Search"></sl-button>');
+    const el = await fixture<SlButton>('<sl-button icon-only start-icon="search" label="Search"></sl-button>');
     const btn = $(el, 'button');
-    expect(btn.classList.contains('sl-button--icon')).toBe(true);
+    expect(btn.classList.contains('sl-button--icon-only')).toBe(true);
     expect(btn.getAttribute('aria-label')).toBe('Search');
     expect(btn.querySelector('svg.sl-icon path')).not.toBeNull();
     expect(btn.querySelector('.sl-button__label')).toBeNull();
   });
 
+  it('start and end icons render in their parts; empty parts are hidden', async () => {
+    const el = await fixture<SlButton>('<sl-button start-icon="plus">New</sl-button>');
+    expect($(el, '[part="start"] svg')).toBeTruthy();
+    expect($(el, '[part="end"]').hasAttribute('hidden')).toBe(true);
+    el.endIcon = 'arrow-right';
+    await el.updateComplete;
+    expect($(el, '[part="end"]').hasAttribute('hidden')).toBe(false);
+  });
+
+  it('pressed is a tri-state toggle', async () => {
+    const el = await fixture<SlButton>('<sl-button>Bold</sl-button>');
+    expect($(el, 'button').hasAttribute('aria-pressed')).toBe(false);
+    el.pressed = true;
+    await el.updateComplete;
+    expect($(el, 'button').getAttribute('aria-pressed')).toBe('true');
+    const off = await fixture<SlButton>('<sl-button pressed="false">Italic</sl-button>');
+    expect($(off, 'button').getAttribute('aria-pressed')).toBe('false');
+  });
+
   it('warns when an icon-only button has no label', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    await fixture('<sl-button icon="search"></sl-button>');
+    await fixture('<sl-button icon-only start-icon="search"></sl-button>');
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
   });
@@ -145,9 +162,9 @@ describe('sl-text-field', () => {
   });
 
   it('size and disabled map to modifiers', async () => {
-    const el = await fixture<SlTextField>('<sl-text-field label="x" size="lg" disabled></sl-text-field>');
+    const el = await fixture<SlTextField>('<sl-text-field label="x" size="large" disabled></sl-text-field>');
     const root = $(el, '.sl-field');
-    expect(root.classList.contains('sl-field--lg')).toBe(true);
+    expect(root.classList.contains('sl-field--large')).toBe(true);
     expect(root.classList.contains('sl-field--disabled')).toBe(true);
     expect(($(el, 'input') as HTMLInputElement).disabled).toBe(true);
   });
@@ -182,7 +199,8 @@ describe('sl-checkbox / sl-switch', () => {
     expect(input.getAttribute('role')).toBe('switch');
     expect(input.getAttribute('aria-checked')).toBe('true');
     expect(key(input, 'Enter').defaultPrevented).toBe(true);
-    expect($(el, 'label').className).toContain('sl-switch--label-start');
+    expect($(el, 'label').className).toContain('sl-switch--label-end'); // default placement
+    expect($(el, '[part="thumb"]')).toBeTruthy();
   });
 
   it('disabled toggles are marked', async () => {
@@ -252,9 +270,11 @@ describe('display components', () => {
   });
 
   it('sl-alert maps severity to class, icon and role', async () => {
-    const error = await fixture<SlAlert>('<sl-alert severity="error" heading="Build failed">3 tests failed</sl-alert>');
+    const error = await fixture<SlAlert>('<sl-alert severity="error" title="Build failed">3 tests failed</sl-alert>');
     const base = $(error, '.sl-alert');
-    expect(base.classList.contains('sl-alert--error')).toBe(true);
+    expect([...base.classList]).toEqual(expect.arrayContaining(['sl-alert--soft', 'sl-tone-danger']));
+    expect(error.hasAttribute('title')).toBe(false); // consumed: no native tooltip
+    expect(error.title).toBe('Build failed');
     expect(base.getAttribute('role')).toBe('alert');
     expect($(error, '.sl-alert__title').textContent).toBe('Build failed');
 
@@ -268,17 +288,17 @@ describe('display components', () => {
     const el = await fixture<SlAlert>('<sl-alert dismissible>x</sl-alert>');
     const close = $(el, '.sl-alert__close');
     const handler = vi.fn((e: Event) => e.preventDefault());
-    el.addEventListener('sl-dismiss', handler);
+    el.addEventListener('sl-dismissed', handler);
     close.click();
     expect(el.hidden).toBe(false);
-    el.removeEventListener('sl-dismiss', handler);
+    el.removeEventListener('sl-dismissed', handler);
     close.click();
     expect(el.hidden).toBe(true);
   });
 
   it('sl-badge renders tone and dot', async () => {
     const el = await fixture('<sl-badge tone="success" dot>Ready</sl-badge>');
-    expect($(el, '.sl-badge').className).toContain('sl-badge--success');
+    expect([...$(el, '.sl-badge').classList]).toEqual(expect.arrayContaining(['sl-badge--soft', 'sl-tone-success']));
     expect($(el, '.sl-badge__dot')).toBeTruthy();
   });
 
@@ -327,7 +347,7 @@ describe('icons inside components', () => {
   });
 
   it('rendered icons carry stroke attributes even without CSS', async () => {
-    const el = await fixture('<sl-button icon="x" label="Close"></sl-button>');
+    const el = await fixture('<sl-button icon-only start-icon="x" label="Close"></sl-button>');
     const svg = $(el, 'svg');
     expect(svg.getAttribute('stroke')).toBe('currentColor');
     expect(svg.getAttribute('fill')).toBe('none');

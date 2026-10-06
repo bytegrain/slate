@@ -5,8 +5,9 @@ import { live } from 'lit/directives/live.js';
 import { hostReset, styles } from '../internal/styles';
 import { uid } from '../internal/dom';
 import { attachFormInternals, owningForm, watchFormReset } from '../internal/form';
+import { DefaultsController, getDefaults, type ControlSize, type Direction, type Placement, type Tone } from '../core/defaults';
 
-/** Shared form plumbing for boolean controls. */
+/** Shared form plumbing and options for boolean controls. */
 abstract class ToggleBase extends LitElement {
   static formAssociated = true;
   static override shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: true };
@@ -19,6 +20,9 @@ abstract class ToggleBase extends LitElement {
     value: {},
     label: {},
     description: {},
+    tone: { reflect: true },
+    size: { reflect: true },
+    labelPlacement: { attribute: 'label-placement', reflect: true },
   };
 
   declare checked: boolean;
@@ -28,6 +32,11 @@ abstract class ToggleBase extends LitElement {
   declare value: string;
   declare label: string | undefined;
   declare description: string | undefined;
+  /** Checked colour. Default 'accent'. */
+  declare tone: Tone | undefined;
+  declare size: ControlSize | undefined;
+  /** Label side. Unset → defaults.selection.labelPlacement ('end'). */
+  declare labelPlacement: Placement | undefined;
 
   protected readonly internals: ElementInternals | undefined;
   protected readonly inputId = uid('sl-toggle');
@@ -37,11 +46,33 @@ abstract class ToggleBase extends LitElement {
 
   constructor() {
     super();
+    new DefaultsController(this);
     this.checked = false;
     this.disabled = false;
     this.required = false;
     this.value = 'on';
     this.internals = attachFormInternals(this);
+  }
+
+  protected get placement(): Placement {
+    return this.labelPlacement ?? getDefaults().selection.labelPlacement;
+  }
+
+  /** Effective option values (parameter, else default). */
+  get resolved(): { tone: Tone; size: ControlSize; labelPlacement: Placement } {
+    return { tone: this.tone ?? 'accent', size: this.size ?? 'medium', labelPlacement: this.placement };
+  }
+
+  /** Root classes shared by the checkbox and switch. */
+  protected rootClasses(block: string): Record<string, boolean> {
+    const size = this.size ?? 'medium';
+    return {
+      [block]: true,
+      [`sl-tone-${this.tone ?? 'accent'}`]: true,
+      [`${block}--${size}`]: size !== 'medium',
+      [`${block}--label-${this.placement}`]: true,
+      'is-disabled': this.disabled,
+    };
   }
 
   override connectedCallback(): void {
@@ -97,6 +128,7 @@ abstract class ToggleBase extends LitElement {
   protected onChange(e: Event): void {
     this.applyInput(e.target as HTMLInputElement);
     this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+    this.dispatchEvent(new CustomEvent('sl-checked-changed', { bubbles: true, composed: true, detail: { checked: this.checked } }));
   }
 
   protected applyInput(input: HTMLInputElement): void {
@@ -113,13 +145,17 @@ abstract class ToggleBase extends LitElement {
   }
 }
 
-/** <sl-checkbox label="Run tests" description="…" checked indeterminate></sl-checkbox> */
+/**
+ * <sl-checkbox label="Run tests" description="…" checked indeterminate tone="success" size="small"
+ *              label-placement="start"></sl-checkbox>
+ * `indeterminate` is the web spelling of Checked = null. Fires `change` and `sl-checked-changed`.
+ */
 export class SlCheckbox extends ToggleBase {
   static override properties = {
     ...ToggleBase.properties,
     indeterminate: { type: Boolean, reflect: true },
   };
-  static override styles = [hostReset, styles.base, styles.selection, css`:host { display: inline-flex; }`];
+  static override styles = [hostReset, styles.base, styles.tone, styles.selection, css`:host { display: inline-flex; }`];
 
   declare indeterminate: boolean;
 
@@ -134,11 +170,11 @@ export class SlCheckbox extends ToggleBase {
   }
 
   override render() {
-    return html`<label class=${classMap({ 'sl-checkbox': true, 'is-disabled': this.disabled })} part="base">
+    return html`<label class=${classMap(this.rootClasses('sl-checkbox'))} part="base">
       <input
         id=${this.inputId}
         class="sl-checkbox__input"
-        part="control"
+        part="box"
         type="checkbox"
         .checked=${live(this.checked)}
         .indeterminate=${this.indeterminate}
@@ -153,16 +189,16 @@ export class SlCheckbox extends ToggleBase {
   }
 }
 
-/** <sl-switch label="Preview deployments" checked label-position="start|end"></sl-switch> */
+/** <sl-switch label="Preview deployments" checked label-placement="start" spread tone="accent"></sl-switch> */
 export class SlSwitch extends ToggleBase {
   static override properties = {
     ...ToggleBase.properties,
-    labelPosition: { attribute: 'label-position', reflect: true },
     spread: { type: Boolean, reflect: true },
   };
   static override styles = [
     hostReset,
     styles.base,
+    styles.tone,
     styles.selection,
     css`
       :host { display: inline-flex; }
@@ -170,38 +206,32 @@ export class SlSwitch extends ToggleBase {
     `,
   ];
 
-  /** Label before (start, default) or after (end) the switch. */
-  declare labelPosition: 'start' | 'end';
   /** Label and switch at opposite ends of the row (settings lists). */
   declare spread: boolean;
 
   constructor() {
     super();
-    this.labelPosition = 'start';
     this.spread = false;
   }
 
   override render() {
-    const classes = {
-      'sl-switch': true,
-      [`sl-switch--label-${this.labelPosition}`]: true,
-      'sl-switch--spread': this.spread,
-      'is-disabled': this.disabled,
-    };
+    const classes = { ...this.rootClasses('sl-switch'), 'sl-switch--spread': this.spread };
     return html`<label class=${classMap(classes)} part="base">
-      <input
-        id=${this.inputId}
-        class="sl-switch__input"
-        part="control"
-        type="checkbox"
-        role="switch"
-        .checked=${live(this.checked)}
-        ?disabled=${this.disabled}
-        aria-checked=${this.checked ? 'true' : 'false'}
-        aria-describedby=${ifDefined(this.description ? this.descId : undefined)}
-        @change=${this.onChange}
-        @keydown=${this.onKeyDown}
-      />
+      <span class="sl-switch__control">
+        <input
+          id=${this.inputId}
+          class="sl-switch__input"
+          part="track"
+          type="checkbox"
+          role="switch"
+          .checked=${live(this.checked)}
+          ?disabled=${this.disabled}
+          aria-checked=${this.checked ? 'true' : 'false'}
+          aria-describedby=${ifDefined(this.description ? this.descId : undefined)}
+          @change=${this.onChange}
+          @keydown=${this.onKeyDown}
+        /><span class="sl-switch__thumb" part="thumb" aria-hidden="true"></span>
+      </span>
       ${this.renderText('sl-switch')}
     </label>`;
   }
@@ -220,10 +250,13 @@ export class SlRadio extends LitElement {
     description: {},
     disabled: { type: Boolean, reflect: true },
     checked: { type: Boolean, reflect: true },
+    tone: { attribute: false },
+    size: { attribute: false },
   };
   static override styles = [
     hostReset,
     styles.base,
+    styles.tone,
     styles.selection,
     css`
       :host {
@@ -243,12 +276,18 @@ export class SlRadio extends LitElement {
   declare disabled: boolean;
   /** Managed by the group. */
   declare checked: boolean;
+  /** Managed by the group. */
+  declare tone: Tone;
+  /** Managed by the group. */
+  declare size: ControlSize;
 
   constructor() {
     super();
     this.value = '';
     this.disabled = false;
     this.checked = false;
+    this.tone = 'accent';
+    this.size = 'medium';
   }
 
   override connectedCallback(): void {
@@ -282,19 +321,28 @@ export class SlRadio extends LitElement {
   };
 
   override render() {
-    return html`<span class=${classMap({ 'sl-radio': true, 'is-disabled': this.disabled })} part="base">
+    const classes = {
+      'sl-radio': true,
+      [`sl-tone-${this.tone}`]: true,
+      [`sl-radio--${this.size}`]: this.size !== 'medium',
+      'is-disabled': this.disabled,
+    };
+    return html`<span class=${classMap(classes)} part="base">
       <span class=${classMap({ 'sl-radio__input': true, 'is-checked': this.checked })} part="control" aria-hidden="true"></span>
       <span class="sl-radio__text">
         <span class="sl-radio__label" part="label"><slot>${this.label ?? ''}</slot></span>
-        ${this.description ? html`<span class="sl-radio__description">${this.description}</span>` : nothing}
+        ${this.description ? html`<span class="sl-radio__description" part="description">${this.description}</span>` : nothing}
       </span>
     </span>`;
   }
 }
 
 /**
- * <sl-radio-group label="Plan" name="plan" value="team"> <sl-radio value="team" label="Team"></sl-radio> … </sl-radio-group>
+ * <sl-radio-group label="Plan" name="plan" value="team" direction="row" tone="accent">
+ *   <sl-radio value="team" label="Team"></sl-radio> …
+ * </sl-radio-group>
  * One tab stop; arrow keys move and select (roving tabindex). Form-associated.
+ * Fires `input`, `change` and `sl-value-changed` (detail: { value }) when the user picks a radio.
  */
 export class SlRadioGroup extends LitElement {
   static formAssociated = true;
@@ -305,7 +353,9 @@ export class SlRadioGroup extends LitElement {
     value: { reflect: true },
     disabled: { type: Boolean, reflect: true },
     required: { type: Boolean, reflect: true },
-    orientation: { reflect: true },
+    direction: { reflect: true },
+    tone: { reflect: true },
+    size: { reflect: true },
   };
   static override styles = [hostReset, styles.base, styles.selection, css`:host { display: block; }`];
 
@@ -314,7 +364,9 @@ export class SlRadioGroup extends LitElement {
   declare value: string;
   declare disabled: boolean;
   declare required: boolean;
-  declare orientation: 'vertical' | 'horizontal';
+  declare direction: Direction;
+  declare tone: Tone;
+  declare size: ControlSize;
 
   private readonly internals: ElementInternals | undefined;
   private readonly labelId = uid('sl-radio-group-label');
@@ -326,7 +378,9 @@ export class SlRadioGroup extends LitElement {
     this.value = '';
     this.disabled = false;
     this.required = false;
-    this.orientation = 'vertical';
+    this.direction = 'column';
+    this.tone = 'accent';
+    this.size = 'medium';
     this.internals = attachFormInternals(this);
     this.addEventListener('sl-radio-select', (e) => this.choose((e as CustomEvent<{ value: string }>).detail.value, true));
     this.addEventListener('keydown', this.onKeyDown);
@@ -372,6 +426,7 @@ export class SlRadioGroup extends LitElement {
     if (this.label) this.setAttribute('aria-label', this.label);
     this.setAttribute('aria-disabled', String(this.disabled));
     this.setAttribute('aria-required', String(this.required));
+    this.setAttribute('aria-orientation', this.direction === 'row' ? 'horizontal' : 'vertical');
     this.syncRadios();
     this.internals?.setFormValue(this.value || null);
     if (this.internals) {
@@ -386,6 +441,8 @@ export class SlRadioGroup extends LitElement {
     const current = radios.find((r) => r.value === this.value && !r.disabled);
     for (const r of radios) {
       r.checked = r.value === this.value;
+      r.tone = this.tone;
+      r.size = this.size;
       const focusable = current ? r === current : r === enabled[0];
       r.tabIndex = focusable && !this.disabled ? 0 : -1;
     }
@@ -398,6 +455,7 @@ export class SlRadioGroup extends LitElement {
     if (fromUser) {
       this.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
       this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+      this.dispatchEvent(new CustomEvent('sl-value-changed', { bubbles: true, composed: true, detail: { value } }));
     }
   }
 
@@ -416,12 +474,9 @@ export class SlRadioGroup extends LitElement {
   };
 
   override render() {
-    return html`<div
-      class=${classMap({ 'sl-radio-group': true, 'sl-radio-group--row': this.orientation === 'horizontal' })}
-      part="base"
-    >
+    return html`<div class=${classMap({ 'sl-radio-group': true, 'sl-radio-group--row': this.direction === 'row' })} part="base">
       ${this.label ? html`<span class="sl-radio-group__label" id=${this.labelId} part="label">${this.label}</span>` : nothing}
-      <div class="sl-radio-group__options"><slot @slotchange=${this.syncRadios}></slot></div>
+      <div class="sl-radio-group__options" part="options"><slot @slotchange=${this.syncRadios}></slot></div>
     </div>`;
   }
 }

@@ -1,37 +1,57 @@
 /* Alert, badge, progress, spinner, kbd — docs/design/components.md */
 
-/* ---- Alert ---- */
+/* ---- Alert ----
+   <div class="sl-alert sl-alert--{soft|outlined|solid} sl-tone-{tone} [sl-alert--dense]">  (severity → tone; error → danger) */
 
 .sl-alert {
-  --_fg: var(--sl-color-text-secondary);
-  --_bg: var(--sl-color-background-subtle);
-  --_border: var(--sl-color-border-default);
+  --_pad: var(--sl-component-alert-padding);
 
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 11px 14px;
+  padding: calc(var(--_pad) - 1px) calc(var(--_pad) + 2px);
   font-family: var(--sl-font-family-ui);
   font-size: var(--sl-font-size-md);
   line-height: var(--sl-font-line-height-normal);
-  color: var(--_fg);
-  background: var(--_bg);
-  border: var(--sl-border-width-hairline) solid var(--_border);
-  border-radius: var(--sl-radius-lg);
+  color: var(--sl-color-text-secondary);
+  background: var(--_tone-subtle);
+  border: var(--sl-border-width-hairline) solid var(--_tone-border);
+  border-radius: var(--sl-component-alert-radius);
 }
 
-.sl-alert--info { --_fg: var(--sl-color-status-info-fg); --_bg: var(--sl-color-status-info-bg); --_border: var(--sl-color-status-info-border); }
-.sl-alert--success { --_fg: var(--sl-color-status-success-fg); --_bg: var(--sl-color-status-success-bg); --_border: var(--sl-color-status-success-border); }
-.sl-alert--warning { --_fg: var(--sl-color-status-warning-fg); --_bg: var(--sl-color-status-warning-bg); --_border: var(--sl-color-status-warning-border); }
-.sl-alert--error { --_fg: var(--sl-color-status-danger-fg); --_bg: var(--sl-color-status-danger-bg); --_border: var(--sl-color-status-danger-border); }
+.sl-alert--soft.sl-tone-neutral { --_tone-subtle: var(--sl-color-background-subtle); }
+
+.sl-alert--outlined {
+  background: var(--sl-color-background-surface);
+}
+
+.sl-alert--outlined.sl-tone-neutral { --_tone-border: var(--sl-color-border-strong); }
+
+.sl-alert--solid {
+  color: var(--_on-tone);
+  background: var(--_tone);
+  border-color: transparent;
+}
+
+.sl-alert--dense {
+  --_pad: var(--sl-space-2);
+  gap: var(--sl-space-2);
+  font-size: var(--sl-font-size-sm);
+}
 
 .sl-alert__icon {
+  display: inline-flex;
   flex: none;
   width: 18px;
   height: 18px;
   margin-top: 1.5px;
-  color: var(--_fg);
+  color: var(--_tone-fg);
 }
+
+.sl-alert__icon .sl-icon { width: 100%; height: 100%; }
+
+.sl-alert--dense .sl-alert__icon { width: var(--sl-size-icon-md); height: var(--sl-size-icon-md); margin-top: 2px; }
+.sl-alert--solid .sl-alert__icon { color: inherit; }
 
 .sl-alert__content {
   flex: 1;
@@ -50,6 +70,9 @@
   color: var(--sl-color-text-secondary);
 }
 
+.sl-alert--solid .sl-alert__title,
+.sl-alert--solid .sl-alert__message { color: inherit; }
+
 .sl-alert__actions {
   display: flex;
   flex: none;
@@ -59,19 +82,22 @@
 }
 
 .sl-alert__close { margin: -4px -6px -4px 0; }
+.sl-alert--solid .sl-alert__close { --_fg: currentColor; --_fg-hover: currentColor; --_bg-hover: rgb(0 0 0 / 0.12); }
 
-/* ---- Badge ---- */
+/* ---- Badge ----
+   <span class="sl-badge sl-badge--{soft|solid|outlined} sl-tone-{tone} [sl-badge--small]"> */
 
 .sl-badge {
-  --_fg: var(--sl-color-text-secondary);
-  --_bg: var(--sl-color-background-subtle);
-  --_ring: var(--sl-color-border-default);
+  --_fg: var(--_tone-fg);
+  --_bg: var(--_tone-subtle);
+  --_ring: var(--_tone-border);
+  --_h: var(--sl-component-badge-height);
 
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  height: 20px;
+  height: var(--_h);
   padding: 0 7px;
   font-family: var(--sl-font-family-ui);
   font-size: var(--sl-font-size-xs);
@@ -81,15 +107,36 @@
   vertical-align: middle;
   color: var(--_fg);
   background: var(--_bg);
-  border-radius: var(--sl-radius-sm);
+  border-radius: var(--sl-component-badge-radius);
   box-shadow: inset 0 0 0 1px var(--_ring);
 }
 
-.sl-badge--info { --_fg: var(--sl-color-status-info-fg); --_bg: var(--sl-color-status-info-bg); --_ring: var(--sl-color-status-info-border); }
-.sl-badge--success { --_fg: var(--sl-color-status-success-fg); --_bg: var(--sl-color-status-success-bg); --_ring: var(--sl-color-status-success-border); }
-.sl-badge--warning { --_fg: var(--sl-color-status-warning-fg); --_bg: var(--sl-color-status-warning-bg); --_ring: var(--sl-color-status-warning-border); }
-.sl-badge--danger { --_fg: var(--sl-color-status-danger-fg); --_bg: var(--sl-color-status-danger-bg); --_ring: var(--sl-color-status-danger-border); }
-.sl-badge--accent { --_fg: var(--sl-color-text-on-accent); --_bg: var(--sl-color-accent-default); --_ring: transparent; }
+.sl-badge--soft.sl-tone-neutral {
+  --_fg: var(--sl-color-text-secondary);
+  --_bg: var(--sl-color-background-subtle);
+}
+
+.sl-badge--solid {
+  --_fg: var(--_on-tone);
+  --_bg: var(--_tone);
+  --_ring: transparent;
+}
+
+.sl-badge--outlined {
+  --_bg: transparent;
+}
+
+.sl-badge--outlined.sl-tone-neutral {
+  --_fg: var(--sl-color-text-secondary);
+  --_ring: var(--sl-color-border-strong);
+}
+
+.sl-badge--small {
+  --_h: calc(var(--sl-component-badge-height) - 4px);
+  gap: 4px;
+  padding: 0 5px;
+  font-size: var(--sl-font-size-2xs);
+}
 
 .sl-badge__dot {
   width: 6px;
@@ -98,21 +145,35 @@
   background: currentColor;
 }
 
-/* ---- Progress ---- */
+.sl-badge__icon {
+  flex: none;
+  width: 12px;
+  height: 12px;
+}
+
+/* ---- Progress ----
+   <div class="sl-progress sl-tone-{tone} [sl-progress--small|large] [sl-progress--indeterminate]" role="progressbar"> */
 
 .sl-progress {
+  --_h: var(--sl-component-progress-height);
+
   position: relative;
-  height: 6px;
+  flex: 1;
+  height: var(--_h);
   overflow: hidden;
-  background: var(--sl-color-background-muted);
+  background: var(--sl-component-progress-track);
   border-radius: var(--sl-radius-full);
   box-shadow: var(--sl-shadow-inset);
 }
 
+.sl-progress.sl-tone-accent { --_tone: var(--sl-component-progress-fill); }
+.sl-progress--small { --_h: calc(var(--sl-component-progress-height) * 2 / 3); }
+.sl-progress--large { --_h: calc(var(--sl-component-progress-height) * 5 / 3); }
+
 .sl-progress__bar {
   height: 100%;
   width: var(--_value, 0%);
-  background: var(--sl-color-accent-default);
+  background: var(--_tone, var(--sl-component-progress-fill));
   border-radius: inherit;
   transition: width var(--sl-motion-duration-base) var(--sl-motion-easing-standard);
 }
@@ -124,12 +185,29 @@
   animation: sl-progress-slide 1.4s var(--sl-motion-easing-standard) infinite;
 }
 
+/* Progress with a visible value: <div class="sl-progress-row"> track + <span class="sl-progress__value">. */
+.sl-progress-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sl-space-2);
+}
+
+.sl-progress__value {
+  flex: none;
+  min-width: 4ch;
+  font-family: var(--sl-font-family-mono);
+  font-size: var(--sl-font-size-xs);
+  text-align: right;
+  color: var(--sl-color-text-secondary);
+}
+
 @keyframes sl-progress-slide {
   from { transform: translateX(-100%); }
   to { transform: translateX(340%); }
 }
 
-/* ---- Spinner ---- */
+/* ---- Spinner ----
+   <span class="sl-spinner [sl-spinner--small|large] [sl-tone-{tone}]">  (neutral/no tone = currentColor) */
 
 .sl-spinner {
   box-sizing: border-box;
@@ -144,8 +222,9 @@
   animation: sl-spin 0.8s linear infinite;
 }
 
-.sl-spinner--sm { width: var(--sl-size-icon-sm); height: var(--sl-size-icon-sm); }
-.sl-spinner--lg { width: var(--sl-size-icon-lg); height: var(--sl-size-icon-lg); }
+.sl-spinner--small { width: var(--sl-size-icon-sm); height: var(--sl-size-icon-sm); }
+.sl-spinner--large { width: var(--sl-size-icon-lg); height: var(--sl-size-icon-lg); }
+.sl-spinner:is(.sl-tone-accent, .sl-tone-success, .sl-tone-warning, .sl-tone-danger, .sl-tone-info) { color: var(--_tone-fg); }
 
 /* ---- Kbd ---- */
 

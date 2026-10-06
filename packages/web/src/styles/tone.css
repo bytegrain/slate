@@ -1,0 +1,73 @@
+/* Tone and radius utilities — docs/design/configurability.md.
+   A component root carries one `sl-tone-*` class; its stylesheet reads these variables:
+     --_tone        solid fill            --_tone-hover / --_tone-press   solid fill states
+     --_on-tone     text on the fill      --_tone-fg      tone-coloured text/icons on surfaces
+     --_tone-subtle tinted background     --_tone-border  tinted border
+   Radius: `sl-radius-*` sets --_radius, which shaped components use instead of their component token. */
+
+.sl-tone-neutral {
+  --_tone: var(--sl-color-text-primary);
+  --_tone-hover: color-mix(in srgb, var(--sl-color-text-primary) 86%, var(--sl-color-background-surface));
+  --_tone-press: color-mix(in srgb, var(--sl-color-text-primary) 76%, var(--sl-color-background-surface));
+  --_on-tone: var(--sl-color-background-surface);
+  --_tone-fg: var(--sl-color-text-primary);
+  --_tone-subtle: var(--sl-color-background-muted);
+  --_tone-border: var(--sl-color-border-default);
+}
+
+.sl-tone-accent {
+  --_tone: var(--sl-color-accent-default);
+  --_tone-hover: var(--sl-color-accent-hover);
+  --_tone-press: var(--sl-color-accent-pressed);
+  --_on-tone: var(--sl-color-text-on-accent);
+  --_tone-fg: var(--sl-color-accent-text);
+  --_tone-subtle: var(--sl-color-accent-subtle);
+  --_tone-border: var(--sl-color-accent-default);
+}
+
+.sl-tone-success {
+  --_tone: var(--sl-color-status-success-solid);
+  --_on-tone: var(--sl-color-status-success-on-solid);
+  --_tone-fg: var(--sl-color-status-success-fg);
+  --_tone-subtle: var(--sl-color-status-success-bg);
+  --_tone-border: var(--sl-color-status-success-border);
+}
+
+.sl-tone-warning {
+  --_tone: var(--sl-color-status-warning-solid);
+  --_on-tone: var(--sl-color-status-warning-on-solid);
+  --_tone-fg: var(--sl-color-status-warning-fg);
+  --_tone-subtle: var(--sl-color-status-warning-bg);
+  --_tone-border: var(--sl-color-status-warning-border);
+}
+
+.sl-tone-danger {
+  --_tone: var(--sl-color-status-danger-solid);
+  --_on-tone: var(--sl-color-status-danger-on-solid);
+  --_tone-fg: var(--sl-color-status-danger-fg);
+  --_tone-subtle: var(--sl-color-status-danger-bg);
+  --_tone-border: var(--sl-color-status-danger-border);
+}
+
+.sl-tone-info {
+  --_tone: var(--sl-color-status-info-solid);
+  --_on-tone: var(--sl-color-status-info-on-solid);
+  --_tone-fg: var(--sl-color-status-info-fg);
+  --_tone-subtle: var(--sl-color-status-info-bg);
+  --_tone-border: var(--sl-color-status-info-border);
+}
+
+/* Status solids have no hover/press tokens: shade the fill so the states work in both themes. */
+.sl-tone-success,
+.sl-tone-warning,
+.sl-tone-danger,
+.sl-tone-info {
+  --_tone-hover: color-mix(in srgb, var(--_tone) 90%, black);
+  --_tone-press: color-mix(in srgb, var(--_tone) 80%, black);
+}
+
+.sl-radius-none { --_radius: 0px; }
+.sl-radius-small { --_radius: var(--sl-radius-sm); }
+.sl-radius-medium { --_radius: var(--sl-radius-md); }
+.sl-radius-large { --_radius: var(--sl-radius-lg); }
+.sl-radius-full { --_radius: var(--sl-radius-full); }

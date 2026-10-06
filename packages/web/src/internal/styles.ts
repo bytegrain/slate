@@ -3,6 +3,7 @@ import baseCss from '../styles/base.css?inline';
 import typographyCss from '../styles/typography.css?inline';
 import layoutCss from '../styles/layout.css?inline';
 import gridCss from '../styles/grid.css?inline';
+import toneCss from '../styles/tone.css?inline';
 import buttonCss from '../styles/button.css?inline';
 import fieldCss from '../styles/field.css?inline';
 import selectionCss from '../styles/selection.css?inline';
@@ -20,6 +21,7 @@ export const styles = {
   typography: unsafeCSS(typographyCss),
   layout: unsafeCSS(layoutCss),
   grid: unsafeCSS(gridCss),
+  tone: unsafeCSS(toneCss),
   button: unsafeCSS(buttonCss),
   field: unsafeCSS(fieldCss),
   selection: unsafeCSS(selectionCss),

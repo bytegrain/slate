@@ -4,16 +4,29 @@ import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { hostReset, styles } from '../internal/styles';
 import { renderIcon } from '../internal/icon';
-import { deepActiveElement, firstFocusable } from '../internal/dom';
+import { deepActiveElement, defaultTrue, firstFocusable } from '../internal/dom';
+import { TitledElement } from '../internal/title';
+import { DefaultsController, getDefaults, type CardVariant, type Radius } from '../core/defaults';
+import { iconButtonClasses } from './button';
 import { breakpointMinWidth, breakpoints, resolveSpan, spaceVar, type GridSpan } from '../core/layout';
 
+export type ResponsiveBreakpoint = 'sm' | 'md' | 'lg' | 'xl';
+
 /**
- * <sl-app-shell viewport> with <sl-app-bar slot="app-bar">, <sl-drawer slot="drawer"> and main content.
- * The app bar's menu button toggles the drawer.
+ * <sl-app-shell fill-viewport drawer-variant="responsive" responsive-breakpoint="md" drawer-open>
+ *   <sl-app-bar slot="app-bar" title="Slate"></sl-app-bar>
+ *   <sl-drawer slot="drawer"> <sl-nav-item …> </sl-drawer>
+ *   main content…
+ * </sl-app-shell>
+ * The shell drives its drawer: `drawer-variant`, `responsive-breakpoint` and the two-way `drawer-open`
+ * (fires `sl-drawer-open-changed` with { open }). The app bar's menu button toggles it.
  */
 export class SlAppShell extends LitElement {
   static override properties = {
-    viewport: { type: Boolean, reflect: true },
+    drawerVariant: { attribute: 'drawer-variant', reflect: true },
+    drawerOpen: { type: Boolean, attribute: 'drawer-open', reflect: true },
+    responsiveBreakpoint: { attribute: 'responsive-breakpoint', reflect: true },
+    fillViewport: { type: Boolean, attribute: 'fill-viewport', reflect: true },
     flush: { type: Boolean, reflect: true },
   };
   static override styles = [
@@ -21,24 +34,35 @@ export class SlAppShell extends LitElement {
     styles.layout,
     css`
       :host { display: block; height: 100%; min-height: 0; }
-      :host([viewport]) { height: 100vh; height: 100dvh; }
+      :host([fill-viewport]) { height: 100vh; height: 100dvh; }
     `,
   ];
 
+  declare drawerVariant: DrawerVariant;
+  /** Unset until the drawer resolves its initial state (open when docked, closed when overlaying). */
+  declare drawerOpen: boolean | undefined;
+  declare responsiveBreakpoint: ResponsiveBreakpoint;
   /** Fill the viewport (use when the shell is the page root). */
-  declare viewport: boolean;
+  declare fillViewport: boolean;
   /** Remove the main area's padding. */
   declare flush: boolean;
 
   constructor() {
     super();
-    this.viewport = false;
+    this.drawerVariant = 'responsive';
+    this.responsiveBreakpoint = 'md';
+    this.fillViewport = false;
     this.flush = false;
     this.addEventListener('sl-menu-toggle', () => this.drawer?.toggle());
     this.addEventListener('sl-drawer-change', (e) => {
+      if (e.target !== this.drawer) return;
       const open = (e as CustomEvent<{ open: boolean }>).detail.open;
       const bar = this.querySelector<SlAppBar>(':scope > sl-app-bar');
       if (bar) bar.menuExpanded = open;
+      if (this.drawerOpen !== open) {
+        this.drawerOpen = open;
+        this.dispatchEvent(new CustomEvent('sl-drawer-open-changed', { bubbles: true, composed: true, detail: { open } }));
+      }
     });
   }
 
@@ -46,40 +70,63 @@ export class SlAppShell extends LitElement {
     return this.querySelector<SlDrawer>(':scope > sl-drawer');
   }
 
+  override willUpdate(): void {
+    this.syncDrawer();
+  }
+
+  private syncDrawer = (): void => {
+    const drawer = this.drawer;
+    if (!drawer) return;
+    drawer.variant = this.drawerVariant;
+    drawer.breakpoint = this.responsiveBreakpoint;
+    if (this.drawerOpen !== undefined && drawer.open !== this.drawerOpen) {
+      if (this.drawerOpen) drawer.show();
+      else drawer.hide();
+    }
+  };
+
   override render() {
     return html`<div class="sl-app-shell" part="base">
       <slot name="app-bar"></slot>
-      <slot name="drawer"></slot>
+      <slot name="drawer" @slotchange=${this.syncDrawer}></slot>
       <main class=${classMap({ 'sl-main': true, 'sl-main--flush': this.flush })} part="main"><slot></slot></main>
     </div>`;
   }
 }
 
-/** <sl-app-bar menu-button> brand, actions… </sl-app-bar> */
-export class SlAppBar extends LitElement {
+/**
+ * <sl-app-bar title="Slate">
+ *   <img slot="leading"> … <sl-text-field slot="center"> … <sl-button slot="actions">
+ * </sl-app-bar>
+ * Regions: [menu button] [leading] [title] [center + default slot] [actions]. `show-menu-button="false"` hides the menu.
+ */
+export class SlAppBar extends TitledElement {
   static override properties = {
-    menuButton: { type: Boolean, attribute: 'menu-button', reflect: true },
+    title: {},
+    showMenuButton: { attribute: 'show-menu-button', converter: defaultTrue },
     menuLabel: { attribute: 'menu-label' },
     menuExpanded: { type: Boolean, attribute: false },
   };
-  static override styles = [hostReset, styles.base, styles.button, styles.typography, styles.layout, css`:host { display: contents; }`];
+  static override styles = [hostReset, styles.base, styles.tone, styles.button, styles.typography, styles.layout, css`:host { display: contents; }`];
 
-  declare menuButton: boolean;
+  declare title: string;
+  declare showMenuButton: boolean;
   declare menuLabel: string;
   declare menuExpanded: boolean;
 
   constructor() {
     super();
-    this.menuButton = false;
+    this.title = '';
+    this.showMenuButton = true;
     this.menuLabel = 'Toggle navigation';
     this.menuExpanded = true;
   }
 
   override render() {
     return html`<header class="sl-app-bar" part="base">
-      ${this.menuButton
+      ${this.showMenuButton
         ? html`<button
-            class="sl-button sl-button--ghost sl-button--icon"
+            class=${iconButtonClasses}
             part="menu-button"
             type="button"
             aria-label=${this.menuLabel}
@@ -87,7 +134,10 @@ export class SlAppBar extends LitElement {
             @click=${this.onMenu}
           >${renderIcon('menu', 'sl-button__icon')}</button>`
         : nothing}
-      <slot></slot>
+      <div class="sl-app-bar__leading" part="leading"><slot name="leading"></slot></div>
+      ${this.title ? html`<span class="sl-app-bar__title" part="title">${this.title}</span>` : nothing}
+      <div class="sl-app-bar__center" part="center"><slot name="center"></slot><slot></slot></div>
+      <div class="sl-app-bar__actions" part="actions"><slot name="actions"></slot></div>
     </header>`;
   }
 
@@ -99,13 +149,14 @@ export class SlAppBar extends LitElement {
 export type DrawerVariant = 'responsive' | 'persistent' | 'temporary' | 'mini';
 
 /**
- * <sl-drawer variant="responsive|persistent|temporary|mini" open label="Main">nav…</sl-drawer>
- * Responsive (default) is persistent from `md` up and temporary (overlay + scrim) below.
- * Fires `sl-drawer-change` with { open }.
+ * <sl-drawer variant="responsive|persistent|temporary|mini" breakpoint="md" open label="Main">nav…</sl-drawer>
+ * Usually driven by <sl-app-shell>. Responsive (default) is persistent from `breakpoint` up and temporary
+ * (overlay + scrim) below. Fires `sl-drawer-change` with { open }.
  */
 export class SlDrawer extends LitElement {
   static override properties = {
     variant: { reflect: true },
+    breakpoint: { reflect: true },
     open: { type: Boolean, reflect: true },
     label: {},
     narrow: { state: true },
@@ -113,6 +164,7 @@ export class SlDrawer extends LitElement {
   static override styles = [hostReset, styles.layout, css`:host { display: contents; }`];
 
   declare variant: DrawerVariant;
+  declare breakpoint: ResponsiveBreakpoint;
   declare open: boolean;
   declare label: string;
   declare narrow: boolean;
@@ -124,23 +176,25 @@ export class SlDrawer extends LitElement {
   constructor() {
     super();
     this.variant = 'responsive';
+    this.breakpoint = 'md';
     this.open = false;
     this.label = 'Navigation';
     this.narrow = false;
   }
 
-  /** True when the drawer currently overlays content (temporary, or responsive below md). */
+  /** True when the drawer currently overlays content (temporary, or responsive below its breakpoint). */
   get overlay(): boolean {
     return this.variant === 'temporary' || (this.variant === 'responsive' && this.narrow);
   }
 
+  /** True when the drawer shows icons only. */
+  get mini(): boolean {
+    return this.variant === 'mini' && !this.open;
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
-    if (typeof matchMedia === 'function') {
-      this.media = matchMedia(`(max-width: ${breakpointMinWidth('md') - 0.02}px)`);
-      this.narrow = this.media.matches;
-      this.media.addEventListener?.('change', this.onMediaChange);
-    }
+    this.watchMedia();
     if (!this.initialised) {
       this.initialised = true;
       if (!this.hasAttribute('open')) {
@@ -154,6 +208,27 @@ export class SlDrawer extends LitElement {
     super.disconnectedCallback();
     this.media?.removeEventListener?.('change', this.onMediaChange);
     document.removeEventListener('keydown', this.onDocumentKeyDown);
+  }
+
+  override willUpdate(changed: Map<string, unknown>): void {
+    if (changed.has('breakpoint') && changed.get('breakpoint') !== undefined && this.isConnected) {
+      const wasNarrow = this.narrow;
+      this.watchMedia();
+      if (this.variant === 'responsive' && wasNarrow !== this.narrow) this.setOpen(!this.narrow);
+    }
+  }
+
+  override updated(): void {
+    // Nav items render icon-only in a collapsed mini drawer.
+    for (const item of this.querySelectorAll<SlNavItem>('sl-nav-item')) item.mini = this.mini;
+  }
+
+  private watchMedia(): void {
+    this.media?.removeEventListener?.('change', this.onMediaChange);
+    if (typeof matchMedia !== 'function') return;
+    this.media = matchMedia(`(max-width: ${breakpointMinWidth(this.breakpoint) - 0.02}px)`);
+    this.narrow = this.media.matches;
+    this.media.addEventListener?.('change', this.onMediaChange);
   }
 
   show(): void {
@@ -197,31 +272,123 @@ export class SlDrawer extends LitElement {
     const classes = {
       'sl-drawer': true,
       [`sl-drawer--${this.variant}`]: true,
+      [`sl-drawer--breakpoint-${this.breakpoint}`]: this.breakpoint !== 'md',
+      'is-overlay': this.overlay,
       'is-open': this.open,
     };
     return html`${this.open && this.overlay ? html`<div class="sl-drawer-scrim" part="scrim" @click=${this.hide}></div>` : nothing}
       <nav class=${classMap(classes)} part="base" aria-label=${this.label} tabindex="-1" ?inert=${!this.open && this.overlay}>
-        <slot></slot>
+        <slot @slotchange=${() => this.requestUpdate()}></slot>
       </nav>`;
+  }
+}
+
+/**
+ * <sl-nav-item label="Overview" icon="home" href="/" trailing="12" active></sl-nav-item>
+ * A drawer navigation entry: a link with `href`, otherwise a button. In a collapsed mini drawer it shows
+ * only its icon and exposes the label as a tooltip/accessible name.
+ */
+export class SlNavItem extends LitElement {
+  static override shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: true };
+  static override properties = {
+    label: {},
+    icon: {},
+    trailing: {},
+    active: { type: Boolean, reflect: true },
+    href: {},
+    target: {},
+    disabled: { type: Boolean, reflect: true },
+    mini: { type: Boolean, reflect: true },
+  };
+  static override styles = [
+    hostReset,
+    styles.typography,
+    styles.layout,
+    css`
+      :host { display: block; }
+      :host([mini]) .sl-nav__label,
+      :host([mini]) .sl-nav__meta { display: none; }
+      :host([mini]) .sl-nav__item { justify-content: center; padding: 0; }
+      .sl-nav__item { width: 100%; box-sizing: border-box; }
+    `,
+  ];
+
+  declare label: string;
+  declare icon: string | undefined;
+  /** Count or short status shown at the end. */
+  declare trailing: string | undefined;
+  declare active: boolean;
+  declare href: string | undefined;
+  declare target: string | undefined;
+  declare disabled: boolean;
+  /** Set by the drawer when collapsed to an icon rail. */
+  declare mini: boolean;
+
+  constructor() {
+    super();
+    this.label = '';
+    this.active = false;
+    this.disabled = false;
+    this.mini = false;
+  }
+
+  override render() {
+    const classes = { 'sl-nav__item': true, 'is-active': this.active, 'is-disabled': this.disabled };
+    const inner = html`${renderIcon(this.icon)}
+      <span class="sl-nav__label" part="label"><slot>${this.label}</slot></span>
+      ${this.trailing ? html`<span class="sl-nav__meta" part="trailing">${this.trailing}</span>` : nothing}`;
+    const name = this.mini ? this.label || undefined : undefined;
+    if (this.href && !this.disabled) {
+      return html`<a
+        class=${classMap(classes)}
+        part="base"
+        href=${this.href}
+        target=${ifDefined(this.target)}
+        aria-current=${ifDefined(this.active ? 'page' : undefined)}
+        aria-label=${ifDefined(name)}
+        title=${ifDefined(name)}
+        >${inner}</a
+      >`;
+    }
+    return html`<button
+      class=${classMap(classes)}
+      part="base"
+      type="button"
+      ?disabled=${this.disabled}
+      aria-current=${ifDefined(this.active ? 'page' : undefined)}
+      aria-label=${ifDefined(name)}
+      title=${ifDefined(name)}
+    >
+      ${inner}
+    </button>`;
   }
 }
 
 export type ContainerSize = 'sm' | 'md' | 'lg' | 'xl' | 'fluid';
 
-/** <sl-container size="lg"> — centred, max-width content. */
+/** <sl-container max-width="lg" gutters="false"> — centred, max-width content. */
 export class SlContainer extends LitElement {
-  static override properties = { size: { reflect: true } };
+  static override properties = {
+    maxWidth: { attribute: 'max-width', reflect: true },
+    gutters: { converter: defaultTrue },
+  };
   static override styles = [hostReset, styles.layout, css`:host { display: block; }`];
 
-  declare size: ContainerSize;
+  declare maxWidth: ContainerSize;
+  /** Horizontal padding (default true). */
+  declare gutters: boolean;
 
   constructor() {
     super();
-    this.size = 'lg';
+    this.maxWidth = 'lg';
+    this.gutters = true;
   }
 
   override render() {
-    return html`<div class="sl-container sl-container--${this.size}" part="base"><slot></slot></div>`;
+    return html`<div
+      class=${classMap({ 'sl-container': true, [`sl-container--${this.maxWidth}`]: true, 'sl-container--no-gutters': !this.gutters })}
+      part="base"
+    ><slot></slot></div>`;
   }
 }
 
@@ -299,14 +466,16 @@ export class SlStack extends LitElement {
 
   declare direction: 'row' | 'column';
   declare spacing: string;
-  declare align: 'start' | 'center' | 'end' | 'stretch' | 'baseline' | undefined;
-  declare justify: 'start' | 'center' | 'end' | 'between' | undefined;
+  declare align: 'start' | 'center' | 'end' | 'stretch' | 'baseline';
+  declare justify: 'start' | 'center' | 'end' | 'between';
   declare wrap: boolean;
 
   constructor() {
     super();
     this.direction = 'column';
     this.spacing = '3';
+    this.align = 'stretch';
+    this.justify = 'start';
     this.wrap = false;
   }
 
@@ -315,8 +484,8 @@ export class SlStack extends LitElement {
       'sl-stack': true,
       'sl-stack--row': this.direction === 'row',
       'sl-stack--wrap': this.wrap,
-      [`sl-stack--align-${this.align}`]: !!this.align,
-      [`sl-stack--justify-${this.justify}`]: !!this.justify,
+      [`sl-stack--align-${this.align}`]: this.align !== 'stretch',
+      [`sl-stack--justify-${this.justify}`]: this.justify !== 'start',
     };
     return html`<div class=${classMap(classes)} part="base" style=${styleMap({ '--_gap': spaceVar(this.spacing) })}><slot></slot></div>`;
   }
@@ -352,60 +521,73 @@ export class SlDivider extends LitElement {
   }
 }
 
-/** <sl-card heading="…" subheading="…" outlined interactive> body <div slot="actions"> <div slot="footer"> */
-export class SlCard extends LitElement {
+/**
+ * <sl-card variant="elevated|outlined|flat" radius="large" title="…" subtitle="…" interactive flush>
+ *   body… <div slot="header-actions"> <div slot="footer"> (or <div slot="header"> to replace the title block)
+ * </sl-card>
+ */
+export class SlCard extends TitledElement {
   static override properties = {
-    heading: {},
-    subheading: {},
-    outlined: { type: Boolean, reflect: true },
+    variant: { reflect: true },
+    radius: { reflect: true },
+    title: {},
+    subtitle: {},
     interactive: { type: Boolean, reflect: true },
     flush: { type: Boolean, reflect: true },
-    hasActions: { state: true },
-    hasFooter: { state: true },
+    slotted: { state: true },
   };
-  static override styles = [hostReset, styles.layout, css`:host { display: block; min-width: 0; }`];
+  static override styles = [hostReset, styles.tone, styles.layout, css`:host { display: block; min-width: 0; }`];
 
-  declare heading: string | undefined;
-  declare subheading: string | undefined;
-  declare outlined: boolean;
+  declare variant: CardVariant | undefined;
+  declare radius: Radius | undefined;
+  declare title: string;
+  declare subtitle: string | undefined;
   declare interactive: boolean;
   /** Remove body padding (tables, media). */
   declare flush: boolean;
-  declare hasActions: boolean;
-  declare hasFooter: boolean;
+  declare slotted: { header: boolean; 'header-actions': boolean; footer: boolean };
 
   constructor() {
     super();
-    this.outlined = false;
+    new DefaultsController(this);
+    this.title = '';
     this.interactive = false;
     this.flush = false;
-    this.hasActions = false;
-    this.hasFooter = false;
+    this.slotted = { header: false, 'header-actions': false, footer: false };
+  }
+
+  get resolved(): { variant: CardVariant; radius: Radius } {
+    const d = getDefaults().card;
+    return { variant: this.variant ?? d.variant, radius: this.radius ?? d.radius };
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.hasActions = !!this.querySelector(':scope > [slot="actions"]');
-    this.hasFooter = !!this.querySelector(':scope > [slot="footer"]');
+    const has = (name: string) => !!this.querySelector(`:scope > [slot="${name}"]`);
+    this.slotted = { header: has('header'), 'header-actions': has('header-actions'), footer: has('footer') };
   }
 
   override render() {
-    const showHeader = !!(this.heading || this.subheading || this.hasActions);
+    const { variant, radius } = this.resolved;
+    const showHeader = !!(this.title || this.subtitle || this.slotted.header || this.slotted['header-actions']);
     const classes = {
       'sl-card': true,
-      'sl-card--outlined': this.outlined,
+      [`sl-card--${variant}`]: true,
+      [`sl-radius-${radius}`]: radius !== 'default',
       'sl-card--interactive': this.interactive,
     };
     return html`<article class=${classMap(classes)} part="base" tabindex=${ifDefined(this.interactive ? '0' : undefined)}>
       <header class="sl-card__header" part="header" ?hidden=${!showHeader}>
-        <div class="sl-card__titles">
-          ${this.heading ? html`<h3 class="sl-card__title">${this.heading}</h3>` : nothing}
-          ${this.subheading ? html`<p class="sl-card__subtitle">${this.subheading}</p>` : nothing}
-        </div>
-        <div class="sl-card__actions"><slot name="actions" @slotchange=${this.onSlotChange}></slot></div>
+        <slot name="header" @slotchange=${this.onSlotChange}>
+          <div class="sl-card__titles">
+            ${this.title ? html`<h3 class="sl-card__title" part="title">${this.title}</h3>` : nothing}
+            ${this.subtitle ? html`<p class="sl-card__subtitle" part="subtitle">${this.subtitle}</p>` : nothing}
+          </div>
+        </slot>
+        <div class="sl-card__actions" part="actions"><slot name="header-actions" @slotchange=${this.onSlotChange}></slot></div>
       </header>
       <div class=${classMap({ 'sl-card__body': true, 'sl-card__body--flush': this.flush })} part="body"><slot></slot></div>
-      <footer class="sl-card__footer" part="footer" ?hidden=${!this.hasFooter}>
+      <footer class="sl-card__footer" part="footer" ?hidden=${!this.slotted.footer}>
         <slot name="footer" @slotchange=${this.onSlotChange}></slot>
       </footer>
     </article>`;
@@ -413,9 +595,7 @@ export class SlCard extends LitElement {
 
   private onSlotChange(e: Event): void {
     const slot = e.target as HTMLSlotElement;
-    const filled = slot.assignedElements().length > 0;
-    if (slot.name === 'actions') this.hasActions = filled;
-    else this.hasFooter = filled;
+    this.slotted = { ...this.slotted, [slot.name]: slot.assignedElements().length > 0 };
   }
 }
 

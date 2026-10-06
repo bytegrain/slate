@@ -1,17 +1,20 @@
-/* Button — docs/design/components.md#button */
+/* Button — docs/design/components.md#button, docs/design/configurability.md
+   Markup: <button class="sl-button sl-button--{variant} sl-tone-{tone} [sl-button--small|large] [sl-radius-*]
+            [sl-button--icon-only] [sl-button--full] [is-loading]"> …
+   Every dimension and the default shadows come from the component.button.* tokens. */
 
 .sl-button {
   --_h: var(--sl-size-control-md);
-  --_px: var(--sl-space-3);
+  --_px: var(--sl-component-button-padding-md);
   --_fs: var(--sl-font-size-sm);
   --_bg: var(--sl-color-background-surface);
   --_bg-hover: var(--sl-color-background-hover);
   --_bg-press: var(--sl-color-background-pressed);
-  --_fg: var(--sl-color-text-primary);
+  --_fg: var(--_tone-fg, var(--sl-color-text-primary));
   --_fg-hover: var(--_fg);
   --_border: var(--sl-color-border-strong);
   --_border-hover: var(--sl-color-border-control-hover);
-  --_shadow: var(--sl-shadow-control);
+  --_shadow: var(--sl-component-button-shadow);
   --_shadow-press: var(--sl-shadow-pressed);
 
   box-sizing: border-box;
@@ -19,21 +22,21 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--sl-space-1-5);
+  gap: var(--sl-component-button-gap);
   height: var(--_h);
   min-width: var(--_h);
   margin: 0;
   padding: 0 var(--_px);
   font-family: var(--sl-font-family-ui);
   font-size: var(--_fs);
-  font-weight: var(--sl-font-weight-medium);
+  font-weight: var(--sl-component-button-font-weight);
   line-height: 1;
   white-space: nowrap;
   text-decoration: none;
   color: var(--_fg);
   background: var(--_bg);
   border: var(--sl-border-width-hairline) solid var(--_border);
-  border-radius: var(--sl-radius-md);
+  border-radius: var(--_radius, var(--sl-component-button-radius));
   box-shadow: var(--_shadow);
   cursor: pointer;
   user-select: none;
@@ -71,56 +74,56 @@
   font-weight: var(--sl-font-weight-semibold);
 }
 
-/* Sizes */
-.sl-button--sm { --_h: var(--sl-size-control-sm); --_px: var(--sl-space-2); }
-.sl-button--lg { --_h: var(--sl-size-control-lg); --_px: var(--sl-space-4); --_fs: var(--sl-font-size-md); }
+/* ---- Sizes ---- */
+.sl-button--small { --_h: var(--sl-size-control-sm); --_px: var(--sl-component-button-padding-sm); }
+.sl-button--large { --_h: var(--sl-size-control-lg); --_px: var(--sl-component-button-padding-lg); --_fs: var(--sl-font-size-md); }
 
-/* Variants */
-.sl-button--primary {
-  --_bg: var(--sl-color-accent-default);
-  --_bg-hover: var(--sl-color-accent-hover);
-  --_bg-press: var(--sl-color-accent-pressed);
-  --_fg: var(--sl-color-text-on-accent);
+/* ---- Variants (combine with sl-tone-*) ---- */
+
+/* Outlined (default): surface + border + milled edge; the tone colours the text. Neutral = Alloy secondary. */
+.sl-button--outlined.sl-tone-neutral { --_fg: var(--sl-color-text-primary); }
+
+/* Solid: filled with the tone. Solid + accent = the primary action. */
+.sl-button--solid {
+  --_bg: var(--_tone);
+  --_bg-hover: var(--_tone-hover);
+  --_bg-press: var(--_tone-press);
+  --_fg: var(--_on-tone);
   --_border: transparent;
   --_border-hover: transparent;
-  --_shadow: var(--sl-shadow-primary);
+  --_shadow: var(--sl-component-button-solid-shadow);
 }
 
+/* Soft: tinted, borderless. */
+.sl-button--soft {
+  --_bg: var(--_tone-subtle);
+  --_bg-hover: color-mix(in srgb, var(--_tone-subtle) 80%, var(--_tone));
+  --_bg-press: color-mix(in srgb, var(--_tone-subtle) 65%, var(--_tone));
+  --_border: transparent;
+  --_border-hover: transparent;
+  --_shadow: none;
+}
+
+/* Ghost: no chrome until hovered. Neutral ghosts use secondary text. */
 .sl-button--ghost {
   --_bg: transparent;
   --_bg-hover: var(--sl-color-background-muted);
-  --_fg: var(--sl-color-text-secondary);
-  --_fg-hover: var(--sl-color-text-primary);
   --_border: transparent;
   --_border-hover: transparent;
   --_shadow: none;
   --_shadow-press: none;
 }
 
-.sl-button--danger {
-  --_fg: var(--sl-color-status-danger-fg);
+.sl-button--ghost.sl-tone-neutral {
+  --_fg: var(--sl-color-text-secondary);
+  --_fg-hover: var(--sl-color-text-primary);
 }
 
-.sl-button--danger-solid {
-  --_bg: var(--sl-color-status-danger-solid);
-  --_bg-hover: var(--sl-color-status-danger-solid);
-  --_bg-press: var(--sl-color-status-danger-solid);
-  --_fg: var(--sl-color-status-danger-on-solid);
-  --_border: transparent;
-  --_border-hover: transparent;
-  --_shadow: var(--sl-shadow-primary);
-}
-
-/* Darken the solid fill with an overlay so it works in both themes. */
-.sl-button--danger-solid:hover { background-image: linear-gradient(rgb(0 0 0 / 0.08), rgb(0 0 0 / 0.08)); }
-.sl-button--danger-solid:active { background-image: linear-gradient(rgb(0 0 0 / 0.16), rgb(0 0 0 / 0.16)); }
-
+/* Link: inline text. Neutral links use the link colour. */
 .sl-button--link {
   --_bg: transparent;
   --_bg-hover: transparent;
   --_bg-press: transparent;
-  --_fg: var(--sl-color-text-link);
-  --_fg-hover: var(--sl-color-text-link-hover);
   --_border: transparent;
   --_border-hover: transparent;
   --_shadow: none;
@@ -133,8 +136,13 @@
   text-decoration-thickness: 1px;
 }
 
-/* Modifiers */
-.sl-button--icon { width: var(--_h); padding: 0; }
+.sl-button--link.sl-tone-neutral {
+  --_fg: var(--sl-color-text-link);
+  --_fg-hover: var(--sl-color-text-link-hover);
+}
+
+/* ---- Modifiers ---- */
+.sl-button--icon-only { width: var(--_h); padding: 0; }
 .sl-button--full { display: flex; width: 100%; }
 
 .sl-button:disabled,
@@ -149,10 +157,20 @@
   pointer-events: none;
 }
 
+.sl-button__start,
+.sl-button__end {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+}
+
+.sl-button__start:empty,
+.sl-button__end:empty { display: none; }
+
 .sl-button__icon {
   flex: none;
-  width: var(--sl-size-icon-md);
-  height: var(--sl-size-icon-md);
+  width: var(--sl-component-button-icon-size);
+  height: var(--sl-component-button-icon-size);
 }
 
 .sl-button__label {
@@ -162,8 +180,7 @@
 
 .sl-button .sl-kbd { margin-left: var(--sl-space-1); }
 
-.sl-button--primary .sl-kbd,
-.sl-button--danger-solid .sl-kbd {
+.sl-button--solid .sl-kbd {
   color: inherit;
   background: rgb(255 255 255 / 0.14);
   border-color: rgb(255 255 255 / 0.28);

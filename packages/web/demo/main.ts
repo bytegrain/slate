@@ -1,6 +1,21 @@
 import '../src/styles/index.css';
 import './demo.css';
-import { dialog, snackbar, type SlDialog, type SlProvider, type SlProgress, type SnackbarPosition } from '../src/index';
+import {
+  configureDefaults,
+  createTheme,
+  dialog,
+  icons,
+  snackbar,
+  themeToCss,
+  tones,
+  type SlDialog,
+  type SlNavItem,
+  type SlProvider,
+  type SlProgress,
+  type SlateThemeOptions,
+  type SnackbarPosition,
+} from '../src/index';
+import componentsJson from '../../../design/api/components.json?raw';
 
 const provider = document.getElementById('provider') as SlProvider;
 
@@ -62,11 +77,37 @@ function renderSwatches(): void {
 renderSwatches();
 
 // ---- Nav highlighting ----
-const navItems = [...document.querySelectorAll<HTMLAnchorElement>('.sl-nav__item')];
+const navItems = [...document.querySelectorAll<SlNavItem>('sl-nav-item')];
 for (const item of navItems) {
   item.addEventListener('click', () => {
-    for (const i of navItems) i.classList.toggle('is-active', i === item);
+    for (const i of navItems) i.active = i === item;
   });
+}
+
+// ---- Button matrix: every variant × tone ----
+const matrix = document.getElementById('button-matrix')!;
+const variants = ['outlined', 'solid', 'soft', 'ghost', 'link'];
+matrix.style.setProperty('--_cols', String(tones.length));
+matrix.append(document.createElement('span'));
+for (const tone of tones) {
+  const head = document.createElement('span');
+  head.className = 'demo-matrix__head';
+  head.textContent = tone;
+  matrix.append(head);
+}
+for (const variant of variants) {
+  const head = document.createElement('span');
+  head.className = 'demo-matrix__head';
+  head.textContent = variant;
+  matrix.append(head);
+  for (const tone of tones) {
+    const b = document.createElement('sl-button');
+    b.setAttribute('variant', variant);
+    b.setAttribute('tone', tone);
+    b.setAttribute('size', 'small');
+    b.textContent = tone === 'accent' && variant === 'solid' ? 'Primary' : 'Button';
+    matrix.append(b);
+  }
 }
 
 // ---- Form ----
@@ -123,6 +164,191 @@ document.getElementById('snack-position')!.addEventListener('change', (e) => {
   provider.snackbarPosition = (e.currentTarget as HTMLElement & { value: string }).value as SnackbarPosition;
 });
 
+// ---- Theming ----
+const presets: Array<[string, string]> = [
+  ['Alloy teal', ''],
+  ['Cobalt', '#2F4FD8'],
+  ['Violet', '#5B3DF5'],
+  ['Signal orange', '#FF5A1F'],
+  ['Forest', '#1F7A4C'],
+  ['Amber', '#FFB020'],
+  ['Crimson', '#E5231B'],
+  ['Graphite', '#12161C'],
+];
+const themeState: SlateThemeOptions & { base?: 'light' | 'dark' } = {};
+const accentField = document.getElementById('accent-hex') as HTMLElement & { value: string; error?: string };
+const radius = document.getElementById('radius-scale') as HTMLInputElement;
+const font = document.getElementById('font-family') as HTMLSelectElement;
+const baseGroup = document.getElementById('theme-base') as HTMLElement & { value: string };
+const themeCss = document.getElementById('theme-css')!;
+
+function applyThemeState(): void {
+  const options: SlateThemeOptions = {
+    accent: themeState.accent || undefined,
+    radiusScale: themeState.radiusScale,
+    fontFamily: themeState.fontFamily || undefined,
+    base: themeState.base,
+  };
+  const custom = !!(options.accent || options.fontFamily || (options.radiusScale ?? 1) !== 1 || options.base);
+  try {
+    provider.themeOptions = custom ? options : null;
+    accentField.error = undefined;
+    const theme = createTheme({ base: options.base ?? provider.resolvedTheme, ...options });
+    themeCss.textContent = custom ? themeToCss({ ...theme, values: Object.fromEntries(theme.changedPaths.map((p) => [p, theme.values[p]])) }, 'sl-provider') : '/* Alloy defaults — pick a colour */';
+  } catch (err) {
+    accentField.error = (err as Error).message;
+  }
+  renderSwatches();
+}
+
+const presetHost = document.getElementById('accent-presets')!;
+for (const [name, hex] of presets) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'demo-preset';
+  b.title = name;
+  b.setAttribute('aria-label', name);
+  b.style.background = hex || 'var(--sl-palette-teal-700)';
+  b.addEventListener('click', () => {
+    themeState.accent = hex;
+    accentField.value = hex;
+    applyThemeState();
+  });
+  presetHost.append(b);
+}
+accentField.addEventListener('sl-value-changed', () => {
+  const v = accentField.value.trim();
+  if (v === '' || /^#?[0-9a-fA-F]{6}$/.test(v)) {
+    themeState.accent = v && !v.startsWith('#') ? `#${v}` : v;
+    applyThemeState();
+  }
+});
+radius.addEventListener('input', () => {
+  themeState.radiusScale = Number(radius.value);
+  document.getElementById('radius-value')!.textContent = `${Number(radius.value).toFixed(2)}×`;
+  applyThemeState();
+});
+font.addEventListener('change', () => {
+  themeState.fontFamily = font.value;
+  applyThemeState();
+});
+baseGroup.addEventListener('change', () => {
+  themeState.base = (baseGroup.value || undefined) as 'light' | 'dark' | undefined;
+  applyThemeState();
+});
+document.getElementById('theme-reset')!.addEventListener('click', () => {
+  for (const k of Object.keys(themeState)) delete (themeState as Record<string, unknown>)[k];
+  accentField.value = '';
+  radius.value = '1';
+  document.getElementById('radius-value')!.textContent = '1.0×';
+  font.value = '';
+  baseGroup.value = '';
+  applyThemeState();
+});
+document.getElementById('theme-copy')!.addEventListener('click', () => {
+  void navigator.clipboard?.writeText(themeCss.textContent ?? '');
+  snackbar.success('Theme CSS copied');
+});
+
+// ---- Playground: controls generated from design/api/components.json ----
+interface OptionSpec { kind: string; type?: string; default?: unknown; platforms?: string[] }
+const api = JSON.parse(componentsJson) as { enums: Record<string, string[]>; components: Record<string, { web: string; options: Record<string, OptionSpec> }> };
+const iconNames = Object.keys(icons);
+const samples: Record<string, { markup: string; skip?: string[] }> = {
+  Button: { markup: '<sl-button>Deploy</sl-button>', skip: ['Href', 'Type', 'Pressed'] },
+  TextField: { markup: '<sl-text-field label="Project name" helper-text="Lowercase, numbers and dashes." value="slate-web"></sl-text-field>', skip: ['Value', 'Rows'] },
+  Card: { markup: '<sl-card title="Deployments" subtitle="Last 7 days"><sl-text tone="secondary">Card body content.</sl-text><div slot="footer"><sl-button size="small">View all</sl-button></div></sl-card>' },
+  Alert: { markup: '<sl-alert title="Deployed to production">slate-web is live in 3 regions.</sl-alert>' },
+  Badge: { markup: '<sl-badge>Ready</sl-badge>' },
+};
+const kebabCase = (n: string) => n.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+const propName = (component: string, option: string) =>
+  component === 'TextField' && (option === 'Prefix' || option === 'Suffix') ? `${option.toLowerCase()}Text` : option[0].toLowerCase() + option.slice(1);
+
+const playgrounds = document.getElementById('playgrounds')!;
+for (const [name, sample] of Object.entries(samples)) {
+  const spec = api.components[name];
+  const card = document.createElement('sl-card');
+  card.setAttribute('title', `<${spec.web}>`);
+  card.setAttribute('subtitle', name);
+  const layout = document.createElement('div');
+  layout.className = 'demo-playground';
+  const stage = document.createElement('div');
+  stage.className = 'demo-playground__stage';
+  stage.innerHTML = sample.markup;
+  const target = stage.firstElementChild as HTMLElement & Record<string, unknown>;
+  const code = document.createElement('pre');
+  code.className = 'demo-code demo-code--inline';
+  const controls = document.createElement('div');
+  controls.className = 'demo-playground__controls';
+
+  const showCode = () => {
+    const clone = target.cloneNode(true) as HTMLElement;
+    code.textContent = clone.outerHTML.replace(/ (class|style)="[^"]*"/g, '');
+  };
+
+  for (const [option, o] of Object.entries(spec.options)) {
+    if ((o.platforms && !o.platforms.includes('web')) || sample.skip?.includes(option)) continue;
+    if (o.kind !== 'param' && o.kind !== 'bool') continue;
+    const prop = propName(name, option);
+    const attr = prop === 'prefixText' ? 'prefix' : prop === 'suffixText' ? 'suffix' : kebabCase(option);
+    const values = o.type && (api.enums[o.type] ?? (o.type.includes('|') ? o.type.split('|') : null));
+    let control: HTMLElement;
+    if (o.kind === 'bool') {
+      const sw = document.createElement('sl-switch') as HTMLElement & { checked: boolean };
+      sw.setAttribute('label', option);
+      sw.setAttribute('size', 'small');
+      sw.checked = target.hasAttribute(attr);
+      sw.addEventListener('change', () => {
+        target.toggleAttribute(attr, sw.checked);
+        showCode();
+      });
+      control = sw;
+    } else if (values || o.type === 'icon') {
+      const wrap = document.createElement('label');
+      wrap.className = 'demo-control';
+      wrap.innerHTML = `<span>${option}</span>`;
+      const select = document.createElement('select');
+      select.className = 'demo-select';
+      for (const v of ['', ...(values ?? iconNames)]) select.append(new Option(v === '' ? '(unset)' : v, v));
+      select.value = target.getAttribute(attr) ?? '';
+      select.addEventListener('change', () => {
+        if (select.value) target.setAttribute(attr, select.value);
+        else target.removeAttribute(attr);
+        if (!select.value) (target as Record<string, unknown>)[prop] = undefined;
+        showCode();
+      });
+      wrap.append(select);
+      control = wrap;
+    } else if (o.type === 'string') {
+      const field = document.createElement('sl-text-field') as HTMLElement & { value: string };
+      field.setAttribute('label', option);
+      field.setAttribute('size', 'small');
+      field.value = (target[prop] as string | undefined) ?? '';
+      field.addEventListener('sl-value-changed', () => {
+        target[prop] = field.value;
+        showCode();
+      });
+      control = field;
+    } else {
+      continue;
+    }
+    controls.append(control);
+  }
+  layout.append(stage, controls);
+  card.append(layout, code);
+  playgrounds.append(card);
+  showCode();
+}
+
+// ---- App-wide defaults ----
+for (const select of document.querySelectorAll<HTMLSelectElement>('[data-default]')) {
+  select.addEventListener('change', () => {
+    const [group, key] = select.dataset.default!.split('.');
+    configureDefaults({ [group]: { [key]: select.value } } as Parameters<typeof configureDefaults>[0]);
+  });
+}
+
 // ---- Dialogs ----
 /** A rename form that validates before accepting. */
 function renameDialog(): { content: (d: SlDialog) => Node; submit: (d: SlDialog) => void } {
@@ -149,15 +375,15 @@ const dialogActions: Record<string, () => Promise<void>> = {
   form: async () => {
     const rename = renameDialog();
     const r = await dialog.show({
-      heading: 'Rename package',
+      title: 'Rename package',
       description: 'Renaming updates every reference in the solution.',
       icon: 'pencil',
-      width: 'xs',
+      maxWidth: 'xs',
       closeOnBackdropClick: false,
       content: rename.content,
       actions: [
         { label: 'Cancel', cancel: true },
-        { label: 'Rename', variant: 'primary', onClick: rename.submit },
+        { label: 'Rename', onClick: rename.submit },
       ],
     });
     if (!r.canceled) snackbar.success(`Renamed to ${String(r.data)}`);
@@ -180,9 +406,9 @@ const dialogActions: Record<string, () => Promise<void>> = {
   },
   stacked: async () => {
     await dialog.show({
-      heading: 'Project settings',
+      title: 'Project settings',
       description: 'Dialogs stack: only the top one responds to Escape.',
-      width: 'md',
+      maxWidth: 'md',
       content: (d) => {
         const b = document.createElement('sl-button');
         b.textContent = 'Open a second dialog';
@@ -218,3 +444,17 @@ if (params.get('show') === 'snackbars') {
 }
 if (params.get('show') === 'dialog') void dialogActions.destructive();
 if (params.get('show') === 'form') void dialogActions.form();
+
+// ?accent=FF5A1F&radius=1.5 preselects a custom theme (handy for screenshots and links).
+if (params.get('accent') || params.get('radius')) {
+  if (params.get('accent')) {
+    themeState.accent = `#${params.get('accent')!.replace(/^#/, '')}`;
+    accentField.value = themeState.accent;
+  }
+  if (params.get('radius')) {
+    themeState.radiusScale = Number(params.get('radius'));
+    radius.value = params.get('radius')!;
+    document.getElementById('radius-value')!.textContent = `${themeState.radiusScale.toFixed(2)}×`;
+  }
+  applyThemeState();
+}

@@ -15,11 +15,11 @@ import { snackbar, dialog } from '@slate/web';   // registers all <sl-*> element
 ```html
 <body class="sl-root">
   <sl-provider theme="system" density="compact">
-    <sl-app-shell viewport>
-      <sl-app-bar slot="app-bar" menu-button>My app</sl-app-bar>
+    <sl-app-shell fill-viewport>
+      <sl-app-bar slot="app-bar" title="My app"></sl-app-bar>
       <sl-drawer slot="drawer"><nav class="sl-nav">…</nav></sl-drawer>
       <sl-container>
-        <sl-button variant="primary" icon-start="plus">New project</sl-button>
+        <sl-button variant="solid" tone="accent" start-icon="plus">New project</sl-button>
       </sl-container>
     </sl-app-shell>
   </sl-provider>
@@ -46,7 +46,7 @@ snackbar.success('Deployed', { title: 'slate-web', action: { label: 'View', onIn
 snackbar.configure({ position: 'top-center' });
 
 const ok = await dialog.confirm({ title: 'Delete?', message: 'This can’t be undone.', confirmText: 'Delete', destructive: true });
-const result = await dialog.show({ heading: 'Rename', content: form, actions: [{ label: 'Cancel', cancel: true }, { label: 'Save', value: 'x' }] });
+const result = await dialog.show({ title: 'Rename', content: form, actions: [{ label: 'Cancel', cancel: true }, { label: 'Save', value: 'x' }] });
 ```
 
 The snackbar queue and dialog stack mirror `Slate.Core` rule-for-rule (max visible, FIFO queue, durations from tokens,
@@ -62,3 +62,20 @@ npm run build   # dist/slate.js, dist/slate.css, dist/types, dist/fonts, dist-de
 
 Tokens and icons under `src/**/generated` come from `design/` — regenerate with
 `dotnet run --project tools/Slate.Tokens.Cli -- build`, never edit them by hand.
+
+## Configuring
+
+Every component follows the canonical API in `design/api/components.json` (see `docs/design/configurability.md`):
+
+```js
+import { configureDefaults, createTheme } from '@slate/web';
+
+// App-wide defaults: unset options on every component use these.
+configureDefaults({ button: { size: 'small' }, field: { variant: 'filled' }, snackbar: { position: 'top-center' } });
+
+// Custom theme from a brand colour (contrast guaranteed), softer radii, another font.
+document.querySelector('sl-provider').themeOptions = { accent: '#FF5A1F', radiusScale: 1.5, fontFamily: 'Inter, sans-serif' };
+```
+
+Per-component styling: override `--sl-component-*` tokens in any scope (e.g. `--sl-component-button-radius: 999px`),
+or use `::part(...)` on a single element.

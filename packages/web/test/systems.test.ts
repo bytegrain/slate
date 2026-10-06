@@ -138,7 +138,7 @@ describe('sl-dialog', () => {
   };
 
   it('opens modally with title/description wiring', async () => {
-    const { el } = await open('<sl-dialog heading="Rename" description="Pick a new name">Body</sl-dialog>');
+    const { el } = await open('<sl-dialog title="Rename" description="Pick a new name">Body</sl-dialog>');
     const dlg = $(el, 'dialog') as HTMLDialogElement;
     expect(dlg.open).toBe(true);
     expect(el.open).toBe(true);
@@ -149,7 +149,7 @@ describe('sl-dialog', () => {
   });
 
   it('width, placement and modifiers map to classes', async () => {
-    const { el } = await open('<sl-dialog heading="x" width="lg" placement="top" full-width></sl-dialog>');
+    const { el } = await open('<sl-dialog title="x" max-width="lg" placement="top" full-width></sl-dialog>');
     const cls = $(el, 'dialog').className;
     expect(cls).toContain('sl-dialog--lg');
     expect(cls).toContain('sl-dialog--top');
@@ -157,7 +157,7 @@ describe('sl-dialog', () => {
   });
 
   it('accept resolves Ok with data and fires sl-close', async () => {
-    const { el, result } = await open('<sl-dialog heading="x"></sl-dialog>');
+    const { el, result } = await open('<sl-dialog title="x"></sl-dialog>');
     const closed = vi.fn();
     el.addEventListener('sl-close', closed);
     el.accept('new-name');
@@ -168,18 +168,18 @@ describe('sl-dialog', () => {
   });
 
   it('Escape cancels unless disabled', async () => {
-    const { el, result } = await open('<sl-dialog heading="x"><button>ok</button></sl-dialog>');
+    const { el, result } = await open('<sl-dialog title="x"><button>ok</button></sl-dialog>');
     key($(el, 'dialog'), 'Escape');
     expect((await result).canceled).toBe(true);
 
-    const locked = await open('<sl-dialog heading="y" close-on-escape="false"></sl-dialog>');
+    const locked = await open('<sl-dialog title="y" close-on-escape="false"></sl-dialog>');
     key($(locked.el, 'dialog'), 'Escape');
     await settle();
     expect(locked.el.open).toBe(true);
   });
 
   it('the native cancel request is routed through the stack', async () => {
-    const { el, result } = await open('<sl-dialog heading="x"></sl-dialog>');
+    const { el, result } = await open('<sl-dialog title="x"></sl-dialog>');
     const cancel = new Event('cancel', { cancelable: true });
     $(el, 'dialog').dispatchEvent(cancel);
     expect(cancel.defaultPrevented).toBe(true);
@@ -187,29 +187,29 @@ describe('sl-dialog', () => {
   });
 
   it('scrim click cancels unless disabled', async () => {
-    const locked = await open('<sl-dialog heading="y" close-on-backdrop-click="false"></sl-dialog>');
+    const locked = await open('<sl-dialog title="y" close-on-backdrop-click="false"></sl-dialog>');
     $(locked.el, '.sl-dialog__scrim').click();
     await settle();
     expect(locked.el.open).toBe(true);
     locked.el.close();
     await locked.result;
 
-    const { el, result } = await open('<sl-dialog heading="x"></sl-dialog>');
+    const { el, result } = await open('<sl-dialog title="x"></sl-dialog>');
     $(el, '.sl-dialog__scrim').click();
     expect((await result).canceled).toBe(true);
   });
 
   it('close button cancels and can be hidden', async () => {
-    const { el, result } = await open('<sl-dialog heading="x"></sl-dialog>');
+    const { el, result } = await open('<sl-dialog title="x"></sl-dialog>');
     $(el, '.sl-dialog__close').click();
     expect((await result).canceled).toBe(true);
-    const hidden = await fixture<SlDialog>('<sl-dialog heading="x" show-close-button="false"></sl-dialog>');
+    const hidden = await fixture<SlDialog>('<sl-dialog title="x" show-close-button="false"></sl-dialog>');
     expect(shadow(hidden).querySelector('.sl-dialog__close')).toBeNull();
   });
 
   it('only the top of a stack responds to Escape', async () => {
-    const a = await open('<sl-dialog heading="a"></sl-dialog>');
-    const b = await open('<sl-dialog heading="b"></sl-dialog>');
+    const a = await open('<sl-dialog title="a"></sl-dialog>');
+    const b = await open('<sl-dialog title="b"></sl-dialog>');
     key($(a.el, 'dialog'), 'Escape'); // not the top: ignored
     await settle();
     expect(a.el.open).toBe(true);
@@ -221,7 +221,7 @@ describe('sl-dialog', () => {
   it('moves focus in on open and restores it on close', async () => {
     const trigger = await fixture<HTMLButtonElement>('<button>Open</button>');
     trigger.focus();
-    const { el, result } = await open('<sl-dialog heading="x"><input id="first" /></sl-dialog>');
+    const { el, result } = await open('<sl-dialog title="x"><input id="first" /></sl-dialog>');
     expect(document.activeElement).toBe(el.querySelector('#first'));
     el.close();
     await result;
@@ -229,12 +229,12 @@ describe('sl-dialog', () => {
   });
 
   it('autofocus wins over the first focusable', async () => {
-    const { el } = await open('<sl-dialog heading="x"><input /><button autofocus id="af">Go</button></sl-dialog>');
+    const { el } = await open('<sl-dialog title="x"><input /><button autofocus id="af">Go</button></sl-dialog>');
     expect(document.activeElement).toBe(el.querySelector('#af'));
   });
 
   it('the open attribute opens and closes declaratively', async () => {
-    const el = await fixture<SlDialog>('<sl-dialog heading="x" open></sl-dialog>');
+    const el = await fixture<SlDialog>('<sl-dialog title="x" open></sl-dialog>');
     await settle();
     expect(dialogStack.top?.content).toBe(el);
     el.open = false;
@@ -243,7 +243,7 @@ describe('sl-dialog', () => {
   });
 
   it('removing an open dialog cancels it', async () => {
-    const { el, result } = await open('<sl-dialog heading="x"></sl-dialog>');
+    const { el, result } = await open('<sl-dialog title="x"></sl-dialog>');
     el.remove();
     expect((await result).canceled).toBe(true);
   });
@@ -259,14 +259,15 @@ describe('dialog service', () => {
 
   it('show() builds actions and resolves with the clicked value; the element is removed', async () => {
     const pending = dialog.show({
-      heading: 'Choose',
+      title: 'Choose',
       content: 'Pick one',
       actions: [{ label: 'Cancel', cancel: true }, { label: 'Keep', value: 'keep' }],
     });
     const el = await nextDialog();
     const buttons = [...el.querySelectorAll('sl-button')];
     expect(buttons.map((b) => b.textContent)).toEqual(['Cancel', 'Keep']);
-    expect(buttons.map((b) => b.getAttribute('variant'))).toEqual(['secondary', 'primary']);
+    expect(buttons.map((b) => b.getAttribute('variant'))).toEqual(['outlined', 'solid']);
+    expect(buttons.map((b) => b.getAttribute('tone'))).toEqual(['neutral', 'accent']);
     expect(el.querySelector('p')!.textContent).toBe('Pick one');
     $(buttons[1], 'button').click();
     expect(await pending).toEqual(DialogResult.ok('keep'));
@@ -275,7 +276,7 @@ describe('dialog service', () => {
 
   it('content factories receive the dialog', async () => {
     const pending = dialog.show({
-      heading: 'Rename',
+      title: 'Rename',
       content: (d) => {
         const b = document.createElement('button');
         b.addEventListener('click', () => d.accept('renamed'));
@@ -291,7 +292,8 @@ describe('dialog service', () => {
     const pending = dialog.confirm({ title: 'Delete Slate.Wpf?', message: 'Gone forever.', confirmText: 'Delete', destructive: true });
     const el = await nextDialog();
     const [cancel, confirm] = [...el.querySelectorAll('sl-button')];
-    expect(confirm.getAttribute('variant')).toBe('danger-solid');
+    expect(confirm.getAttribute('variant')).toBe('solid');
+    expect(confirm.getAttribute('tone')).toBe('danger');
     expect(cancel.hasAttribute('autofocus')).toBe(true); // safe default for destructive
     expect(el.icon).toBe('alert-triangle');
     expect(el.tone).toBe('danger');

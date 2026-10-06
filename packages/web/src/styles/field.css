@@ -1,7 +1,16 @@
-/* Text field — docs/design/components.md#text-field */
+/* Text field — docs/design/components.md#text-field, docs/design/configurability.md
+   Markup: <div class="sl-field sl-field--{outlined|filled|underlined} [sl-field--small|large] [sl-radius-*]
+            [sl-field--multiline] [sl-field--invalid] [sl-field--disabled]">
+   Colours, radius, padding and the inset shadow come from component.field.* tokens. */
 
 .sl-field {
   --_h: var(--sl-size-control-md);
+  --_px: var(--sl-component-field-padding-x);
+  --_bg: var(--sl-component-field-background);
+  --_border: var(--sl-component-field-border);
+  --_border-hover: var(--sl-component-field-border-hover);
+  --_border-focus: var(--sl-component-field-border-focus);
+  --_shadow: var(--sl-component-field-shadow);
 
   display: flex;
   flex-direction: column;
@@ -10,8 +19,15 @@
   font-family: var(--sl-font-family-ui);
 }
 
-.sl-field--sm { --_h: var(--sl-size-control-sm); }
-.sl-field--lg { --_h: var(--sl-size-control-lg); }
+.sl-field--small { --_h: var(--sl-size-control-sm); }
+.sl-field--large { --_h: var(--sl-size-control-lg); }
+
+/* Filled: muted fill, border only on hover/focus. */
+.sl-field--filled {
+  --_bg: var(--sl-component-field-filled-background);
+  --_border: transparent;
+  --_shadow: none;
+}
 
 .sl-field__label {
   font: var(--sl-typography-label);
@@ -29,33 +45,58 @@
   align-items: stretch;
   height: var(--_h);
   overflow: hidden;
-  background: var(--sl-color-background-sunken);
-  border: var(--sl-border-width-hairline) solid var(--sl-color-border-strong);
-  border-radius: var(--sl-radius-md);
-  box-shadow: var(--sl-shadow-inset);
+  background: var(--_bg);
+  border: var(--sl-border-width-hairline) solid var(--_border);
+  border-radius: var(--_radius, var(--sl-component-field-radius));
+  box-shadow: var(--_shadow);
   transition:
     border-color var(--sl-motion-duration-fast) var(--sl-motion-easing-standard),
     outline-color var(--sl-motion-duration-fast) var(--sl-motion-easing-standard);
 }
 
-.sl-field__control:hover { border-color: var(--sl-color-border-control-hover); }
+.sl-field__control:hover { border-color: var(--_border-hover); }
 
 .sl-field__control:focus-within {
-  border-color: var(--sl-color-accent-default);
+  border-color: var(--_border-focus);
   outline: var(--sl-focus-ring-width) solid var(--sl-color-focus-ring);
   outline-offset: var(--sl-focus-ring-offset);
 }
+
+/* Underlined: bottom rule only, no fill, no radius; focus thickens the rule instead of ringing the box. */
+.sl-field--underlined .sl-field__control {
+  background: transparent;
+  border-width: 0 0 var(--sl-border-width-hairline);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.sl-field--underlined .sl-field__control:focus-within {
+  outline: none;
+  box-shadow: inset 0 calc(var(--sl-border-width-thick) * -1) 0 var(--_border-focus);
+}
+
+.sl-field--underlined .sl-field__input,
+.sl-field--underlined .sl-field__icon,
+.sl-field--underlined .sl-field__affix { padding-inline: 0; }
+
+.sl-field--underlined .sl-field__affix { background: transparent; border: 0; }
+.sl-field--underlined .sl-field__icon + .sl-field__input,
+.sl-field--underlined .sl-field__affix--prefix + .sl-field__input { padding-left: var(--sl-space-2); }
 
 .sl-field--invalid .sl-field__control,
 .sl-field--invalid .sl-field__control:hover {
   border-color: var(--sl-color-status-danger-fg);
 }
 
+.sl-field--underlined.sl-field--invalid .sl-field__control:focus-within {
+  box-shadow: inset 0 calc(var(--sl-border-width-thick) * -1) 0 var(--sl-color-status-danger-fg);
+}
+
 .sl-field__input {
   flex: 1;
   min-width: 0;
   margin: 0;
-  padding: 0 10px;
+  padding: 0 var(--_px);
   font-family: inherit;
   font-size: var(--sl-font-size-md);
   line-height: var(--sl-font-line-height-normal);
@@ -79,7 +120,7 @@
 }
 
 .sl-field__input--multiline {
-  padding: var(--sl-space-2) 10px;
+  padding: var(--sl-space-2) var(--_px);
   resize: vertical;
 }
 
@@ -87,7 +128,7 @@
   display: flex;
   flex: none;
   align-items: center;
-  padding: 0 10px;
+  padding: 0 var(--_px);
   font-family: var(--sl-font-family-mono);
   font-size: var(--sl-font-size-xs);
   color: var(--sl-color-text-tertiary);
@@ -98,18 +139,65 @@
 .sl-field__affix--prefix { border-right: var(--sl-border-width-hairline) solid var(--sl-color-border-default); }
 .sl-field__affix--suffix { border-left: var(--sl-border-width-hairline) solid var(--sl-color-border-default); }
 
-.sl-field__icon {
+/* Leading/trailing adornments: icons, custom content (start-content/end-content slots), clear button. */
+.sl-field__icon,
+.sl-field__adornment {
   display: flex;
   flex: none;
   align-items: center;
-  padding-left: 10px;
+  gap: var(--sl-space-1);
   color: var(--sl-color-text-tertiary);
 }
 
-.sl-field__icon + .sl-field__input { padding-left: var(--sl-space-2); }
+.sl-field__icon--start,
+.sl-field__adornment--start { padding-left: var(--_px); }
+
+.sl-field__icon--end,
+.sl-field__adornment--end { padding-right: var(--_px); }
+
+.sl-field__icon--start + .sl-field__input,
+.sl-field__adornment--start + .sl-field__input { padding-left: var(--sl-space-2); }
+
+.sl-field__input + .sl-field__icon--end,
+.sl-field__input + .sl-field__adornment--end,
+.sl-field__input + .sl-field__clear { margin-left: calc(var(--_px) * -1 + var(--sl-space-2)); }
+
+.sl-field__clear {
+  display: flex;
+  flex: none;
+  align-self: center;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-right: var(--sl-space-1-5);
+  padding: 0;
+  color: var(--sl-color-text-tertiary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--sl-radius-sm);
+  cursor: pointer;
+}
+
+.sl-field__clear:hover { color: var(--sl-color-text-primary); background: var(--sl-color-background-muted); }
+
+.sl-field__clear:focus-visible {
+  outline: var(--sl-focus-ring-width) solid var(--sl-color-focus-ring);
+  outline-offset: 0;
+}
+
+.sl-field__clear .sl-icon { width: var(--sl-size-icon-sm); height: var(--sl-size-icon-sm); }
+
+.sl-field__footer {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sl-space-2);
+}
 
 .sl-field__helper,
 .sl-field__error {
+  flex: 1;
+  min-width: 0;
   margin: 0;
   font: var(--sl-typography-caption);
   color: var(--sl-color-text-tertiary);
@@ -127,6 +215,17 @@
   height: var(--sl-size-icon-sm);
 }
 
+.sl-field__counter {
+  flex: none;
+  margin-left: auto;
+  font-family: var(--sl-font-family-mono);
+  font-size: var(--sl-font-size-2xs);
+  line-height: var(--sl-font-line-height-snug);
+  color: var(--sl-color-text-tertiary);
+}
+
+.sl-field__counter.is-over { color: var(--sl-color-status-danger-fg); }
+
 .sl-field--disabled {
   opacity: var(--sl-opacity-disabled);
 }
@@ -136,4 +235,4 @@
   cursor: not-allowed;
 }
 
-.sl-field--disabled .sl-field__control:hover { border-color: var(--sl-color-border-strong); }
+.sl-field--disabled .sl-field__control:hover { border-color: var(--_border); }

@@ -1,10 +1,17 @@
 import { tokenNumber } from './tokens';
+import type { Tone } from './defaults';
 
 export type DialogWidth = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 export type DialogPlacement = 'center' | 'top';
 
 export interface DialogOptions {
   title?: string;
+  /** Supporting text under the title (the dialog's accessible description). */
+  description?: string;
+  /** Icon shown in a tinted tile beside the title. */
+  icon?: string;
+  /** Colours the icon tile; 'danger' for destructive confirmations. */
+  tone?: Tone;
   maxWidth: DialogWidth;
   /** Use the full max width instead of sizing to content. */
   fullWidth: boolean;

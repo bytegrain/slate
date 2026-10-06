@@ -1,40 +1,47 @@
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, nothing } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { hostReset, styles } from '../internal/styles';
 import { renderIcon } from '../internal/icon';
 import { deepActiveElement, defaultTrue, firstFocusable, prefersReducedMotion, uid } from '../internal/dom';
 import { tokenNumber } from '../core/tokens';
+import { TitledElement } from '../internal/title';
+import { DefaultsController, getDefaults, type Tone } from '../core/defaults';
+import { iconButtonClasses } from './button';
 import {
   DialogResult,
+  defaultDialogOptions,
   dialogStack,
+  type DialogOptions,
   type DialogPlacement,
   type DialogReference,
   type DialogStack,
   type DialogWidth,
 } from '../core/dialog-stack';
 
-export type DialogTone = 'accent' | 'danger' | 'warning' | 'success' | 'info';
+export type DialogTone = Tone;
 
 /**
- * <sl-dialog heading="Rename" description="…" width="xs" icon="pencil" open>
+ * <sl-dialog title="Rename" description="…" max-width="xs" icon="pencil" tone="accent" open>
  *   body…
- *   <sl-button slot="footer" variant="primary">Save</sl-button>
+ *   <sl-button slot="footer" variant="solid" tone="accent">Save</sl-button>
  * </sl-dialog>
+ *
+ * Unset options fall back to configureDefaults({ dialog: … }), then to Alloy's DialogOptions defaults.
  *
  * Modal (native <dialog> + showModal: background is inert, focus stays inside). Only the top dialog of
  * the page-wide DialogStack reacts to Escape and scrim clicks. `show()` resolves with { canceled, data }.
  * Fires `sl-close` (detail: DialogResult) after closing.
  */
-export class SlDialog extends LitElement {
+export class SlDialog extends TitledElement {
   static override properties = {
     open: { type: Boolean, reflect: true },
-    heading: {},
+    title: {},
     description: {},
-    width: { reflect: true },
+    maxWidth: { attribute: 'max-width', reflect: true },
     placement: { reflect: true },
     fullWidth: { type: Boolean, attribute: 'full-width', reflect: true },
-    fullscreen: { type: Boolean, reflect: true },
+    fullScreen: { type: Boolean, attribute: 'full-screen', reflect: true },
     closeOnEscape: { attribute: 'close-on-escape', converter: defaultTrue },
     closeOnBackdropClick: { attribute: 'close-on-backdrop-click', converter: defaultTrue },
     showCloseButton: { attribute: 'show-close-button', converter: defaultTrue },
@@ -48,6 +55,7 @@ export class SlDialog extends LitElement {
     hostReset,
     styles.base,
     styles.typography,
+    styles.tone,
     styles.button,
     styles.dialog,
     css`
@@ -56,17 +64,17 @@ export class SlDialog extends LitElement {
   ];
 
   declare open: boolean;
-  declare heading: string;
+  declare title: string;
   declare description: string | undefined;
-  declare width: DialogWidth;
-  declare placement: DialogPlacement;
-  declare fullWidth: boolean;
-  declare fullscreen: boolean;
-  declare closeOnEscape: boolean;
-  declare closeOnBackdropClick: boolean;
-  declare showCloseButton: boolean;
+  declare maxWidth: DialogWidth | undefined;
+  declare placement: DialogPlacement | undefined;
+  declare fullWidth: boolean | undefined;
+  declare fullScreen: boolean | undefined;
+  declare closeOnEscape: boolean | undefined;
+  declare closeOnBackdropClick: boolean | undefined;
+  declare showCloseButton: boolean | undefined;
   declare icon: string | undefined;
-  declare tone: DialogTone;
+  declare tone: DialogTone | undefined;
   declare hasFooter: boolean;
   declare closing: boolean;
 
@@ -81,18 +89,31 @@ export class SlDialog extends LitElement {
 
   constructor() {
     super();
+    new DefaultsController(this);
     this.open = false;
-    this.heading = '';
-    this.width = 'sm';
-    this.placement = 'center';
-    this.fullWidth = false;
-    this.fullscreen = false;
-    this.closeOnEscape = true;
-    this.closeOnBackdropClick = true;
-    this.showCloseButton = true;
-    this.tone = 'accent';
+    this.title = '';
     this.hasFooter = false;
     this.closing = false;
+  }
+
+  /** Effective options: element properties, else app defaults, else Alloy defaults. */
+  get resolved(): DialogOptions {
+    const d: Partial<DialogOptions> = { ...defaultDialogOptions, tone: 'neutral', ...getDefaults().dialog };
+    const pick = <K extends keyof DialogOptions>(key: K, value: DialogOptions[K] | undefined): DialogOptions[K] =>
+      (value ?? d[key]) as DialogOptions[K];
+    return {
+      title: this.title,
+      description: this.description,
+      icon: this.icon ?? d.icon,
+      tone: pick('tone', this.tone),
+      maxWidth: pick('maxWidth', this.maxWidth),
+      fullWidth: pick('fullWidth', this.fullWidth),
+      fullScreen: pick('fullScreen', this.fullScreen),
+      placement: pick('placement', this.placement),
+      closeOnEscape: pick('closeOnEscape', this.closeOnEscape),
+      closeOnBackdropClick: pick('closeOnBackdropClick', this.closeOnBackdropClick),
+      showCloseButton: pick('showCloseButton', this.showCloseButton),
+    };
   }
 
   /** The live stack entry while open. */
@@ -115,16 +136,7 @@ export class SlDialog extends LitElement {
     if (this.finished && this.reference?.isOpen) return this.finished;
 
     this.returnFocusTo = deepActiveElement();
-    const reference = this.stack.push(this, {
-      title: this.heading,
-      maxWidth: this.width,
-      fullWidth: this.fullWidth,
-      fullScreen: this.fullscreen,
-      placement: this.placement,
-      closeOnEscape: this.closeOnEscape,
-      closeOnBackdropClick: this.closeOnBackdropClick,
-      showCloseButton: this.showCloseButton,
-    });
+    const reference = this.stack.push(this, this.resolved);
     this.reference = reference;
     this.closing = false;
     this.open = true;
@@ -214,12 +226,13 @@ export class SlDialog extends LitElement {
   }
 
   override render() {
+    const o = this.resolved;
     const classes = {
       'sl-dialog': true,
-      [`sl-dialog--${this.width}`]: true,
-      'sl-dialog--top': this.placement === 'top',
-      'sl-dialog--full-width': this.fullWidth,
-      'sl-dialog--fullscreen': this.fullscreen,
+      [`sl-dialog--${o.maxWidth}`]: true,
+      'sl-dialog--top': o.placement === 'top',
+      'sl-dialog--full-width': o.fullWidth,
+      'sl-dialog--full-screen': o.fullScreen,
       'is-closing': this.closing,
     };
     return html`<dialog
@@ -233,19 +246,17 @@ export class SlDialog extends LitElement {
       <div class="sl-dialog__scrim" part="scrim" @click=${this.onBackdrop}></div>
       <div class="sl-dialog__panel" part="panel" tabindex="-1">
         <header class="sl-dialog__header" part="header">
-          ${this.icon
-            ? html`<div class="sl-dialog__icon ${this.tone === 'accent' ? '' : `sl-dialog__icon--${this.tone}`}" aria-hidden="true">
-                ${renderIcon(this.icon, 'sl-icon--lg')}
-              </div>`
+          ${o.icon
+            ? html`<div class="sl-dialog__icon sl-tone-${o.tone}" part="icon" aria-hidden="true">${renderIcon(o.icon, 'sl-icon--lg')}</div>`
             : nothing}
           <div class="sl-dialog__titles">
-            <h2 class="sl-dialog__title" id=${this.titleId}>${this.heading}</h2>
-            ${this.description ? html`<p class="sl-dialog__description" id=${this.descId}>${this.description}</p>` : nothing}
+            <h2 class="sl-dialog__title" id=${this.titleId} part="title">${this.title}</h2>
+            ${this.description ? html`<p class="sl-dialog__description" id=${this.descId} part="description">${this.description}</p>` : nothing}
           </div>
-          ${this.showCloseButton
+          ${o.showCloseButton
             ? html`<button
-                class="sl-button sl-button--ghost sl-button--sm sl-button--icon sl-dialog__close"
-                part="close-button"
+                class="${iconButtonClasses} sl-button--small sl-dialog__close"
+                part="close"
                 type="button"
                 aria-label="Close"
                 @click=${() => this.close()}

@@ -58,3 +58,7 @@
 @keyframes sl-fade-out {
   to { opacity: 0; }
 }
+
+/* Density factor for components that scale beyond control heights (switches). Inherits into shadow roots. */
+[data-sl-density="compact"] { --_density-scale: 1; }
+[data-sl-density="comfortable"] { --_density-scale: 1.2; }

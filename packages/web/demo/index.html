@@ -16,46 +16,47 @@
   </head>
   <body class="sl-root">
     <sl-provider id="provider" theme="light" density="compact">
-      <sl-app-shell viewport>
-        <sl-app-bar slot="app-bar" menu-button>
-          <a class="demo-brand" href="#top">
+      <sl-app-shell fill-viewport id="shell">
+        <sl-app-bar slot="app-bar">
+          <a slot="leading" class="demo-brand" href="#top">
             <span class="demo-mark"><sl-icon name="layers"></sl-icon></span>
             Slate <span class="demo-version">0.1 · web</span>
           </a>
-          <sl-spacer></sl-spacer>
-          <div class="demo-search">
-            <sl-text-field placeholder="Search components" start-icon="search" size="sm" aria-label="Search components"></sl-text-field>
+          <div slot="center" class="demo-search">
+            <sl-text-field placeholder="Search components" start-icon="search" size="small" variant="filled" aria-label="Search components" clearable></sl-text-field>
           </div>
-          <div class="sl-button-group" role="group" aria-label="Theme">
-            <button class="sl-button sl-button--sm" data-theme="light" aria-pressed="true"><svg class="sl-icon sl-button__icon" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true"><path d="M8 12 A4 4 0 1 0 16 12 A4 4 0 1 0 8 12 M12 2 L12 4 M12 20 L12 22 M2 12 L4 12 M20 12 L22 12"></path></svg>Light</button>
-            <button class="sl-button sl-button--sm" data-theme="dark" aria-pressed="false"><svg class="sl-icon sl-button__icon" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true"><path d="M20 14.5 A8 8 0 0 1 9.5 4 A8 8 0 1 0 20 14.5 Z"></path></svg>Dark</button>
-            <button class="sl-button sl-button--sm" data-theme="system" aria-pressed="false">System</button>
+          <div slot="actions" class="sl-button-group" role="group" aria-label="Theme">
+            <button class="sl-button sl-button--outlined sl-tone-neutral sl-button--small" data-theme="light" aria-pressed="true"><svg class="sl-icon sl-button__icon" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true"><path d="M8 12 A4 4 0 1 0 16 12 A4 4 0 1 0 8 12 M12 2 L12 4 M12 20 L12 22 M2 12 L4 12 M20 12 L22 12"></path></svg>Light</button>
+            <button class="sl-button sl-button--outlined sl-tone-neutral sl-button--small" data-theme="dark" aria-pressed="false"><svg class="sl-icon sl-button__icon" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true"><path d="M20 14.5 A8 8 0 0 1 9.5 4 A8 8 0 1 0 20 14.5 Z"></path></svg>Dark</button>
+            <button class="sl-button sl-button--outlined sl-tone-neutral sl-button--small" data-theme="system" aria-pressed="false">System</button>
           </div>
-          <sl-switch id="density" label="Comfortable" label-position="end"></sl-switch>
+          <sl-switch slot="actions" id="density" label="Comfortable"></sl-switch>
         </sl-app-bar>
 
         <sl-drawer slot="drawer" label="Components">
           <nav class="sl-nav" aria-label="Sections">
             <div class="sl-nav__heading">Foundations</div>
-            <a class="sl-nav__item is-active" href="#foundations" title="Foundations"><sl-icon name="layers"></sl-icon><span class="sl-nav__label">Colour &amp; type</span></a>
+            <sl-nav-item href="#foundations" icon="layers" label="Colour &amp; type" active></sl-nav-item>
+            <sl-nav-item href="#theming" icon="sun" label="Theming"></sl-nav-item>
             <div class="sl-nav__heading">Components</div>
-            <a class="sl-nav__item" href="#buttons" title="Buttons"><sl-icon name="plus"></sl-icon><span class="sl-nav__label">Buttons</span><span class="sl-nav__meta">6</span></a>
-            <a class="sl-nav__item" href="#forms" title="Form controls"><sl-icon name="pencil"></sl-icon><span class="sl-nav__label">Form controls</span></a>
-            <a class="sl-nav__item" href="#feedback" title="Feedback"><sl-icon name="info"></sl-icon><span class="sl-nav__label">Feedback</span></a>
-            <a class="sl-nav__item" href="#layout" title="Layout"><sl-icon name="home"></sl-icon><span class="sl-nav__label">Layout</span></a>
+            <sl-nav-item href="#buttons" icon="plus" label="Buttons" trailing="5×6"></sl-nav-item>
+            <sl-nav-item href="#forms" icon="pencil" label="Form controls"></sl-nav-item>
+            <sl-nav-item href="#feedback" icon="info" label="Feedback"></sl-nav-item>
+            <sl-nav-item href="#layout" icon="home" label="Layout"></sl-nav-item>
+            <sl-nav-item href="#playground" icon="settings" label="Playground"></sl-nav-item>
             <div class="sl-nav__heading">Systems</div>
-            <a class="sl-nav__item" href="#snackbars" title="Snackbars"><sl-icon name="bell"></sl-icon><span class="sl-nav__label">Snackbars</span></a>
-            <a class="sl-nav__item" href="#dialogs" title="Dialogs"><sl-icon name="copy"></sl-icon><span class="sl-nav__label">Dialogs</span></a>
+            <sl-nav-item href="#snackbars" icon="bell" label="Snackbars"></sl-nav-item>
+            <sl-nav-item href="#dialogs" icon="copy" label="Dialogs"></sl-nav-item>
           </nav>
         </sl-drawer>
 
-        <sl-container size="xl" id="top">
+        <sl-container max-width="xl" id="top">
           <header class="demo-hero">
             <div class="demo-eyebrow"><i></i>Alloy · @slate/web</div>
             <sl-text variant="h1" as="h1">Engineered for the eight-hour day.</sl-text>
             <sl-text tone="secondary" class="demo-lede">Framework-agnostic web components and a class-based stylesheet, generated from the same design source as Slate.Blazor, Slate.Wpf and Slate.Avalonia. Toggle the theme and density above — everything below reacts.</sl-text>
             <sl-stack direction="row" spacing="2" wrap>
-              <sl-badge tone="accent">v0.1 preview</sl-badge>
+              <sl-badge tone="accent" variant="solid">v0.1 preview</sl-badge>
               <sl-badge>@slate/web</sl-badge>
               <sl-badge>Slate.Blazor</sl-badge>
               <sl-badge>Slate.Wpf</sl-badge>
@@ -66,10 +67,10 @@
           <!-- Foundations -->
           <section class="demo-section" id="foundations">
             <div class="demo-section__head"><span class="demo-num">01</span><sl-text variant="h3" as="h2">Foundations</sl-text><sl-text tone="secondary">Semantic colour tokens and the type scale. Values switch with the theme.</sl-text></div>
-            <sl-card heading="Colour" subheading="color.* semantic tokens">
+            <sl-card title="Colour" subtitle="color.* semantic tokens">
               <div class="demo-swatches" id="swatches"></div>
             </sl-card>
-            <sl-card heading="Type scale" subheading="typography.*">
+            <sl-card title="Type scale" subtitle="typography.*">
               <div class="demo-type">
                 <span class="demo-type__k">display · 56</span><sl-text variant="display">Ship it.</sl-text>
                 <span class="demo-type__k">h2 · 28</span><sl-text variant="h2">Components that compose</sl-text>
@@ -84,36 +85,32 @@
 
           <!-- Buttons -->
           <section class="demo-section" id="buttons">
-            <div class="demo-section__head"><span class="demo-num">02</span><sl-text variant="h3" as="h2">Buttons</sl-text><sl-text tone="secondary">Six variants, three sizes. One primary per view.</sl-text></div>
+            <div class="demo-section__head"><span class="demo-num">02</span><sl-text variant="h3" as="h2">Buttons</sl-text><sl-text tone="secondary">Variant × tone. The primary action is solid + accent — one per view.</sl-text></div>
             <sl-card>
               <sl-stack spacing="5">
-                <div><p class="demo-cap">Variants</p>
-                  <sl-stack direction="row" spacing="2" wrap align="center">
-                    <sl-button variant="primary">Deploy</sl-button>
-                    <sl-button>Secondary</sl-button>
-                    <sl-button variant="ghost">Ghost</sl-button>
-                    <sl-button variant="danger">Delete</sl-button>
-                    <sl-button variant="danger-solid">Delete forever</sl-button>
-                    <sl-button variant="link" href="#buttons">Learn more</sl-button>
-                  </sl-stack>
+                <div><p class="demo-cap">Variant × tone</p>
+                  <div class="demo-matrix" id="button-matrix"></div>
                 </div>
-                <div><p class="demo-cap">Sizes &amp; icons</p>
+                <div><p class="demo-cap">Sizes, icons &amp; radius</p>
                   <sl-stack direction="row" spacing="2" wrap align="center">
-                    <sl-button variant="primary" size="sm">Small</sl-button>
-                    <sl-button variant="primary">Medium</sl-button>
-                    <sl-button variant="primary" size="lg" icon-end="arrow-right">Large</sl-button>
-                    <sl-button icon-start="download">Export</sl-button>
-                    <sl-button icon="plus" label="Add"></sl-button>
-                    <sl-button icon="more-horizontal" label="More" variant="ghost"></sl-button>
+                    <sl-button variant="solid" tone="accent" size="small">Small</sl-button>
+                    <sl-button variant="solid" tone="accent">Medium</sl-button>
+                    <sl-button variant="solid" tone="accent" size="large" end-icon="arrow-right">Large</sl-button>
+                    <sl-button start-icon="download">Export</sl-button>
+                    <sl-button icon-only start-icon="plus" label="Add"></sl-button>
+                    <sl-button icon-only start-icon="more-horizontal" label="More" variant="ghost"></sl-button>
+                    <sl-button radius="full" variant="soft" tone="accent">Pill</sl-button>
+                    <sl-button radius="none">Square</sl-button>
                   </sl-stack>
                 </div>
                 <div><p class="demo-cap">States</p>
                   <sl-stack direction="row" spacing="2" wrap align="center">
-                    <sl-button variant="primary" loading>Deploying</sl-button>
-                    <sl-button variant="primary" disabled>Disabled</sl-button>
+                    <sl-button variant="solid" tone="accent" loading>Deploying</sl-button>
+                    <sl-button variant="solid" tone="accent" disabled>Disabled</sl-button>
                     <sl-button shortcut="⌘↵">Commit</sl-button>
+                    <sl-button pressed="true" start-icon="pencil">Toggle (on)</sl-button>
                     <div class="sl-button-group" role="group" aria-label="View">
-                      <button class="sl-button" aria-pressed="true">Day</button><button class="sl-button">Week</button><button class="sl-button">Month</button>
+                      <button class="sl-button sl-button--outlined sl-tone-neutral" aria-pressed="true">Day</button><button class="sl-button sl-button--outlined sl-tone-neutral">Week</button><button class="sl-button sl-button--outlined sl-tone-neutral">Month</button>
                     </div>
                   </sl-stack>
                 </div>
@@ -127,28 +124,38 @@
             <form id="demo-form">
               <sl-grid spacing="4">
                 <sl-grid-item xs="12" md="6">
-                  <sl-card heading="Project" subheading="Text fields">
+                  <sl-card title="Project" subtitle="Text fields">
                     <sl-stack spacing="4">
                       <sl-text-field label="Project name" name="project" value="slate-dashboard" helper-text="Lowercase, numbers and dashes." required></sl-text-field>
-                      <sl-text-field label="Owner email" name="email" type="email" value="aaron@" error="Enter a complete email address."></sl-text-field>
+                      <sl-text-field label="Owner email" name="email" input-type="email" value="aaron@" error="Enter a complete email address."></sl-text-field>
                       <sl-text-field label="Domain" name="domain" prefix="https://" suffix=".dev" value="slate"></sl-text-field>
                       <sl-text-field label="Notes" name="notes" multiline rows="3" placeholder="Anything reviewers should know"></sl-text-field>
-                      <sl-text-field label="Read-only token" value="sl_live_4f9a…" readonly size="sm"></sl-text-field>
+                      <sl-text-field label="Read-only token" value="sl_live_4f9a…" read-only size="small"></sl-text-field>
+                      <sl-text-field label="Filled · counter" variant="filled" max-length="40" counter value="Alloy"></sl-text-field>
+                      <sl-text-field label="Underlined · clearable" variant="underlined" clearable value="Clear me"></sl-text-field>
+                      <sl-text-field label="Custom adornments" input-type="number" value="24">
+                        <span slot="start-content">£</span><sl-badge slot="end-content" size="small">GBP</sl-badge>
+                      </sl-text-field>
                     </sl-stack>
                     <div slot="footer">
                       <sl-button type="reset" variant="ghost">Reset</sl-button>
-                      <sl-button type="submit" variant="primary">Create project</sl-button>
+                      <sl-button type="submit" variant="solid" tone="accent">Create project</sl-button>
                     </div>
                   </sl-card>
                 </sl-grid-item>
                 <sl-grid-item xs="12" md="6">
                   <sl-stack spacing="4">
-                    <sl-card heading="Choices" subheading="Checkbox & radio">
+                    <sl-card title="Choices" subtitle="Checkbox & radio">
                       <sl-stack spacing="3">
                         <sl-checkbox name="tests" checked label="Run tests before deploy"></sl-checkbox>
                         <sl-checkbox name="notify" checked label="Notify on failure" description="Sends to #builds and the commit author."></sl-checkbox>
                         <sl-checkbox name="merge" indeterminate label="Auto-merge when green"></sl-checkbox>
                         <sl-checkbox disabled label="Disabled option"></sl-checkbox>
+                        <sl-stack direction="row" spacing="4" wrap>
+                          <sl-checkbox checked tone="success" label="Success"></sl-checkbox>
+                          <sl-checkbox checked tone="danger" size="small" label="Danger · small"></sl-checkbox>
+                          <sl-checkbox checked tone="neutral" size="large" label="Neutral · large"></sl-checkbox>
+                        </sl-stack>
                         <sl-divider></sl-divider>
                         <sl-radio-group label="Plan" name="plan" value="team">
                           <sl-radio value="solo" label="Solo" description="Three projects"></sl-radio>
@@ -157,11 +164,12 @@
                         </sl-radio-group>
                       </sl-stack>
                     </sl-card>
-                    <sl-card heading="Settings" subheading="Switches">
+                    <sl-card title="Settings" subtitle="Switches">
                       <sl-stack spacing="3">
-                        <sl-switch spread name="preview" checked label="Preview deployments"></sl-switch>
-                        <sl-switch spread name="compact" label="Compact tables" description="Use 28px rows in data grids."></sl-switch>
-                        <sl-switch spread disabled label="Locked by admin"></sl-switch>
+                        <sl-switch spread label-placement="start" name="preview" checked label="Preview deployments"></sl-switch>
+                        <sl-switch spread label-placement="start" name="compact" label="Compact tables" description="Use 28px rows in data grids."></sl-switch>
+                        <sl-switch spread label-placement="start" disabled label="Locked by admin"></sl-switch>
+                        <sl-switch checked tone="success" label-placement="start" label="Label at start · success tone"></sl-switch>
                       </sl-stack>
                     </sl-card>
                   </sl-stack>
@@ -174,14 +182,19 @@
           <section class="demo-section" id="feedback">
             <div class="demo-section__head"><span class="demo-num">04</span><sl-text variant="h3" as="h2">Feedback</sl-text><sl-text tone="secondary">Status is never colour alone: every state pairs a hue with an icon and words.</sl-text></div>
             <sl-grid spacing="3">
-              <sl-grid-item xs="12" md="6"><sl-alert severity="info" heading="New tokens available">Pull v0.2 to get the updated focus ring.</sl-alert></sl-grid-item>
-              <sl-grid-item xs="12" md="6"><sl-alert severity="success" heading="Deployed to production">slate-web is live in 3 regions.</sl-alert></sl-grid-item>
-              <sl-grid-item xs="12" md="6"><sl-alert severity="warning" heading="Usage at 80%" dismissible>Build minutes reset on the 1st.</sl-alert></sl-grid-item>
-              <sl-grid-item xs="12" md="6"><sl-alert severity="error" heading="Build failed">3 tests failed in Slate.Wpf.Tests.<sl-button slot="actions" size="sm">View logs</sl-button></sl-alert></sl-grid-item>
+              <sl-grid-item xs="12" md="6"><sl-alert severity="info" title="New tokens available">Pull v0.2 to get the updated focus ring.</sl-alert></sl-grid-item>
+              <sl-grid-item xs="12" md="6"><sl-alert severity="success" title="Deployed to production">slate-web is live in 3 regions.</sl-alert></sl-grid-item>
+              <sl-grid-item xs="12" md="6"><sl-alert severity="warning" title="Usage at 80%" dismissible>Build minutes reset on the 1st.</sl-alert></sl-grid-item>
+              <sl-grid-item xs="12" md="6"><sl-alert severity="error" title="Build failed">3 tests failed in Slate.Wpf.Tests.<sl-button slot="actions" size="small">View logs</sl-button></sl-alert></sl-grid-item>
+            </sl-grid>
+            <sl-grid spacing="3">
+              <sl-grid-item xs="12" md="4"><sl-alert severity="info" variant="outlined" title="Outlined">Surface background, tone border.</sl-alert></sl-grid-item>
+              <sl-grid-item xs="12" md="4"><sl-alert severity="success" variant="solid" title="Solid">Filled with the tone.</sl-alert></sl-grid-item>
+              <sl-grid-item xs="12" md="4"><sl-alert severity="warning" dense icon="bell">Dense, with a custom icon.</sl-alert></sl-grid-item>
             </sl-grid>
             <sl-grid spacing="4">
               <sl-grid-item xs="12" md="6">
-                <sl-card heading="Badges & keys">
+                <sl-card title="Badges & keys">
                   <sl-stack spacing="3">
                     <sl-stack direction="row" spacing="2" wrap>
                       <sl-badge tone="success" dot>Ready</sl-badge>
@@ -191,17 +204,24 @@
                       <sl-badge tone="accent">New</sl-badge>
                       <sl-badge>Draft</sl-badge>
                     </sl-stack>
+                    <sl-stack direction="row" spacing="2" wrap>
+                      <sl-badge variant="solid" tone="success" icon="check">Solid</sl-badge>
+                      <sl-badge variant="outlined" tone="danger">Outlined</sl-badge>
+                      <sl-badge variant="solid" tone="neutral" size="small">Small</sl-badge>
+                    </sl-stack>
                     <sl-text tone="secondary">Open the command menu with <sl-kbd>⌘</sl-kbd> <sl-kbd>K</sl-kbd>.</sl-text>
                   </sl-stack>
                 </sl-card>
               </sl-grid-item>
               <sl-grid-item xs="12" md="6">
-                <sl-card heading="Progress">
+                <sl-card title="Progress">
                   <sl-stack spacing="4">
                     <div><sl-stack direction="row" justify="between"><sl-text variant="label">Uploading assets</sl-text><sl-text variant="mono" tone="tertiary" id="progress-label">64%</sl-text></sl-stack>
                       <sl-progress id="progress" value="64" label="Uploading assets"></sl-progress></div>
+                    <sl-progress value="72" tone="success" size="small" show-value label="Coverage"></sl-progress>
+                    <sl-progress value="91" tone="danger" size="large" show-value label="Disk usage"></sl-progress>
                     <div><sl-text variant="label">Indexing (indeterminate)</sl-text><sl-progress label="Indexing"></sl-progress></div>
-                    <sl-stack direction="row" spacing="4" align="center"><sl-spinner size="sm"></sl-spinner><sl-spinner></sl-spinner><sl-spinner size="lg"></sl-spinner></sl-stack>
+                    <sl-stack direction="row" spacing="4" align="center"><sl-spinner size="small"></sl-spinner><sl-spinner tone="accent"></sl-spinner><sl-spinner size="large" tone="success"></sl-spinner></sl-stack>
                   </sl-stack>
                 </sl-card>
               </sl-grid-item>
@@ -211,7 +231,7 @@
           <!-- Layout -->
           <section class="demo-section" id="layout">
             <div class="demo-section__head"><span class="demo-num">05</span><sl-text variant="h3" as="h2">Layout</sl-text><sl-text tone="secondary">App shell, container, 12-column grid, stack, card and toolbar — the same primitives on every platform.</sl-text></div>
-            <sl-card heading="Responsive grid" subheading="xs=12 · sm=6 · lg=3 — resize the window">
+            <sl-card title="Responsive grid" subtitle="xs=12 · sm=6 · lg=3 — resize the window">
               <sl-grid spacing="3">
                 <sl-grid-item xs="12" sm="6" lg="3"><div class="demo-cell">1</div></sl-grid-item>
                 <sl-grid-item xs="12" sm="6" lg="3"><div class="demo-cell">2</div></sl-grid-item>
@@ -223,48 +243,108 @@
             </sl-card>
             <sl-grid spacing="4">
               <sl-grid-item xs="12" md="4">
-                <sl-card heading="Deployments" subheading="Last 7 days">
-                  <sl-button slot="actions" icon="more-horizontal" label="Card actions" variant="ghost" size="sm"></sl-button>
+                <sl-card title="Deployments" subtitle="Last 7 days">
+                  <sl-button slot="header-actions" icon-only start-icon="more-horizontal" label="Card actions" variant="ghost" size="small"></sl-button>
                   <sl-text variant="h2">42s</sl-text><sl-text tone="tertiary" variant="caption">Median build time, −8s vs last week</sl-text>
-                  <div slot="footer"><sl-button size="sm">View all</sl-button></div>
+                  <div slot="footer"><sl-button size="small">View all</sl-button></div>
                 </sl-card>
               </sl-grid-item>
               <sl-grid-item xs="12" md="4">
-                <sl-card heading="Outlined" outlined><sl-text tone="secondary">Hairline instead of shadow — for dense dashboards.</sl-text></sl-card>
+                <sl-card title="Outlined" variant="outlined" radius="large"><sl-text tone="secondary">Hairline instead of shadow — for dense dashboards.</sl-text></sl-card>
               </sl-grid-item>
               <sl-grid-item xs="12" md="4">
-                <sl-card heading="Interactive" interactive id="interactive-card"><sl-text tone="secondary">Lifts on hover; focusable; click me.</sl-text></sl-card>
+                <sl-card title="Interactive" interactive id="interactive-card"><sl-text tone="secondary">Lifts on hover; focusable; click me.</sl-text></sl-card>
               </sl-grid-item>
             </sl-grid>
             <sl-toolbar label="Formatting">
-              <sl-button variant="ghost" size="sm" icon="copy" label="Copy"></sl-button>
-              <sl-button variant="ghost" size="sm" icon="pencil" label="Edit"></sl-button>
+              <sl-button variant="ghost" size="small" icon-only start-icon="copy" label="Copy"></sl-button>
+              <sl-button variant="ghost" size="small" icon-only start-icon="pencil" label="Edit"></sl-button>
               <sl-divider vertical></sl-divider>
-              <sl-button variant="ghost" size="sm" icon="download" label="Download"></sl-button>
-              <sl-button variant="ghost" size="sm" icon="trash" label="Delete"></sl-button>
+              <sl-button variant="ghost" size="small" icon-only start-icon="download" label="Download"></sl-button>
+              <sl-button variant="ghost" size="small" icon-only start-icon="trash" label="Delete"></sl-button>
             </sl-toolbar>
+          </section>
+
+          <!-- Theming -->
+          <section class="demo-section" id="theming">
+            <div class="demo-section__head"><span class="demo-num">06</span><sl-text variant="h3" as="h2">Theming</sl-text><sl-text tone="secondary">createTheme() derives an accessible accent from any brand colour (lightness only), scales radii and swaps fonts — byte-identical to Slate.Core's ThemeBuilder. The whole page follows.</sl-text></div>
+            <sl-grid spacing="4">
+              <sl-grid-item xs="12" md="5">
+                <sl-card title="Theme options" subtitle="&lt;sl-provider&gt;.themeOptions">
+                  <sl-stack spacing="4">
+                    <div><p class="demo-cap">Accent</p>
+                      <div class="demo-presets" id="accent-presets"></div>
+                    </div>
+                    <sl-text-field id="accent-hex" label="Brand colour" placeholder="#0E5E6F" helper-text="Any #RRGGBB — contrast is guaranteed." clearable></sl-text-field>
+                    <div>
+                      <label class="sl-field__label" for="radius-scale">Radius scale <span class="demo-mono" id="radius-value">1.0×</span></label>
+                      <input id="radius-scale" class="demo-range" type="range" min="0" max="2.5" step="0.25" value="1" />
+                    </div>
+                    <div>
+                      <label class="sl-field__label" for="font-family">Font</label>
+                      <select id="font-family" class="demo-select">
+                        <option value="">Instrument Sans (Alloy)</option>
+                        <option value="system-ui, sans-serif">System UI</option>
+                        <option value="Georgia, serif">Georgia (serif)</option>
+                        <option value="'IBM Plex Mono', monospace">IBM Plex Mono</option>
+                      </select>
+                    </div>
+                    <sl-radio-group id="theme-base" label="Base" direction="row" value="">
+                      <sl-radio value="" label="Follow mode"></sl-radio>
+                      <sl-radio value="light" label="Light"></sl-radio>
+                      <sl-radio value="dark" label="Dark"></sl-radio>
+                    </sl-radio-group>
+                  </sl-stack>
+                  <div slot="footer"><sl-button variant="ghost" id="theme-reset">Reset to Alloy</sl-button><sl-button variant="solid" tone="accent" id="theme-copy" start-icon="copy">Copy CSS</sl-button></div>
+                </sl-card>
+              </sl-grid-item>
+              <sl-grid-item xs="12" md="7">
+                <sl-card title="Changed tokens" subtitle="theme.changedPaths" flush>
+                  <pre class="demo-code" id="theme-css">/* Alloy defaults — pick a colour */</pre>
+                </sl-card>
+              </sl-grid-item>
+            </sl-grid>
+          </section>
+
+          <!-- Playground -->
+          <section class="demo-section" id="playground">
+            <div class="demo-section__head"><span class="demo-num">07</span><sl-text variant="h3" as="h2">Playground</sl-text><sl-text tone="secondary">Every option below is generated from design/api/components.json — the canonical API every platform implements.</sl-text></div>
+            <div id="playgrounds" class="demo-playgrounds"></div>
+            <sl-card title="App-wide defaults" subtitle="configureDefaults()">
+              <sl-stack direction="row" spacing="4" wrap align="end">
+                <div><label class="sl-field__label" for="def-button-variant">Button variant</label>
+                  <select id="def-button-variant" class="demo-select" data-default="button.variant"><option>outlined</option><option>solid</option><option>soft</option><option>ghost</option></select></div>
+                <div><label class="sl-field__label" for="def-button-size">Button size</label>
+                  <select id="def-button-size" class="demo-select" data-default="button.size"><option>medium</option><option>small</option><option>large</option></select></div>
+                <div><label class="sl-field__label" for="def-field-variant">Field variant</label>
+                  <select id="def-field-variant" class="demo-select" data-default="field.variant"><option>outlined</option><option>filled</option><option>underlined</option></select></div>
+                <div><label class="sl-field__label" for="def-card-variant">Card variant</label>
+                  <select id="def-card-variant" class="demo-select" data-default="card.variant"><option>elevated</option><option>outlined</option><option>flat</option></select></div>
+              </sl-stack>
+              <sl-text tone="tertiary" variant="caption">Components without an explicit value update immediately — try it and scroll back up.</sl-text>
+            </sl-card>
           </section>
 
           <!-- Snackbars -->
           <section class="demo-section" id="snackbars">
-            <div class="demo-section__head"><span class="demo-num">06</span><sl-text variant="h3" as="h2">Snackbars</sl-text><sl-text tone="secondary">Queued (max 3 visible), de-duplicated, paused on hover or focus. Errors linger longer; actions get at least 8s.</sl-text></div>
+            <div class="demo-section__head"><span class="demo-num">08</span><sl-text variant="h3" as="h2">Snackbars</sl-text><sl-text tone="secondary">Queued (max 3 visible), de-duplicated, paused on hover or focus. Errors linger longer; actions get at least 8s.</sl-text></div>
             <sl-card>
               <sl-stack spacing="4">
                 <sl-stack direction="row" spacing="2" wrap>
                   <sl-button data-snack="normal">Normal</sl-button>
-                  <sl-button data-snack="info" icon-start="info">Info</sl-button>
-                  <sl-button data-snack="success" icon-start="check-circle">Success</sl-button>
-                  <sl-button data-snack="warning" icon-start="alert-triangle">Warning</sl-button>
-                  <sl-button data-snack="error" icon-start="alert-circle">Error</sl-button>
+                  <sl-button data-snack="info" start-icon="info">Info</sl-button>
+                  <sl-button data-snack="success" start-icon="check-circle">Success</sl-button>
+                  <sl-button data-snack="warning" start-icon="alert-triangle">Warning</sl-button>
+                  <sl-button data-snack="error" start-icon="alert-circle">Error</sl-button>
                 </sl-stack>
                 <sl-stack direction="row" spacing="2" wrap>
-                  <sl-button data-snack="action" variant="primary" icon-start="trash">Delete with undo</sl-button>
+                  <sl-button data-snack="action" variant="solid" tone="accent" start-icon="trash">Delete with undo</sl-button>
                   <sl-button data-snack="sticky">Sticky (requires interaction)</sl-button>
                   <sl-button data-snack="burst">Burst of 6 (queueing)</sl-button>
                   <sl-button data-snack="duplicate">Duplicate ×3</sl-button>
                   <sl-button data-snack="clear" variant="ghost">Clear all</sl-button>
                 </sl-stack>
-                <sl-radio-group id="snack-position" label="Position" orientation="horizontal" value="bottom-right">
+                <sl-radio-group id="snack-position" label="Position" direction="row" value="bottom-right">
                   <sl-radio value="top-left" label="Top left"></sl-radio>
                   <sl-radio value="top-center" label="Top center"></sl-radio>
                   <sl-radio value="top-right" label="Top right"></sl-radio>
@@ -278,28 +358,28 @@
 
           <!-- Dialogs -->
           <section class="demo-section" id="dialogs">
-            <div class="demo-section__head"><span class="demo-num">07</span><sl-text variant="h3" as="h2">Dialogs</sl-text><sl-text tone="secondary">Modal, stackable, focus-managed. Escape and scrim clicks cancel only when allowed.</sl-text></div>
+            <div class="demo-section__head"><span class="demo-num">09</span><sl-text variant="h3" as="h2">Dialogs</sl-text><sl-text tone="secondary">Modal, stackable, focus-managed. Escape and scrim clicks cancel only when allowed.</sl-text></div>
             <sl-card>
               <sl-stack direction="row" spacing="2" wrap>
-                <sl-button data-dialog="form" variant="primary" icon-start="pencil">Form dialog</sl-button>
+                <sl-button data-dialog="form" variant="solid" tone="accent" start-icon="pencil">Form dialog</sl-button>
                 <sl-button data-dialog="confirm">Confirm</sl-button>
-                <sl-button data-dialog="destructive" variant="danger" icon-start="trash">Destructive</sl-button>
+                <sl-button data-dialog="destructive" tone="danger" start-icon="trash">Destructive</sl-button>
                 <sl-button data-dialog="alert">Acknowledge</sl-button>
                 <sl-button data-dialog="stacked">Stacked dialogs</sl-button>
                 <sl-button data-dialog="declarative">Declarative &lt;sl-dialog&gt;</sl-button>
               </sl-stack>
             </sl-card>
-            <sl-dialog id="declarative" heading="Invite your team" description="Slate is better together. We'll email each person a link." icon="user" width="md" placement="top">
+            <sl-dialog id="declarative" title="Invite your team" description="Slate is better together. We'll email each person a link." icon="user" max-width="md" placement="top" tone="accent">
               <sl-stack spacing="4">
                 <sl-text-field label="Email addresses" placeholder="ada@example.com, grace@example.com" autofocus></sl-text-field>
-                <sl-radio-group label="Role" value="editor" orientation="horizontal">
+                <sl-radio-group label="Role" value="editor" direction="row">
                   <sl-radio value="viewer" label="Viewer"></sl-radio>
                   <sl-radio value="editor" label="Editor"></sl-radio>
                   <sl-radio value="admin" label="Admin"></sl-radio>
                 </sl-radio-group>
               </sl-stack>
               <sl-button slot="footer" data-close>Cancel</sl-button>
-              <sl-button slot="footer" variant="primary" data-accept>Send invites</sl-button>
+              <sl-button slot="footer" variant="solid" tone="accent" data-accept>Send invites</sl-button>
             </sl-dialog>
           </section>
 

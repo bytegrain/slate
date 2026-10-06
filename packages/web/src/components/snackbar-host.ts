@@ -45,6 +45,10 @@ export class SlSnackbarHost extends LitElement {
     this.leaving = [];
   }
 
+  get resolved(): { position: SnackbarPosition } {
+    return { position: this.position ?? this.service.configuration.position };
+  }
+
   private get queue(): SnackbarQueue {
     return this.service.queue;
   }

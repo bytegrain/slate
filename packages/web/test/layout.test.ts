@@ -130,8 +130,9 @@ describe('grid, stack and friends', () => {
   });
 
   it('container sizes', async () => {
-    const el = await fixture('<sl-container size="md"></sl-container>');
+    const el = await fixture('<sl-container max-width="md" gutters="false"></sl-container>');
     expect($(el, '.sl-container').className).toContain('sl-container--md');
+    expect($(el, '.sl-container').className).toContain('sl-container--no-gutters');
   });
 
   it('divider exposes separator semantics', async () => {
@@ -146,8 +147,8 @@ describe('grid, stack and friends', () => {
     expect($(bare, '.sl-card__header').hidden).toBe(true);
     expect($(bare, '.sl-card__footer').hidden).toBe(true);
 
-    const full = await fixture<SlCard>(`<sl-card heading="Deployments" subheading="Last 7 days" outlined interactive>
-        <button slot="actions">More</button>Body<div slot="footer">Footer</div></sl-card>`);
+    const full = await fixture<SlCard>(`<sl-card title="Deployments" subtitle="Last 7 days" variant="outlined" interactive>
+        <button slot="header-actions">More</button>Body<div slot="footer">Footer</div></sl-card>`);
     expect($(full, '.sl-card__header').hidden).toBe(false);
     expect($(full, '.sl-card__title').textContent).toBe('Deployments');
     expect($(full, '.sl-card__footer').hidden).toBe(false);
