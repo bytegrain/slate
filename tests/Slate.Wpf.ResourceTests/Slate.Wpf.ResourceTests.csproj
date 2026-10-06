@@ -1,12 +1,30 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Plain net10.0: validates Slate.Wpf's XAML as XML so it runs on every OS (the WPF runtime tests are Windows-only). -->
+  <!-- Plain net10.0: validates Slate.Wpf's XAML and compiled API metadata so it runs on every OS
+       (the WPF runtime tests are Windows-only). Slate.Wpf is built first; its metadata is read with
+       MetadataLoadContext against the WindowsDesktop reference pack, so nothing WPF has to execute. -->
   <ItemGroup>
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="System.Reflection.MetadataLoadContext" VersionOverride="10.0.12" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Build order only: the test reads ../../src/Slate.Wpf/bin/<config>/net10.0-windows/Slate.Wpf.dll. -->
+    <ProjectReference Include="..\..\src\Slate.Wpf\Slate.Wpf.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true"
+                      SetTargetFramework="TargetFramework=net10.0-windows" />
+  </ItemGroup>
+  <PropertyGroup>
+    <!-- Lets the test locate the matching build of Slate.Wpf. -->
+    <SlateConfiguration>$(Configuration)</SlateConfiguration>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>SlateConfiguration</_Parameter1>
+      <_Parameter2>$(Configuration)</_Parameter2>
+    </AssemblyAttribute>
   </ItemGroup>
 </Project>

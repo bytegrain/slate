@@ -4,9 +4,6 @@ using Slate.Layout;
 
 namespace Slate.Wpf;
 
-public enum StackAlign { Start, Center, End, Stretch }
-public enum StackJustify { Start, Center, End, Between }
-
 /// <summary>Spacing values are space-token steps: px = step × 4 (2 → 8px, 0.5 → 2px, 6 → 24px).</summary>
 public static class Spacing
 {
@@ -14,14 +11,14 @@ public static class Spacing
 }
 
 /// <summary>
-/// One-dimensional layout with token spacing (docs/design/layout.md#stack).
-/// <see cref="Spacer"/> children share leftover space along the main axis.
+/// One-dimensional layout with token spacing (docs/design/layout.md#stack). <see cref="Spacer"/> children share
+/// leftover space along the main axis. With <see cref="Wrap"/>, rows/columns wrap when they run out of room.
 /// </summary>
 public class Stack : Panel
 {
-    public static readonly DependencyProperty OrientationProperty = DependencyProperty.Register(
-        nameof(Orientation), typeof(Orientation), typeof(Stack),
-        new FrameworkPropertyMetadata(Orientation.Vertical, FrameworkPropertyMetadataOptions.AffectsMeasure));
+    public static readonly DependencyProperty DirectionProperty = DependencyProperty.Register(
+        nameof(Direction), typeof(Direction), typeof(Stack),
+        new FrameworkPropertyMetadata(Direction.Column, FrameworkPropertyMetadataOptions.AffectsMeasure));
 
     public static readonly DependencyProperty SpacingProperty = DependencyProperty.Register(
         nameof(Spacing), typeof(double), typeof(Stack),
@@ -35,38 +32,72 @@ public class Stack : Panel
         nameof(Justify), typeof(StackJustify), typeof(Stack),
         new FrameworkPropertyMetadata(StackJustify.Start, FrameworkPropertyMetadataOptions.AffectsArrange));
 
-    public Orientation Orientation { get => (Orientation)GetValue(OrientationProperty); set => SetValue(OrientationProperty, value); }
+    public static readonly DependencyProperty WrapProperty = DependencyProperty.Register(
+        nameof(Wrap), typeof(bool), typeof(Stack),
+        new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsMeasure));
+
+    /// <summary>Column (default, vertical) or Row (horizontal).</summary>
+    public Direction Direction { get => (Direction)GetValue(DirectionProperty); set => SetValue(DirectionProperty, value); }
 
     /// <summary>Gap between children as a space-token step (default 2 = 8px).</summary>
     public double Spacing { get => (double)GetValue(SpacingProperty); set => SetValue(SpacingProperty, value); }
 
-    /// <summary>Cross-axis alignment.</summary>
+    /// <summary>Cross-axis alignment (Baseline aligns like Start).</summary>
     public StackAlign Align { get => (StackAlign)GetValue(AlignProperty); set => SetValue(AlignProperty, value); }
 
     /// <summary>Main-axis distribution of leftover space (ignored when a Spacer is present).</summary>
     public StackJustify Justify { get => (StackJustify)GetValue(JustifyProperty); set => SetValue(JustifyProperty, value); }
 
-    private bool Horizontal => Orientation == Orientation.Horizontal;
+    /// <summary>Wrap children onto further lines when the main axis runs out of space.</summary>
+    public bool Wrap { get => (bool)GetValue(WrapProperty); set => SetValue(WrapProperty, value); }
+
+    private bool Horizontal => Direction == Direction.Row;
 
     private List<UIElement> Visible() => InternalChildren.Cast<UIElement>().Where(c => c.Visibility != Visibility.Collapsed).ToList();
+
+    private double MainOf(Size s) => Horizontal ? s.Width : s.Height;
+    private double CrossOf(Size s) => Horizontal ? s.Height : s.Width;
+
+    /// <summary>Splits children into lines (one line unless wrapping).</summary>
+    private List<List<UIElement>> Lines(List<UIElement> children, double mainLimit, double gap)
+    {
+        var lines = new List<List<UIElement>> { new() };
+        double used = 0;
+        foreach (var child in children)
+        {
+            var size = MainOf(child.DesiredSize);
+            var line = lines[^1];
+            if (Wrap && line.Count > 0 && used + gap + size > mainLimit)
+            {
+                lines.Add(line = new());
+                used = 0;
+            }
+            used += (line.Count > 0 ? gap : 0) + size;
+            line.Add(child);
+        }
+        return lines;
+    }
 
     protected override Size MeasureOverride(Size available)
     {
         var children = Visible();
         var gap = Wpf.Spacing.ToPixels(Spacing);
-        double main = 0, cross = 0;
-        var childConstraint = Horizontal ? new Size(double.PositiveInfinity, available.Height) : new Size(available.Width, double.PositiveInfinity);
+        var childConstraint = Horizontal
+            ? new Size(Wrap ? available.Width : double.PositiveInfinity, available.Height)
+            : new Size(available.Width, Wrap ? available.Height : double.PositiveInfinity);
 
         foreach (UIElement child in InternalChildren)
             child.Measure(childConstraint);
 
-        foreach (var child in children)
+        var lines = Lines(children, MainOf(available), gap);
+        double main = 0, cross = 0;
+        foreach (var line in lines)
         {
-            var d = child.DesiredSize;
-            main += Horizontal ? d.Width : d.Height;
-            cross = Math.Max(cross, Horizontal ? d.Height : d.Width);
+            var lineMain = line.Sum(c => MainOf(c.DesiredSize)) + gap * Math.Max(0, line.Count - 1);
+            main = Math.Max(main, lineMain);
+            cross += line.Count == 0 ? 0 : line.Max(c => CrossOf(c.DesiredSize));
         }
-        main += gap * Math.Max(0, children.Count - 1);
+        cross += gap * Math.Max(0, lines.Count(l => l.Count > 0) - 1);
         return Horizontal ? new Size(main, cross) : new Size(cross, main);
     }
 
@@ -74,10 +105,24 @@ public class Stack : Panel
     {
         var children = Visible();
         var gap = Wpf.Spacing.ToPixels(Spacing);
-        var mainSize = Horizontal ? final.Width : final.Height;
-        var crossSize = Horizontal ? final.Height : final.Width;
+        var mainSize = MainOf(final);
+        var lines = Lines(children, mainSize, gap);
+        var single = lines.Count == 1;
+        double crossOffsetOfLine = 0;
 
-        double used = children.Sum(c => Horizontal ? c.DesiredSize.Width : c.DesiredSize.Height) + gap * Math.Max(0, children.Count - 1);
+        foreach (var line in lines)
+        {
+            if (line.Count == 0) continue;
+            var lineCross = single ? CrossOf(final) : line.Max(c => CrossOf(c.DesiredSize));
+            ArrangeLine(line, gap, mainSize, crossOffsetOfLine, lineCross);
+            crossOffsetOfLine += lineCross + gap;
+        }
+        return final;
+    }
+
+    private void ArrangeLine(List<UIElement> children, double gap, double mainSize, double crossStart, double crossSize)
+    {
+        double used = children.Sum(c => MainOf(c.DesiredSize)) + gap * Math.Max(0, children.Count - 1);
         var free = Math.Max(0, mainSize - used);
         var spacers = children.Count(c => c is Spacer);
 
@@ -95,9 +140,9 @@ public class Stack : Panel
         foreach (var child in children)
         {
             var d = child.DesiredSize;
-            var length = (Horizontal ? d.Width : d.Height) + (child is Spacer && spacers > 0 ? free / spacers : 0);
-            var childCross = Align == StackAlign.Stretch ? crossSize : Math.Min(crossSize, Horizontal ? d.Height : d.Width);
-            var crossOffset = Align switch
+            var length = MainOf(d) + (child is Spacer && spacers > 0 ? free / spacers : 0);
+            var childCross = Align == StackAlign.Stretch ? crossSize : Math.Min(crossSize, CrossOf(d));
+            var crossOffset = crossStart + Align switch
             {
                 StackAlign.Center => (crossSize - childCross) / 2,
                 StackAlign.End => crossSize - childCross,
@@ -109,7 +154,6 @@ public class Stack : Panel
                 : new Rect(crossOffset, position, childCross, length));
             position += length + gap + extraGap;
         }
-        return final;
     }
 }
 
@@ -118,22 +162,26 @@ public class Spacer : FrameworkElement
 {
 }
 
-public enum ContainerSize { Sm, Md, Lg, Xl, Fluid }
-
-/// <summary>Centres content with a token max width and responsive side padding (16px, 24px from sm).</summary>
+/// <summary>
+/// Centres content with a token max width and responsive side gutters (16px, 24px from sm).
+/// The contract's <c>MaxWidth</c> option is <see cref="ContainerMaxWidth"/> here because FrameworkElement.MaxWidth already exists.
+/// </summary>
 public class Container : ContentControl
 {
-    public static readonly DependencyProperty SizeProperty = DependencyProperty.Register(
-        nameof(Size), typeof(ContainerSize), typeof(Container),
-        new FrameworkPropertyMetadata(ContainerSize.Lg, FrameworkPropertyMetadataOptions.AffectsMeasure,
-            (d, e) => d.SetValue(ContentMaxWidthPropertyKey, MaxContentWidth((ContainerSize)e.NewValue))));
+    public static readonly DependencyProperty ContainerMaxWidthProperty = DependencyProperty.Register(
+        nameof(ContainerMaxWidth), typeof(ContainerWidth), typeof(Container),
+        new FrameworkPropertyMetadata(ContainerWidth.Lg, FrameworkPropertyMetadataOptions.AffectsMeasure,
+            (d, e) => d.SetValue(ContentMaxWidthPropertyKey, MaxContentWidth((ContainerWidth)e.NewValue))));
+
+    public static readonly DependencyProperty GuttersProperty = DependencyProperty.Register(
+        nameof(Gutters), typeof(bool), typeof(Container), new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsMeasure));
 
     private static readonly DependencyPropertyKey ContentMaxWidthPropertyKey = DependencyProperty.RegisterReadOnly(
         nameof(ContentMaxWidth), typeof(double), typeof(Container), new FrameworkPropertyMetadata(SlateTokens.Container.Lg));
 
     public static readonly DependencyProperty ContentMaxWidthProperty = ContentMaxWidthPropertyKey.DependencyProperty;
 
-    /// <summary>Max width of the content for the current <see cref="Size"/> (used by the template).</summary>
+    /// <summary>Max width of the content in px for the current <see cref="ContainerMaxWidth"/> (used by the template).</summary>
     public double ContentMaxWidth => (double)GetValue(ContentMaxWidthProperty);
 
     static Container()
@@ -143,20 +191,24 @@ public class Container : ContentControl
         FocusableProperty.OverrideMetadata(typeof(Container), new FrameworkPropertyMetadata(false));
     }
 
-    public ContainerSize Size { get => (ContainerSize)GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
+    /// <summary>Sm, Md, Lg (default), Xl or Fluid (no max width).</summary>
+    public ContainerWidth ContainerMaxWidth { get => (ContainerWidth)GetValue(ContainerMaxWidthProperty); set => SetValue(ContainerMaxWidthProperty, value); }
 
-    public static double MaxContentWidth(ContainerSize size) => size switch
+    /// <summary>Responsive side padding (default true).</summary>
+    public bool Gutters { get => (bool)GetValue(GuttersProperty); set => SetValue(GuttersProperty, value); }
+
+    public static double MaxContentWidth(ContainerWidth width) => width switch
     {
-        ContainerSize.Sm => SlateTokens.Container.Sm,
-        ContainerSize.Md => SlateTokens.Container.Md,
-        ContainerSize.Lg => SlateTokens.Container.Lg,
-        ContainerSize.Xl => SlateTokens.Container.Xl,
+        ContainerWidth.Sm => SlateTokens.Container.Sm,
+        ContainerWidth.Md => SlateTokens.Container.Md,
+        ContainerWidth.Lg => SlateTokens.Container.Lg,
+        ContainerWidth.Xl => SlateTokens.Container.Xl,
         _ => double.PositiveInfinity,
     };
 
     protected override Size MeasureOverride(Size constraint)
     {
-        var pad = constraint.Width >= SlateTokens.Breakpoint.Sm ? SlateTokens.Space._6 : SlateTokens.Space._4;
+        var pad = !Gutters ? 0 : constraint.Width >= SlateTokens.Breakpoint.Sm ? SlateTokens.Space._6 : SlateTokens.Space._4;
         Padding = new Thickness(pad, 0, pad, 0);
         return base.MeasureOverride(constraint);
     }

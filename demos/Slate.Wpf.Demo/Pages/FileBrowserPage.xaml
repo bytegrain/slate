@@ -15,37 +15,37 @@
     <!-- Toolbar -->
     <Border DockPanel.Dock="Top" Background="{DynamicResource Sl.Brush.Background.Surface}" BorderBrush="{DynamicResource Sl.Brush.Border.Default}"
             BorderThickness="0,0,0,1" Padding="12,8">
-      <sl:Stack Orientation="Horizontal" Spacing="1" Align="Center">
-        <Button sl:Ui.Variant="Ghost" sl:Ui.Icon="arrow-left" AutomationProperties.Name="Back" ToolTip="Back (Alt+Left)" />
-        <Button sl:Ui.Variant="Ghost" sl:Ui.Icon="arrow-right" AutomationProperties.Name="Forward" IsEnabled="False" />
-        <Button sl:Ui.Variant="Ghost" sl:Ui.Icon="chevron-up" AutomationProperties.Name="Up one level" />
+      <sl:Stack Direction="Row" Spacing="1" Align="Center">
+        <Button sl:Sl.Variant="Ghost" sl:Sl.StartIcon="arrow-left" AutomationProperties.Name="Back" ToolTip="Back (Alt+Left)" />
+        <Button sl:Sl.Variant="Ghost" sl:Sl.StartIcon="arrow-right" AutomationProperties.Name="Forward" IsEnabled="False" />
+        <Button sl:Sl.Variant="Ghost" sl:Sl.StartIcon="chevron-up" AutomationProperties.Name="Up one level" />
         <Border Margin="8,0" Height="30" CornerRadius="{DynamicResource Sl.CornerRadius.Md}" Background="{DynamicResource Sl.Brush.Background.Sunken}"
                 BorderBrush="{DynamicResource Sl.Brush.Border.Strong}" BorderThickness="1" Padding="4,0" MinWidth="360">
           <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
             <sl:Icon Kind="folder" Size="14" Margin="6,0,4,0" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
-            <Button sl:Ui.Variant="Ghost" sl:Ui.Size="Small" Content="Projects" />
+            <Button sl:Sl.Variant="Ghost" sl:Sl.Size="Small" Content="Projects" />
             <sl:Icon Kind="chevron-right" Size="12" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" VerticalAlignment="Center" />
-            <Button sl:Ui.Variant="Ghost" sl:Ui.Size="Small" Content="slate" />
+            <Button sl:Sl.Variant="Ghost" sl:Sl.Size="Small" Content="slate" />
             <sl:Icon Kind="chevron-right" Size="12" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" VerticalAlignment="Center" />
-            <Button sl:Ui.Variant="Ghost" sl:Ui.Size="Small" Content="assets" FontWeight="{DynamicResource Sl.Font.Weight.Semibold}" />
+            <Button sl:Sl.Variant="Ghost" sl:Sl.Size="Small" Content="assets" FontWeight="{DynamicResource Sl.Font.Weight.Semibold}" />
           </StackPanel>
         </Border>
         <sl:Spacer />
         <Border Style="{DynamicResource Sl.Segmented}" VerticalAlignment="Center">
           <StackPanel Orientation="Horizontal">
-            <RadioButton Style="{DynamicResource Sl.SegmentedItem}" GroupName="View" Content="List" sl:Ui.Icon="menu" IsChecked="True" />
-            <RadioButton Style="{DynamicResource Sl.SegmentedItem}" GroupName="View" Content="Grid" sl:Ui.Icon="layers" />
+            <RadioButton Style="{DynamicResource Sl.SegmentedItem}" GroupName="View" Content="List" sl:Sl.StartIcon="menu" IsChecked="True" />
+            <RadioButton Style="{DynamicResource Sl.SegmentedItem}" GroupName="View" Content="Grid" sl:Sl.StartIcon="layers" />
           </StackPanel>
         </Border>
-        <Button sl:Ui.Icon="plus" Content="New folder" Margin="8,0,0,0" />
-        <Button sl:Ui.Variant="Primary" sl:Ui.Icon="external-link" Content="Share" Click="OnShare" />
+        <Button sl:Sl.StartIcon="plus" Content="New folder" Margin="8,0,0,0" />
+        <Button sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" sl:Sl.StartIcon="external-link" Content="Share" Click="OnShare" />
       </sl:Stack>
     </Border>
 
     <!-- Status bar -->
     <Border DockPanel.Dock="Bottom" Height="30" Background="{DynamicResource Sl.Brush.Background.Subtle}" BorderBrush="{DynamicResource Sl.Brush.Border.Default}"
             BorderThickness="0,1,0,0" Padding="12,0">
-      <sl:Stack Orientation="Horizontal" Spacing="4" Align="Center">
+      <sl:Stack Direction="Row" Spacing="4" Align="Center">
         <TextBlock x:Name="StatusText" FontSize="{DynamicResource Sl.Font.Size.Xs}" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
         <sl:Spacer />
         <TextBlock FontSize="{DynamicResource Sl.Font.Size.Xs}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" Text="Copying 2 of 7 to \\fs01\archive" />
@@ -91,10 +91,10 @@
             </StackPanel>
           </Grid>
           <sl:Divider />
-          <sl:Stack Orientation="Horizontal" Spacing="2">
-            <Button sl:Ui.Icon="download" Content="Download" />
-            <Button sl:Ui.Icon="copy" AutomationProperties.Name="Copy path" ToolTip="Copy path" />
-            <Button sl:Ui.Variant="Danger" sl:Ui.Icon="trash" AutomationProperties.Name="Delete" ToolTip="Delete" Click="OnDelete" />
+          <sl:Stack Direction="Row" Spacing="2">
+            <Button sl:Sl.StartIcon="download" Content="Download" />
+            <Button sl:Sl.StartIcon="copy" AutomationProperties.Name="Copy path" ToolTip="Copy path" />
+            <Button sl:Sl.Tone="Danger" sl:Sl.StartIcon="trash" AutomationProperties.Name="Delete" ToolTip="Delete" Click="OnDelete" />
           </sl:Stack>
         </sl:Stack>
       </ScrollViewer>
@@ -127,15 +127,15 @@
       <ListBox x:Name="Files" Grid.Row="1" SelectionMode="Extended" SelectionChanged="OnSelectionChanged" AutomationProperties.Name="Files">
         <ListBox.ContextMenu>
           <ContextMenu>
-            <MenuItem Header="Open" sl:Ui.Icon="external-link" InputGestureText="Enter" />
-            <MenuItem Header="Rename" sl:Ui.Icon="pencil" InputGestureText="F2" />
-            <MenuItem Header="Copy path" sl:Ui.Icon="copy" InputGestureText="Ctrl+Shift+C" />
+            <MenuItem Header="Open" sl:Sl.StartIcon="external-link" InputGestureText="Enter" />
+            <MenuItem Header="Rename" sl:Sl.StartIcon="pencil" InputGestureText="F2" />
+            <MenuItem Header="Copy path" sl:Sl.StartIcon="copy" InputGestureText="Ctrl+Shift+C" />
             <MenuItem Header="Move to">
               <MenuItem Header="archive" />
               <MenuItem Header="builds" />
             </MenuItem>
             <Separator />
-            <MenuItem Header="Delete" sl:Ui.Icon="trash" sl:Ui.Variant="Danger" InputGestureText="Del" Click="OnDelete" />
+            <MenuItem Header="Delete" sl:Sl.StartIcon="trash" sl:Sl.Tone="Danger" InputGestureText="Del" Click="OnDelete" />
           </ContextMenu>
         </ListBox.ContextMenu>
         <ListBox.ItemTemplate>

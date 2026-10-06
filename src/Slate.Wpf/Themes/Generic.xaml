@@ -23,12 +23,12 @@
         <ControlTemplate TargetType="Button">
           <Border x:Name="Bd" CornerRadius="5" Background="Transparent" Padding="{TemplateBinding Padding}">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-              <sl:Icon x:Name="Icon" Size="14" Kind="{Binding Path=(sl:Ui.Icon), RelativeSource={RelativeSource TemplatedParent}}" />
+              <sl:Icon x:Name="Icon" Size="14" Kind="{Binding Path=(sl:Sl.StartIcon), RelativeSource={RelativeSource TemplatedParent}}" />
               <ContentPresenter x:Name="Label" RecognizesAccessKey="True" VerticalAlignment="Center" />
             </StackPanel>
           </Border>
           <ControlTemplate.Triggers>
-            <Trigger Property="sl:Ui.Icon" Value="{x:Null}">
+            <Trigger Property="sl:Sl.StartIcon" Value="{x:Null}">
               <Setter TargetName="Icon" Property="Visibility" Value="Collapsed" />
             </Trigger>
             <Trigger Property="Content" Value="{x:Null}">
@@ -68,10 +68,39 @@
                           HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}" />
             <TextBlock x:Name="Placeholder" Padding="2,0" IsHitTestVisible="False" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                        Foreground="{DynamicResource Sl.Brush.Text.Placeholder}" TextTrimming="CharacterEllipsis" Visibility="Collapsed"
-                       Text="{Binding Path=(sl:Ui.Placeholder), RelativeSource={RelativeSource TemplatedParent}}" />
+                       Text="{Binding Path=(sl:Sl.Placeholder), RelativeSource={RelativeSource TemplatedParent}}" />
           </Grid>
           <ControlTemplate.Triggers>
-            <Trigger Property="sl:Ui.IsEmpty" Value="True">
+            <Trigger Property="sl:Sl.Empty" Value="True">
+              <Setter TargetName="Placeholder" Property="Visibility" Value="Visible" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- Borderless PasswordBox used inside TextField when InputType is Password. -->
+  <Style x:Key="Sl.PasswordBox.Bare" TargetType="PasswordBox">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="CaretBrush" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="SelectionBrush" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+    <Setter Property="SelectionOpacity" Value="0.3" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="PasswordBox">
+          <Grid Background="Transparent">
+            <ScrollViewer x:Name="PART_ContentHost" Focusable="False" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+            <TextBlock x:Name="Placeholder" Padding="2,0" IsHitTestVisible="False" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                       Foreground="{DynamicResource Sl.Brush.Text.Placeholder}" TextTrimming="CharacterEllipsis" Visibility="Collapsed"
+                       Text="{Binding Path=(sl:Sl.Placeholder), RelativeSource={RelativeSource TemplatedParent}}" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="sl:Sl.Empty" Value="True">
               <Setter TargetName="Placeholder" Property="Visibility" Value="Visible" />
             </Trigger>
           </ControlTemplate.Triggers>
@@ -150,70 +179,59 @@
   </Style>
 
   <Style TargetType="sl:Badge">
-    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Subtle}" />
-    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Secondary}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.Default}" />
+    <Setter Property="Background" Value="{Binding Path=(sl:Sl.ChromeBackground), RelativeSource={RelativeSource Self}}" />
+    <Setter Property="Foreground" Value="{Binding Path=(sl:Sl.ChromeForeground), RelativeSource={RelativeSource Self}}" />
+    <Setter Property="BorderBrush" Value="{Binding Path=(sl:Sl.ChromeBorder), RelativeSource={RelativeSource Self}}" />
+    <Setter Property="Height" Value="{DynamicResource Sl.Component.Badge.Height}" />
     <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Xs}" />
     <Setter Property="FontWeight" Value="{DynamicResource Sl.Font.Weight.Semibold}" />
+    <Setter Property="Padding" Value="7,0" />
     <Setter Property="VerticalAlignment" Value="Center" />
     <Setter Property="HorizontalAlignment" Value="Left" />
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="sl:Badge">
-          <Border Height="20" CornerRadius="{DynamicResource Sl.CornerRadius.Sm}" Padding="7,0" Background="{TemplateBinding Background}"
-                  BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" SnapsToDevicePixels="True">
+          <Border Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="1" SnapsToDevicePixels="True"
+                  CornerRadius="{Binding Path=(sl:Sl.ActualCornerRadius), RelativeSource={RelativeSource TemplatedParent}}">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
               <Ellipse x:Name="Dot" Width="6" Height="6" Margin="0,0,5,0" Fill="{TemplateBinding Foreground}" Visibility="Collapsed" />
+              <sl:Icon x:Name="Icon" Kind="{TemplateBinding Icon}" Size="12" Margin="0,0,4,0" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}" />
               <ContentPresenter VerticalAlignment="Center" />
             </StackPanel>
           </Border>
           <ControlTemplate.Triggers>
-            <Trigger Property="ShowDot" Value="True">
+            <Trigger Property="Dot" Value="True">
               <Setter TargetName="Dot" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="Icon" Value="{x:Null}">
+              <Setter TargetName="Icon" Property="Visibility" Value="Collapsed" />
             </Trigger>
           </ControlTemplate.Triggers>
         </ControlTemplate>
       </Setter.Value>
     </Setter>
     <Style.Triggers>
-      <Trigger Property="Tone" Value="Success">
-        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Success.Bg}" />
-        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Success.Fg}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Success.Border}" />
-      </Trigger>
-      <Trigger Property="Tone" Value="Warning">
-        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Warning.Bg}" />
-        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Warning.Fg}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Warning.Border}" />
-      </Trigger>
-      <Trigger Property="Tone" Value="Danger">
-        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Danger.Bg}" />
-        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Danger.Border}" />
-      </Trigger>
-      <Trigger Property="Tone" Value="Info">
-        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Info.Bg}" />
-        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Info.Fg}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Info.Border}" />
-      </Trigger>
-      <Trigger Property="Tone" Value="Accent">
-        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Default}" />
-        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.OnAccent}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+      <Trigger Property="sl:Sl.ActualSize" Value="Small">
+        <Setter Property="Height" Value="18" />
+        <Setter Property="Padding" Value="5,0" />
+        <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.2xs}" />
       </Trigger>
     </Style.Triggers>
   </Style>
 
   <Style TargetType="sl:Alert">
-    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Info.Bg}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Info.Border}" />
-    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Info.Fg}" />
+    <Setter Property="Background" Value="{Binding Path=(sl:Sl.ChromeBackground), RelativeSource={RelativeSource Self}}" />
+    <Setter Property="BorderBrush" Value="{Binding Path=(sl:Sl.ChromeBorder), RelativeSource={RelativeSource Self}}" />
+    <Setter Property="Foreground" Value="{Binding Path=(sl:Sl.ChromeForeground), RelativeSource={RelativeSource Self}}" />
+    <Setter Property="Padding" Value="{DynamicResource Sl.Component.Alert.Padding.Thickness}" />
     <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Md}" />
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="sl:Alert">
-          <Border CornerRadius="{DynamicResource Sl.CornerRadius.Lg}" Background="{TemplateBinding Background}"
-                  BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" Padding="14,11" SnapsToDevicePixels="True">
+          <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"
+                  Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True"
+                  CornerRadius="{Binding Path=(sl:Sl.ActualCornerRadius), RelativeSource={RelativeSource TemplatedParent}}">
             <Grid>
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -221,11 +239,11 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
-              <sl:Icon x:Name="Icon" Kind="info" Size="18" Margin="0,1,10,0" VerticalAlignment="Top" Foreground="{TemplateBinding Foreground}" />
+              <sl:Icon x:Name="Icon" Kind="{TemplateBinding ActualIcon}" Size="18" Margin="0,1,10,0" VerticalAlignment="Top" Foreground="{TemplateBinding Foreground}" />
               <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock x:Name="Title" Text="{TemplateBinding Title}" FontWeight="{DynamicResource Sl.Font.Weight.Semibold}"
-                           Foreground="{DynamicResource Sl.Brush.Text.Primary}" TextWrapping="Wrap" />
-                <ContentPresenter TextElement.Foreground="{DynamicResource Sl.Brush.Text.Secondary}">
+                <TextBlock x:Name="Title" Text="{TemplateBinding Title}" FontWeight="{DynamicResource Sl.Font.Weight.Semibold}" TextWrapping="Wrap"
+                           Foreground="{Binding Path=(sl:Sl.StrongForeground), RelativeSource={RelativeSource TemplatedParent}}" />
+                <ContentPresenter TextElement.Foreground="{Binding Path=(sl:Sl.MutedForeground), RelativeSource={RelativeSource TemplatedParent}}">
                   <ContentPresenter.Resources>
                     <Style TargetType="TextBlock">
                       <Setter Property="TextWrapping" Value="Wrap" />
@@ -234,64 +252,50 @@
                 </ContentPresenter>
               </StackPanel>
               <ContentPresenter Grid.Column="2" Content="{TemplateBinding Actions}" Margin="12,0,0,0" VerticalAlignment="Center" />
-              <Button x:Name="PART_Close" Grid.Column="3" sl:Ui.Variant="Ghost" sl:Ui.Size="Small" sl:Ui.Icon="x" Margin="8,-3,-6,-3"
-                      VerticalAlignment="Top" AutomationProperties.Name="Dismiss" Visibility="Collapsed" />
+              <Button x:Name="PART_Close" Grid.Column="3" sl:Sl.Variant="Ghost" sl:Sl.Size="Small" sl:Sl.StartIcon="x" sl:Sl.IconOnly="True"
+                      sl:Sl.Label="Dismiss" Margin="8,-3,-6,-3" VerticalAlignment="Top" Visibility="Collapsed"
+                      Foreground="{Binding Path=(sl:Sl.StrongForeground), RelativeSource={RelativeSource TemplatedParent}}" />
             </Grid>
           </Border>
           <ControlTemplate.Triggers>
             <Trigger Property="Title" Value="{x:Null}">
               <Setter TargetName="Title" Property="Visibility" Value="Collapsed" />
             </Trigger>
-            <Trigger Property="IsDismissible" Value="True">
+            <Trigger Property="ActualIcon" Value="{x:Null}">
+              <Setter TargetName="Icon" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Dismissible" Value="True">
               <Setter TargetName="PART_Close" Property="Visibility" Value="Visible" />
             </Trigger>
-            <Trigger Property="Severity" Value="Success">
-              <Setter TargetName="Icon" Property="Kind" Value="check-circle" />
-            </Trigger>
-            <Trigger Property="Severity" Value="Warning">
-              <Setter TargetName="Icon" Property="Kind" Value="alert-triangle" />
-            </Trigger>
-            <Trigger Property="Severity" Value="Error">
-              <Setter TargetName="Icon" Property="Kind" Value="alert-circle" />
+            <Trigger Property="Dense" Value="True">
+              <Setter TargetName="Icon" Property="Size" Value="16" />
+              <Setter TargetName="Icon" Property="Margin" Value="0,1,8,0" />
             </Trigger>
           </ControlTemplate.Triggers>
         </ControlTemplate>
       </Setter.Value>
     </Setter>
     <Style.Triggers>
-      <Trigger Property="Severity" Value="Normal">
-        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Subtle}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.Default}" />
-        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Secondary}" />
-      </Trigger>
-      <Trigger Property="Severity" Value="Success">
-        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Success.Bg}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Success.Border}" />
-        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Success.Fg}" />
-      </Trigger>
-      <Trigger Property="Severity" Value="Warning">
-        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Warning.Bg}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Warning.Border}" />
-        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Warning.Fg}" />
-      </Trigger>
-      <Trigger Property="Severity" Value="Error">
-        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Danger.Bg}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Danger.Border}" />
-        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
+      <Trigger Property="Dense" Value="True">
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Sm}" />
       </Trigger>
     </Style.Triggers>
   </Style>
 
   <Style TargetType="sl:Card">
-    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Surface}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.Default}" />
-    <Setter Property="Padding" Value="20" />
+    <Setter Property="Background" Value="{DynamicResource Sl.Component.Card.Background.Brush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Component.Card.Border.Brush}" />
+    <Setter Property="Padding" Value="{DynamicResource Sl.Component.Card.Padding.Thickness}" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource Sl.FocusVisual}" />
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="sl:Card">
           <Grid SnapsToDevicePixels="True">
-            <Border x:Name="Shadow" CornerRadius="{DynamicResource Sl.CornerRadius.Xl}" Background="{TemplateBinding Background}" Effect="{DynamicResource Sl.Effect.E1}" />
-            <Border CornerRadius="{DynamicResource Sl.CornerRadius.Xl}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
+            <Border x:Name="Shadow" Background="{TemplateBinding Background}" Effect="{DynamicResource Sl.Component.Card.Shadow.Effect}"
+                    CornerRadius="{Binding Path=(sl:Sl.ActualCornerRadius), RelativeSource={RelativeSource TemplatedParent}}" />
+            <Border x:Name="Surface" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"
+                    CornerRadius="{Binding Path=(sl:Sl.ActualCornerRadius), RelativeSource={RelativeSource TemplatedParent}}">
               <DockPanel>
                 <Border x:Name="HeaderBar" DockPanel.Dock="Top" BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="0,0,0,1" Padding="16,10,12,10">
                   <Grid>
@@ -299,44 +303,66 @@
                       <ColumnDefinition Width="*" />
                       <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <StackPanel VerticalAlignment="Center">
-                      <ContentPresenter ContentSource="Header" TextElement.FontWeight="{DynamicResource Sl.Font.Weight.Semibold}" TextElement.FontSize="{DynamicResource Sl.Font.Size.Md}" />
-                      <TextBlock x:Name="Subtitle" Text="{TemplateBinding Subtitle}" FontSize="{DynamicResource Sl.Font.Size.Xs}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+                    <StackPanel x:Name="TitleBlock" VerticalAlignment="Center">
+                      <TextBlock x:Name="Title" Text="{TemplateBinding Title}" TextWrapping="Wrap"
+                                 FontWeight="{DynamicResource Sl.Font.Weight.Semibold}" FontSize="{DynamicResource Sl.Font.Size.Md}" />
+                      <TextBlock x:Name="Subtitle" Text="{TemplateBinding Subtitle}" TextWrapping="Wrap"
+                                 FontSize="{DynamicResource Sl.Font.Size.Xs}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
                     </StackPanel>
+                    <ContentPresenter x:Name="CustomHeader" ContentSource="Header" VerticalAlignment="Center" Visibility="Collapsed" />
                     <ContentPresenter Grid.Column="1" Content="{TemplateBinding HeaderActions}" VerticalAlignment="Center" />
                   </Grid>
                 </Border>
-                <Border x:Name="FooterBar" DockPanel.Dock="Bottom" Background="{DynamicResource Sl.Brush.Background.Subtle}" CornerRadius="0,0,9,9"
-                        BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="0,1,0,0" Padding="16,10">
+                <Border x:Name="FooterBar" DockPanel.Dock="Bottom" Background="{DynamicResource Sl.Brush.Background.Subtle}"
+                        BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="0,1,0,0" Padding="16,10"
+                        CornerRadius="{Binding Path=(sl:Sl.ActualCornerRadius), RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static sl:CornerPartConverter.Instance}, ConverterParameter=Bottom}">
                   <ContentPresenter Content="{TemplateBinding Footer}" HorizontalAlignment="Right" />
                 </Border>
-                <ContentPresenter Margin="{TemplateBinding Padding}" />
+                <ContentPresenter x:Name="Body" Margin="{TemplateBinding Padding}" />
               </DockPanel>
             </Border>
           </Grid>
           <ControlTemplate.Triggers>
+            <Trigger Property="Title" Value="{x:Null}">
+              <Setter TargetName="Title" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Subtitle" Value="{x:Null}">
+              <Setter TargetName="Subtitle" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="HasHeader" Value="True">
+              <Setter TargetName="CustomHeader" Property="Visibility" Value="Visible" />
+              <Setter TargetName="TitleBlock" Property="Visibility" Value="Collapsed" />
+            </Trigger>
             <MultiTrigger>
               <MultiTrigger.Conditions>
-                <Condition Property="Header" Value="{x:Null}" />
+                <Condition Property="HasHeader" Value="False" />
+                <Condition Property="Title" Value="{x:Null}" />
+                <Condition Property="Subtitle" Value="{x:Null}" />
                 <Condition Property="HeaderActions" Value="{x:Null}" />
               </MultiTrigger.Conditions>
               <Setter TargetName="HeaderBar" Property="Visibility" Value="Collapsed" />
             </MultiTrigger>
-            <Trigger Property="Subtitle" Value="{x:Null}">
-              <Setter TargetName="Subtitle" Property="Visibility" Value="Collapsed" />
-            </Trigger>
             <Trigger Property="Footer" Value="{x:Null}">
               <Setter TargetName="FooterBar" Property="Visibility" Value="Collapsed" />
             </Trigger>
-            <Trigger Property="Variant" Value="Outlined">
+            <Trigger Property="Flush" Value="True">
+              <Setter TargetName="Body" Property="Margin" Value="0" />
+            </Trigger>
+            <Trigger Property="ActualVariant" Value="Outlined">
               <Setter TargetName="Shadow" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="ActualVariant" Value="Flat">
+              <Setter TargetName="Shadow" Property="Visibility" Value="Collapsed" />
+              <Setter TargetName="Surface" Property="BorderBrush" Value="{DynamicResource Sl.Brush.Transparent}" />
+              <Setter TargetName="Surface" Property="Background" Value="{DynamicResource Sl.Brush.Background.Subtle}" />
             </Trigger>
             <MultiTrigger>
               <MultiTrigger.Conditions>
-                <Condition Property="IsInteractive" Value="True" />
+                <Condition Property="Interactive" Value="True" />
                 <Condition Property="IsMouseOver" Value="True" />
               </MultiTrigger.Conditions>
-              <Setter TargetName="Shadow" Property="Effect" Value="{DynamicResource Sl.Effect.E2}" />
+              <Setter TargetName="Shadow" Property="Effect" Value="{DynamicResource Sl.Component.Card.HoverShadow.Effect}" />
+              <Setter TargetName="Shadow" Property="Visibility" Value="Visible" />
               <Setter Property="Cursor" Value="Hand" />
             </MultiTrigger>
           </ControlTemplate.Triggers>
@@ -390,51 +416,78 @@
           <StackPanel>
             <StackPanel x:Name="LabelRow" Orientation="Horizontal" Margin="0,0,0,6">
               <Label Content="{TemplateBinding Label}" Target="{Binding ElementName=PART_TextBox}" />
-              <TextBlock x:Name="Required" Text=" *" Foreground="{DynamicResource Sl.Brush.Status.Danger.Fg}" FontWeight="{DynamicResource Sl.Font.Weight.Semibold}"
+              <TextBlock x:Name="RequiredMark" Text=" *" Foreground="{DynamicResource Sl.Brush.Status.Danger.Fg}" FontWeight="{DynamicResource Sl.Font.Weight.Semibold}"
                          Visibility="Collapsed" AutomationProperties.Name="required" />
             </StackPanel>
             <Grid x:Name="Field" Height="{DynamicResource Sl.Size.Control.Md}" SnapsToDevicePixels="True">
-              <Border x:Name="Ring" Margin="-4" CornerRadius="10" BorderThickness="2" BorderBrush="{DynamicResource Sl.Brush.Focus.Ring}" Visibility="Collapsed">
-                <Border CornerRadius="8" BorderThickness="2" BorderBrush="{DynamicResource Sl.Brush.Background.Canvas}" />
+              <Border x:Name="Ring" Margin="-4" BorderThickness="2" BorderBrush="{DynamicResource Sl.Brush.Focus.Ring}" Visibility="Collapsed"
+                      CornerRadius="{Binding Path=(sl:Sl.ActualCornerRadius), RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static sl:CornerInflateConverter.Instance}, ConverterParameter=4}">
+                <Border BorderThickness="2" BorderBrush="{DynamicResource Sl.Brush.Background.Canvas}"
+                        CornerRadius="{Binding Path=(sl:Sl.ActualCornerRadius), RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static sl:CornerInflateConverter.Instance}, ConverterParameter=2}" />
               </Border>
-              <Border x:Name="Chrome" CornerRadius="{DynamicResource Sl.CornerRadius.Md}" Background="{DynamicResource Sl.Brush.Background.Sunken}"
-                      BorderBrush="{DynamicResource Sl.Brush.Border.Strong}" BorderThickness="1" ClipToBounds="True">
+              <Border x:Name="Chrome" BorderThickness="1" ClipToBounds="True"
+                      Background="{Binding Path=(sl:Sl.ChromeBackground), RelativeSource={RelativeSource TemplatedParent}}"
+                      BorderBrush="{Binding Path=(sl:Sl.ChromeBorder), RelativeSource={RelativeSource TemplatedParent}}"
+                      CornerRadius="{Binding Path=(sl:Sl.ActualCornerRadius), RelativeSource={RelativeSource TemplatedParent}}">
                 <Grid>
-                  <Border Height="1" VerticalAlignment="Top" Margin="3,0" Background="{DynamicResource Sl.Brush.Effect.Shade}" />
+                  <Border x:Name="InsetShade" Height="1" VerticalAlignment="Top" Margin="3,0" Background="{DynamicResource Sl.Brush.Effect.Shade}" />
                   <DockPanel>
-                    <Border x:Name="PrefixBox" DockPanel.Dock="Left" Background="{DynamicResource Sl.Brush.Background.Subtle}" CornerRadius="5,0,0,5"
+                    <Border x:Name="PrefixBox" DockPanel.Dock="Left" Background="{DynamicResource Sl.Brush.Background.Subtle}"
                             BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="0,0,1,0" Padding="10,0">
                       <TextBlock Text="{TemplateBinding Prefix}" VerticalAlignment="Center" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}"
                                  FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="{DynamicResource Sl.Font.Size.Xs}" />
                     </Border>
-                    <Border x:Name="SuffixBox" DockPanel.Dock="Right" Background="{DynamicResource Sl.Brush.Background.Subtle}" CornerRadius="0,5,5,0"
+                    <Border x:Name="SuffixBox" DockPanel.Dock="Right" Background="{DynamicResource Sl.Brush.Background.Subtle}"
                             BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="1,0,0,0" Padding="10,0">
                       <TextBlock Text="{TemplateBinding Suffix}" VerticalAlignment="Center" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}"
                                  FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="{DynamicResource Sl.Font.Size.Xs}" />
                     </Border>
-                    <sl:Icon x:Name="StartIcon" DockPanel.Dock="Left" Kind="{TemplateBinding StartIcon}" Margin="10,0,0,0" VerticalAlignment="Center"
+                    <ContentPresenter x:Name="EndContentHost" DockPanel.Dock="Right" Content="{TemplateBinding EndContent}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                    <sl:Icon x:Name="EndIconGlyph" DockPanel.Dock="Right" Kind="{TemplateBinding EndIcon}" Margin="0,0,10,0" VerticalAlignment="Center"
                              Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
-                    <TextBox x:Name="PART_TextBox" Style="{StaticResource Sl.TextBox.Bare}" Margin="8,0"
-                             Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged}"
-                             IsReadOnly="{TemplateBinding IsReadOnly}" FontSize="{TemplateBinding FontSize}"
-                             sl:Ui.Placeholder="{TemplateBinding Placeholder}" />
+                    <Button x:Name="PART_Clear" DockPanel.Dock="Right" sl:Sl.Variant="Ghost" sl:Sl.Size="Small" sl:Sl.StartIcon="x" sl:Sl.IconOnly="True"
+                            sl:Sl.Label="Clear" Margin="0,0,4,0" VerticalAlignment="Center" Visibility="Collapsed" Focusable="False" />
+                    <ContentPresenter x:Name="StartContentHost" DockPanel.Dock="Left" Content="{TemplateBinding StartContent}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    <sl:Icon x:Name="StartIconGlyph" DockPanel.Dock="Left" Kind="{TemplateBinding StartIcon}" Margin="10,0,0,0" VerticalAlignment="Center"
+                             Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+                    <Grid>
+                      <TextBox x:Name="PART_TextBox" Style="{StaticResource Sl.TextBox.Bare}"
+                               Margin="{Binding Path=(sl:Sl.PaddingX), RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static sl:HorizontalThicknessConverter.Instance}, ConverterParameter=-2}"
+                               Text="{Binding Value, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged}"
+                               IsReadOnly="{TemplateBinding ReadOnly}" FontSize="{TemplateBinding FontSize}"
+                               MaxLength="{Binding MaxLength, RelativeSource={RelativeSource TemplatedParent}, TargetNullValue=0}"
+                               sl:Sl.Placeholder="{TemplateBinding Placeholder}" />
+                      <PasswordBox x:Name="PART_PasswordBox" Style="{StaticResource Sl.PasswordBox.Bare}" Visibility="Collapsed"
+                                   Margin="{Binding Path=(sl:Sl.PaddingX), RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static sl:HorizontalThicknessConverter.Instance}, ConverterParameter=-2}"
+                                   FontSize="{TemplateBinding FontSize}"
+                                   MaxLength="{Binding MaxLength, RelativeSource={RelativeSource TemplatedParent}, TargetNullValue=0}"
+                                   sl:Sl.Placeholder="{TemplateBinding Placeholder}" />
+                    </Grid>
                   </DockPanel>
                 </Grid>
               </Border>
             </Grid>
-            <StackPanel x:Name="HelperRow" Orientation="Horizontal" Margin="0,6,0,0">
-              <sl:Icon x:Name="ErrorIcon" Kind="alert-circle" Size="14" Margin="0,0,6,0" VerticalAlignment="Center"
-                       Foreground="{DynamicResource Sl.Brush.Status.Danger.Fg}" Visibility="Collapsed" />
-              <TextBlock x:Name="Helper" Text="{TemplateBinding HelperText}" TextWrapping="Wrap"
-                         FontSize="{DynamicResource Sl.Font.Size.Xs}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
-            </StackPanel>
+            <Grid x:Name="HelperRow" Margin="0,6,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <StackPanel Orientation="Horizontal">
+                <sl:Icon x:Name="ErrorIcon" Kind="alert-circle" Size="14" Margin="0,0,6,0" VerticalAlignment="Center"
+                         Foreground="{DynamicResource Sl.Brush.Status.Danger.Fg}" Visibility="Collapsed" />
+                <TextBlock x:Name="Helper" Text="{TemplateBinding HelperText}" TextWrapping="Wrap"
+                           FontSize="{DynamicResource Sl.Font.Size.Xs}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+              </StackPanel>
+              <TextBlock x:Name="CounterText" Grid.Column="1" Text="{TemplateBinding CounterText}" Margin="12,0,0,0" Visibility="Collapsed"
+                         FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="{DynamicResource Sl.Font.Size.2xs}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+            </Grid>
           </StackPanel>
           <ControlTemplate.Triggers>
             <Trigger Property="Label" Value="{x:Null}">
               <Setter TargetName="LabelRow" Property="Visibility" Value="Collapsed" />
             </Trigger>
-            <Trigger Property="IsRequired" Value="True">
-              <Setter TargetName="Required" Property="Visibility" Value="Visible" />
+            <Trigger Property="Required" Value="True">
+              <Setter TargetName="RequiredMark" Property="Visibility" Value="Visible" />
             </Trigger>
             <Trigger Property="Prefix" Value="{x:Null}">
               <Setter TargetName="PrefixBox" Property="Visibility" Value="Collapsed" />
@@ -443,36 +496,85 @@
               <Setter TargetName="SuffixBox" Property="Visibility" Value="Collapsed" />
             </Trigger>
             <Trigger Property="StartIcon" Value="{x:Null}">
-              <Setter TargetName="StartIcon" Property="Visibility" Value="Collapsed" />
+              <Setter TargetName="StartIconGlyph" Property="Visibility" Value="Collapsed" />
             </Trigger>
-            <Trigger Property="HelperText" Value="{x:Null}">
+            <Trigger Property="EndIcon" Value="{x:Null}">
+              <Setter TargetName="EndIconGlyph" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="StartContent" Value="{x:Null}">
+              <Setter TargetName="StartContentHost" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="EndContent" Value="{x:Null}">
+              <Setter TargetName="EndContentHost" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <DataTrigger Binding="{Binding StartContent, RelativeSource={RelativeSource Self}, Converter={x:Static sl:IsNotNullConverter.Instance}}" Value="True">
+              <Setter TargetName="StartIconGlyph" Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding EndContent, RelativeSource={RelativeSource Self}, Converter={x:Static sl:IsNotNullConverter.Instance}}" Value="True">
+              <Setter TargetName="EndIconGlyph" Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+            <Trigger Property="ShowClear" Value="True">
+              <Setter TargetName="PART_Clear" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="HelperText" Value="{x:Null}" />
+                <Condition Property="Counter" Value="False" />
+              </MultiTrigger.Conditions>
               <Setter TargetName="HelperRow" Property="Visibility" Value="Collapsed" />
+            </MultiTrigger>
+            <Trigger Property="Counter" Value="True">
+              <Setter TargetName="CounterText" Property="Visibility" Value="Visible" />
             </Trigger>
-            <Trigger Property="Size" Value="Small">
+            <Trigger Property="InputType" Value="Password">
+              <Setter TargetName="PART_TextBox" Property="Visibility" Value="Collapsed" />
+              <Setter TargetName="PART_PasswordBox" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="sl:Sl.ActualSize" Value="Small">
               <Setter TargetName="Field" Property="Height" Value="{DynamicResource Sl.Size.Control.Sm}" />
+              <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Sm}" />
             </Trigger>
-            <Trigger Property="Size" Value="Large">
+            <Trigger Property="sl:Sl.ActualSize" Value="Large">
               <Setter TargetName="Field" Property="Height" Value="{DynamicResource Sl.Size.Control.Lg}" />
+              <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Lg}" />
             </Trigger>
-            <Trigger Property="IsMultiline" Value="True">
+            <Trigger Property="Multiline" Value="True">
               <Setter TargetName="Field" Property="Height" Value="Auto" />
               <Setter TargetName="Field" Property="MinHeight" Value="76" />
               <Setter TargetName="PART_TextBox" Property="AcceptsReturn" Value="True" />
               <Setter TargetName="PART_TextBox" Property="TextWrapping" Value="Wrap" />
               <Setter TargetName="PART_TextBox" Property="VerticalContentAlignment" Value="Top" />
               <Setter TargetName="PART_TextBox" Property="VerticalScrollBarVisibility" Value="Auto" />
+              <Setter TargetName="PART_TextBox" Property="MinLines" Value="{Binding Rows, RelativeSource={RelativeSource TemplatedParent}}" />
               <Setter TargetName="PART_TextBox" Property="Margin" Value="8,7" />
             </Trigger>
-            <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.ControlHover}" />
+            <Trigger Property="ActualVariant" Value="Filled">
+              <Setter TargetName="InsetShade" Property="Visibility" Value="Collapsed" />
             </Trigger>
-            <Trigger Property="IsReadOnly" Value="True">
+            <Trigger Property="ActualVariant" Value="Underlined">
+              <Setter TargetName="InsetShade" Property="Visibility" Value="Collapsed" />
+              <Setter TargetName="Chrome" Property="BorderThickness" Value="0,0,0,1" />
+              <Setter TargetName="PrefixBox" Property="Background" Value="{DynamicResource Sl.Brush.Transparent}" />
+              <Setter TargetName="SuffixBox" Property="Background" Value="{DynamicResource Sl.Brush.Transparent}" />
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="{Binding Path=(sl:Sl.HoverBorder), RelativeSource={RelativeSource TemplatedParent}}" />
+            </Trigger>
+            <Trigger Property="ReadOnly" Value="True">
               <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Sl.Brush.Background.Subtle}" />
             </Trigger>
             <Trigger Property="IsKeyboardFocusWithin" Value="True">
-              <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Sl.Component.Field.BorderFocus.Brush}" />
               <Setter TargetName="Ring" Property="Visibility" Value="Visible" />
             </Trigger>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="IsKeyboardFocusWithin" Value="True" />
+                <Condition Property="ActualVariant" Value="Underlined" />
+              </MultiTrigger.Conditions>
+              <Setter TargetName="Ring" Property="Visibility" Value="Collapsed" />
+              <Setter TargetName="Chrome" Property="BorderThickness" Value="0,0,0,2" />
+            </MultiTrigger>
             <Trigger Property="HasError" Value="True">
               <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
               <Setter TargetName="HelperRow" Property="Visibility" Value="Visible" />
@@ -498,12 +600,19 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="sl:Switch">
-          <DockPanel x:Name="Root" Background="{TemplateBinding Background}" LastChildFill="True">
-            <Grid x:Name="TrackSite" DockPanel.Dock="Right" Width="36" Height="20" Margin="12,1,0,0" VerticalAlignment="Top" SnapsToDevicePixels="True">
-              <Border x:Name="Track" CornerRadius="10" Background="{DynamicResource Sl.Brush.Control.Track}">
+          <Grid x:Name="Root" Background="{TemplateBinding Background}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition x:Name="TrackColumn" Width="Auto" />
+              <ColumnDefinition x:Name="LabelColumn" Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid x:Name="TrackSite" Width="{DynamicResource Sl.Component.Selection.SwitchWidth}" Height="{DynamicResource Sl.Component.Selection.SwitchHeight}"
+                  Margin="0,1,10,0" VerticalAlignment="Top" HorizontalAlignment="Left" SnapsToDevicePixels="True">
+              <Border x:Name="Track" CornerRadius="{DynamicResource Sl.CornerRadius.Full}" Background="{DynamicResource Sl.Brush.Control.Track}"
+                      BorderThickness="1" BorderBrush="{Binding Path=(sl:Sl.ChromeBorder), RelativeSource={RelativeSource TemplatedParent}}">
                 <Border Height="1" VerticalAlignment="Top" Margin="5,0" Background="{DynamicResource Sl.Brush.Effect.Shade}" />
               </Border>
-              <Border x:Name="Thumb" Width="16" Height="16" CornerRadius="8" HorizontalAlignment="Left" Margin="2"
+              <Border x:Name="Thumb" Width="{DynamicResource Sl.Component.Selection.ThumbSize}" Height="{DynamicResource Sl.Component.Selection.ThumbSize}"
+                      CornerRadius="{DynamicResource Sl.CornerRadius.Full}" HorizontalAlignment="Left" Margin="2"
                       BorderBrush="{DynamicResource Sl.Brush.Effect.Shade}" BorderThickness="0,0,0,1">
                 <Border.Background>
                   <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -512,40 +621,94 @@
                   </LinearGradientBrush>
                 </Border.Background>
                 <Border.RenderTransform>
-                  <TranslateTransform x:Name="ThumbShift" />
+                  <TranslateTransform>
+                    <TranslateTransform.X>
+                      <MultiBinding Converter="{x:Static sl:MultiplyConverter.Instance}">
+                        <Binding Path="ThumbPosition" RelativeSource="{RelativeSource TemplatedParent}" />
+                        <Binding Path="ThumbTravel" RelativeSource="{RelativeSource TemplatedParent}" />
+                      </MultiBinding>
+                    </TranslateTransform.X>
+                  </TranslateTransform>
                 </Border.RenderTransform>
               </Border>
             </Grid>
-            <StackPanel VerticalAlignment="Center">
-              <ContentPresenter RecognizesAccessKey="True" />
+            <StackPanel x:Name="LabelStack" Grid.Column="1" VerticalAlignment="Center">
+              <ContentPresenter x:Name="ContentHost" RecognizesAccessKey="True" />
+              <TextBlock x:Name="LabelText" Text="{TemplateBinding Label}" Visibility="Collapsed" />
               <TextBlock x:Name="Description" Text="{TemplateBinding Description}" TextWrapping="Wrap"
                          FontSize="{DynamicResource Sl.Font.Size.Xs}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
             </StackPanel>
-          </DockPanel>
+          </Grid>
           <ControlTemplate.Triggers>
             <Trigger Property="Description" Value="{x:Null}">
               <Setter TargetName="Description" Property="Visibility" Value="Collapsed" />
             </Trigger>
-            <Trigger Property="LabelPosition" Value="After">
-              <Setter TargetName="TrackSite" Property="DockPanel.Dock" Value="Left" />
-              <Setter TargetName="TrackSite" Property="Margin" Value="0,1,10,0" />
-            </Trigger>
-            <Trigger Property="Content" Value="{x:Null}">
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="Content" Value="{x:Null}" />
+                <Condition Property="HasLabel" Value="True" />
+              </MultiTrigger.Conditions>
+              <Setter TargetName="LabelText" Property="Visibility" Value="Visible" />
+            </MultiTrigger>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="Content" Value="{x:Null}" />
+                <Condition Property="HasLabel" Value="False" />
+              </MultiTrigger.Conditions>
               <Setter TargetName="TrackSite" Property="Margin" Value="0" />
+            </MultiTrigger>
+            <Trigger Property="sl:Sl.ActualLabelPlacement" Value="Start">
+              <Setter TargetName="TrackColumn" Property="Width" Value="*" />
+              <Setter TargetName="LabelColumn" Property="Width" Value="Auto" />
+              <Setter TargetName="TrackSite" Property="Grid.Column" Value="1" />
+              <Setter TargetName="TrackSite" Property="Margin" Value="10,1,0,0" />
+              <Setter TargetName="LabelStack" Property="Grid.Column" Value="0" />
+            </Trigger>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="Spread" Value="True" />
+                <Condition Property="sl:Sl.ActualLabelPlacement" Value="Start" />
+              </MultiTrigger.Conditions>
+              <Setter TargetName="TrackColumn" Property="Width" Value="Auto" />
+              <Setter TargetName="LabelColumn" Property="Width" Value="*" />
+              <Setter TargetName="TrackSite" Property="HorizontalAlignment" Value="Right" />
+            </MultiTrigger>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="Spread" Value="True" />
+                <Condition Property="sl:Sl.ActualLabelPlacement" Value="End" />
+              </MultiTrigger.Conditions>
+              <Setter TargetName="TrackColumn" Property="Width" Value="*" />
+              <Setter TargetName="LabelColumn" Property="Width" Value="Auto" />
+            </MultiTrigger>
+            <Trigger Property="sl:Sl.ActualSize" Value="Small">
+              <Setter TargetName="TrackSite" Property="Width" Value="28" />
+              <Setter TargetName="TrackSite" Property="Height" Value="16" />
+              <Setter TargetName="Thumb" Property="Width" Value="12" />
+              <Setter TargetName="Thumb" Property="Height" Value="12" />
+              <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Sm}" />
+            </Trigger>
+            <Trigger Property="sl:Sl.ActualSize" Value="Large">
+              <Setter TargetName="TrackSite" Property="Width" Value="44" />
+              <Setter TargetName="TrackSite" Property="Height" Value="24" />
+              <Setter TargetName="Thumb" Property="Width" Value="20" />
+              <Setter TargetName="Thumb" Property="Height" Value="20" />
+              <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Lg}" />
             </Trigger>
             <Trigger Property="IsChecked" Value="True">
-              <Setter TargetName="Track" Property="Background" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+              <Setter TargetName="Track" Property="Background" Value="{Binding Path=(sl:Sl.Fill), RelativeSource={RelativeSource TemplatedParent}}" />
+              <Setter TargetName="Track" Property="BorderBrush" Value="{Binding Path=(sl:Sl.Fill), RelativeSource={RelativeSource TemplatedParent}}" />
               <Trigger.EnterActions>
                 <BeginStoryboard>
                   <Storyboard>
-                    <DoubleAnimation Storyboard.TargetName="ThumbShift" Storyboard.TargetProperty="X" To="16" Duration="0:0:0.12" />
+                    <DoubleAnimation Storyboard.TargetProperty="(sl:Switch.ThumbPosition)" To="1" Duration="0:0:0.12" />
                   </Storyboard>
                 </BeginStoryboard>
               </Trigger.EnterActions>
               <Trigger.ExitActions>
                 <BeginStoryboard>
                   <Storyboard>
-                    <DoubleAnimation Storyboard.TargetName="ThumbShift" Storyboard.TargetProperty="X" To="0" Duration="0:0:0.12" />
+                    <DoubleAnimation Storyboard.TargetProperty="(sl:Switch.ThumbPosition)" To="0" Duration="0:0:0.12" />
                   </Storyboard>
                 </BeginStoryboard>
               </Trigger.ExitActions>
@@ -560,33 +723,75 @@
     </Setter>
   </Style>
 
+  <Style TargetType="sl:RadioGroup">
+    <Setter Property="ItemsPanel">
+      <Setter.Value>
+        <ItemsPanelTemplate>
+          <sl:Stack Spacing="2" />
+        </ItemsPanelTemplate>
+      </Setter.Value>
+    </Setter>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="sl:RadioGroup">
+          <StackPanel>
+            <Label x:Name="Legend" Content="{TemplateBinding Label}" Margin="0,0,0,8" />
+            <ItemsPresenter />
+          </StackPanel>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Label" Value="{x:Null}">
+              <Setter TargetName="Legend" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <Trigger Property="Direction" Value="Row">
+        <Setter Property="ItemsPanel">
+          <Setter.Value>
+            <ItemsPanelTemplate>
+              <sl:Stack Direction="Row" Spacing="4" Wrap="True" />
+            </ItemsPanelTemplate>
+          </Setter.Value>
+        </Setter>
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+
   <!-- ===== Shell ===== -->
 
   <Style TargetType="sl:AppBar">
-    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Surface}" />
-    <Setter Property="Height" Value="{DynamicResource Sl.Size.Appbar}" />
+    <Setter Property="Background" Value="{DynamicResource Sl.Component.AppBar.Background.Brush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Component.AppBar.Border.Brush}" />
+    <Setter Property="Height" Value="{DynamicResource Sl.Component.AppBar.Height}" />
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="sl:AppBar">
-          <Border Background="{TemplateBinding Background}" BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="0,0,0,1" Padding="8,0,12,0">
+          <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0,0,0,1" Padding="8,0,12,0">
             <Grid>
               <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
-              <Button x:Name="Nav" sl:Ui.Variant="Ghost" sl:Ui.Icon="menu" Command="{x:Static sl:AppShell.ToggleDrawerCommand}"
-                      AutomationProperties.Name="Toggle navigation" Margin="0,0,8,0" VerticalAlignment="Center" />
-              <ContentPresenter Grid.Column="1" Content="{TemplateBinding Title}" VerticalAlignment="Center" Margin="4,0,16,0"
-                                TextElement.FontSize="{DynamicResource Sl.Font.Size.Lg}" TextElement.FontWeight="{DynamicResource Sl.Font.Weight.Semibold}" />
-              <ContentPresenter Grid.Column="2" VerticalAlignment="Center" />
-              <ContentPresenter Grid.Column="3" Content="{TemplateBinding Actions}" VerticalAlignment="Center" />
+              <Button x:Name="Nav" sl:Sl.Variant="Ghost" sl:Sl.StartIcon="menu" sl:Sl.IconOnly="True" sl:Sl.Label="Toggle navigation"
+                      Command="{x:Static sl:AppShell.ToggleDrawerCommand}" Margin="0,0,8,0" VerticalAlignment="Center" />
+              <ContentPresenter Grid.Column="1" Content="{TemplateBinding Leading}" VerticalAlignment="Center" Margin="0,0,8,0" />
+              <TextBlock x:Name="TitleText" Grid.Column="2" Text="{TemplateBinding Title}" VerticalAlignment="Center" Margin="4,0,16,0"
+                         FontSize="{DynamicResource Sl.Font.Size.Lg}" FontWeight="{DynamicResource Sl.Font.Weight.Semibold}" />
+              <ContentPresenter Grid.Column="3" Content="{TemplateBinding Center}" VerticalAlignment="Center" />
+              <ContentPresenter Grid.Column="4" Content="{TemplateBinding Actions}" VerticalAlignment="Center" />
             </Grid>
           </Border>
           <ControlTemplate.Triggers>
-            <Trigger Property="ShowNavigationButton" Value="False">
+            <Trigger Property="ShowMenuButton" Value="False">
               <Setter TargetName="Nav" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Title" Value="{x:Null}">
+              <Setter TargetName="TitleText" Property="Visibility" Value="Collapsed" />
             </Trigger>
           </ControlTemplate.Triggers>
         </ControlTemplate>
@@ -612,30 +817,30 @@
               </Grid.ColumnDefinitions>
               <ContentPresenter x:Name="Main" Grid.Column="1" />
               <Border x:Name="PART_Scrim" Grid.ColumnSpan="2" Background="{DynamicResource Sl.Brush.Scrim}" Visibility="Collapsed" Panel.ZIndex="1" />
-              <Grid x:Name="DrawerPane" Width="{DynamicResource Sl.Size.Drawer.Full}" HorizontalAlignment="Left" Panel.ZIndex="2">
-                <Border x:Name="DrawerShadow" Background="{DynamicResource Sl.Brush.Background.Subtle}" Effect="{DynamicResource Sl.Effect.E3}" Visibility="Collapsed" />
-                <Border Background="{DynamicResource Sl.Brush.Background.Subtle}" BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="0,0,1,0">
+              <Grid x:Name="DrawerPane" Width="{DynamicResource Sl.Component.Drawer.Width}" HorizontalAlignment="Left" Panel.ZIndex="2">
+                <Border x:Name="DrawerShadow" Background="{DynamicResource Sl.Component.Drawer.Background.Brush}" Effect="{DynamicResource Sl.Effect.E3}" Visibility="Collapsed" />
+                <Border Background="{DynamicResource Sl.Component.Drawer.Background.Brush}" BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="0,0,1,0">
                   <ContentPresenter Content="{TemplateBinding Drawer}" />
                 </Border>
               </Grid>
             </Grid>
           </Grid>
           <ControlTemplate.Triggers>
-            <Trigger Property="IsDrawerOpen" Value="False">
+            <Trigger Property="DrawerOpen" Value="False">
               <Setter TargetName="DrawerPane" Property="Visibility" Value="Collapsed" />
             </Trigger>
-            <Trigger Property="sl:AppShell.IsMini" Value="True">
-              <Setter TargetName="DrawerPane" Property="Width" Value="{DynamicResource Sl.Size.Drawer.Mini}" />
+            <Trigger Property="sl:AppShell.Mini" Value="True">
+              <Setter TargetName="DrawerPane" Property="Width" Value="{DynamicResource Sl.Component.Drawer.MiniWidth}" />
             </Trigger>
-            <Trigger Property="IsOverlay" Value="True">
+            <Trigger Property="Overlay" Value="True">
               <Setter TargetName="Main" Property="Grid.Column" Value="0" />
               <Setter TargetName="Main" Property="Grid.ColumnSpan" Value="2" />
               <Setter TargetName="DrawerShadow" Property="Visibility" Value="Visible" />
             </Trigger>
             <MultiTrigger>
               <MultiTrigger.Conditions>
-                <Condition Property="IsOverlay" Value="True" />
-                <Condition Property="IsDrawerOpen" Value="True" />
+                <Condition Property="Overlay" Value="True" />
+                <Condition Property="DrawerOpen" Value="True" />
               </MultiTrigger.Conditions>
               <Setter TargetName="PART_Scrim" Property="Visibility" Value="Visible" />
             </MultiTrigger>
@@ -649,16 +854,16 @@
     <Setter Property="FocusVisualStyle" Value="{DynamicResource Sl.FocusVisual}" />
     <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Secondary}" />
     <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Md}" />
-    <Setter Property="Height" Value="32" />
+    <Setter Property="Height" Value="{DynamicResource Sl.Size.Control.Md}" />
     <Setter Property="Margin" Value="0,1" />
     <Setter Property="Cursor" Value="Hand" />
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="sl:NavItem">
           <Grid SnapsToDevicePixels="True">
-            <Border x:Name="Lift" CornerRadius="{DynamicResource Sl.CornerRadius.Md}" Background="{DynamicResource Sl.Brush.Background.Surface}"
+            <Border x:Name="Lift" CornerRadius="{DynamicResource Sl.Component.Drawer.ItemRadius.Corner}" Background="{DynamicResource Sl.Component.Drawer.ActiveItem.Brush}"
                     Effect="{DynamicResource Sl.Effect.E1}" Visibility="Collapsed" />
-            <Border x:Name="Bd" CornerRadius="{DynamicResource Sl.CornerRadius.Md}" Background="Transparent" BorderThickness="1" BorderBrush="Transparent" Padding="8,0">
+            <Border x:Name="Bd" CornerRadius="{DynamicResource Sl.Component.Drawer.ItemRadius.Corner}" Background="Transparent" BorderThickness="1" BorderBrush="Transparent" Padding="8,0">
               <Grid>
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="Auto" />
@@ -667,23 +872,28 @@
                 </Grid.ColumnDefinitions>
                 <sl:Icon x:Name="Icon" Kind="{TemplateBinding Icon}" VerticalAlignment="Center" Margin="0,0,10,0" />
                 <ContentPresenter x:Name="Label" Grid.Column="1" VerticalAlignment="Center" />
-                <ContentPresenter x:Name="Trailing" Grid.Column="2" Content="{TemplateBinding Trailing}" VerticalAlignment="Center" />
+                <ContentPresenter x:Name="Trailing" Grid.Column="2" Content="{TemplateBinding Trailing}" VerticalAlignment="Center"
+                                  TextElement.FontFamily="{DynamicResource Sl.Font.Family.Mono}" TextElement.FontSize="{DynamicResource Sl.Font.Size.2xs}"
+                                  TextElement.Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
               </Grid>
             </Border>
           </Grid>
           <ControlTemplate.Triggers>
+            <Trigger Property="Icon" Value="{x:Null}">
+              <Setter TargetName="Icon" Property="Visibility" Value="Collapsed" />
+            </Trigger>
             <Trigger Property="IsMouseOver" Value="True">
               <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Sl.Brush.Background.Muted}" />
               <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
             </Trigger>
             <Trigger Property="IsSelected" Value="True">
               <Setter TargetName="Lift" Property="Visibility" Value="Visible" />
-              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Sl.Brush.Background.Surface}" />
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Sl.Component.Drawer.ActiveItem.Brush}" />
               <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.Default}" />
               <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
               <Setter Property="FontWeight" Value="{DynamicResource Sl.Font.Weight.Medium}" />
             </Trigger>
-            <Trigger Property="sl:AppShell.IsMini" Value="True">
+            <Trigger Property="sl:AppShell.Mini" Value="True">
               <Setter TargetName="Label" Property="Visibility" Value="Collapsed" />
               <Setter TargetName="Trailing" Property="Visibility" Value="Collapsed" />
               <Setter TargetName="Icon" Property="Margin" Value="0" />
@@ -850,15 +1060,15 @@
   </Style>
 
   <Style TargetType="sl:SnackbarItem">
-    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Inverse.Text}" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Component.Snackbar.Foreground.Brush}" />
     <Setter Property="FontFamily" Value="{DynamicResource Sl.Font.Family.Ui}" />
     <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Md}" />
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="sl:SnackbarItem">
           <Grid MinWidth="{DynamicResource Sl.Size.Snackbar.Min}" MaxWidth="{DynamicResource Sl.Size.Snackbar.Max}" Margin="0,4">
-            <Border CornerRadius="{DynamicResource Sl.CornerRadius.Lg}" Background="{DynamicResource Sl.Brush.Inverse.Background}" Effect="{DynamicResource Sl.Effect.E3}" />
-            <Border CornerRadius="{DynamicResource Sl.CornerRadius.Lg}" Background="{DynamicResource Sl.Brush.Inverse.Background}" ClipToBounds="True">
+            <Border CornerRadius="{DynamicResource Sl.Component.Snackbar.Radius.Corner}" Background="{DynamicResource Sl.Component.Snackbar.Background.Brush}" Effect="{DynamicResource Sl.Component.Snackbar.Shadow.Effect}" />
+            <Border CornerRadius="{DynamicResource Sl.Component.Snackbar.Radius.Corner}" Background="{DynamicResource Sl.Component.Snackbar.Background.Brush}" ClipToBounds="True">
               <Grid>
                 <Grid Margin="12,10">
                   <Grid.ColumnDefinitions>
@@ -876,10 +1086,10 @@
                   </StackPanel>
                   <Button x:Name="PART_Action" Grid.Column="2" Style="{StaticResource Sl.InverseButton}" Content="{Binding Options.Action.Label}"
                           Margin="12,0,0,0" VerticalAlignment="Center" />
-                  <Button x:Name="PART_Close" Grid.Column="3" Style="{StaticResource Sl.InverseButton}" sl:Ui.Icon="x"
+                  <Button x:Name="PART_Close" Grid.Column="3" Style="{StaticResource Sl.InverseButton}" sl:Sl.StartIcon="x"
                           AutomationProperties.Name="Dismiss notification" Margin="4,0,-4,0" VerticalAlignment="Center" />
                 </Grid>
-                <Rectangle x:Name="PART_Progress" Height="2" VerticalAlignment="Bottom" Fill="{DynamicResource Sl.Brush.Focus.Ring}" />
+                <Rectangle x:Name="PART_Progress" Height="2" VerticalAlignment="Bottom" Fill="{DynamicResource Sl.Component.Snackbar.Timer.Brush}" />
               </Grid>
             </Border>
           </Grid>
@@ -897,7 +1107,7 @@
               <MultiDataTrigger.Conditions>
                 <Condition Binding="{Binding Options.Title, Converter={x:Static sl:IsNotNullConverter.Instance}}" Value="True" />
               </MultiDataTrigger.Conditions>
-              <Setter TargetName="Message" Property="Foreground" Value="{DynamicResource Sl.Brush.Inverse.TextMuted}" />
+              <Setter TargetName="Message" Property="Foreground" Value="{DynamicResource Sl.Component.Snackbar.Muted.Brush}" />
             </MultiDataTrigger>
             <DataTrigger Binding="{Binding Severity}" Value="Success">
               <Setter TargetName="Tile" Property="Visibility" Value="Visible" />
@@ -955,22 +1165,34 @@
       <Setter.Value>
         <ControlTemplate TargetType="sl:DialogFrame">
           <Grid>
-            <Border x:Name="PART_Scrim" Background="{DynamicResource Sl.Brush.Scrim}" />
+            <Border x:Name="PART_Scrim" Background="{DynamicResource Sl.Component.Dialog.Scrim.Brush}" />
             <Grid x:Name="PART_Panel" Margin="32" KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.ControlTabNavigation="Cycle"
                   KeyboardNavigation.DirectionalNavigation="Contained" Focusable="True" FocusVisualStyle="{x:Null}">
-              <Border CornerRadius="{DynamicResource Sl.CornerRadius.2xl}" Background="{DynamicResource Sl.Brush.Background.Raised}" Effect="{DynamicResource Sl.Effect.E3}" />
-              <Border CornerRadius="{DynamicResource Sl.CornerRadius.2xl}" Background="{DynamicResource Sl.Brush.Background.Raised}"
+              <Border CornerRadius="{DynamicResource Sl.Component.Dialog.Radius.Corner}" Background="{DynamicResource Sl.Component.Dialog.Background.Brush}"
+                      Effect="{DynamicResource Sl.Component.Dialog.Shadow.Effect}" />
+              <Border CornerRadius="{DynamicResource Sl.Component.Dialog.Radius.Corner}" Background="{DynamicResource Sl.Component.Dialog.Background.Brush}"
                       BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="1" ClipToBounds="True">
                 <DockPanel>
                   <Grid x:Name="Header" DockPanel.Dock="Top" Margin="20,16,12,0">
                     <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="Auto" />
                       <ColumnDefinition Width="*" />
                       <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="{Binding Dialog.Options.Title, RelativeSource={RelativeSource TemplatedParent}}" VerticalAlignment="Center"
-                               FontSize="{DynamicResource Sl.Font.Size.Lg}" FontWeight="{DynamicResource Sl.Font.Weight.Semibold}" TextWrapping="Wrap" />
-                    <Button x:Name="CloseButton" Grid.Column="1" sl:Ui.Variant="Ghost" sl:Ui.Size="Small" sl:Ui.Icon="x"
-                            Command="{x:Static sl:DialogCommands.Cancel}" AutomationProperties.Name="Close dialog" VerticalAlignment="Top" />
+                    <Border x:Name="Tile" Width="36" Height="36" CornerRadius="{DynamicResource Sl.CornerRadius.Lg}" Margin="0,0,14,0" VerticalAlignment="Top"
+                            Background="{Binding Path=(sl:Sl.Fill), RelativeSource={RelativeSource TemplatedParent}}">
+                      <sl:Icon Size="18" HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Kind="{Binding EffectiveOptions.Icon, RelativeSource={RelativeSource TemplatedParent}}"
+                               Foreground="{Binding Path=(sl:Sl.OnFill), RelativeSource={RelativeSource TemplatedParent}}" />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding EffectiveOptions.Title, RelativeSource={RelativeSource TemplatedParent}}"
+                                 FontSize="{DynamicResource Sl.Font.Size.Lg}" FontWeight="{DynamicResource Sl.Font.Weight.Semibold}" TextWrapping="Wrap" />
+                      <TextBlock x:Name="Description" Text="{Binding EffectiveOptions.Description, RelativeSource={RelativeSource TemplatedParent}}"
+                                 Margin="0,4,0,0" TextWrapping="Wrap" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
+                    </StackPanel>
+                    <Button x:Name="CloseButton" Grid.Column="2" sl:Sl.Variant="Ghost" sl:Sl.Size="Small" sl:Sl.StartIcon="x" sl:Sl.IconOnly="True"
+                            sl:Sl.Label="Close dialog" Command="{x:Static sl:DialogCommands.Cancel}" VerticalAlignment="Top" />
                   </Grid>
                   <ContentPresenter x:Name="Body" Margin="20,12,20,20" />
                 </DockPanel>
@@ -982,7 +1204,13 @@
               <Setter TargetName="Header" Property="Visibility" Value="Collapsed" />
               <Setter TargetName="Body" Property="Margin" Value="0" />
             </Trigger>
-            <DataTrigger Binding="{Binding Dialog.Options.ShowCloseButton, RelativeSource={RelativeSource Self}}" Value="False">
+            <DataTrigger Binding="{Binding EffectiveOptions.Icon, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+              <Setter TargetName="Tile" Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding EffectiveOptions.Description, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+              <Setter TargetName="Description" Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding EffectiveOptions.ShowCloseButton, RelativeSource={RelativeSource Self}}" Value="False">
               <Setter TargetName="CloseButton" Property="Visibility" Value="Collapsed" />
             </DataTrigger>
             <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource Self}, Converter={x:Static sl:IsDialogContentConverter.Instance}}" Value="True">
@@ -1000,7 +1228,7 @@
       <Setter.Value>
         <ControlTemplate TargetType="sl:DialogContent">
           <DockPanel>
-            <Border x:Name="FooterBar" DockPanel.Dock="Bottom" Background="{DynamicResource Sl.Brush.Background.Subtle}"
+            <Border x:Name="FooterBar" DockPanel.Dock="Bottom" Background="{DynamicResource Sl.Component.Dialog.Footer.Brush}"
                     BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="0,1,0,0" Padding="20,12">
               <ContentPresenter Content="{TemplateBinding Footer}" HorizontalAlignment="Right" />
             </Border>
@@ -1034,10 +1262,10 @@
           <TextBlock Text="{Binding Message}" Margin="0,4,0,0" TextWrapping="Wrap" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
         </StackPanel>
       </Grid>
-      <Border Background="{DynamicResource Sl.Brush.Background.Subtle}" BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="0,1,0,0" Padding="20,12">
+      <Border Background="{DynamicResource Sl.Component.Dialog.Footer.Brush}" BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="0,1,0,0" Padding="20,12">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
           <Button x:Name="Cancel" Content="{Binding CancelText}" Command="{x:Static sl:DialogCommands.Cancel}" Margin="0,0,8,0" />
-          <Button x:Name="Confirm" Content="{Binding ConfirmText}" Command="{x:Static sl:DialogCommands.Ok}" IsDefault="True" sl:Ui.Variant="Primary" />
+          <Button x:Name="Confirm" Content="{Binding ConfirmText}" Command="{x:Static sl:DialogCommands.Ok}" IsDefault="True" sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" />
         </StackPanel>
       </Border>
     </StackPanel>
@@ -1077,7 +1305,7 @@
         <Setter TargetName="Tile" Property="Background" Value="{DynamicResource Sl.Brush.Status.Danger.Bg}" />
         <Setter TargetName="TileIcon" Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
         <Setter TargetName="TileIcon" Property="Kind" Value="alert-triangle" />
-        <Setter TargetName="Confirm" Property="sl:Ui.Variant" Value="DangerSolid" />
+        <Setter TargetName="Confirm" Property="sl:Sl.Tone" Value="Danger" />
       </DataTrigger>
     </DataTemplate.Triggers>
   </DataTemplate>

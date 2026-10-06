@@ -20,6 +20,13 @@ public class SnackbarHost : ItemsControl
     public static readonly DependencyProperty ServiceProperty = DependencyProperty.Register(
         nameof(Service), typeof(ISnackbarService), typeof(SnackbarHost), new FrameworkPropertyMetadata(null, (d, _) => ((SnackbarHost)d).Attach()));
 
+    public static readonly DependencyProperty PositionProperty = DependencyProperty.Register(
+        nameof(Position), typeof(SnackbarPosition?), typeof(SnackbarHost), new FrameworkPropertyMetadata(null, (d, _) => ((SnackbarHost)d).Attach()));
+
+    public static readonly DependencyProperty LabelProperty = DependencyProperty.Register(
+        nameof(Label), typeof(string), typeof(SnackbarHost),
+        new FrameworkPropertyMetadata("Notifications", (d, e) => AutomationProperties.SetName(d, (string?)e.NewValue ?? "")));
+
     static SnackbarHost()
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(SnackbarHost), new FrameworkPropertyMetadata(typeof(SnackbarHost)));
@@ -36,6 +43,12 @@ public class SnackbarHost : ItemsControl
     /// <summary>The service to render; defaults to <see cref="SlateServices.Snackbar"/>.</summary>
     public ISnackbarService? Service { get => (ISnackbarService?)GetValue(ServiceProperty); set => SetValue(ServiceProperty, value); }
 
+    /// <summary>Corner/edge to stack in; null uses the service's configuration (Defaults.Snackbar.Position).</summary>
+    public SnackbarPosition? Position { get => (SnackbarPosition?)GetValue(PositionProperty); set => SetValue(PositionProperty, value); }
+
+    /// <summary>Accessible name of the notifications region (default "Notifications").</summary>
+    public string? Label { get => (string?)GetValue(LabelProperty); set => SetValue(LabelProperty, value); }
+
     internal ISnackbarService EffectiveService => Service ?? SlateServices.Snackbar;
 
     private void Attach()
@@ -43,7 +56,7 @@ public class SnackbarHost : ItemsControl
         var service = EffectiveService;
         if (!ReferenceEquals(ItemsSource, service.Visible))
             ItemsSource = service.Visible;
-        ApplyPosition(service.Configuration.Position);
+        ApplyPosition(Position ?? service.Configuration.Position);
     }
 
     private void ApplyPosition(SnackbarPosition position)

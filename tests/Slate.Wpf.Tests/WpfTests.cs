@@ -75,7 +75,7 @@ public class ThemeTests
 public class ButtonTests
 {
     [Fact]
-    public void Default_button_is_medium_secondary() => Wpf.Run(() =>
+    public void Default_button_is_medium_outlined_neutral() => Wpf.Run(() =>
     {
         var b = Wpf.Realize(new Button { Content = "Save" });
         Assert.Equal(32, b.ActualHeight);
@@ -83,10 +83,11 @@ public class ButtonTests
     });
 
     [Fact]
-    public void Primary_uses_accent_and_on_accent() => Wpf.Run(() =>
+    public void Solid_accent_uses_accent_and_on_accent() => Wpf.Run(() =>
     {
         var b = new Button { Content = "Deploy" };
-        Ui.SetVariant(b, ButtonVariant.Primary);
+        Sl.SetVariant(b, ButtonVariant.Solid);
+        Sl.SetTone(b, Tone.Accent);
         Wpf.Realize(b);
         Assert.Equal(((SolidColorBrush)Application.Current.FindResource("Sl.Brush.Accent.Default")).Color, ((SolidColorBrush)b.Background).Color);
         Assert.Equal(((SolidColorBrush)Application.Current.FindResource("Sl.Brush.Text.OnAccent")).Color, ((SolidColorBrush)b.Foreground).Color);
@@ -98,7 +99,7 @@ public class ButtonTests
     public void Sizes_follow_control_tokens(ControlSize size, double height) => Wpf.Run(() =>
     {
         var b = new Button { Content = "x" };
-        Ui.SetSize(b, size);
+        Sl.SetSize(b, size);
         Wpf.Realize(b);
         Assert.Equal(height, b.ActualHeight);
     });
@@ -107,7 +108,7 @@ public class ButtonTests
     public void Icon_only_buttons_are_square() => Wpf.Run(() =>
     {
         var b = new Button();
-        Ui.SetIcon(b, "plus");
+        Sl.SetStartIcon(b, "plus");
         Wpf.Realize(new StackPanel { Orientation = Orientation.Horizontal, Children = { b } });
         Assert.Equal(b.ActualHeight, b.ActualWidth);
     });
@@ -118,14 +119,14 @@ public class ButtonTests
         var clicks = 0;
         var b = new Button { Content = "Save" };
         b.Click += (_, _) => clicks++;
-        Ui.SetIsLoading(b, true);
+        Sl.SetLoading(b, true);
         Wpf.Realize(b);
 
         b.RaiseEvent(new System.Windows.Input.MouseButtonEventArgs(System.Windows.Input.Mouse.PrimaryDevice, 0, System.Windows.Input.MouseButton.Left)
         { RoutedEvent = UIElement.PreviewMouseLeftButtonDownEvent });
         Assert.Equal("Busy", AutomationProperties.GetItemStatus(b));
 
-        Ui.SetIsLoading(b, false);
+        Sl.SetLoading(b, false);
         Assert.Equal("", AutomationProperties.GetItemStatus(b));
     });
 }
@@ -135,27 +136,27 @@ public class InputTests
     [Fact]
     public void TextField_wires_label_description_required_and_invalid_into_automation() => Wpf.Run(() =>
     {
-        var field = Wpf.Realize(new TextField { Label = "Email", HelperText = "We never share it.", IsRequired = true });
+        var field = Wpf.Realize(new TextField { Label = "Email", HelperText = "We never share it.", Required = true });
         var box = field.TextBox!;
         Assert.Equal("Email", AutomationProperties.GetName(box));
         Assert.Equal("We never share it.", AutomationProperties.GetHelpText(box));
         Assert.True(AutomationProperties.GetIsRequiredForForm(box));
-        Assert.False(Ui.GetHasError(box));
+        Assert.False(Sl.GetHasError(box));
 
         field.Error = "Enter a complete email address.";
         Assert.True(field.HasError);
         Assert.Equal("Enter a complete email address.", AutomationProperties.GetHelpText(box));
         Assert.Equal("Invalid", AutomationProperties.GetItemStatus(box));
-        Assert.True(Ui.GetHasError(box));
+        Assert.True(Sl.GetHasError(box));
     });
 
     [Fact]
-    public void TextField_text_binds_two_way() => Wpf.Run(() =>
+    public void TextField_value_binds_two_way() => Wpf.Run(() =>
     {
         var field = Wpf.Realize(new TextField { Label = "Name" });
         field.TextBox!.Text = "Aaron";
-        Assert.Equal("Aaron", field.Text);
-        field.Text = "Jo";
+        Assert.Equal("Aaron", field.Value);
+        field.Value = "Jo";
         Assert.Equal("Jo", field.TextBox.Text);
     });
 
@@ -163,11 +164,11 @@ public class InputTests
     public void Placeholder_tracks_emptiness() => Wpf.Run(() =>
     {
         var box = new TextBox();
-        Ui.SetPlaceholder(box, "Search");
+        Sl.SetPlaceholder(box, "Search");
         Wpf.Realize(box);
-        Assert.True(Ui.GetIsEmpty(box));
+        Assert.True(Sl.GetEmpty(box));
         box.Text = "x";
-        Assert.False(Ui.GetIsEmpty(box));
+        Assert.False(Sl.GetEmpty(box));
     });
 
     [Fact]
@@ -221,23 +222,23 @@ public class LayoutTests
     public void Spacer_pushes_following_items_to_the_end() => Wpf.Run(() =>
     {
         var end = new Border { Width = 20 };
-        var stack = new Stack { Orientation = Orientation.Horizontal, Spacing = 0, Width = 200, Children = { new Border { Width = 20 }, new Spacer(), end } };
+        var stack = new Stack { Direction = Direction.Row, Spacing = 0, Width = 200, Children = { new Border { Width = 20 }, new Spacer(), end } };
         Wpf.Realize(stack);
         Assert.Equal(180, end.TranslatePoint(new Point(), stack).X);
     });
 
     [Theory]
-    [InlineData(DrawerMode.Responsive, 1200, DrawerMode.Persistent)]
-    [InlineData(DrawerMode.Responsive, 700, DrawerMode.Temporary)]
-    [InlineData(DrawerMode.Mini, 700, DrawerMode.Mini)]
-    public void Responsive_drawer_switches_at_md(DrawerMode mode, double width, DrawerMode expected) =>
+    [InlineData(DrawerVariant.Responsive, 1200, DrawerVariant.Persistent)]
+    [InlineData(DrawerVariant.Responsive, 700, DrawerVariant.Temporary)]
+    [InlineData(DrawerVariant.Mini, 700, DrawerVariant.Mini)]
+    public void Responsive_drawer_switches_at_md(DrawerVariant mode, double width, DrawerVariant expected) =>
         Assert.Equal(expected, AppShell.Effective(mode, width));
 
     [Fact]
     public void Container_widths_come_from_tokens()
     {
-        Assert.Equal(1200, Container.MaxContentWidth(ContainerSize.Lg));
-        Assert.True(double.IsPositiveInfinity(Container.MaxContentWidth(ContainerSize.Fluid)));
+        Assert.Equal(1200, Container.MaxContentWidth(ContainerWidth.Lg));
+        Assert.True(double.IsPositiveInfinity(Container.MaxContentWidth(ContainerWidth.Fluid)));
     }
 }
 
@@ -252,12 +253,12 @@ public class DisplayTests
     }
 
     [Theory]
-    [InlineData(Severity.Error, BadgeTone.Danger, "alert-circle")]
-    [InlineData(Severity.Success, BadgeTone.Success, "check-circle")]
-    [InlineData(Severity.Normal, BadgeTone.Neutral, "info")]
-    public void Severity_maps_to_tone_and_icon(Severity s, BadgeTone tone, string icon)
+    [InlineData(Severity.Error, Tone.Danger, "alert-circle")]
+    [InlineData(Severity.Success, Tone.Success, "check-circle")]
+    [InlineData(Severity.Normal, Tone.Neutral, "info")]
+    public void Severity_maps_to_tone_and_icon(Severity s, Tone tone, string icon)
     {
-        Assert.Equal(tone, Badge.ToneFor(s));
+        Assert.Equal(tone, s.ToTone());
         Assert.Equal(icon, Alert.IconFor(s));
     }
 

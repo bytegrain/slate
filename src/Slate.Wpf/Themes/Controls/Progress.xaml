@@ -1,33 +1,68 @@
-<!-- Linear progress (docs/design/components.md#progress): 6px muted track, accent fill; indeterminate uses a
-     30% glider that is static under reduced motion. -->
+<!-- Linear progress (docs/design/components.md#progress). Options: sl:Sl.Tone (default Accent), sl:Sl.Size (track height
+     4 / component.progress.height / 10), sl:Sl.ShowValue (percentage), sl:Sl.Label (accessible name). Track and fill come
+     from component.progress.*; indeterminate uses a 30% glider that is static under reduced motion. -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sl="clr-namespace:Slate.Wpf">
   <Style TargetType="ProgressBar">
-    <Setter Property="Height" Value="6" />
-    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Accent.Default}" />
-    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Muted}" />
+    <Setter Property="sl:Sl.Kind" Value="Progress" />
+    <Setter Property="Height" Value="{DynamicResource Sl.Component.Progress.Height}" />
+    <Setter Property="Foreground" Value="{Binding Path=(sl:Sl.Fill), RelativeSource={RelativeSource Self}}" />
+    <Setter Property="Background" Value="{Binding Path=(sl:Sl.ChromeBackground), RelativeSource={RelativeSource Self}}" />
     <Setter Property="Maximum" Value="100" />
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="ProgressBar">
-          <Grid SnapsToDevicePixels="True">
-            <Border x:Name="PART_Track" CornerRadius="3" Background="{TemplateBinding Background}">
-              <Border Height="1" VerticalAlignment="Top" Margin="2,0" Background="{DynamicResource Sl.Brush.Effect.Shade}" />
-            </Border>
-            <Border x:Name="PART_Indicator" CornerRadius="3" Background="{TemplateBinding Foreground}" HorizontalAlignment="Left" />
-            <sl:IndeterminateGlider x:Name="Glider" Visibility="Collapsed">
-              <Border CornerRadius="3" Background="{TemplateBinding Foreground}" />
-            </sl:IndeterminateGlider>
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid SnapsToDevicePixels="True" Height="{TemplateBinding Height}" VerticalAlignment="Center">
+              <Border x:Name="PART_Track" CornerRadius="{DynamicResource Sl.CornerRadius.Full}" Background="{TemplateBinding Background}">
+                <Border Height="1" VerticalAlignment="Top" Margin="2,0" Background="{DynamicResource Sl.Brush.Effect.Shade}" />
+              </Border>
+              <Border x:Name="PART_Indicator" CornerRadius="{DynamicResource Sl.CornerRadius.Full}" Background="{TemplateBinding Foreground}" HorizontalAlignment="Left" />
+              <sl:IndeterminateGlider x:Name="Glider" Visibility="Collapsed">
+                <Border CornerRadius="{DynamicResource Sl.CornerRadius.Full}" Background="{TemplateBinding Foreground}" />
+              </sl:IndeterminateGlider>
+            </Grid>
+            <TextBlock x:Name="ValueText" Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Visibility="Collapsed"
+                       FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="{DynamicResource Sl.Font.Size.Xs}" Foreground="{DynamicResource Sl.Brush.Text.Secondary}">
+              <TextBlock.Text>
+                <MultiBinding Converter="{x:Static sl:PercentConverter.Instance}">
+                  <Binding Path="Value" RelativeSource="{RelativeSource TemplatedParent}" />
+                  <Binding Path="Maximum" RelativeSource="{RelativeSource TemplatedParent}" />
+                </MultiBinding>
+              </TextBlock.Text>
+            </TextBlock>
           </Grid>
           <ControlTemplate.Triggers>
             <Trigger Property="IsIndeterminate" Value="True">
               <Setter TargetName="PART_Indicator" Property="Visibility" Value="Collapsed" />
               <Setter TargetName="Glider" Property="Visibility" Value="Visible" />
             </Trigger>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="sl:Sl.ShowValue" Value="True" />
+                <Condition Property="IsIndeterminate" Value="False" />
+              </MultiTrigger.Conditions>
+              <Setter TargetName="ValueText" Property="Visibility" Value="Visible" />
+            </MultiTrigger>
           </ControlTemplate.Triggers>
         </ControlTemplate>
       </Setter.Value>
     </Setter>
+    <Style.Triggers>
+      <Trigger Property="sl:Sl.ActualSize" Value="Small">
+        <Setter Property="Height" Value="4" />
+      </Trigger>
+      <Trigger Property="sl:Sl.ActualSize" Value="Large">
+        <Setter Property="Height" Value="10" />
+      </Trigger>
+      <Trigger Property="sl:Sl.ShowValue" Value="True">
+        <Setter Property="MinHeight" Value="18" />
+      </Trigger>
+    </Style.Triggers>
   </Style>
 </ResourceDictionary>

@@ -1,5 +1,6 @@
 using System.Windows;
 using Microsoft.Win32;
+using Slate.Theming;
 
 namespace Slate.Wpf;
 
@@ -7,21 +8,27 @@ namespace Slate.Wpf;
 /// The Slate resource dictionary. Merge it once in App.xaml:
 /// <code>&lt;sl:SlateTheme Mode="System" Density="Compact" /&gt;</code>
 /// Changing <see cref="Mode"/> or <see cref="Density"/> swaps the generated token dictionaries in place;
-/// everything in Slate uses DynamicResource, so the whole UI updates live.
+/// everything in Slate uses DynamicResource, so the whole UI updates live. Custom themes
+/// (<see cref="Options"/> / <see cref="Apply(SlateThemeDefinition)"/>) are written into an overrides dictionary
+/// merged after the tokens, so they follow the same mechanism.
 /// </summary>
 public class SlateTheme : ResourceDictionary
 {
     private const string Assembly = "Slate.Wpf";
 
-    // Fixed positions in MergedDictionaries: generated tokens, density, theme, fonts, control styles.
+    // Fixed positions in MergedDictionaries: generated tokens, density, theme, fonts, custom-theme overrides, control styles.
     private const int DensityIndex = 1;
     private const int ThemeIndex = 2;
+    private const int OverridesIndex = 4;
 
     private ThemeMode _mode = ThemeMode.Light;
     private Density _density = Slate.Density.Compact;
     private bool? _reducedMotion;
     private string? _loadedTheme;
     private Density? _loadedDensity;
+    private SlateThemeOptions? _options;
+    private SlateThemeDefinition? _fixedDefinition;
+    private SlateThemeDefinition? _applied;
 
     public SlateTheme()
     {
@@ -29,8 +36,11 @@ public class SlateTheme : ResourceDictionary
         MergedDictionaries.Add(new ResourceDictionary()); // density, filled by Apply
         MergedDictionaries.Add(new ResourceDictionary()); // theme, filled by Apply
         MergedDictionaries.Add(Load("Themes/Fonts.xaml"));
+        MergedDictionaries.Add(new ResourceDictionary()); // custom-theme overrides, filled by Apply
         MergedDictionaries.Add(Load("Themes/Controls.xaml"));
-        Apply();
+        _options = PendingOptions;
+        PendingOptions = null;
+        Apply(force: _options is not null);
 
         Current = this;
         SystemTheme.Changed += OnSystemThemeChanged;
@@ -38,6 +48,36 @@ public class SlateTheme : ResourceDictionary
 
     /// <summary>The most recently created SlateTheme (normally the one in App.xaml).</summary>
     public static SlateTheme? Current { get; private set; }
+
+    /// <summary>
+    /// App-wide component defaults (docs/design/configurability.md#3-defaults). Options set on a control always win;
+    /// unset ones read these when the control loads. <c>services.AddSlate(o => o.Defaults…)</c> configures the same object.
+    /// </summary>
+    public static SlateDefaults Defaults { get; set; } = new();
+
+    /// <summary>
+    /// Custom theme on top of Alloy (accent, radius scale, fonts, token overrides). Rebuilt for light or dark whenever
+    /// the actual theme changes, so one brand colour works in both. Null restores the built-in theme.
+    /// </summary>
+    public SlateThemeOptions? Options
+    {
+        get => _options;
+        set
+        {
+            _options = value;
+            _fixedDefinition = null;
+            Apply(force: true);
+        }
+    }
+
+    /// <summary>The custom theme currently applied, if any.</summary>
+    public SlateThemeDefinition? AppliedDefinition => _applied;
+
+    /// <summary>Theme options registered by AddSlate before any SlateTheme existed; consumed by the next one created.</summary>
+    internal static SlateThemeOptions? PendingOptions { get; set; }
+
+    /// <summary>Raised after a custom theme is applied or reset.</summary>
+    public event EventHandler? ThemeApplied;
 
     /// <summary>Raised after <see cref="ActualTheme"/> changes (including when the OS theme changes under System).</summary>
     public event EventHandler? ActualThemeChanged;
@@ -89,7 +129,28 @@ public class SlateTheme : ResourceDictionary
     /// <summary>Re-evaluates System mode against the current OS setting.</summary>
     public void Refresh() => Apply();
 
-    private void Apply()
+    /// <summary>
+    /// Applies a prebuilt theme definition as-is (e.g. from <see cref="ThemeBuilder.Build"/>) and switches
+    /// <see cref="Mode"/> to its base theme. Prefer <see cref="Options"/> to follow light/dark automatically.
+    /// </summary>
+    public void Apply(SlateThemeDefinition definition)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+        _options = null;
+        _fixedDefinition = definition;
+        _mode = definition.IsDark ? ThemeMode.Dark : ThemeMode.Light;
+        Apply(force: true);
+    }
+
+    /// <summary>Removes any custom theme and returns to built-in Alloy.</summary>
+    public void ResetTheme()
+    {
+        _options = null;
+        _fixedDefinition = null;
+        Apply(force: true);
+    }
+
+    private void Apply(bool force = false)
     {
         // Replacing a merged entry (rather than mutating it) makes WPF raise one resource
         // invalidation, which every DynamicResource consumer picks up.
@@ -100,19 +161,29 @@ public class SlateTheme : ResourceDictionary
         }
 
         var actual = ThemeNames.Resolve(_mode, SystemTheme.IsDark);
-        if (_loadedTheme != actual)
+        var themeChanged = _loadedTheme != actual;
+        if (themeChanged)
         {
             MergedDictionaries[ThemeIndex] = Load(ThemePath(actual));
             _loadedTheme = actual;
             ActualTheme = actual;
-            ActualThemeChanged?.Invoke(this, EventArgs.Empty);
         }
+
+        if (themeChanged || force)
+        {
+            _applied = _fixedDefinition ?? (_options is { } o ? ThemeBuilder.Build(o with { Base = actual }) : null);
+            MergedDictionaries[OverridesIndex] = _applied is null ? new ResourceDictionary() : ThemeResources.Build(_applied, _applied.ChangedPaths);
+            ThemeApplied?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (themeChanged)
+            ActualThemeChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private void OnSystemThemeChanged(object? sender, EventArgs e)
     {
         if (_mode == ThemeMode.System)
-            Application.Current?.Dispatcher.BeginInvoke(Apply);
+            Application.Current?.Dispatcher.BeginInvoke(new Action(() => Apply()));
     }
 }
 

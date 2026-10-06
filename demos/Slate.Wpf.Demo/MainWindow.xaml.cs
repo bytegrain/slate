@@ -13,6 +13,8 @@ public partial class MainWindow : SlateWindow
         ["Layout"] = () => new LayoutPage(),
         ["Feedback"] = () => new FeedbackPage(),
         ["Dialogs"] = () => new DialogsPage(),
+        ["Theming"] = () => new ThemingPage(),
+        ["Playground"] = () => new PlaygroundPage(),
         ["Files"] = () => new FileBrowserPage(),
     };
 
@@ -61,8 +63,8 @@ public partial class MainWindow : SlateWindow
         _syncingNav = false;
 
         PageHost.Content = _pages[key]();
-        if (Shell.IsOverlay)
-            Shell.IsDrawerOpen = false;
+        if (Shell.Overlay)
+            Shell.DrawerOpen = false;
     }
 }
 

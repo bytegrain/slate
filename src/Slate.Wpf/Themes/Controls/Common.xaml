@@ -3,6 +3,9 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+  <!-- Transparent as a resource, so computed brushes (sl:Sl.Chrome*) can reference it like any token. -->
+  <SolidColorBrush x:Key="Sl.Brush.Transparent" Color="Transparent" />
+
   <!-- Keyboard-only focus ring (WPF shows FocusVisualStyle only for keyboard focus):
        2px gap in the canvas colour + 2px focus.ring, following the control's radius. -->
   <Style x:Key="Sl.FocusVisual">

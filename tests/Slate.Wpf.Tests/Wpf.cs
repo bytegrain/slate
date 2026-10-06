@@ -43,8 +43,10 @@ internal static class Wpf
         {
             try
             {
+                Theme.ResetTheme();
                 Theme.Mode = ThemeMode.Light;
                 Theme.Density = Density.Compact;
+                SlateTheme.Defaults = new SlateDefaults();
                 return body();
             }
             catch (Exception ex)

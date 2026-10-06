@@ -1,0 +1,32 @@
+<UserControl x:Class="Slate.Wpf.Demo.Pages.PlaygroundPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sl="https://slate.dev/wpf">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <sl:Container ContainerMaxWidth="Xl" Margin="0,28,0,48">
+      <sl:Stack Spacing="6">
+        <StackPanel>
+          <TextBlock Style="{DynamicResource Sl.Typography.Overline}" Foreground="{DynamicResource Sl.Brush.Accent.Text}" Text="PLAYGROUND" />
+          <TextBlock Style="{DynamicResource Sl.Typography.H2}" Margin="0,6,0,4" Text="Every option, live" />
+          <TextBlock Style="{DynamicResource Sl.Text.Secondary}" TextWrapping="Wrap"
+                     Text="The options here are the canonical API from design/api/components.json — the same names on web, Blazor, WPF and Avalonia." />
+        </StackPanel>
+
+        <Border Style="{DynamicResource Sl.Segmented}">
+          <StackPanel x:Name="Picker" Orientation="Horizontal" />
+        </Border>
+
+        <sl:ResponsiveGrid Spacing="6">
+          <sl:Card sl:ResponsiveGrid.Md="7" Title="Preview" Variant="Outlined">
+            <Grid MinHeight="220">
+              <ContentControl x:Name="Stage" Focusable="False" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
+          </sl:Card>
+          <sl:Card sl:ResponsiveGrid.Md="5" Title="Options" Flush="True">
+            <sl:Stack x:Name="Options" Spacing="3" Margin="20" />
+          </sl:Card>
+        </sl:ResponsiveGrid>
+      </sl:Stack>
+    </sl:Container>
+  </ScrollViewer>
+</UserControl>

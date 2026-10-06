@@ -17,12 +17,12 @@
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="KeyboardNavigation.TabNavigation" Value="None" />
     <Style.Triggers>
-      <Trigger Property="sl:Ui.Size" Value="Small">
+      <Trigger Property="sl:Sl.Size" Value="Small">
         <Setter Property="Height" Value="{DynamicResource Sl.Size.Control.Sm}" />
         <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Sm}" />
         <Setter Property="Padding" Value="6,0" />
       </Trigger>
-      <Trigger Property="sl:Ui.Size" Value="Large">
+      <Trigger Property="sl:Sl.Size" Value="Large">
         <Setter Property="Height" Value="{DynamicResource Sl.Size.Control.Lg}" />
         <Setter Property="Padding" Value="12,0" />
       </Trigger>
@@ -45,12 +45,12 @@
           <TextBlock x:Name="Placeholder" Margin="{TemplateBinding Padding}" Padding="2,0"
                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}" IsHitTestVisible="False"
                      Foreground="{DynamicResource Sl.Brush.Text.Placeholder}" TextTrimming="CharacterEllipsis"
-                     Text="{Binding Path=(sl:Ui.Placeholder), RelativeSource={RelativeSource TemplatedParent}}" Visibility="Collapsed" />
+                     Text="{Binding Path=(sl:Sl.Placeholder), RelativeSource={RelativeSource TemplatedParent}}" Visibility="Collapsed" />
         </Grid>
       </Border>
     </Grid>
     <ControlTemplate.Triggers>
-      <Trigger Property="sl:Ui.IsEmpty" Value="True">
+      <Trigger Property="sl:Sl.Empty" Value="True">
         <Setter TargetName="Placeholder" Property="Visibility" Value="Visible" />
       </Trigger>
       <Trigger Property="IsMouseOver" Value="True">
@@ -59,7 +59,7 @@
       <Trigger Property="IsReadOnly" Value="True">
         <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Sl.Brush.Background.Subtle}" />
       </Trigger>
-      <Trigger Property="sl:Ui.HasError" Value="True">
+      <Trigger Property="sl:Sl.HasError" Value="True">
         <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
       </Trigger>
       <Trigger Property="IsKeyboardFocused" Value="True">
@@ -69,7 +69,7 @@
       <MultiTrigger>
         <MultiTrigger.Conditions>
           <Condition Property="IsKeyboardFocused" Value="True" />
-          <Condition Property="sl:Ui.HasError" Value="True" />
+          <Condition Property="sl:Sl.HasError" Value="True" />
         </MultiTrigger.Conditions>
         <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
       </MultiTrigger>
@@ -119,18 +119,18 @@
                               HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" />
                 <TextBlock x:Name="Placeholder" Margin="{TemplateBinding Padding}" Padding="2,0" VerticalAlignment="Center"
                            IsHitTestVisible="False" Foreground="{DynamicResource Sl.Brush.Text.Placeholder}"
-                           Text="{Binding Path=(sl:Ui.Placeholder), RelativeSource={RelativeSource TemplatedParent}}" Visibility="Collapsed" />
+                           Text="{Binding Path=(sl:Sl.Placeholder), RelativeSource={RelativeSource TemplatedParent}}" Visibility="Collapsed" />
               </Grid>
             </Border>
           </Grid>
           <ControlTemplate.Triggers>
-            <Trigger Property="sl:Ui.IsEmpty" Value="True">
+            <Trigger Property="sl:Sl.Empty" Value="True">
               <Setter TargetName="Placeholder" Property="Visibility" Value="Visible" />
             </Trigger>
             <Trigger Property="IsMouseOver" Value="True">
               <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.ControlHover}" />
             </Trigger>
-            <Trigger Property="sl:Ui.HasError" Value="True">
+            <Trigger Property="sl:Sl.HasError" Value="True">
               <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
             </Trigger>
             <Trigger Property="IsKeyboardFocused" Value="True">
@@ -184,7 +184,7 @@
                               ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" />
             <TextBlock x:Name="Placeholder" Margin="{TemplateBinding Padding}" VerticalAlignment="Center" IsHitTestVisible="False"
                        Foreground="{DynamicResource Sl.Brush.Text.Placeholder}" Visibility="Collapsed"
-                       Text="{Binding Path=(sl:Ui.Placeholder), RelativeSource={RelativeSource TemplatedParent}}" />
+                       Text="{Binding Path=(sl:Sl.Placeholder), RelativeSource={RelativeSource TemplatedParent}}" />
             <TextBox x:Name="PART_EditableTextBox" Visibility="Collapsed" Margin="1" Padding="7,0,30,0" BorderThickness="0" Background="Transparent"
                      IsReadOnly="{TemplateBinding IsReadOnly}" />
             <ToggleButton Style="{StaticResource Sl.ComboBox.Toggle}"
@@ -216,7 +216,7 @@
             <Trigger Property="IsDropDownOpen" Value="True">
               <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Default}" />
             </Trigger>
-            <Trigger Property="sl:Ui.HasError" Value="True">
+            <Trigger Property="sl:Sl.HasError" Value="True">
               <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">

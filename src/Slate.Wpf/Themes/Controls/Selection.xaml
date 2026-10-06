@@ -1,50 +1,85 @@
-<!-- Checkbox and radio (docs/design/components.md). Outlines use border.control (>= 3:1). The whole row is
-     clickable; the keyboard focus ring wraps the row. -->
+<!-- Checkbox and radio (docs/design/components.md). Options: sl:Sl.Tone (default Accent), sl:Sl.Size, sl:Sl.LabelPlacement,
+     sl:Sl.Description, sl:Sl.Radius (checkbox). Outlines use component.selection.border (>= 3:1); checked fills use the
+     computed sl:Sl.Fill (component.selection.checked for Accent). The whole row is clickable. -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sl="clr-namespace:Slate.Wpf">
 
-  <Style TargetType="CheckBox">
+  <Style x:Key="Sl.SelectionBase" TargetType="ToggleButton">
+    <Setter Property="sl:Sl.Kind" Value="Selection" />
     <Setter Property="FocusVisualStyle" Value="{DynamicResource Sl.FocusVisual}" />
     <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
     <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Md}" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Cursor" Value="Hand" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+
+  <Style TargetType="CheckBox" BasedOn="{StaticResource Sl.SelectionBase}">
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="CheckBox">
           <Grid x:Name="Root" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
             <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="*" />
+              <ColumnDefinition x:Name="BoxColumn" Width="Auto" />
+              <ColumnDefinition x:Name="LabelColumn" Width="*" />
             </Grid.ColumnDefinitions>
-            <Grid Width="16" Height="16" VerticalAlignment="Top" Margin="0,2.5,0,0">
-              <Border x:Name="Box" CornerRadius="{DynamicResource Sl.CornerRadius.Sm}" BorderThickness="1"
-                      BorderBrush="{DynamicResource Sl.Brush.Border.Control}" Background="{DynamicResource Sl.Brush.Background.Sunken}" />
-              <sl:Icon x:Name="Check" Kind="check" Size="12" StrokeThickness="2" Foreground="{DynamicResource Sl.Brush.Text.OnAccent}"
-                       HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />
-              <sl:Icon x:Name="Dash" Kind="minus" Size="12" StrokeThickness="2" Foreground="{DynamicResource Sl.Brush.Text.OnAccent}"
-                       HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />
+            <Grid x:Name="BoxSite" Width="{DynamicResource Sl.Component.Selection.BoxSize}" Height="{DynamicResource Sl.Component.Selection.BoxSize}"
+                  VerticalAlignment="Top" Margin="0,2.5,0,0">
+              <Border x:Name="Box" BorderThickness="1" Background="{DynamicResource Sl.Brush.Background.Sunken}"
+                      BorderBrush="{Binding Path=(sl:Sl.ChromeBorder), RelativeSource={RelativeSource TemplatedParent}}"
+                      CornerRadius="{Binding Path=(sl:Sl.ActualCornerRadius), RelativeSource={RelativeSource TemplatedParent}}" />
+              <Viewbox Margin="2">
+                <Grid Width="12" Height="12">
+                  <sl:Icon x:Name="Check" Kind="check" Size="12" StrokeThickness="2" Visibility="Collapsed"
+                           Foreground="{Binding Path=(sl:Sl.OnFill), RelativeSource={RelativeSource TemplatedParent}}" />
+                  <sl:Icon x:Name="Dash" Kind="minus" Size="12" StrokeThickness="2" Visibility="Collapsed"
+                           Foreground="{Binding Path=(sl:Sl.OnFill), RelativeSource={RelativeSource TemplatedParent}}" />
+                </Grid>
+              </Viewbox>
             </Grid>
-            <ContentPresenter x:Name="Label" Grid.Column="1" Margin="8,0,0,0" RecognizesAccessKey="True"
-                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+            <StackPanel x:Name="LabelStack" Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+              <ContentPresenter x:Name="Label" RecognizesAccessKey="True" />
+              <TextBlock x:Name="Description" TextWrapping="Wrap" FontSize="{DynamicResource Sl.Font.Size.Xs}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}"
+                         Text="{Binding Path=(sl:Sl.Description), RelativeSource={RelativeSource TemplatedParent}}" />
+            </StackPanel>
           </Grid>
           <ControlTemplate.Triggers>
+            <Trigger Property="sl:Sl.Description" Value="{x:Null}">
+              <Setter TargetName="Description" Property="Visibility" Value="Collapsed" />
+            </Trigger>
             <Trigger Property="Content" Value="{x:Null}">
-              <Setter TargetName="Label" Property="Margin" Value="0" />
+              <Setter TargetName="LabelStack" Property="Margin" Value="0" />
+            </Trigger>
+            <Trigger Property="sl:Sl.ActualLabelPlacement" Value="Start">
+              <Setter TargetName="BoxColumn" Property="Width" Value="*" />
+              <Setter TargetName="LabelColumn" Property="Width" Value="Auto" />
+              <Setter TargetName="BoxSite" Property="Grid.Column" Value="1" />
+              <Setter TargetName="BoxSite" Property="HorizontalAlignment" Value="Left" />
+              <Setter TargetName="LabelStack" Property="Grid.Column" Value="0" />
+              <Setter TargetName="LabelStack" Property="Margin" Value="0,0,8,0" />
+            </Trigger>
+            <Trigger Property="sl:Sl.ActualSize" Value="Small">
+              <Setter TargetName="BoxSite" Property="Width" Value="14" />
+              <Setter TargetName="BoxSite" Property="Height" Value="14" />
+              <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Sm}" />
+            </Trigger>
+            <Trigger Property="sl:Sl.ActualSize" Value="Large">
+              <Setter TargetName="BoxSite" Property="Width" Value="20" />
+              <Setter TargetName="BoxSite" Property="Height" Value="20" />
+              <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Lg}" />
             </Trigger>
             <Trigger Property="IsMouseOver" Value="True">
               <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.ControlHover}" />
             </Trigger>
             <Trigger Property="IsChecked" Value="True">
-              <Setter TargetName="Box" Property="Background" Value="{DynamicResource Sl.Brush.Accent.Default}" />
-              <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+              <Setter TargetName="Box" Property="Background" Value="{Binding Path=(sl:Sl.Fill), RelativeSource={RelativeSource TemplatedParent}}" />
+              <Setter TargetName="Box" Property="BorderBrush" Value="{Binding Path=(sl:Sl.Fill), RelativeSource={RelativeSource TemplatedParent}}" />
               <Setter TargetName="Check" Property="Visibility" Value="Visible" />
             </Trigger>
             <Trigger Property="IsChecked" Value="{x:Null}">
-              <Setter TargetName="Box" Property="Background" Value="{DynamicResource Sl.Brush.Accent.Default}" />
-              <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+              <Setter TargetName="Box" Property="Background" Value="{Binding Path=(sl:Sl.Fill), RelativeSource={RelativeSource TemplatedParent}}" />
+              <Setter TargetName="Box" Property="BorderBrush" Value="{Binding Path=(sl:Sl.Fill), RelativeSource={RelativeSource TemplatedParent}}" />
               <Setter TargetName="Dash" Property="Visibility" Value="Visible" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
@@ -57,38 +92,63 @@
     </Setter>
   </Style>
 
-  <Style TargetType="RadioButton">
-    <Setter Property="FocusVisualStyle" Value="{DynamicResource Sl.FocusVisual}" />
-    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
-    <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Md}" />
-    <Setter Property="Background" Value="Transparent" />
-    <Setter Property="Cursor" Value="Hand" />
-    <Setter Property="VerticalContentAlignment" Value="Center" />
+  <Style TargetType="RadioButton" BasedOn="{StaticResource Sl.SelectionBase}">
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="RadioButton">
           <Grid x:Name="Root" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
             <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="*" />
+              <ColumnDefinition x:Name="BoxColumn" Width="Auto" />
+              <ColumnDefinition x:Name="LabelColumn" Width="*" />
             </Grid.ColumnDefinitions>
-            <Grid Width="16" Height="16" VerticalAlignment="Top" Margin="0,2.5,0,0">
-              <Ellipse x:Name="Circle" StrokeThickness="1" Stroke="{DynamicResource Sl.Brush.Border.Control}" Fill="{DynamicResource Sl.Brush.Background.Sunken}" />
-              <Ellipse x:Name="Dot" Width="6" Height="6" Fill="{DynamicResource Sl.Brush.Text.OnAccent}" Visibility="Collapsed" />
+            <Grid x:Name="BoxSite" Width="{DynamicResource Sl.Component.Selection.BoxSize}" Height="{DynamicResource Sl.Component.Selection.BoxSize}"
+                  VerticalAlignment="Top" Margin="0,2.5,0,0">
+              <Ellipse x:Name="Circle" StrokeThickness="1" Fill="{DynamicResource Sl.Brush.Background.Sunken}"
+                       Stroke="{Binding Path=(sl:Sl.ChromeBorder), RelativeSource={RelativeSource TemplatedParent}}" />
+              <Ellipse x:Name="Dot" Width="6" Height="6" Visibility="Collapsed"
+                       Fill="{Binding Path=(sl:Sl.OnFill), RelativeSource={RelativeSource TemplatedParent}}" />
             </Grid>
-            <ContentPresenter x:Name="Label" Grid.Column="1" Margin="8,0,0,0" RecognizesAccessKey="True"
-                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+            <StackPanel x:Name="LabelStack" Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+              <ContentPresenter x:Name="Label" RecognizesAccessKey="True" />
+              <TextBlock x:Name="Description" TextWrapping="Wrap" FontSize="{DynamicResource Sl.Font.Size.Xs}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}"
+                         Text="{Binding Path=(sl:Sl.Description), RelativeSource={RelativeSource TemplatedParent}}" />
+            </StackPanel>
           </Grid>
           <ControlTemplate.Triggers>
+            <Trigger Property="sl:Sl.Description" Value="{x:Null}">
+              <Setter TargetName="Description" Property="Visibility" Value="Collapsed" />
+            </Trigger>
             <Trigger Property="Content" Value="{x:Null}">
-              <Setter TargetName="Label" Property="Margin" Value="0" />
+              <Setter TargetName="LabelStack" Property="Margin" Value="0" />
+            </Trigger>
+            <Trigger Property="sl:Sl.ActualLabelPlacement" Value="Start">
+              <Setter TargetName="BoxColumn" Property="Width" Value="*" />
+              <Setter TargetName="LabelColumn" Property="Width" Value="Auto" />
+              <Setter TargetName="BoxSite" Property="Grid.Column" Value="1" />
+              <Setter TargetName="BoxSite" Property="HorizontalAlignment" Value="Left" />
+              <Setter TargetName="LabelStack" Property="Grid.Column" Value="0" />
+              <Setter TargetName="LabelStack" Property="Margin" Value="0,0,8,0" />
+            </Trigger>
+            <Trigger Property="sl:Sl.ActualSize" Value="Small">
+              <Setter TargetName="BoxSite" Property="Width" Value="14" />
+              <Setter TargetName="BoxSite" Property="Height" Value="14" />
+              <Setter TargetName="Dot" Property="Width" Value="5" />
+              <Setter TargetName="Dot" Property="Height" Value="5" />
+              <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Sm}" />
+            </Trigger>
+            <Trigger Property="sl:Sl.ActualSize" Value="Large">
+              <Setter TargetName="BoxSite" Property="Width" Value="20" />
+              <Setter TargetName="BoxSite" Property="Height" Value="20" />
+              <Setter TargetName="Dot" Property="Width" Value="8" />
+              <Setter TargetName="Dot" Property="Height" Value="8" />
+              <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Lg}" />
             </Trigger>
             <Trigger Property="IsMouseOver" Value="True">
               <Setter TargetName="Circle" Property="Stroke" Value="{DynamicResource Sl.Brush.Border.ControlHover}" />
             </Trigger>
             <Trigger Property="IsChecked" Value="True">
-              <Setter TargetName="Circle" Property="Fill" Value="{DynamicResource Sl.Brush.Accent.Default}" />
-              <Setter TargetName="Circle" Property="Stroke" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+              <Setter TargetName="Circle" Property="Fill" Value="{Binding Path=(sl:Sl.Fill), RelativeSource={RelativeSource TemplatedParent}}" />
+              <Setter TargetName="Circle" Property="Stroke" Value="{Binding Path=(sl:Sl.Fill), RelativeSource={RelativeSource TemplatedParent}}" />
               <Setter TargetName="Dot" Property="Visibility" Value="Visible" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">

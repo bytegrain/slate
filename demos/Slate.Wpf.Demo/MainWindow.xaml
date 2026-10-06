@@ -8,7 +8,7 @@
 
   <sl:SlateWindow.TitleBarContent>
     <Grid Width="320">
-      <TextBox x:Name="Search" sl:Ui.Size="Small" sl:Ui.Placeholder="Search components" Padding="28,0,40,0"
+      <TextBox x:Name="Search" sl:Sl.Size="Small" sl:Sl.Placeholder="Search components" Padding="28,0,40,0"
                AutomationProperties.Name="Search components" />
       <sl:Icon Kind="search" Size="14" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" IsHitTestVisible="False"
                Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
@@ -17,15 +17,15 @@
   </sl:SlateWindow.TitleBarContent>
 
   <sl:SlateWindow.TitleBarActions>
-    <sl:Stack Orientation="Horizontal" Spacing="3" Align="Center">
+    <sl:Stack Direction="Row" Spacing="3" Align="Center">
       <Border Style="{DynamicResource Sl.Segmented}" VerticalAlignment="Center">
         <StackPanel Orientation="Horizontal">
-          <RadioButton x:Name="ThemeLight" GroupName="Theme" Style="{DynamicResource Sl.SegmentedItem}" sl:Ui.Icon="sun" Content="Light" Checked="OnThemeChecked" Tag="Light" />
-          <RadioButton x:Name="ThemeDark" GroupName="Theme" Style="{DynamicResource Sl.SegmentedItem}" sl:Ui.Icon="moon" Content="Dark" Checked="OnThemeChecked" Tag="Dark" />
+          <RadioButton x:Name="ThemeLight" GroupName="Theme" Style="{DynamicResource Sl.SegmentedItem}" sl:Sl.StartIcon="sun" Content="Light" Checked="OnThemeChecked" Tag="Light" />
+          <RadioButton x:Name="ThemeDark" GroupName="Theme" Style="{DynamicResource Sl.SegmentedItem}" sl:Sl.StartIcon="moon" Content="Dark" Checked="OnThemeChecked" Tag="Dark" />
           <RadioButton x:Name="ThemeSystem" GroupName="Theme" Style="{DynamicResource Sl.SegmentedItem}" Content="System" Checked="OnThemeChecked" Tag="System" />
         </StackPanel>
       </Border>
-      <sl:Switch x:Name="Comfortable" Content="Comfortable" FontSize="{DynamicResource Sl.Font.Size.Sm}" Checked="OnDensityChanged" Unchecked="OnDensityChanged"
+      <sl:Switch x:Name="Comfortable" Content="Comfortable" LabelPlacement="Start" FontSize="{DynamicResource Sl.Font.Size.Sm}" Checked="OnDensityChanged" Unchecked="OnDensityChanged"
                  VerticalAlignment="Center" />
     </sl:Stack>
   </sl:SlateWindow.TitleBarActions>
@@ -47,6 +47,8 @@
               </sl:NavItem.Trailing>
             </sl:NavItem>
             <sl:NavItem Icon="copy" Content="Dialogs" Tag="Dialogs" />
+            <sl:NavItem Icon="sun" Content="Theming" Tag="Theming" />
+            <sl:NavItem Icon="pencil" Content="Playground" Tag="Playground" />
           </ListBox>
           <sl:SectionHeader Content="Examples" Margin="8,8,0,0" />
           <ListBox x:Name="Examples" Style="{DynamicResource Sl.NavList}" SelectionChanged="OnNavigate" Padding="8,0">

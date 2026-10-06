@@ -104,11 +104,12 @@ public sealed class DialogService : IDialogService
 {
     public DialogStack Stack { get; } = new();
 
-    public DialogReference Show(object content, DialogOptions? options = null) => Stack.Push(content, options);
+    /// <summary>Unset options fall back to <see cref="SlateTheme.Defaults"/>.Dialog.</summary>
+    public DialogReference Show(object content, DialogOptions? options = null) => Stack.Push(content, options ?? SlateTheme.Defaults.Dialog);
 
     public Task<DialogResult> ShowAsync(object content, DialogOptions? options = null) => Show(content, options).Result;
 
-    public Task<DialogResult> ShowAsync(object content, string title) => ShowAsync(content, new DialogOptions { Title = title });
+    public Task<DialogResult> ShowAsync(object content, string title) => ShowAsync(content, SlateTheme.Defaults.Dialog with { Title = title });
 
     public async Task<bool> ConfirmAsync(MessageBoxOptions options)
     {
@@ -126,6 +127,7 @@ public sealed class DialogService : IDialogService
     public static DialogOptions MessageBoxDialogOptions(MessageBoxOptions o) => new()
     {
         Title = o.Title,
+        Tone = o.Destructive ? Tone.Danger : o.Severity.ToTone(),
         MaxWidth = DialogWidth.Xs,
         ShowCloseButton = false,
         CloseOnBackdropClick = o.CancelText is not null && !o.Destructive,
@@ -144,7 +146,7 @@ public static class SlateServices
 
     public static ISnackbarService Snackbar
     {
-        get => _snackbar ??= new SnackbarService();
+        get => _snackbar ??= new SnackbarService(SlateTheme.Defaults.Snackbar);
         set => _snackbar = value;
     }
 
@@ -157,13 +159,25 @@ public static class SlateServices
 
 public static class SlateServiceCollectionExtensions
 {
-    /// <summary>Registers <see cref="ISnackbarService"/> and <see cref="IDialogService"/> as singletons shared with <see cref="SlateServices"/>.</summary>
+    /// <summary>
+    /// Registers <see cref="ISnackbarService"/> and <see cref="IDialogService"/> as singletons shared with <see cref="SlateServices"/>,
+    /// and applies <see cref="SlateOptions.Defaults"/> (to <see cref="SlateTheme.Defaults"/>) and <see cref="SlateOptions.Theme"/>.
+    /// </summary>
     public static IServiceCollection AddSlate(this IServiceCollection services, Action<SlateOptions>? configure = null)
     {
         var options = new SlateOptions();
         configure?.Invoke(options);
 
-        var snackbar = new SnackbarService(options.Snackbar, options.TimeProvider);
+        SlateTheme.Defaults = options.Defaults;
+        if (options.Theme is { } theme)
+        {
+            if (SlateTheme.Current is { } current)
+                current.Options = theme;
+            else
+                SlateTheme.PendingOptions = theme;
+        }
+
+        var snackbar = new SnackbarService(options.Defaults.Snackbar, options.TimeProvider);
         var dialogs = new DialogService();
         SlateServices.Snackbar = snackbar;
         SlateServices.Dialogs = dialogs;
@@ -176,6 +190,11 @@ public static class SlateServiceCollectionExtensions
 
 public sealed class SlateOptions
 {
-    public SnackbarConfiguration Snackbar { get; set; } = new();
+    /// <summary>App-wide component defaults (also used for the snackbar host and dialogs).</summary>
+    public SlateDefaults Defaults { get; } = new();
+
+    /// <summary>Custom theme applied to <see cref="SlateTheme.Current"/> (or to the next SlateTheme created).</summary>
+    public Theming.SlateThemeOptions? Theme { get; set; }
+
     public TimeProvider? TimeProvider { get; set; }
 }

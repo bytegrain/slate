@@ -3,52 +3,52 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:sl="https://slate.dev/wpf">
   <ScrollViewer VerticalScrollBarVisibility="Auto">
-    <sl:Container Size="Lg" Margin="0,28,0,48">
+    <sl:Container ContainerMaxWidth="Lg" Margin="0,28,0,48">
       <sl:Stack Spacing="6">
         <StackPanel>
           <TextBlock Style="{DynamicResource Sl.Typography.Overline}" Foreground="{DynamicResource Sl.Brush.Accent.Text}" Text="COMPONENTS" />
           <TextBlock Style="{DynamicResource Sl.Typography.H2}" Margin="0,6,0,4" Text="Every control, every state" />
           <TextBlock Style="{DynamicResource Sl.Text.Secondary}" TextWrapping="Wrap"
-                     Text="Native WPF controls pick up Alloy automatically. Variants, sizes and icons are attached properties (sl:Ui.*)." />
+                     Text="Native WPF controls pick up Alloy automatically. Variants, sizes and icons are attached properties (sl:Sl.*)." />
         </StackPanel>
 
         <!-- Buttons -->
-        <sl:Card Header="Buttons" Subtitle="Six variants, three sizes. One primary action per view.">
+        <sl:Card Title="Buttons" Subtitle="Six variants, three sizes. One primary action per view.">
           <sl:Stack Spacing="4">
-            <sl:Stack Orientation="Horizontal" Spacing="2">
-              <Button sl:Ui.Variant="Primary" Content="Deploy" />
+            <sl:Stack Direction="Row" Spacing="2">
+              <Button sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" Content="Deploy" />
               <Button Content="Secondary" />
-              <Button sl:Ui.Variant="Ghost" Content="Ghost" />
-              <Button sl:Ui.Variant="Danger" Content="Delete" />
-              <Button sl:Ui.Variant="DangerSolid" Content="Delete forever" />
-              <Button sl:Ui.Variant="Link" Content="Learn more" VerticalAlignment="Center" />
+              <Button sl:Sl.Variant="Ghost" Content="Ghost" />
+              <Button sl:Sl.Tone="Danger" Content="Delete" />
+              <Button sl:Sl.Variant="Solid" sl:Sl.Tone="Danger" Content="Delete forever" />
+              <Button sl:Sl.Variant="Link" Content="Learn more" VerticalAlignment="Center" />
             </sl:Stack>
-            <sl:Stack Orientation="Horizontal" Spacing="2" Align="Center">
-              <Button sl:Ui.Variant="Primary" sl:Ui.Size="Small" Content="Small" />
-              <Button sl:Ui.Variant="Primary" Content="Medium" />
-              <Button sl:Ui.Variant="Primary" sl:Ui.Size="Large" Content="Large" sl:Ui.IconEnd="arrow-right" />
-              <Button sl:Ui.Icon="download" Content="Export" />
-              <Button sl:Ui.Icon="plus" AutomationProperties.Name="Add" ToolTip="Add item" />
-              <Button sl:Ui.Variant="Ghost" sl:Ui.Icon="more-horizontal" AutomationProperties.Name="More" ToolTip="More actions">
+            <sl:Stack Direction="Row" Spacing="2" Align="Center">
+              <Button sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" sl:Sl.Size="Small" Content="Small" />
+              <Button sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" Content="Medium" />
+              <Button sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" sl:Sl.Size="Large" Content="Large" sl:Sl.EndIcon="arrow-right" />
+              <Button sl:Sl.StartIcon="download" Content="Export" />
+              <Button sl:Sl.StartIcon="plus" AutomationProperties.Name="Add" ToolTip="Add item" />
+              <Button sl:Sl.Variant="Ghost" sl:Sl.StartIcon="more-horizontal" AutomationProperties.Name="More" ToolTip="More actions">
                 <Button.ContextMenu>
                   <ContextMenu>
-                    <MenuItem Header="Rename" sl:Ui.Icon="pencil" InputGestureText="F2" />
-                    <MenuItem Header="Duplicate" sl:Ui.Icon="copy" InputGestureText="Ctrl+D" />
+                    <MenuItem Header="Rename" sl:Sl.StartIcon="pencil" InputGestureText="F2" />
+                    <MenuItem Header="Duplicate" sl:Sl.StartIcon="copy" InputGestureText="Ctrl+D" />
                     <MenuItem Header="Move to">
                       <MenuItem Header="Archive" />
                       <MenuItem Header="Shared" />
                     </MenuItem>
                     <Separator />
-                    <MenuItem Header="Delete" sl:Ui.Icon="trash" sl:Ui.Variant="Danger" InputGestureText="Del" />
+                    <MenuItem Header="Delete" sl:Sl.StartIcon="trash" sl:Sl.Tone="Danger" InputGestureText="Del" />
                   </ContextMenu>
                 </Button.ContextMenu>
               </Button>
             </sl:Stack>
-            <sl:Stack Orientation="Horizontal" Spacing="2" Align="Center">
-              <Button x:Name="LoadingButton" sl:Ui.Variant="Primary" Content="Deploying…" sl:Ui.IsLoading="True" />
+            <sl:Stack Direction="Row" Spacing="2" Align="Center">
+              <Button x:Name="LoadingButton" sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" Content="Deploying…" sl:Sl.Loading="True" />
               <Button Content="Disabled" IsEnabled="False" />
-              <Button Content="Commit" sl:Ui.Shortcut="Ctrl ↵" />
-              <ToggleButton Content="Pinned" sl:Ui.Icon="layers" IsChecked="True" />
+              <Button Content="Commit" sl:Sl.Shortcut="Ctrl ↵" />
+              <ToggleButton Content="Pinned" sl:Sl.StartIcon="layers" IsChecked="True" />
               <Border Style="{DynamicResource Sl.Segmented}">
                 <StackPanel Orientation="Horizontal">
                   <RadioButton Style="{DynamicResource Sl.SegmentedItem}" Content="Day" GroupName="Range" />
@@ -61,36 +61,36 @@
         </sl:Card>
 
         <!-- Inputs -->
-        <sl:Card Header="Text inputs" Subtitle="Labels stay visible. Errors say what happened and how to fix it.">
+        <sl:Card Title="Text inputs" Subtitle="Labels stay visible. Errors say what happened and how to fix it.">
           <sl:ResponsiveGrid Spacing="5">
-            <sl:TextField sl:ResponsiveGrid.Md="6" Label="Project name" Text="slate-dashboard" HelperText="Lowercase letters, numbers and dashes." IsRequired="True" />
-            <sl:TextField sl:ResponsiveGrid.Md="6" Label="Owner email" Text="aaron@" Error="Enter a complete email address." />
-            <sl:TextField sl:ResponsiveGrid.Md="6" Label="Domain" Prefix="https://" Text="slate.dev" />
+            <sl:TextField sl:ResponsiveGrid.Md="6" Label="Project name" Value="slate-dashboard" HelperText="Lowercase letters, numbers and dashes." Required="True" />
+            <sl:TextField sl:ResponsiveGrid.Md="6" Label="Owner email" Value="aaron@" Error="Enter a complete email address." />
+            <sl:TextField sl:ResponsiveGrid.Md="6" Label="Domain" Prefix="https://" Value="slate.dev" />
             <sl:TextField sl:ResponsiveGrid.Md="6" Label="Search" StartIcon="search" Placeholder="Files, people, settings" />
-            <sl:TextField sl:ResponsiveGrid.Md="6" Label="Price" Suffix="USD" Text="24.00" />
-            <sl:TextField sl:ResponsiveGrid.Md="6" Label="Build ID" Text="a1f9c2e" IsReadOnly="True" HelperText="Read-only" />
+            <sl:TextField sl:ResponsiveGrid.Md="6" Label="Price" Suffix="USD" Value="24.00" />
+            <sl:TextField sl:ResponsiveGrid.Md="6" Label="Build ID" Value="a1f9c2e" ReadOnly="True" HelperText="Read-only" />
             <StackPanel sl:ResponsiveGrid.Md="6">
               <Label Content="_Password" Target="{Binding ElementName=Password}" Margin="0,0,0,6" />
-              <PasswordBox x:Name="Password" sl:Ui.Placeholder="At least 12 characters" />
+              <PasswordBox x:Name="Password" sl:Sl.Placeholder="At least 12 characters" />
             </StackPanel>
             <StackPanel sl:ResponsiveGrid.Md="6">
               <Label Content="_Region" Target="{Binding ElementName=Region}" Margin="0,0,0,6" />
-              <ComboBox x:Name="Region" sl:Ui.Placeholder="Choose a region">
+              <ComboBox x:Name="Region" sl:Sl.Placeholder="Choose a region">
                 <ComboBoxItem Content="Europe West — London" />
                 <ComboBoxItem Content="US East — Virginia" />
                 <ComboBoxItem Content="Asia Pacific — Sydney" />
               </ComboBox>
             </StackPanel>
-            <sl:TextField sl:ResponsiveGrid.Md="12" Label="Release notes" IsMultiline="True" Placeholder="What changed, and why?" />
-            <sl:TextField sl:ResponsiveGrid.Md="6" Label="Disabled" Text="Can't touch this" IsEnabled="False" />
-            <sl:TextField sl:ResponsiveGrid.Md="3" Label="Small" Size="Small" Text="26px" />
-            <sl:TextField sl:ResponsiveGrid.Md="3" Label="Large" Size="Large" Text="40px" />
+            <sl:TextField sl:ResponsiveGrid.Md="12" Label="Release notes" Multiline="True" Placeholder="What changed, and why?" />
+            <sl:TextField sl:ResponsiveGrid.Md="6" Label="Disabled" Value="Can't touch this" IsEnabled="False" />
+            <sl:TextField sl:ResponsiveGrid.Md="3" Label="Small" Size="Small" Value="26px" />
+            <sl:TextField sl:ResponsiveGrid.Md="3" Label="Large" Size="Large" Value="40px" />
           </sl:ResponsiveGrid>
         </sl:Card>
 
         <!-- Selection -->
         <sl:ResponsiveGrid Spacing="6">
-          <sl:Card sl:ResponsiveGrid.Md="6" Header="Checkbox &amp; radio">
+          <sl:Card sl:ResponsiveGrid.Md="6" Title="Checkbox &amp; radio">
             <sl:Stack Spacing="3">
               <CheckBox Content="Run tests before deploy" IsChecked="True" />
               <CheckBox IsChecked="True">
@@ -106,23 +106,23 @@
               <RadioButton GroupName="Plan" Content="Solo — three projects" />
             </sl:Stack>
           </sl:Card>
-          <sl:Card sl:ResponsiveGrid.Md="6" Header="Switch">
+          <sl:Card sl:ResponsiveGrid.Md="6" Title="Switch">
             <sl:Stack Spacing="4">
               <sl:Switch Content="Preview deployments" IsChecked="True" />
               <sl:Switch Content="Compact density" Description="Fit more rows on screen." />
-              <sl:Switch Content="Label after" LabelPosition="After" IsChecked="True" />
+              <sl:Switch Content="Label after" LabelPlacement="End" IsChecked="True" />
               <sl:Switch Content="Disabled" IsEnabled="False" IsChecked="True" />
             </sl:Stack>
           </sl:Card>
         </sl:ResponsiveGrid>
 
         <!-- Display -->
-        <sl:Card Header="Badges, progress and keys">
+        <sl:Card Title="Badges, progress and keys">
           <sl:Stack Spacing="5">
-            <sl:Stack Orientation="Horizontal" Spacing="2">
-              <sl:Badge Tone="Success" ShowDot="True" Content="Ready" />
-              <sl:Badge Tone="Warning" ShowDot="True" Content="Building" />
-              <sl:Badge Tone="Danger" ShowDot="True" Content="Failed" />
+            <sl:Stack Direction="Row" Spacing="2">
+              <sl:Badge Tone="Success" Dot="True" Content="Ready" />
+              <sl:Badge Tone="Warning" Dot="True" Content="Building" />
+              <sl:Badge Tone="Danger" Dot="True" Content="Failed" />
               <sl:Badge Tone="Info" Content="Info" />
               <sl:Badge Tone="Accent" Content="New" />
               <sl:Badge Content="Draft" />
@@ -138,26 +138,26 @@
               <ProgressBar Value="64" AutomationProperties.Name="Uploading assets" />
             </StackPanel>
             <ProgressBar IsIndeterminate="True" AutomationProperties.Name="Loading" />
-            <sl:Stack Orientation="Horizontal" Spacing="3" Align="Center">
+            <sl:Stack Direction="Row" Spacing="3" Align="Center">
               <sl:Spinner />
               <TextBlock Style="{DynamicResource Sl.Text.Secondary}" Text="Indexing 2,481 files…" />
             </sl:Stack>
           </sl:Stack>
         </sl:Card>
 
-        <sl:Card Header="Toolbar &amp; menu bar">
+        <sl:Card Title="Toolbar &amp; menu bar">
           <sl:Stack Spacing="4">
             <sl:Toolbar>
-              <Button sl:Ui.Variant="Ghost" sl:Ui.Size="Small" sl:Ui.Icon="arrow-left" AutomationProperties.Name="Back" />
-              <Button sl:Ui.Variant="Ghost" sl:Ui.Size="Small" sl:Ui.Icon="arrow-right" AutomationProperties.Name="Forward" />
+              <Button sl:Sl.Variant="Ghost" sl:Sl.Size="Small" sl:Sl.StartIcon="arrow-left" AutomationProperties.Name="Back" />
+              <Button sl:Sl.Variant="Ghost" sl:Sl.Size="Small" sl:Sl.StartIcon="arrow-right" AutomationProperties.Name="Forward" />
               <sl:ToolbarSeparator />
-              <Button sl:Ui.Variant="Ghost" sl:Ui.Size="Small" sl:Ui.Icon="copy" Content="Copy" />
-              <Button sl:Ui.Variant="Ghost" sl:Ui.Size="Small" sl:Ui.Icon="trash" Content="Delete" />
+              <Button sl:Sl.Variant="Ghost" sl:Sl.Size="Small" sl:Sl.StartIcon="copy" Content="Copy" />
+              <Button sl:Sl.Variant="Ghost" sl:Sl.Size="Small" sl:Sl.StartIcon="trash" Content="Delete" />
             </sl:Toolbar>
             <Menu HorizontalAlignment="Left">
               <MenuItem Header="_File">
-                <MenuItem Header="New project" sl:Ui.Icon="plus" InputGestureText="Ctrl+N" />
-                <MenuItem Header="Open…" sl:Ui.Icon="folder" InputGestureText="Ctrl+O" />
+                <MenuItem Header="New project" sl:Sl.StartIcon="plus" InputGestureText="Ctrl+N" />
+                <MenuItem Header="Open…" sl:Sl.StartIcon="folder" InputGestureText="Ctrl+O" />
                 <Separator />
                 <MenuItem Header="Exit" />
               </MenuItem>
@@ -170,7 +170,7 @@
           </sl:Stack>
         </sl:Card>
 
-        <sl:Card Header="Icons" Subtitle="The shared Slate set — the same paths render on web, Blazor, WPF and Avalonia.">
+        <sl:Card Title="Icons" Subtitle="The shared Slate set — the same paths render on web, Blazor, WPF and Avalonia.">
           <ItemsControl x:Name="IconGallery">
             <ItemsControl.ItemsPanel>
               <ItemsPanelTemplate>

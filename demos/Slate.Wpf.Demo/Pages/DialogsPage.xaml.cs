@@ -22,18 +22,23 @@ public partial class DialogsPage : UserControl
     /// <summary>A form dialog built from Slate parts; the footer buttons use DialogCommands.</summary>
     private async void OnForm(object sender, RoutedEventArgs e)
     {
-        var name = new TextField { Label = "Package name", Text = "Slate.Wpf", HelperText = "Shown on NuGet." };
+        var name = new TextField { Label = "Package name", Value = "Slate.Wpf", HelperText = "Shown on NuGet.", Counter = true, MaxLength = 40 };
         FocusManager.SetFocusedElement(name, name);
         var ok = new Button { Content = "Rename", IsDefault = true, Command = DialogCommands.Ok };
-        Ui.SetVariant(ok, ButtonVariant.Primary);
-        ok.SetBinding(System.Windows.Controls.Primitives.ButtonBase.CommandParameterProperty, new System.Windows.Data.Binding(nameof(TextField.Text)) { Source = name });
+        Sl.SetVariant(ok, ButtonVariant.Solid);
+        Sl.SetTone(ok, Tone.Accent);
+        ok.SetBinding(System.Windows.Controls.Primitives.ButtonBase.CommandParameterProperty, new System.Windows.Data.Binding(nameof(TextField.Value)) { Source = name });
 
         var content = new DialogContent
         {
-            Content = new Stack { Spacing = 4, Children = { name, new TextField { Label = "Description", IsMultiline = true, Placeholder = "Optional" } } },
+            // DialogContent options override the DialogOptions the dialog was opened with.
+            Icon = "pencil",
+            Tone = Tone.Accent,
+            Description = "Renaming keeps the package's download history.",
+            Content = new Stack { Spacing = 4, Children = { name, new TextField { Label = "Description", Multiline = true, Placeholder = "Optional" } } },
             Footer = new Stack
             {
-                Orientation = Orientation.Horizontal,
+                Direction = Direction.Row,
                 Spacing = 2,
                 Children = { new Button { Content = "Cancel", Command = DialogCommands.Cancel }, ok },
             },
@@ -92,7 +97,7 @@ public partial class DialogsPage : UserControl
     private async void OnTop(object sender, RoutedEventArgs e)
     {
         var search = new TextBox();
-        Ui.SetPlaceholder(search, "Type a command…");
+        Sl.SetPlaceholder(search, "Type a command…");
         FocusManager.SetFocusedElement(search, search);
         Show(await Dialogs.ShowAsync(search, new DialogOptions { Title = "Command palette", Placement = DialogPlacement.Top, MaxWidth = DialogWidth.Md, FullWidth = true }));
     }

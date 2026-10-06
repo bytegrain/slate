@@ -10,6 +10,8 @@ namespace Slate.Wpf.ResourceTests;
 public partial class XamlResourceTests
 {
     private static readonly string Root = FindRoot();
+
+    internal static string RepoRoot => Root;
     private static readonly string Lib = Path.Combine(Root, "src", "Slate.Wpf");
     private static readonly string Demo = Path.Combine(Root, "demos", "Slate.Wpf.Demo");
     private static readonly XNamespace X = "http://schemas.microsoft.com/winfx/2006/xaml";
@@ -36,6 +38,9 @@ public partial class XamlResourceTests
              .Select(e => (string?)e.Attribute(X + "Key"))
              .Where(k => k is not null)
              .ToHashSet()!;
+
+    /// <summary>Every x:Key defined by the generated dictionaries and Slate.Wpf's own XAML.</summary>
+    internal static HashSet<string> AllDefinedKeys() => KeysIn(Generated.Concat(Authored));
 
     [GeneratedRegex(@"\{(?:DynamicResource|StaticResource)\s+(Sl\.[^}\s]+)\}")]
     private static partial Regex ResourceReference();
@@ -131,7 +136,7 @@ public partial class XamlResourceTests
         foreach (var file in Authored.Concat(Xaml(Demo)))
         {
             var text = File.ReadAllText(file);
-            var used = Regex.Matches(text, @"(?:Kind|Ui\.Icon|Ui\.IconEnd|Icon|StartIcon|AppIcon)=""([a-z][a-z0-9-]*)""").Select(m => m.Groups[1].Value);
+            var used = Regex.Matches(text, @"(?:Kind|Sl\.StartIcon|Sl\.EndIcon|Icon|StartIcon|EndIcon|AppIcon)=""([a-z][a-z0-9-]*)""").Select(m => m.Groups[1].Value);
             var unknown = used.Where(u => !icons.Contains(u)).Distinct().ToList();
             Assert.True(unknown.Count == 0, $"{Path.GetFileName(file)} uses unknown icons: {string.Join(", ", unknown)}");
         }

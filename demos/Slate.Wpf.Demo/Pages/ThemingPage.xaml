@@ -1,0 +1,111 @@
+<UserControl x:Class="Slate.Wpf.Demo.Pages.ThemingPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sl="https://slate.dev/wpf">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <sl:Container ContainerMaxWidth="Xl" Margin="0,28,0,48">
+      <sl:Stack Spacing="6">
+        <StackPanel>
+          <TextBlock Style="{DynamicResource Sl.Typography.Overline}" Foreground="{DynamicResource Sl.Brush.Accent.Text}" Text="THEMING" />
+          <TextBlock Style="{DynamicResource Sl.Typography.H2}" Margin="0,6,0,4" Text="Make Alloy yours" />
+          <TextBlock Style="{DynamicResource Sl.Text.Secondary}" TextWrapping="Wrap"
+                     Text="SlateTheme.Options builds a theme from a brand colour, radius scale and font. Slate adjusts the accent's lightness only as far as needed to keep every contrast rule, in light and dark." />
+        </StackPanel>
+
+        <sl:ResponsiveGrid Spacing="6">
+          <!-- Controls -->
+          <sl:Card sl:ResponsiveGrid.Md="5" Title="Theme" Subtitle="Applied live to the whole app.">
+            <sl:Stack Spacing="5">
+              <StackPanel>
+                <Label Content="Accent" Margin="0,0,0,8" />
+                <WrapPanel x:Name="Swatches" />
+                <sl:Stack Direction="Row" Spacing="2" Margin="0,10,0,0" Align="End">
+                  <sl:TextField x:Name="AccentHex" Label="Hex" Value="0E5E6F" Width="160" Prefix="#" Clearable="True" MaxLength="6" />
+                  <Button Content="Apply" sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" Click="OnApplyHex" Margin="0,0,0,0" />
+                </sl:Stack>
+                <TextBlock x:Name="AccentResult" Style="{DynamicResource Sl.Text.Tertiary}" Margin="0,8,0,0" TextWrapping="Wrap" />
+              </StackPanel>
+
+              <StackPanel>
+                <DockPanel>
+                  <TextBlock x:Name="RadiusValue" DockPanel.Dock="Right" Style="{DynamicResource Sl.Text.Mono}" Text="1.00×" />
+                  <Label Content="_Radius scale" Target="{Binding ElementName=Radius}" />
+                </DockPanel>
+                <Slider x:Name="Radius" Minimum="0" Maximum="2" Value="1" TickFrequency="0.25" IsSnapToTickEnabled="True" Margin="0,8,0,0"
+                        ValueChanged="OnRadiusChanged" AutomationProperties.Name="Radius scale" />
+              </StackPanel>
+
+              <StackPanel>
+                <Label Content="_Font" Target="{Binding ElementName=Font}" Margin="0,0,0,6" />
+                <ComboBox x:Name="Font" SelectionChanged="OnFontChanged">
+                  <ComboBoxItem Content="Instrument Sans (Alloy)" Tag="" IsSelected="True" />
+                  <ComboBoxItem Content="Segoe UI" Tag="Segoe UI" />
+                  <ComboBoxItem Content="Georgia" Tag="Georgia" />
+                  <ComboBoxItem Content="IBM Plex Mono" Tag="IBM Plex Mono" />
+                </ComboBox>
+              </StackPanel>
+
+              <StackPanel>
+                <Label Content="Mode" Margin="0,0,0,6" />
+                <Border Style="{DynamicResource Sl.Segmented}">
+                  <StackPanel Orientation="Horizontal">
+                    <RadioButton x:Name="ModeLight" GroupName="ThemingMode" Style="{DynamicResource Sl.SegmentedItem}" sl:Sl.StartIcon="sun" Content="Light" Tag="Light" Checked="OnModeChecked" />
+                    <RadioButton x:Name="ModeDark" GroupName="ThemingMode" Style="{DynamicResource Sl.SegmentedItem}" sl:Sl.StartIcon="moon" Content="Dark" Tag="Dark" Checked="OnModeChecked" />
+                    <RadioButton x:Name="ModeSystem" GroupName="ThemingMode" Style="{DynamicResource Sl.SegmentedItem}" Content="System" Tag="System" Checked="OnModeChecked" />
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+
+              <sl:Divider />
+
+              <StackPanel>
+                <TextBlock Style="{DynamicResource Sl.Typography.Title}" Text="App-wide defaults" />
+                <TextBlock Style="{DynamicResource Sl.Text.Tertiary}" TextWrapping="Wrap" Margin="0,2,0,10"
+                           Text="SlateTheme.Defaults — used by controls that don't set the option themselves." />
+                <sl:ResponsiveGrid Spacing="3">
+                  <StackPanel sl:ResponsiveGrid.Xs="6">
+                    <Label Content="Button variant" Margin="0,0,0,6" />
+                    <ComboBox x:Name="DefaultVariant" SelectionChanged="OnDefaultsChanged" />
+                  </StackPanel>
+                  <StackPanel sl:ResponsiveGrid.Xs="6">
+                    <Label Content="Button size" Margin="0,0,0,6" />
+                    <ComboBox x:Name="DefaultSize" SelectionChanged="OnDefaultsChanged" />
+                  </StackPanel>
+                  <StackPanel sl:ResponsiveGrid.Xs="6">
+                    <Label Content="Field variant" Margin="0,0,0,6" />
+                    <ComboBox x:Name="DefaultField" SelectionChanged="OnDefaultsChanged" />
+                  </StackPanel>
+                  <StackPanel sl:ResponsiveGrid.Xs="6">
+                    <Label Content="Card variant" Margin="0,0,0,6" />
+                    <ComboBox x:Name="DefaultCard" SelectionChanged="OnDefaultsChanged" />
+                  </StackPanel>
+                </sl:ResponsiveGrid>
+              </StackPanel>
+
+              <Button Content="Reset to Alloy" sl:Sl.StartIcon="x" HorizontalAlignment="Left" Click="OnReset" />
+            </sl:Stack>
+          </sl:Card>
+
+          <!-- Preview -->
+          <sl:Stack sl:ResponsiveGrid.Md="7" Spacing="5">
+            <ContentControl x:Name="Preview" Focusable="False" />
+            <sl:Card Title="Scoped density" Subtitle="sl:Sl.Density on any element switches the controls inside it.">
+              <sl:ResponsiveGrid Spacing="4">
+                <sl:Stack sl:ResponsiveGrid.Md="6" Spacing="3" sl:Sl.Density="Compact">
+                  <TextBlock Style="{DynamicResource Sl.Typography.Overline}" Text="COMPACT" />
+                  <sl:TextField Label="Name" Value="Compact" />
+                  <Button Content="32px button" HorizontalAlignment="Left" />
+                </sl:Stack>
+                <sl:Stack sl:ResponsiveGrid.Md="6" Spacing="3" sl:Sl.Density="Comfortable">
+                  <TextBlock Style="{DynamicResource Sl.Typography.Overline}" Text="COMFORTABLE" />
+                  <sl:TextField Label="Name" Value="Comfortable" />
+                  <Button Content="40px button" HorizontalAlignment="Left" />
+                </sl:Stack>
+              </sl:ResponsiveGrid>
+            </sl:Card>
+          </sl:Stack>
+        </sl:ResponsiveGrid>
+      </sl:Stack>
+    </sl:Container>
+  </ScrollViewer>
+</UserControl>
