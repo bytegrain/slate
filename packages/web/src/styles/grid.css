@@ -1,0 +1,114 @@
+/* Grid — 12 columns with mobile-first spans per breakpoint (mirrors Slate.Core GridSpan), plus spacing modifiers. */
+
+.sl-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--_gap, var(--sl-space-4));
+  min-width: 0;
+}
+
+.sl-grid__item {
+  grid-column: span 12;
+  min-width: 0;
+}
+
+.sl-grid--spacing-0 { --_gap: var(--sl-space-0); }
+.sl-grid--spacing-0-5 { --_gap: var(--sl-space-0-5); }
+.sl-grid--spacing-1 { --_gap: var(--sl-space-1); }
+.sl-grid--spacing-1-5 { --_gap: var(--sl-space-1-5); }
+.sl-grid--spacing-2 { --_gap: var(--sl-space-2); }
+.sl-grid--spacing-3 { --_gap: var(--sl-space-3); }
+.sl-grid--spacing-4 { --_gap: var(--sl-space-4); }
+.sl-grid--spacing-5 { --_gap: var(--sl-space-5); }
+.sl-grid--spacing-6 { --_gap: var(--sl-space-6); }
+.sl-grid--spacing-8 { --_gap: var(--sl-space-8); }
+.sl-grid--spacing-10 { --_gap: var(--sl-space-10); }
+.sl-grid--spacing-12 { --_gap: var(--sl-space-12); }
+.sl-grid--spacing-16 { --_gap: var(--sl-space-16); }
+
+.sl-stack--spacing-0 { --_gap: var(--sl-space-0); }
+.sl-stack--spacing-0-5 { --_gap: var(--sl-space-0-5); }
+.sl-stack--spacing-1 { --_gap: var(--sl-space-1); }
+.sl-stack--spacing-1-5 { --_gap: var(--sl-space-1-5); }
+.sl-stack--spacing-2 { --_gap: var(--sl-space-2); }
+.sl-stack--spacing-3 { --_gap: var(--sl-space-3); }
+.sl-stack--spacing-4 { --_gap: var(--sl-space-4); }
+.sl-stack--spacing-5 { --_gap: var(--sl-space-5); }
+.sl-stack--spacing-6 { --_gap: var(--sl-space-6); }
+.sl-stack--spacing-8 { --_gap: var(--sl-space-8); }
+.sl-stack--spacing-10 { --_gap: var(--sl-space-10); }
+.sl-stack--spacing-12 { --_gap: var(--sl-space-12); }
+.sl-stack--spacing-16 { --_gap: var(--sl-space-16); }
+
+.sl-col-xs-1 { grid-column: span 1; }
+.sl-col-xs-2 { grid-column: span 2; }
+.sl-col-xs-3 { grid-column: span 3; }
+.sl-col-xs-4 { grid-column: span 4; }
+.sl-col-xs-5 { grid-column: span 5; }
+.sl-col-xs-6 { grid-column: span 6; }
+.sl-col-xs-7 { grid-column: span 7; }
+.sl-col-xs-8 { grid-column: span 8; }
+.sl-col-xs-9 { grid-column: span 9; }
+.sl-col-xs-10 { grid-column: span 10; }
+.sl-col-xs-11 { grid-column: span 11; }
+.sl-col-xs-12 { grid-column: span 12; }
+
+@media (min-width: 600px) {
+  .sl-col-sm-1 { grid-column: span 1; }
+  .sl-col-sm-2 { grid-column: span 2; }
+  .sl-col-sm-3 { grid-column: span 3; }
+  .sl-col-sm-4 { grid-column: span 4; }
+  .sl-col-sm-5 { grid-column: span 5; }
+  .sl-col-sm-6 { grid-column: span 6; }
+  .sl-col-sm-7 { grid-column: span 7; }
+  .sl-col-sm-8 { grid-column: span 8; }
+  .sl-col-sm-9 { grid-column: span 9; }
+  .sl-col-sm-10 { grid-column: span 10; }
+  .sl-col-sm-11 { grid-column: span 11; }
+  .sl-col-sm-12 { grid-column: span 12; }
+}
+
+@media (min-width: 900px) {
+  .sl-col-md-1 { grid-column: span 1; }
+  .sl-col-md-2 { grid-column: span 2; }
+  .sl-col-md-3 { grid-column: span 3; }
+  .sl-col-md-4 { grid-column: span 4; }
+  .sl-col-md-5 { grid-column: span 5; }
+  .sl-col-md-6 { grid-column: span 6; }
+  .sl-col-md-7 { grid-column: span 7; }
+  .sl-col-md-8 { grid-column: span 8; }
+  .sl-col-md-9 { grid-column: span 9; }
+  .sl-col-md-10 { grid-column: span 10; }
+  .sl-col-md-11 { grid-column: span 11; }
+  .sl-col-md-12 { grid-column: span 12; }
+}
+
+@media (min-width: 1200px) {
+  .sl-col-lg-1 { grid-column: span 1; }
+  .sl-col-lg-2 { grid-column: span 2; }
+  .sl-col-lg-3 { grid-column: span 3; }
+  .sl-col-lg-4 { grid-column: span 4; }
+  .sl-col-lg-5 { grid-column: span 5; }
+  .sl-col-lg-6 { grid-column: span 6; }
+  .sl-col-lg-7 { grid-column: span 7; }
+  .sl-col-lg-8 { grid-column: span 8; }
+  .sl-col-lg-9 { grid-column: span 9; }
+  .sl-col-lg-10 { grid-column: span 10; }
+  .sl-col-lg-11 { grid-column: span 11; }
+  .sl-col-lg-12 { grid-column: span 12; }
+}
+
+@media (min-width: 1536px) {
+  .sl-col-xl-1 { grid-column: span 1; }
+  .sl-col-xl-2 { grid-column: span 2; }
+  .sl-col-xl-3 { grid-column: span 3; }
+  .sl-col-xl-4 { grid-column: span 4; }
+  .sl-col-xl-5 { grid-column: span 5; }
+  .sl-col-xl-6 { grid-column: span 6; }
+  .sl-col-xl-7 { grid-column: span 7; }
+  .sl-col-xl-8 { grid-column: span 8; }
+  .sl-col-xl-9 { grid-column: span 9; }
+  .sl-col-xl-10 { grid-column: span 10; }
+  .sl-col-xl-11 { grid-column: span 11; }
+  .sl-col-xl-12 { grid-column: span 12; }
+}

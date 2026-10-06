@@ -1,0 +1,64 @@
+/* Text styles (typography.*) and text tones. */
+
+.sl-text { margin: 0; }
+
+.sl-text--display { font: var(--sl-typography-display); letter-spacing: var(--sl-typography-display-letter-spacing); }
+.sl-text--h1 { font: var(--sl-typography-h1); letter-spacing: var(--sl-typography-h1-letter-spacing); }
+.sl-text--h2 { font: var(--sl-typography-h2); letter-spacing: var(--sl-typography-h2-letter-spacing); }
+.sl-text--h3 { font: var(--sl-typography-h3); letter-spacing: var(--sl-typography-h3-letter-spacing); }
+.sl-text--title { font: var(--sl-typography-title); letter-spacing: var(--sl-typography-title-letter-spacing); }
+.sl-text--body { font: var(--sl-typography-body); letter-spacing: var(--sl-typography-body-letter-spacing); }
+.sl-text--body-strong { font: var(--sl-typography-body-strong); letter-spacing: var(--sl-typography-body-strong-letter-spacing); }
+.sl-text--label { font: var(--sl-typography-label); letter-spacing: var(--sl-typography-label-letter-spacing); }
+.sl-text--caption { font: var(--sl-typography-caption); letter-spacing: var(--sl-typography-caption-letter-spacing); }
+.sl-text--overline {
+  font: var(--sl-typography-overline);
+  letter-spacing: var(--sl-typography-overline-letter-spacing);
+  text-transform: uppercase;
+}
+.sl-text--mono { font: var(--sl-typography-mono); letter-spacing: var(--sl-typography-mono-letter-spacing); }
+
+.sl-text--primary { color: var(--sl-color-text-primary); }
+.sl-text--secondary { color: var(--sl-color-text-secondary); }
+.sl-text--tertiary { color: var(--sl-color-text-tertiary); }
+.sl-text--accent { color: var(--sl-color-accent-text); }
+.sl-text--success { color: var(--sl-color-status-success-fg); }
+.sl-text--warning { color: var(--sl-color-status-warning-fg); }
+.sl-text--danger { color: var(--sl-color-status-danger-fg); }
+.sl-text--info { color: var(--sl-color-status-info-fg); }
+
+.sl-text--truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sl-link {
+  color: var(--sl-color-text-link);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  border-radius: var(--sl-radius-xs);
+}
+
+.sl-link:hover { color: var(--sl-color-text-link-hover); }
+
+.sl-link:focus-visible {
+  outline: var(--sl-focus-ring-width) solid var(--sl-color-focus-ring);
+  outline-offset: var(--sl-focus-ring-offset);
+}
+
+.sl-icon {
+  display: inline-block;
+  flex: none;
+  width: var(--sl-size-icon-md);
+  height: var(--sl-size-icon-md);
+  vertical-align: middle;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sl-icon--sm { width: var(--sl-size-icon-sm); height: var(--sl-size-icon-sm); }
+.sl-icon--lg { width: var(--sl-size-icon-lg); height: var(--sl-size-icon-lg); }

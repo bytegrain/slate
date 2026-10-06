@@ -1,0 +1,218 @@
+/* Checkbox, radio and switch — docs/design/components.md */
+
+.sl-checkbox,
+.sl-radio,
+.sl-switch {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--sl-space-2);
+  font-family: var(--sl-font-family-ui);
+  font-size: var(--sl-font-size-md);
+  line-height: var(--sl-font-line-height-normal);
+  color: var(--sl-color-text-primary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.sl-checkbox__text,
+.sl-radio__text,
+.sl-switch__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.sl-checkbox__description,
+.sl-radio__description,
+.sl-switch__description {
+  font: var(--sl-typography-caption);
+  color: var(--sl-color-text-tertiary);
+}
+
+/* ---- Checkbox ---- */
+
+.sl-checkbox__input {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-content: center;
+  width: 16px;
+  height: 16px;
+  margin: 2.5px 0 0;
+  background: var(--sl-color-background-sunken);
+  border: var(--sl-border-width-hairline) solid var(--sl-color-border-control);
+  border-radius: var(--sl-radius-sm);
+  box-shadow: var(--sl-shadow-inset);
+  appearance: none;
+  cursor: inherit;
+  transition:
+    background-color var(--sl-motion-duration-fast) var(--sl-motion-easing-standard),
+    border-color var(--sl-motion-duration-fast) var(--sl-motion-easing-standard);
+}
+
+.sl-checkbox:hover .sl-checkbox__input { border-color: var(--sl-color-border-control-hover); }
+
+.sl-checkbox__input:checked,
+.sl-checkbox__input:indeterminate,
+.sl-checkbox__input.is-indeterminate {
+  background: var(--sl-color-accent-default);
+  border-color: var(--sl-color-accent-default);
+  box-shadow: var(--sl-shadow-primary);
+}
+
+.sl-checkbox:hover .sl-checkbox__input:is(:checked, :indeterminate, .is-indeterminate) {
+  background: var(--sl-color-accent-hover);
+  border-color: var(--sl-color-accent-hover);
+}
+
+.sl-checkbox__input:checked::after {
+  content: "";
+  width: 9px;
+  height: 5px;
+  margin-top: -2px;
+  border: 2px solid var(--sl-color-text-on-accent);
+  border-top: 0;
+  border-right: 0;
+  transform: rotate(-45deg);
+}
+
+.sl-checkbox__input:is(:indeterminate, .is-indeterminate)::after {
+  content: "";
+  width: 8px;
+  height: 2px;
+  margin-top: 0;
+  border: 0;
+  border-radius: 1px;
+  background: var(--sl-color-text-on-accent);
+  transform: none;
+}
+
+/* ---- Radio ---- */
+
+.sl-radio__input {
+  display: grid;
+  flex: none;
+  place-content: center;
+  width: 16px;
+  height: 16px;
+  margin: 2.5px 0 0;
+  background: var(--sl-color-background-sunken);
+  border: var(--sl-border-width-hairline) solid var(--sl-color-border-control);
+  border-radius: var(--sl-radius-full);
+  box-shadow: var(--sl-shadow-inset);
+  appearance: none;
+  cursor: inherit;
+  transition:
+    background-color var(--sl-motion-duration-fast) var(--sl-motion-easing-standard),
+    border-color var(--sl-motion-duration-fast) var(--sl-motion-easing-standard);
+}
+
+.sl-radio:hover .sl-radio__input { border-color: var(--sl-color-border-control-hover); }
+
+.sl-radio__input:checked,
+.sl-radio__input.is-checked {
+  background: var(--sl-color-accent-default);
+  border-color: var(--sl-color-accent-default);
+  box-shadow: var(--sl-shadow-primary);
+}
+
+.sl-radio__input:checked::after,
+.sl-radio__input.is-checked::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: var(--sl-radius-full);
+  background: var(--sl-color-text-on-accent);
+}
+
+.sl-radio-group {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sl-radio-group__label {
+  display: block;
+  margin-bottom: var(--sl-space-2);
+  padding: 0;
+  font: var(--sl-typography-label);
+  color: var(--sl-color-text-primary);
+}
+
+.sl-radio-group__options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sl-space-2);
+}
+
+.sl-radio-group--row .sl-radio-group__options {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--sl-space-2) var(--sl-space-5);
+}
+
+/* ---- Switch ---- */
+
+.sl-switch {
+  /* 20×36 compact, 24×44 comfortable — derived from the active control height. */
+  --_th: calc((var(--sl-size-control-md) + 8px) / 2);
+  align-items: center;
+}
+
+.sl-switch--label-end { flex-direction: row; }
+.sl-switch--label-start { flex-direction: row-reverse; justify-content: flex-end; }
+.sl-switch--spread { display: flex; justify-content: space-between; }
+
+.sl-switch__input {
+  position: relative;
+  flex: none;
+  width: calc(var(--_th) * 2 - 4px);
+  height: var(--_th);
+  margin: 0;
+  background: var(--sl-color-control-track);
+  border-radius: var(--sl-radius-full);
+  box-shadow: var(--sl-shadow-inset);
+  appearance: none;
+  cursor: inherit;
+  transition: background-color var(--sl-motion-duration-fast) var(--sl-motion-easing-standard);
+}
+
+.sl-switch__input::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(var(--_th) - 4px);
+  height: calc(var(--_th) - 4px);
+  border-radius: var(--sl-radius-full);
+  background: linear-gradient(var(--sl-color-control-thumb), var(--sl-color-control-thumb-shade));
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 0 0 0.5px rgb(0 0 0 / 0.1);
+  transition: transform var(--sl-motion-duration-fast) var(--sl-motion-easing-standard);
+}
+
+.sl-switch__input:checked {
+  background: var(--sl-color-accent-default);
+}
+
+.sl-switch__input:checked::before {
+  transform: translateX(calc(var(--_th) - 4px));
+}
+
+.sl-switch:hover .sl-switch__input:checked { background: var(--sl-color-accent-hover); }
+
+/* ---- Shared states ---- */
+
+.sl-checkbox__input:focus-visible,
+.sl-radio__input:focus-visible,
+.sl-switch__input:focus-visible,
+.sl-radio:focus-visible .sl-radio__input {
+  outline: var(--sl-focus-ring-width) solid var(--sl-color-focus-ring);
+  outline-offset: var(--sl-focus-ring-offset);
+}
+
+.sl-checkbox.is-disabled,
+.sl-radio.is-disabled,
+.sl-switch.is-disabled {
+  opacity: var(--sl-opacity-disabled);
+  cursor: not-allowed;
+}

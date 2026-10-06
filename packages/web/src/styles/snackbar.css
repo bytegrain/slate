@@ -1,0 +1,190 @@
+/* Snackbars — docs/design/systems.md#snackbars */
+
+.sl-snackbar-host {
+  position: fixed;
+  z-index: var(--sl-z-snackbar);
+  display: flex;
+  flex-direction: column;
+  /* Children stretch, so a stack of snackbars shares the widest one's width. */
+  align-items: stretch;
+  gap: var(--sl-space-2);
+  max-width: 100vw;
+  padding: var(--sl-space-4);
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.sl-snackbar-host--bottom-left,
+.sl-snackbar-host--bottom-center,
+.sl-snackbar-host--bottom-right { bottom: 0; --_enter-y: 8px; }
+
+.sl-snackbar-host--top-left,
+.sl-snackbar-host--top-center,
+.sl-snackbar-host--top-right { top: 0; --_enter-y: -8px; }
+
+.sl-snackbar-host--bottom-left,
+.sl-snackbar-host--top-left { left: 0; }
+
+.sl-snackbar-host--bottom-right,
+.sl-snackbar-host--top-right { right: 0; }
+
+.sl-snackbar-host--bottom-center,
+.sl-snackbar-host--top-center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.sl-snackbar {
+  --_solid: transparent;
+  --_on: var(--sl-color-inverse-text);
+
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: min(var(--sl-size-snackbar-min), calc(100vw - 2 * var(--sl-space-4)));
+  max-width: min(var(--sl-size-snackbar-max), calc(100vw - 2 * var(--sl-space-4)));
+  padding: 10px var(--sl-space-2) 10px var(--sl-space-3);
+  overflow: hidden;
+  font-family: var(--sl-font-family-ui);
+  font-size: var(--sl-font-size-md);
+  line-height: var(--sl-font-line-height-normal);
+  color: var(--sl-color-inverse-text);
+  background: var(--sl-color-inverse-background);
+  border-radius: var(--sl-radius-lg);
+  box-shadow: var(--sl-shadow-e3);
+  pointer-events: auto;
+  animation: sl-snackbar-in var(--sl-motion-duration-base) var(--sl-motion-easing-emphasized);
+}
+
+.sl-snackbar:focus-visible {
+  outline: var(--sl-focus-ring-width) solid var(--sl-color-focus-ring);
+  outline-offset: var(--sl-focus-ring-offset);
+}
+
+.sl-snackbar.is-leaving {
+  animation: sl-fade-out var(--sl-motion-duration-fast) var(--sl-motion-easing-exit) forwards;
+}
+
+@keyframes sl-snackbar-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--_enter-y, 8px));
+  }
+}
+
+.sl-snackbar--info { --_solid: var(--sl-color-status-info-solid); --_on: var(--sl-color-status-info-on-solid); }
+.sl-snackbar--success { --_solid: var(--sl-color-status-success-solid); --_on: var(--sl-color-status-success-on-solid); }
+.sl-snackbar--warning { --_solid: var(--sl-color-status-warning-solid); --_on: var(--sl-color-status-warning-on-solid); }
+.sl-snackbar--error { --_solid: var(--sl-color-status-danger-solid); --_on: var(--sl-color-status-danger-on-solid); }
+
+.sl-snackbar__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 1.5px;
+  color: var(--_on);
+  background: var(--_solid);
+  border-radius: var(--sl-radius-sm);
+}
+
+.sl-snackbar__icon .sl-icon {
+  width: 12px;
+  height: 12px;
+  stroke-width: 3;
+}
+
+.sl-snackbar__content {
+  flex: 1;
+  min-width: 0;
+  padding-right: var(--sl-space-1);
+}
+
+.sl-snackbar__title {
+  display: block;
+  font-weight: var(--sl-font-weight-semibold);
+}
+
+.sl-snackbar__message { margin: 0; }
+
+.sl-snackbar__title + .sl-snackbar__message { color: var(--sl-color-inverse-text-muted); }
+
+.sl-snackbar__actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--sl-space-1);
+  margin: -3px 0;
+}
+
+/* Buttons sit on the inverse surface: translucent chrome in the inverse text colour. */
+.sl-snackbar__action,
+.sl-snackbar__close {
+  --_h: var(--sl-size-control-sm);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sl-space-1);
+  height: var(--_h);
+  min-width: var(--_h);
+  padding: 0 var(--sl-space-2);
+  font-family: var(--sl-font-family-ui);
+  font-size: var(--sl-font-size-sm);
+  font-weight: var(--sl-font-weight-medium);
+  color: var(--sl-color-inverse-text);
+  background: transparent;
+  border: var(--sl-border-width-hairline) solid transparent;
+  border-radius: var(--sl-radius-md);
+  cursor: pointer;
+  transition: background-color var(--sl-motion-duration-fast) var(--sl-motion-easing-standard);
+}
+
+.sl-snackbar__action {
+  background: color-mix(in srgb, var(--sl-color-inverse-text) 8%, transparent);
+  border-color: color-mix(in srgb, var(--sl-color-inverse-text) 18%, transparent);
+}
+
+.sl-snackbar__close {
+  padding: 0;
+  color: var(--sl-color-inverse-text-muted);
+}
+
+.sl-snackbar__action:hover,
+.sl-snackbar__close:hover {
+  color: var(--sl-color-inverse-text);
+  background: color-mix(in srgb, var(--sl-color-inverse-text) 16%, transparent);
+}
+
+.sl-snackbar__action:focus-visible,
+.sl-snackbar__close:focus-visible {
+  outline: var(--sl-focus-ring-width) solid var(--sl-color-focus-ring);
+  outline-offset: 1px;
+}
+
+/* Remaining-time line. Pauses with the countdown. */
+.sl-snackbar__timer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--sl-color-focus-ring);
+  transform-origin: left center;
+  animation: sl-snackbar-timer var(--_duration, 5000ms) linear forwards;
+}
+
+.sl-snackbar.is-paused .sl-snackbar__timer { animation-play-state: paused; }
+
+@keyframes sl-snackbar-timer {
+  to { transform: scaleX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sl-snackbar,
+  .sl-snackbar.is-leaving { animation: none; }
+  .sl-snackbar__timer { display: none; }
+}

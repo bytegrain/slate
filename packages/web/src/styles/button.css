@@ -1,0 +1,180 @@
+/* Button — docs/design/components.md#button */
+
+.sl-button {
+  --_h: var(--sl-size-control-md);
+  --_px: var(--sl-space-3);
+  --_fs: var(--sl-font-size-sm);
+  --_bg: var(--sl-color-background-surface);
+  --_bg-hover: var(--sl-color-background-hover);
+  --_bg-press: var(--sl-color-background-pressed);
+  --_fg: var(--sl-color-text-primary);
+  --_fg-hover: var(--_fg);
+  --_border: var(--sl-color-border-strong);
+  --_border-hover: var(--sl-color-border-control-hover);
+  --_shadow: var(--sl-shadow-control);
+  --_shadow-press: var(--sl-shadow-pressed);
+
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sl-space-1-5);
+  height: var(--_h);
+  min-width: var(--_h);
+  margin: 0;
+  padding: 0 var(--_px);
+  font-family: var(--sl-font-family-ui);
+  font-size: var(--_fs);
+  font-weight: var(--sl-font-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--_fg);
+  background: var(--_bg);
+  border: var(--sl-border-width-hairline) solid var(--_border);
+  border-radius: var(--sl-radius-md);
+  box-shadow: var(--_shadow);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--sl-motion-duration-fast) var(--sl-motion-easing-standard),
+    border-color var(--sl-motion-duration-fast) var(--sl-motion-easing-standard),
+    color var(--sl-motion-duration-fast) var(--sl-motion-easing-standard),
+    box-shadow var(--sl-motion-duration-fast) var(--sl-motion-easing-standard);
+}
+
+.sl-button:hover {
+  background: var(--_bg-hover);
+  border-color: var(--_border-hover);
+  color: var(--_fg-hover);
+}
+
+.sl-button:active,
+.sl-button.is-pressed {
+  background: var(--_bg-press);
+  box-shadow: var(--_shadow-press);
+}
+
+.sl-button:focus-visible {
+  outline: var(--sl-focus-ring-width) solid var(--sl-color-focus-ring);
+  outline-offset: var(--sl-focus-ring-offset);
+}
+
+/* Toggle buttons and segmented groups: the selected item reads as pushed in. */
+.sl-button[aria-pressed="true"],
+.sl-button.is-selected {
+  --_bg: var(--sl-color-background-muted);
+  --_bg-hover: var(--sl-color-background-muted);
+  --_shadow: var(--sl-shadow-pressed);
+  font-weight: var(--sl-font-weight-semibold);
+}
+
+/* Sizes */
+.sl-button--sm { --_h: var(--sl-size-control-sm); --_px: var(--sl-space-2); }
+.sl-button--lg { --_h: var(--sl-size-control-lg); --_px: var(--sl-space-4); --_fs: var(--sl-font-size-md); }
+
+/* Variants */
+.sl-button--primary {
+  --_bg: var(--sl-color-accent-default);
+  --_bg-hover: var(--sl-color-accent-hover);
+  --_bg-press: var(--sl-color-accent-pressed);
+  --_fg: var(--sl-color-text-on-accent);
+  --_border: transparent;
+  --_border-hover: transparent;
+  --_shadow: var(--sl-shadow-primary);
+}
+
+.sl-button--ghost {
+  --_bg: transparent;
+  --_bg-hover: var(--sl-color-background-muted);
+  --_fg: var(--sl-color-text-secondary);
+  --_fg-hover: var(--sl-color-text-primary);
+  --_border: transparent;
+  --_border-hover: transparent;
+  --_shadow: none;
+  --_shadow-press: none;
+}
+
+.sl-button--danger {
+  --_fg: var(--sl-color-status-danger-fg);
+}
+
+.sl-button--danger-solid {
+  --_bg: var(--sl-color-status-danger-solid);
+  --_bg-hover: var(--sl-color-status-danger-solid);
+  --_bg-press: var(--sl-color-status-danger-solid);
+  --_fg: var(--sl-color-status-danger-on-solid);
+  --_border: transparent;
+  --_border-hover: transparent;
+  --_shadow: var(--sl-shadow-primary);
+}
+
+/* Darken the solid fill with an overlay so it works in both themes. */
+.sl-button--danger-solid:hover { background-image: linear-gradient(rgb(0 0 0 / 0.08), rgb(0 0 0 / 0.08)); }
+.sl-button--danger-solid:active { background-image: linear-gradient(rgb(0 0 0 / 0.16), rgb(0 0 0 / 0.16)); }
+
+.sl-button--link {
+  --_bg: transparent;
+  --_bg-hover: transparent;
+  --_bg-press: transparent;
+  --_fg: var(--sl-color-text-link);
+  --_fg-hover: var(--sl-color-text-link-hover);
+  --_border: transparent;
+  --_border-hover: transparent;
+  --_shadow: none;
+  --_shadow-press: none;
+  height: auto;
+  min-width: 0;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+/* Modifiers */
+.sl-button--icon { width: var(--_h); padding: 0; }
+.sl-button--full { display: flex; width: 100%; }
+
+.sl-button:disabled,
+.sl-button[aria-disabled="true"] {
+  opacity: var(--sl-opacity-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.sl-button.is-loading {
+  cursor: progress;
+  pointer-events: none;
+}
+
+.sl-button__icon {
+  flex: none;
+  width: var(--sl-size-icon-md);
+  height: var(--sl-size-icon-md);
+}
+
+.sl-button__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sl-button .sl-kbd { margin-left: var(--sl-space-1); }
+
+.sl-button--primary .sl-kbd,
+.sl-button--danger-solid .sl-kbd {
+  color: inherit;
+  background: rgb(255 255 255 / 0.14);
+  border-color: rgb(255 255 255 / 0.28);
+  box-shadow: none;
+}
+
+.sl-button-group {
+  display: inline-flex;
+  isolation: isolate;
+}
+
+.sl-button-group > .sl-button:not(:first-child) { margin-left: -1px; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.sl-button-group > .sl-button:not(:last-child) { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.sl-button-group > .sl-button:focus-visible { z-index: 1; }

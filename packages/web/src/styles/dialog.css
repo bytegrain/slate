@@ -1,0 +1,173 @@
+/* Dialogs — docs/design/systems.md#dialogs
+   Works on a native <dialog> (opened with showModal) or a positioned <div role="dialog">. */
+
+.sl-dialog {
+  --_w: var(--sl-size-dialog-sm);
+
+  position: fixed;
+  inset: 0;
+  z-index: var(--sl-z-dialog);
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: var(--sl-space-8);
+  overflow: hidden;
+  color: var(--sl-color-text-primary);
+  background: transparent;
+  border: 0;
+}
+
+dialog.sl-dialog:not([open]) { display: none; }
+dialog.sl-dialog::backdrop { background: transparent; }
+
+.sl-dialog--xs { --_w: var(--sl-size-dialog-xs); }
+.sl-dialog--sm { --_w: var(--sl-size-dialog-sm); }
+.sl-dialog--md { --_w: var(--sl-size-dialog-md); }
+.sl-dialog--lg { --_w: var(--sl-size-dialog-lg); }
+.sl-dialog--xl { --_w: var(--sl-size-dialog-xl); }
+
+.sl-dialog--top {
+  align-items: start;
+  padding-top: max(var(--sl-space-8), 10vh);
+}
+
+.sl-dialog__scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--sl-color-scrim);
+  animation: sl-fade-in var(--sl-motion-duration-slow) var(--sl-motion-easing-standard);
+}
+
+.sl-dialog__panel {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  min-width: min(320px, 100%);
+  max-width: min(var(--_w), 100%);
+  max-height: calc(100vh - 2 * var(--sl-space-8));
+  max-height: calc(100dvh - 2 * var(--sl-space-8));
+  font-family: var(--sl-font-family-ui);
+  font-size: var(--sl-font-size-md);
+  line-height: var(--sl-font-line-height-normal);
+  background: var(--sl-color-background-raised);
+  border-radius: var(--sl-radius-2xl);
+  box-shadow: var(--sl-shadow-e3);
+  outline: none;
+  animation: sl-dialog-in var(--sl-motion-duration-slow) var(--sl-motion-easing-emphasized);
+}
+
+.sl-dialog--full-width .sl-dialog__panel { width: 100%; }
+
+.sl-dialog--fullscreen { padding: 0; }
+
+.sl-dialog--fullscreen .sl-dialog__panel {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  border-radius: 0;
+}
+
+@keyframes sl-dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+.sl-dialog.is-closing .sl-dialog__scrim {
+  animation: sl-fade-out var(--sl-motion-duration-base) var(--sl-motion-easing-exit) forwards;
+}
+
+.sl-dialog.is-closing .sl-dialog__panel {
+  animation: sl-dialog-out var(--sl-motion-duration-base) var(--sl-motion-easing-exit) forwards;
+}
+
+@keyframes sl-dialog-out {
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+.sl-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sl-space-3);
+  padding: 18px var(--sl-space-5) 0;
+}
+
+.sl-dialog__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--sl-color-accent-text);
+  background: var(--sl-color-accent-subtle);
+  border-radius: var(--sl-radius-lg);
+}
+
+.sl-dialog__icon--danger { color: var(--sl-color-status-danger-fg); background: var(--sl-color-status-danger-bg); }
+.sl-dialog__icon--warning { color: var(--sl-color-status-warning-fg); background: var(--sl-color-status-warning-bg); }
+.sl-dialog__icon--success { color: var(--sl-color-status-success-fg); background: var(--sl-color-status-success-bg); }
+.sl-dialog__icon--info { color: var(--sl-color-status-info-fg); background: var(--sl-color-status-info-bg); }
+
+.sl-dialog__titles {
+  flex: 1;
+  min-width: 0;
+  padding-top: var(--sl-space-0-5);
+}
+
+.sl-dialog__title {
+  margin: 0;
+  font: var(--sl-typography-title);
+  color: var(--sl-color-text-primary);
+}
+
+.sl-dialog__description {
+  margin: 3px 0 0;
+  color: var(--sl-color-text-secondary);
+}
+
+.sl-dialog__close { margin: -4px -8px 0 0; }
+
+.sl-dialog__body {
+  flex: 1;
+  min-height: 0;
+  padding: var(--sl-space-4) var(--sl-space-5);
+  overflow: auto;
+}
+
+.sl-dialog__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--sl-space-2);
+  padding: var(--sl-space-3) var(--sl-space-5);
+  background: var(--sl-color-background-subtle);
+  border-top: var(--sl-border-width-hairline) solid var(--sl-color-border-default);
+  border-radius: 0 0 var(--sl-radius-2xl) var(--sl-radius-2xl);
+}
+
+@media (max-width: 599.98px) {
+  .sl-dialog { padding: var(--sl-space-4); }
+  .sl-dialog__panel { max-height: calc(100dvh - 2 * var(--sl-space-4)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sl-dialog__scrim,
+  .sl-dialog__panel,
+  .sl-dialog.is-closing .sl-dialog__scrim,
+  .sl-dialog.is-closing .sl-dialog__panel {
+    animation: none;
+  }
+}

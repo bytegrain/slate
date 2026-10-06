@@ -1,0 +1,386 @@
+/* Layout framework — docs/design/layout.md */
+
+/* ---- App shell ---- */
+
+.sl-app-shell {
+  display: grid;
+  grid-template-areas:
+    "bar bar"
+    "drawer main";
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  background: var(--sl-color-background-canvas);
+}
+
+.sl-app-shell--viewport { height: 100vh; height: 100dvh; }
+
+.sl-app-bar {
+  grid-area: bar;
+  position: sticky;
+  top: 0;
+  z-index: var(--sl-z-appbar);
+  display: flex;
+  align-items: center;
+  gap: var(--sl-space-3);
+  min-width: 0; /* never widen the shell grid; overflowing actions are clipped instead */
+  height: var(--sl-size-appbar);
+  padding: 0 var(--sl-space-4);
+  overflow: hidden;
+  background: var(--sl-color-background-surface);
+  border-bottom: var(--sl-border-width-hairline) solid var(--sl-color-border-default);
+}
+
+.sl-app-bar__title {
+  display: flex;
+  align-items: center;
+  gap: var(--sl-space-2);
+  font: var(--sl-typography-title);
+  color: var(--sl-color-text-primary);
+  white-space: nowrap;
+}
+
+.sl-drawer {
+  grid-area: drawer;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: var(--sl-size-drawer-full);
+  min-height: 0;
+  overflow: hidden auto;
+  background: var(--sl-color-background-subtle);
+  border-right: var(--sl-border-width-hairline) solid var(--sl-color-border-default);
+  transition: width var(--sl-motion-duration-slow) var(--sl-motion-easing-emphasized);
+}
+
+/* Persistent drawers collapse in place when closed. */
+.sl-drawer--persistent:not(.is-open) {
+  width: 0;
+  border-right-width: 0;
+}
+
+.sl-drawer--mini { width: var(--sl-size-drawer-mini); }
+.sl-drawer--mini.is-open { width: var(--sl-size-drawer-full); }
+
+/* Temporary drawers overlay the content with a scrim. */
+.sl-drawer--temporary {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: var(--sl-z-drawer);
+  box-shadow: var(--sl-shadow-e3);
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition:
+    transform var(--sl-motion-duration-slow) var(--sl-motion-easing-emphasized),
+    visibility 0s linear var(--sl-motion-duration-slow);
+}
+
+.sl-drawer--temporary.is-open {
+  transform: none;
+  visibility: visible;
+  transition: transform var(--sl-motion-duration-slow) var(--sl-motion-easing-emphasized);
+}
+
+/* Responsive: persistent from md up, temporary below. */
+.sl-drawer--responsive:not(.is-open) {
+  width: 0;
+  border-right-width: 0;
+}
+
+@media (max-width: 899.98px) {
+  .sl-drawer--responsive {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: var(--sl-z-drawer);
+    box-shadow: var(--sl-shadow-e3);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition:
+      transform var(--sl-motion-duration-slow) var(--sl-motion-easing-emphasized),
+      visibility 0s linear var(--sl-motion-duration-slow);
+  }
+
+  .sl-drawer--responsive:not(.is-open) { width: var(--sl-size-drawer-full); }
+
+  .sl-drawer--responsive.is-open {
+    transform: none;
+    visibility: visible;
+    transition: transform var(--sl-motion-duration-slow) var(--sl-motion-easing-emphasized);
+  }
+}
+
+.sl-drawer-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--sl-z-drawer) - 1);
+  background: var(--sl-color-scrim);
+  animation: sl-fade-in var(--sl-motion-duration-base) var(--sl-motion-easing-standard);
+}
+
+.sl-main {
+  grid-area: main;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--sl-space-6);
+}
+
+.sl-main--flush { padding: 0; }
+
+@media (max-width: 599.98px) {
+  .sl-main { padding: var(--sl-space-4); }
+}
+
+/* ---- Navigation list (drawer content) ---- */
+
+.sl-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: var(--sl-space-2);
+}
+
+.sl-nav__heading {
+  padding: var(--sl-space-3) var(--sl-space-2) var(--sl-space-1);
+  font: var(--sl-typography-overline);
+  letter-spacing: var(--sl-typography-overline-letter-spacing);
+  text-transform: uppercase;
+  color: var(--sl-color-text-tertiary);
+  white-space: nowrap;
+}
+
+.sl-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--sl-size-control-md);
+  padding: 0 var(--sl-space-2);
+  font-family: var(--sl-font-family-ui);
+  font-size: var(--sl-font-size-md);
+  color: var(--sl-color-text-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+  background: transparent;
+  border: 0;
+  border-radius: var(--sl-radius-md);
+  cursor: pointer;
+  transition: background-color var(--sl-motion-duration-fast) var(--sl-motion-easing-standard);
+}
+
+.sl-nav__item:hover {
+  color: var(--sl-color-text-primary);
+  background: var(--sl-color-background-muted);
+}
+
+.sl-nav__item:focus-visible {
+  outline: var(--sl-focus-ring-width) solid var(--sl-color-focus-ring);
+  outline-offset: calc(var(--sl-focus-ring-offset) * -1);
+}
+
+.sl-nav__item.is-active,
+.sl-nav__item[aria-current="page"] {
+  font-weight: var(--sl-font-weight-medium);
+  color: var(--sl-color-text-primary);
+  background: var(--sl-color-background-surface);
+  box-shadow: var(--sl-shadow-e1);
+}
+
+.sl-nav__item .sl-icon { color: var(--sl-color-text-tertiary); }
+.sl-nav__item.is-active .sl-icon,
+.sl-nav__item[aria-current="page"] .sl-icon { color: var(--sl-color-accent-text); }
+
+.sl-nav__label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sl-nav__meta {
+  margin-left: auto;
+  font-family: var(--sl-font-family-mono);
+  font-size: var(--sl-font-size-2xs);
+  color: var(--sl-color-text-tertiary);
+}
+
+/* Mini drawer: icons only. Works for both the CSS class and the <sl-drawer variant="mini"> host. */
+.sl-drawer--mini:not(.is-open) .sl-nav__label,
+.sl-drawer--mini:not(.is-open) .sl-nav__meta,
+.sl-drawer--mini:not(.is-open) .sl-nav__heading,
+sl-drawer[variant="mini"]:not([open]) .sl-nav__label,
+sl-drawer[variant="mini"]:not([open]) .sl-nav__meta,
+sl-drawer[variant="mini"]:not([open]) .sl-nav__heading {
+  display: none;
+}
+
+.sl-drawer--mini:not(.is-open) .sl-nav__item,
+sl-drawer[variant="mini"]:not([open]) .sl-nav__item {
+  justify-content: center;
+  padding: 0;
+}
+
+/* ---- Container ---- */
+
+.sl-container {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--sl-container-lg);
+  margin-inline: auto;
+  padding-inline: var(--sl-space-4);
+}
+
+@media (min-width: 600px) {
+  .sl-container { padding-inline: var(--sl-space-6); }
+}
+
+.sl-container--sm { max-width: var(--sl-container-sm); }
+.sl-container--md { max-width: var(--sl-container-md); }
+.sl-container--lg { max-width: var(--sl-container-lg); }
+.sl-container--xl { max-width: var(--sl-container-xl); }
+.sl-container--fluid { max-width: none; }
+
+/* ---- Stack ---- */
+
+.sl-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--_gap, var(--sl-space-3));
+  min-width: 0;
+}
+
+.sl-stack--row { flex-direction: row; }
+.sl-stack--wrap { flex-wrap: wrap; }
+.sl-stack--align-start { align-items: flex-start; }
+.sl-stack--align-center { align-items: center; }
+.sl-stack--align-end { align-items: flex-end; }
+.sl-stack--align-stretch { align-items: stretch; }
+.sl-stack--align-baseline { align-items: baseline; }
+.sl-stack--justify-start { justify-content: flex-start; }
+.sl-stack--justify-center { justify-content: center; }
+.sl-stack--justify-end { justify-content: flex-end; }
+.sl-stack--justify-between { justify-content: space-between; }
+
+.sl-spacer { flex: 1 1 auto; }
+
+/* ---- Divider ---- */
+
+.sl-divider {
+  flex: none;
+  align-self: stretch;
+  height: 0;
+  margin: 0;
+  border: 0;
+  border-top: var(--sl-border-width-hairline) solid var(--sl-color-border-default);
+}
+
+.sl-divider--vertical {
+  width: 0;
+  height: auto;
+  min-height: 1em;
+  border-top: 0;
+  border-left: var(--sl-border-width-hairline) solid var(--sl-color-border-default);
+}
+
+/* ---- Card ---- */
+
+.sl-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--sl-color-background-surface);
+  border-radius: var(--sl-radius-xl);
+  box-shadow: var(--sl-shadow-e1);
+  transition: box-shadow var(--sl-motion-duration-base) var(--sl-motion-easing-standard);
+}
+
+.sl-card--outlined { box-shadow: inset 0 0 0 1px var(--sl-color-border-default); }
+.sl-card--interactive { cursor: pointer; }
+.sl-card--interactive:hover { box-shadow: var(--sl-shadow-e2); }
+
+.sl-card--interactive:focus-visible {
+  outline: var(--sl-focus-ring-width) solid var(--sl-color-focus-ring);
+  outline-offset: var(--sl-focus-ring-offset);
+}
+
+.sl-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--sl-space-3);
+  min-height: 44px;
+  padding: 10px var(--sl-space-4);
+  border-bottom: var(--sl-border-width-hairline) solid var(--sl-color-border-default);
+}
+
+.sl-card__titles {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sl-card__title {
+  margin: 0;
+  font: var(--sl-typography-label);
+  font-weight: var(--sl-font-weight-semibold);
+  color: var(--sl-color-text-primary);
+}
+
+.sl-card__subtitle {
+  margin: 0;
+  font: var(--sl-typography-caption);
+  color: var(--sl-color-text-tertiary);
+}
+
+.sl-card__actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--sl-space-1);
+  margin-left: auto;
+}
+
+.sl-card__body {
+  flex: 1;
+  padding: var(--sl-space-5);
+}
+
+.sl-card__body--flush { padding: 0; }
+
+.sl-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--sl-space-2);
+  padding: var(--sl-space-3) var(--sl-space-5);
+  background: var(--sl-color-background-subtle);
+  border-top: var(--sl-border-width-hairline) solid var(--sl-color-border-default);
+}
+
+/* ---- Toolbar ---- */
+
+.sl-toolbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: var(--sl-color-background-surface);
+  border-radius: var(--sl-radius-lg);
+  box-shadow: var(--sl-shadow-e1);
+}
+
+.sl-toolbar--flat {
+  display: flex;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  gap: var(--sl-space-2);
+}
+
+.sl-toolbar .sl-divider--vertical {
+  align-self: center;
+  height: 18px;
+  min-height: 0;
+  margin: 0 var(--sl-space-1);
+}

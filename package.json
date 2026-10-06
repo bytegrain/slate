@@ -1,0 +1,10 @@
+{
+  "name": "slate-workspace",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "dev": "npm run dev --workspace @slate/web"
+  }
+}

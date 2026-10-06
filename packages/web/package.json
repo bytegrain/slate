@@ -1,0 +1,47 @@
+{
+  "name": "@slate/web",
+  "version": "0.1.0-preview",
+  "description": "Slate web components and CSS \u2014 the Alloy design system for any web framework.",
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/slate.js",
+  "module": "./dist/slate.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/slate.js"
+    },
+    "./slate.css": "./dist/slate.css",
+    "./tokens.css": "./dist/tokens.css",
+    "./fonts/*": "./dist/fonts/*"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "./dist/slate.js",
+    "./src/index.ts",
+    "**/*.css"
+  ],
+  "scripts": {
+    "dev": "vite --config vite.demo.config.ts",
+    "build": "npm run build:lib && npm run build:css && npm run build:types && npm run build:demo",
+    "build:lib": "vite build",
+    "build:css": "node scripts/build-css.mjs",
+    "build:types": "tsc -p tsconfig.build.json",
+    "build:demo": "vite build --config vite.demo.config.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "lit": "3.3.3"
+  },
+  "devDependencies": {
+    "happy-dom": "20.14.5",
+    "typescript": "5.9.3",
+    "vite": "8.3.3",
+    "vitest": "5.0.3"
+  }
+}
