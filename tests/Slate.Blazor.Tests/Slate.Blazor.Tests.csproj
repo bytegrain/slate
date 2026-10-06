@@ -10,6 +10,9 @@
   <ItemGroup>
     <Using Include="Xunit" />
     <Using Include="Bunit" />
+    <Using Include="Slate" />
+    <Using Include="Slate.Layout" />
+    <Using Include="Slate.Theming" />
     <ProjectReference Include="..\..\src\Slate.Blazor\Slate.Blazor.csproj" />
   </ItemGroup>
 </Project>

@@ -40,11 +40,13 @@
     [Fact]
     public void Row_layout_and_disabled_option()
     {
-        var cut = Render(@<SlRadioGroup @bind-Value="_plan" Row="true">
+        var cut = Render(@<SlRadioGroup @bind-Value="_plan" Direction="Direction.Row" Tone="Tone.Success" Size="ControlSize.Small">
             <SlRadio Value="@("team")" Label="Team" Disabled="true" />
         </SlRadioGroup>);
         Assert.Contains("sl-radio-group--row", cut.Find("fieldset").ClassList);
         Assert.Contains("is-disabled", cut.Find("label.sl-radio").ClassList);
+        Assert.Contains("sl-tone-success", cut.Find("label.sl-radio").ClassList);
+        Assert.Contains("sl-radio--small", cut.Find("label.sl-radio").ClassList);
         Assert.True(cut.Find("input").HasAttribute("disabled"));
     }
 

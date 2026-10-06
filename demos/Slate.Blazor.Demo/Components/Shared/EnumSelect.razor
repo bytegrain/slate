@@ -1,0 +1,30 @@
+@typeparam TEnum where TEnum : struct, Enum
+@* Demo-only labelled select over an enum, styled with Slate's field markup (Slate has no Select component yet). *@
+<div class="sl-field sl-field--outlined sl-field--small">
+    <label class="sl-field__label" for="@_id">@Label</label>
+    <div class="sl-field__control">
+        <select id="@_id" class="sl-field__input" @onchange="OnChange">
+            @foreach (var v in Enum.GetValues<TEnum>())
+            {
+                <option value="@v" selected="@(v.Equals(Value))">@v</option>
+            }
+        </select>
+    </div>
+</div>
+
+@code {
+    private readonly string _id = $"sel{Guid.NewGuid():N}";
+
+    [Parameter, EditorRequired] public string Label { get; set; } = "";
+    [Parameter] public TEnum Value { get; set; }
+    [Parameter] public EventCallback<TEnum> ValueChanged { get; set; }
+
+    private async Task OnChange(ChangeEventArgs e)
+    {
+        if (Enum.TryParse<TEnum>(e.Value?.ToString(), out var v))
+        {
+            Value = v;
+            await ValueChanged.InvokeAsync(v);
+        }
+    }
+}

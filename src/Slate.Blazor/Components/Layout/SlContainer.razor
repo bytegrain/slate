@@ -3,10 +3,16 @@
 <div @attributes="AdditionalAttributes" class="@CssClass" style="@Style">@ChildContent</div>
 
 @code {
-    /// <summary>Max content width (container tokens). Default Lg (1200px).</summary>
-    [Parameter] public ContainerWidth Width { get; set; } = ContainerWidth.Lg;
+    /// <summary>Max content width (container tokens). Default Lg (1200px); Fluid has none.</summary>
+    [Parameter] public ContainerWidth MaxWidth { get; set; } = ContainerWidth.Lg;
+
+    /// <summary>Horizontal padding (default true).</summary>
+    [Parameter] public bool Gutters { get; set; } = true;
 
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
-    private string CssClass => Css.Of("sl-container").Add($"sl-container--{Names.Kebab(Width.ToString())}", Width != ContainerWidth.Lg).Add(Class);
+    private string CssClass => Css.Of("sl-container")
+        .Add($"sl-container--{Names.Kebab(MaxWidth.ToString())}", MaxWidth != ContainerWidth.Lg)
+        .Add("sl-container--no-gutters", !Gutters)
+        .Add(Class);
 }

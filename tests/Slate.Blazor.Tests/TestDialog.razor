@@ -3,8 +3,8 @@
     <SlTextField @bind-Value="Name" Label="Name" id="dialog-name" />
 </SlDialogBody>
 <SlDialogFooter>
-    <SlButton id="cancel" OnClick="() => Dialog.Cancel()">Cancel</SlButton>
-    <SlButton id="ok" Variant="ButtonVariant.Primary" OnClick="() => Dialog.Ok(Name)">Rename</SlButton>
+    <SlButton id="cancel" Click="() => Dialog.Cancel()">Cancel</SlButton>
+    <SlButton id="ok" Variant="ButtonVariant.Solid" Tone="Tone.Accent" Click="() => Dialog.Ok(Name)">Rename</SlButton>
 </SlDialogFooter>
 
 @code {

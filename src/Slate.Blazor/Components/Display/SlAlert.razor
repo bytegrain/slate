@@ -3,7 +3,10 @@
 @if (!_dismissed)
 {
     <div @attributes="AdditionalAttributes" class="@CssClass" style="@Style" role="@Role">
-        <SlIcon Name="@IconName" Class="sl-alert__icon" />
+        @if (IconName is not null)
+        {
+            <span class="sl-alert__icon"><SlIcon Name="@IconName" /></span>
+        }
         <div class="sl-alert__content">
             @if (Title is not null)
             {
@@ -20,8 +23,8 @@
                 @Actions
                 @if (Dismissible)
                 {
-                    <button type="button" class="sl-button sl-button--ghost sl-button--sm sl-button--icon sl-alert__close"
-                            aria-label="@DismissLabel" @onclick="DismissAsync"><SlIcon Name="x" /></button>
+                    <button type="button" class="sl-button sl-button--ghost sl-tone-neutral sl-button--icon-only sl-button--small sl-alert__close"
+                            aria-label="@DismissLabel" @onclick="DismissAsync"><span class="sl-button__start"><SlIcon Name="x" Class="sl-button__icon" /></span></button>
                 }
             </div>
         }
@@ -29,13 +32,24 @@
 }
 
 @code {
-    [Parameter] public Severity Severity { get; set; } = Severity.Normal;
+    [Parameter] public Severity Severity { get; set; } = Severity.Info;
+
+    /// <summary>Soft (default), outlined or solid.</summary>
+    [Parameter] public AlertVariant Variant { get; set; } = AlertVariant.Soft;
+
     [Parameter] public string? Title { get; set; }
+
+    /// <summary>Overrides the severity icon; "none" hides it.</summary>
+    [Parameter] public string? Icon { get; set; }
+
+    /// <summary>Tighter padding for dense layouts.</summary>
+    [Parameter] public bool Dense { get; set; }
+
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public RenderFragment? Actions { get; set; }
     [Parameter] public bool Dismissible { get; set; }
     [Parameter] public string DismissLabel { get; set; } = "Dismiss";
-    [Parameter] public EventCallback OnDismiss { get; set; }
+    [Parameter] public EventCallback Dismissed { get; set; }
 
     /// <summary>Set when the alert appears in response to something, so it is announced. Errors always announce.</summary>
     [Parameter] public bool Live { get; set; }
@@ -44,21 +58,29 @@
 
     private string? Role => Severity == Severity.Error ? "alert" : Live ? "status" : null;
 
-    private string IconName => Severity switch
+    private string? IconName => Icon switch
     {
-        Severity.Success => "check-circle",
-        Severity.Warning => "alert-triangle",
-        Severity.Error => "alert-circle",
-        _ => "info",
+        "none" => null,
+        { } custom => custom,
+        _ => Severity switch
+        {
+            Severity.Success => "check-circle",
+            Severity.Warning => "alert-triangle",
+            Severity.Error => "alert-circle",
+            _ => "info",
+        },
     };
 
     private string CssClass => Css.Of("sl-alert")
-        .Add($"sl-alert--{Names.Kebab(Severity.ToString())}", Severity != Severity.Normal)
+        .Add(Names.Variant(Variant, "sl-alert"))
+        .Add($"sl-alert--{Names.Kebab(Severity.ToString())}")
+        .Add(Names.Tone(Severity.ToTone()))
+        .Add("sl-alert--dense", Dense)
         .Add(Class);
 
     private async Task DismissAsync()
     {
         _dismissed = true;
-        await OnDismiss.InvokeAsync();
+        await Dismissed.InvokeAsync();
     }
 }

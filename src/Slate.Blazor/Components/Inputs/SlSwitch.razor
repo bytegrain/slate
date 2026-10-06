@@ -1,29 +1,38 @@
 @namespace Slate.Blazor
-@inherits SlInputBase<bool>
+@inherits SlCheckedBase<bool>
 @inject SlateJs Js
 <label class="@CssClass" style="@Style">
-    @if (LabelPosition == LabelPosition.End)
-    {
-        @Input
-    }
-    <span class="sl-switch__text">
-        <span class="sl-switch__label">@(Label)@ChildContent</span>
-        @if (Description is not null)
-        {
-            <span class="sl-switch__description" id="@DescriptionId">@Description</span>
-        }
+    <span class="sl-switch__control">
+        <input @attributes="AdditionalAttributes" @ref="_input" id="@ElementId" type="checkbox" role="switch" class="sl-switch__input"
+               checked="@Checked" aria-checked="@(Checked ? "true" : "false")" disabled="@Disabled"
+               aria-describedby="@(Description is null ? null : DescriptionId)"
+               @onchange="OnChange" />
+        <span class="sl-switch__thumb" aria-hidden="true"></span>
     </span>
-    @if (LabelPosition == LabelPosition.Start)
+    @if (Label is not null || ChildContent is not null || Description is not null)
     {
-        @Input
+        <span class="sl-switch__text">
+            <span class="sl-switch__label">@(Label)@ChildContent</span>
+            @if (Description is not null)
+            {
+                <span class="sl-switch__description" id="@DescriptionId">@Description</span>
+            }
+        </span>
     }
 </label>
 
 @code {
     [Parameter] public string? Description { get; set; }
-    [Parameter] public LabelPosition LabelPosition { get; set; } = LabelPosition.Start;
 
-    /// <summary>Label and switch at opposite ends of the row (settings lists).</summary>
+    /// <summary>Colour when on. Default accent.</summary>
+    [Parameter] public Tone? Tone { get; set; }
+
+    [Parameter] public ControlSize? Size { get; set; }
+
+    /// <summary>Label after the switch (End, default) or before it (Start).</summary>
+    [Parameter] public Placement? LabelPlacement { get; set; }
+
+    /// <summary>Label and switch at opposite ends of the row (settings lists; pair with LabelPlacement Start).</summary>
     [Parameter] public bool Spread { get; set; }
 
     [Parameter] public RenderFragment? ChildContent { get; set; }
@@ -31,17 +40,14 @@
     private string DescriptionId => $"{ElementId}-desc";
 
     private string CssClass => Css.Of("sl-switch")
-        .Add(LabelPosition == LabelPosition.Start ? "sl-switch--label-start" : "sl-switch--label-end")
+        .Add(Names.Tone(Tone ?? Slate.Tone.Accent))
+        .Add(Names.Size(Size ?? ControlSize.Medium, "sl-switch"))
+        .Add((LabelPlacement ?? Defaults.Selection.LabelPlacement) == Placement.Start ? "sl-switch--label-start" : "sl-switch--label-end")
         .Add("sl-switch--spread", Spread)
         .Add("is-disabled", Disabled)
         .Add(Class);
 
     private ElementReference _input;
-
-    private RenderFragment Input => @<input @attributes="AdditionalAttributes" @ref="_input" id="@ElementId" type="checkbox" role="switch" class="sl-switch__input"
-                                            checked="@Value" aria-checked="@(Value ? "true" : "false")" disabled="@Disabled"
-                                            aria-describedby="@(Description is null ? null : DescriptionId)"
-                                            @onchange="OnChange" />;
 
     private void OnChange(ChangeEventArgs e) => CurrentValue = e.Value is true || e.Value is "true" || e.Value is "on";
 

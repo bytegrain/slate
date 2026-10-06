@@ -4,8 +4,8 @@
     <SlText Tone="TextTone.Secondary">Level @Level. Only the top dialog is interactive; Escape closes one at a time.</SlText>
 </SlDialogBody>
 <SlDialogFooter>
-    <SlButton OnClick="() => Dialog.Cancel()">Close</SlButton>
-    <SlButton Variant="ButtonVariant.Primary" OnClick="OpenAnother">Open another</SlButton>
+    <SlButton Click="() => Dialog.Cancel()">Close</SlButton>
+    <SlButton Variant="ButtonVariant.Solid" Tone="Tone.Accent" Click="OpenAnother">Open another</SlButton>
 </SlDialogFooter>
 
 @code {

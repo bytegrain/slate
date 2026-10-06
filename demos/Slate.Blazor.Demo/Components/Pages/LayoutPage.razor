@@ -13,11 +13,11 @@
             {
                 var n = i;
                 <SlItem Xs="12" Sm="6" Lg="3">
-                    <SlCard Outlined="true"><SlText Typo="Typo.Label">Item @n</SlText></SlCard>
+                    <SlCard Variant="CardVariant.Outlined"><SlText Typo="Typo.Label">Item @n</SlText></SlCard>
                 </SlItem>
             }
-            <SlItem Xs="12" Md="8"><SlCard Outlined="true"><SlText Typo="Typo.Label">Md=8</SlText></SlCard></SlItem>
-            <SlItem Xs="12" Md="4"><SlCard Outlined="true"><SlText Typo="Typo.Label">Md=4</SlText></SlCard></SlItem>
+            <SlItem Xs="12" Md="8"><SlCard Variant="CardVariant.Outlined"><SlText Typo="Typo.Label">Md=8</SlText></SlCard></SlItem>
+            <SlItem Xs="12" Md="4"><SlCard Variant="CardVariant.Outlined"><SlText Typo="Typo.Label">Md=4</SlText></SlCard></SlItem>
         </SlGrid>
     </DemoSection>
 
@@ -42,25 +42,25 @@
             </SlCard>
         </SlItem>
         <SlItem Xs="12" Md="4">
-            <SlCard Title="Outlined" Outlined="true">
-                <Actions><SlButton IconOnly="true" Variant="ButtonVariant.Ghost" Size="ControlSize.Small" StartIcon="more-horizontal" AriaLabel="More" /></Actions>
+            <SlCard Title="Outlined" Variant="CardVariant.Outlined">
+                <HeaderActions><SlButton IconOnly="true" Variant="ButtonVariant.Ghost" Size="ControlSize.Small" StartIcon="more-horizontal" Label="More" /></HeaderActions>
                 <ChildContent><SlText Tone="TextTone.Secondary">Hairline instead of shadow, with header actions.</SlText></ChildContent>
             </SlCard>
         </SlItem>
         <SlItem Xs="12" Md="4">
-            <SlCard Title="Interactive" Interactive="true" OnClick="() => _clicks++">
+            <SlCard Title="Interactive" Interactive="true" Click="() => _clicks++">
                 <ChildContent><SlText Tone="TextTone.Secondary">Hover lifts it; Enter or click activates. Clicked @_clicks times.</SlText></ChildContent>
-                <Footer><SlButton Size="ControlSize.Small">Cancel</SlButton><SlButton Size="ControlSize.Small" Variant="ButtonVariant.Primary">Open</SlButton></Footer>
+                <Footer><SlButton Size="ControlSize.Small">Cancel</SlButton><SlButton Size="ControlSize.Small" Variant="ButtonVariant.Solid" Tone="Tone.Accent">Open</SlButton></Footer>
             </SlCard>
         </SlItem>
     </SlGrid>
 
     <DemoSection Title="Toolbar">
         <SlToolbar Label="Formatting">
-            <SlButton IconOnly="true" Variant="ButtonVariant.Ghost" StartIcon="copy" AriaLabel="Copy" />
-            <SlButton IconOnly="true" Variant="ButtonVariant.Ghost" StartIcon="pencil" AriaLabel="Edit" />
+            <SlButton IconOnly="true" Variant="ButtonVariant.Ghost" StartIcon="copy" Label="Copy" />
+            <SlButton IconOnly="true" Variant="ButtonVariant.Ghost" StartIcon="pencil" Label="Edit" />
             <SlDivider Vertical="true" />
-            <SlButton IconOnly="true" Variant="ButtonVariant.Ghost" StartIcon="trash" AriaLabel="Delete" />
+            <SlButton IconOnly="true" Variant="ButtonVariant.Ghost" StartIcon="trash" Label="Delete" />
             <SlSpacer />
             <SlButton Size="ControlSize.Small" StartIcon="download">Export</SlButton>
         </SlToolbar>
@@ -70,7 +70,7 @@
         <SlStack Spacing="2">
             @foreach (var w in Enum.GetValues<ContainerWidth>())
             {
-                <SlContainer Width="w" Style="background: var(--sl-color-accent-subtle); border-radius: var(--sl-radius-md); padding-block: var(--sl-space-2)">
+                <SlContainer MaxWidth="w" Style="background: var(--sl-color-accent-subtle); border-radius: var(--sl-radius-md); padding-block: var(--sl-space-2)">
                     <SlText Typo="Typo.Label">@w</SlText>
                 </SlContainer>
             }

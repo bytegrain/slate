@@ -17,10 +17,14 @@ public abstract class SlateTestContext : BunitContext
         {
             o.TimeProvider = Time;
             o.Snackbars = ConfigureSnackbars(new SnackbarConfiguration());
+            ConfigureSlate(o);
         });
     }
 
     protected virtual SnackbarConfiguration ConfigureSnackbars(SnackbarConfiguration c) => c;
+
+    /// <summary>Hook for tests that need app-wide defaults or a theme.</summary>
+    protected virtual void ConfigureSlate(SlateOptions options) { }
 
     protected ISnackbarService Snackbars => Services.GetRequiredService<ISnackbarService>();
     protected IDialogService Dialogs => Services.GetRequiredService<IDialogService>();

@@ -1,21 +1,41 @@
 @namespace Slate.Blazor
 @inherits SlComponentBase
-<div @attributes="AdditionalAttributes" class="@CssClass" style="@StyleValue" role="progressbar" aria-label="@Label"
-     aria-valuemin="0" aria-valuemax="100" aria-valuenow="@(Indeterminate ? null : Clamped.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))"
-     aria-busy="@(Indeterminate ? "true" : null)">
-    <div class="sl-progress__bar"></div>
-</div>
+@if (ShowValue && !Indeterminate)
+{
+    <div class="sl-progress-row">
+        @Bar
+        <span class="sl-progress__value" aria-hidden="true">@(Names.Number(Percent))%</span>
+    </div>
+}
+else
+{
+    @Bar
+}
 
 @code {
-    /// <summary>0-100. Ignored when <see cref="Indeterminate"/>.</summary>
+    /// <summary>0…<see cref="Max"/>. Ignored when <see cref="Indeterminate"/>.</summary>
     [Parameter] public double Value { get; set; }
+    [Parameter] public double Max { get; set; } = 100;
     [Parameter] public bool Indeterminate { get; set; }
+    [Parameter] public Tone Tone { get; set; } = Tone.Accent;
+    [Parameter] public ControlSize Size { get; set; } = ControlSize.Medium;
     [Parameter, EditorRequired] public string Label { get; set; } = "";
 
-    private double Clamped => Math.Clamp(double.IsNaN(Value) ? 0 : Value, 0, 100);
+    /// <summary>Shows the percentage beside the bar.</summary>
+    [Parameter] public bool ShowValue { get; set; }
 
-    private string CssClass => Css.Of("sl-progress").Add("sl-progress--indeterminate", Indeterminate).Add(Class);
+    private double Clamped => Math.Clamp(double.IsNaN(Value) ? 0 : Value, 0, Max <= 0 ? 0 : Max);
+    private double Percent => Max <= 0 ? 0 : Math.Round(Clamped / Max * 100, 2);
 
-    private string StyleValue => Indeterminate ? Style ?? "" :
-        $"--_value: {Clamped.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)}%;{Style}";
+    private string CssClass => Css.Of("sl-progress")
+        .Add(Names.Tone(Tone))
+        .Add(Names.Size(Size, "sl-progress"))
+        .Add("sl-progress--indeterminate", Indeterminate)
+        .Add(Class);
+
+    private string StyleValue => Indeterminate ? Style ?? "" : $"--_value: {Names.Number(Percent)}%;{Style}";
+
+    private RenderFragment Bar => @<div @attributes="AdditionalAttributes" class="@CssClass" style="@StyleValue" role="progressbar" aria-label="@Label"
+        aria-valuemin="0" aria-valuemax="@Names.Number(Max)" aria-valuenow="@(Indeterminate ? null : Names.Number(Clamped))"
+        aria-busy="@(Indeterminate ? "true" : null)"><div class="sl-progress__bar"></div></div>;
 }

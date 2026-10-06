@@ -5,37 +5,94 @@
 <div class="demo-page">
     <PageHeader Title="Components">Every component, variant and state.</PageHeader>
 
-    <DemoSection Title="Buttons" Subtitle="Six variants, three sizes. One primary per view.">
+    <DemoSection Title="Buttons" Subtitle="Variant × tone, three sizes. Primary action = Solid + Accent, one per view.">
         <SlStack Spacing="4">
             <div class="demo-row">
-                <SlButton Variant="ButtonVariant.Primary">Deploy</SlButton>
+                <SlButton Variant="ButtonVariant.Solid" Tone="Tone.Accent">Deploy</SlButton>
                 <SlButton>Secondary</SlButton>
                 <SlButton Variant="ButtonVariant.Ghost">Ghost</SlButton>
-                <SlButton Variant="ButtonVariant.Danger">Delete</SlButton>
-                <SlButton Variant="ButtonVariant.DangerSolid">Delete forever</SlButton>
+                <SlButton Tone="Tone.Danger">Delete</SlButton>
+                <SlButton Variant="ButtonVariant.Solid" Tone="Tone.Danger">Delete forever</SlButton>
                 <SlButton Variant="ButtonVariant.Link">Learn more</SlButton>
             </div>
             <div class="demo-row">
-                <SlButton Variant="ButtonVariant.Primary" Size="ControlSize.Small">Small</SlButton>
-                <SlButton Variant="ButtonVariant.Primary">Medium</SlButton>
-                <SlButton Variant="ButtonVariant.Primary" Size="ControlSize.Large" EndIcon="arrow-right">Large</SlButton>
+                <SlButton Variant="ButtonVariant.Solid" Tone="Tone.Accent" Size="ControlSize.Small">Small</SlButton>
+                <SlButton Variant="ButtonVariant.Solid" Tone="Tone.Accent">Medium</SlButton>
+                <SlButton Variant="ButtonVariant.Solid" Tone="Tone.Accent" Size="ControlSize.Large" EndIcon="arrow-right">Large</SlButton>
                 <SlButton StartIcon="download">Export</SlButton>
-                <SlButton IconOnly="true" StartIcon="plus" AriaLabel="Add" />
-                <SlButton IconOnly="true" Variant="ButtonVariant.Ghost" StartIcon="more-horizontal" AriaLabel="More" />
+                <SlButton IconOnly="true" StartIcon="plus" Label="Add" />
+                <SlButton IconOnly="true" Variant="ButtonVariant.Ghost" StartIcon="more-horizontal" Label="More" />
                 <SlButton Shortcut="⌘↵">Commit</SlButton>
             </div>
             <div class="demo-row">
-                <SlButton Variant="ButtonVariant.Primary" Loading="true">Deploying</SlButton>
-                <SlButton Variant="ButtonVariant.Primary" LoadingWhileBusy="true" OnClick="SaveAsync">Save (async)</SlButton>
-                <SlButton Variant="ButtonVariant.Primary" Disabled="true">Disabled</SlButton>
+                <SlButton Variant="ButtonVariant.Solid" Tone="Tone.Accent" Loading="true">Deploying</SlButton>
+                <SlButton Variant="ButtonVariant.Solid" Tone="Tone.Accent" LoadingWhileBusy="true" Click="SaveAsync">Save (async)</SlButton>
+                <SlButton Variant="ButtonVariant.Solid" Tone="Tone.Accent" Disabled="true">Disabled</SlButton>
                 <SlButtonGroup Label="View">
-                    <SlButton Pressed="@(_view == "day")" OnClick="@(() => _view = "day")">Day</SlButton>
-                    <SlButton Pressed="@(_view == "week")" OnClick="@(() => _view = "week")">Week</SlButton>
-                    <SlButton Pressed="@(_view == "month")" OnClick="@(() => _view = "month")">Month</SlButton>
+                    <SlButton Pressed="@(_view == "day")" Click="@(() => _view = "day")">Day</SlButton>
+                    <SlButton Pressed="@(_view == "week")" Click="@(() => _view = "week")">Week</SlButton>
+                    <SlButton Pressed="@(_view == "month")" Click="@(() => _view = "month")">Month</SlButton>
                 </SlButtonGroup>
             </div>
         </SlStack>
     </DemoSection>
+
+    <DemoSection Title="Variant × tone" Subtitle="Every button variant in every tone, plus radius overrides.">
+        <div class="demo-table-wrap">
+            <table class="demo-table">
+                <thead><tr><th>Variant</th>@foreach (var tone in Enum.GetValues<Tone>()) { <th>@tone</th> }</tr></thead>
+                <tbody>
+                    @foreach (var variant in Enum.GetValues<ButtonVariant>())
+                    {
+                        <tr>
+                            <td class="demo-mono">@variant</td>
+                            @foreach (var tone in Enum.GetValues<Tone>())
+                            {
+                                <td><SlButton Variant="variant" Tone="tone" Size="ControlSize.Small">@tone</SlButton></td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="demo-row" style="margin-top: var(--sl-space-4)">
+            @foreach (var radius in Enum.GetValues<Radius>())
+            {
+                <SlButton Radius="radius" Variant="ButtonVariant.Soft" Tone="Tone.Accent">Radius @radius</SlButton>
+            }
+        </div>
+    </DemoSection>
+
+    <SlGrid>
+        <SlItem Xs="12" Md="6">
+            <DemoSection Title="Field variants" Subtitle="Outlined (default), filled and underlined; counter and clear button.">
+                <SlStack Spacing="4">
+                    <SlTextField @bind-Value="_variantA" Label="Outlined" Variant="FieldVariant.Outlined" Clearable="true" />
+                    <SlTextField @bind-Value="_variantB" Label="Filled" Variant="FieldVariant.Filled" StartIcon="search" Clearable="true" />
+                    <SlTextField @bind-Value="_variantC" Label="Underlined" Variant="FieldVariant.Underlined" EndIcon="pencil" />
+                    <SlTextField @bind-Value="_bio" Label="Bio" Multiline="true" Rows="2" Counter="true" MaxLength="80" Immediate="true" HelperText="Shown on your profile." />
+                    <SlTextField @bind-Value="_amount" Label="Amount" Radius="Radius.Full" Prefix="£">
+                        <EndContent><SlBadge Size="BadgeSize.Small" Tone="Tone.Info">GBP</SlBadge></EndContent>
+                    </SlTextField>
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+        <SlItem Xs="12" Md="6">
+            <DemoSection Title="Selection tones & sizes">
+                <SlStack Spacing="3">
+                    <SlCheckbox @bind-Checked="_toneA" Tone="Tone.Success" Label="Success tone" />
+                    <SlCheckbox @bind-Checked="_toneB" Tone="Tone.Danger" Size="ControlSize.Large" Label="Danger, large" />
+                    <SlCheckbox @bind-Checked="_toneC" LabelPlacement="Placement.Start" Label="Label before" />
+                    <SlSwitch @bind-Checked="_toneD" Tone="Tone.Warning" Label="Warning tone" />
+                    <SlSwitch @bind-Checked="_toneE" Size="ControlSize.Small" Label="Small switch" />
+                    <SlRadioGroup @bind-Value="_plan" Label="Row, info tone" Direction="Direction.Row" Tone="Tone.Info">
+                        <SlRadio Value="@("team")" Label="Team" />
+                        <SlRadio Value="@("solo")" Label="Solo" />
+                    </SlRadioGroup>
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+    </SlGrid>
 
     <SlGrid>
         <SlItem Xs="12" Md="6">
@@ -55,10 +112,10 @@
             <SlStack Spacing="4">
                 <DemoSection Title="Checkbox & radio">
                     <SlStack Spacing="3">
-                        <SlCheckbox @bind-Value="_tests" Label="Run tests before deploy" />
-                        <SlCheckbox @bind-Value="_notify" Label="Notify on failure" Description="Sends to #builds and the commit author." />
-                        <SlCheckbox @bind-Value="_selectAll" Label="Select all (indeterminate)" />
-                        <SlCheckbox @bind-Value="_disabledCheck" Label="Disabled" Disabled="true" />
+                        <SlCheckbox @bind-Checked="_tests" Label="Run tests before deploy" />
+                        <SlCheckbox @bind-Checked="_notify" Label="Notify on failure" Description="Sends to #builds and the commit author." />
+                        <SlCheckbox @bind-Checked="_selectAll" Label="Select all (indeterminate)" />
+                        <SlCheckbox @bind-Checked="_disabledCheck" Label="Disabled" Disabled="true" />
                         <SlRadioGroup @bind-Value="_plan" Label="Plan">
                             <SlRadio Value="@("team")" Label="Team" Description="Unlimited projects, SSO" />
                             <SlRadio Value="@("solo")" Label="Solo" Description="Three projects" />
@@ -68,9 +125,9 @@
                 </DemoSection>
                 <DemoSection Title="Switches">
                     <SlStack Spacing="3">
-                        <SlSwitch @bind-Value="_preview" Label="Preview deployments" Spread="true" />
-                        <SlSwitch @bind-Value="_compact" Label="Compact density" Description="Applies to every table." Spread="true" />
-                        <SlSwitch @bind-Value="_end" Label="Label after" LabelPosition="LabelPosition.End" />
+                        <SlSwitch @bind-Checked="_preview" Label="Preview deployments" Spread="true" LabelPlacement="Placement.Start" />
+                        <SlSwitch @bind-Checked="_compact" Label="Compact density" Description="Applies to every table." Spread="true" LabelPlacement="Placement.Start" />
+                        <SlSwitch @bind-Checked="_end" Label="Label after (default)" />
                     </SlStack>
                 </DemoSection>
             </SlStack>
@@ -80,11 +137,21 @@
     <DemoSection Title="Display">
         <SlStack Spacing="4">
             <div class="demo-row">
-                <SlBadge Tone="BadgeTone.Success" Dot="true">Ready</SlBadge>
-                <SlBadge Tone="BadgeTone.Warning" Dot="true">Building</SlBadge>
-                <SlBadge Tone="BadgeTone.Danger" Dot="true">Failed</SlBadge>
-                <SlBadge Tone="BadgeTone.Info">Info</SlBadge>
-                <SlBadge Tone="BadgeTone.Accent">New</SlBadge>
+                @foreach (var variant in Enum.GetValues<BadgeVariant>())
+                {
+                    @foreach (var tone in new[] { Tone.Neutral, Tone.Accent, Tone.Success, Tone.Danger })
+                    {
+                        <SlBadge Variant="variant" Tone="tone">@variant @tone</SlBadge>
+                    }
+                }
+                <SlBadge Size="BadgeSize.Small" Icon="check" Tone="Tone.Success">small + icon</SlBadge>
+            </div>
+            <div class="demo-row">
+                <SlBadge Tone="Tone.Success" Dot="true">Ready</SlBadge>
+                <SlBadge Tone="Tone.Warning" Dot="true">Building</SlBadge>
+                <SlBadge Tone="Tone.Danger" Dot="true">Failed</SlBadge>
+                <SlBadge Tone="Tone.Info">Info</SlBadge>
+                <SlBadge Tone="Tone.Accent">New</SlBadge>
                 <SlBadge>Draft</SlBadge>
                 <SlKbd>⌘K</SlKbd>
                 <SlSpinner />
@@ -111,6 +178,8 @@
 </div>
 
 @code {
+    private string? _variantA = "slate-web", _variantB, _variantC = "Inline edit", _bio = "", _amount = "120.00";
+    private bool _toneA = true, _toneB = true, _toneC, _toneD = true, _toneE;
     private string _view = "week";
     private string? _name = "slate-dashboard", _email = "aaron@", _domain = "slate", _search, _notes, _readonly = "Generated", _disabled = "Locked";
     private bool _tests = true, _notify = true, _disabledCheck, _preview = true, _compact, _end = true;

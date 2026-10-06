@@ -70,8 +70,16 @@ public interface IDialogService
 internal sealed class DialogService : IDialogService
 {
     private readonly DialogStack _stack = new();
+    private readonly SlateOptions _options;
 
-    public DialogService() => _stack.Changed += (_, e) => Changed?.Invoke(this, e);
+    public DialogService(SlateOptions options)
+    {
+        _options = options;
+        _stack.Changed += (_, e) => Changed?.Invoke(this, e);
+    }
+
+    /// <summary>App defaults (<c>AddSlate(o => o.Defaults.Dialog = …)</c>) apply when no options are passed.</summary>
+    private DialogOptions DefaultOptions => _options.Defaults.Dialog;
 
     public IReadOnlyList<DialogReference> Open => _stack.Open;
     public event EventHandler? Changed;
@@ -79,7 +87,7 @@ internal sealed class DialogService : IDialogService
     public DialogReference Show<TComponent>(string? title = null, IReadOnlyDictionary<string, object?>? parameters = null, DialogOptions? options = null)
         where TComponent : IComponent
     {
-        options ??= new DialogOptions();
+        options ??= DefaultOptions;
         if (title is not null) options = options with { Title = title };
         return _stack.Push(new DialogContent
         {
@@ -96,15 +104,16 @@ internal sealed class DialogService : IDialogService
         ArgumentNullException.ThrowIfNull(content);
         if (content.ComponentType is null && content.Fragment is null && content.MessageBox is null)
             throw new ArgumentException("Dialog content needs a component type, a fragment or message box options.", nameof(content));
-        return _stack.Push(content, options);
+        return _stack.Push(content, options ?? DefaultOptions);
     }
 
     public async Task<bool> ConfirmAsync(MessageBoxOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
-        var dialog = _stack.Push(new DialogContent { MessageBox = options, Description = options.Message }, new DialogOptions
+        var dialog = _stack.Push(new DialogContent { MessageBox = options, Description = options.Message }, DefaultOptions with
         {
             Title = options.Title,
+            Description = options.Message,
             MaxWidth = DialogWidth.Xs,
             // A destructive confirmation should only end through an explicit choice or Escape.
             CloseOnBackdropClick = !options.Destructive,

@@ -53,12 +53,24 @@ public class DisplayTests : SlateTestContext
 
     [Fact]
     public void Badge_tone_and_dot() =>
-        Render<SlBadge>(p => p.Add(x => x.Tone, BadgeTone.Success).Add(x => x.Dot, true).AddChildContent("Ready"))
-            .MarkupMatches("""<span class="sl-badge sl-badge--success"><span class="sl-badge__dot" aria-hidden="true"></span>Ready</span>""");
+        Render<SlBadge>(p => p.Add(x => x.Tone, Tone.Success).Add(x => x.Dot, true).AddChildContent("Ready"))
+            .MarkupMatches("""<span class="sl-badge sl-badge--soft sl-tone-success"><span class="sl-badge__dot" aria-hidden="true"></span>Ready</span>""");
 
     [Fact]
-    public void Neutral_badge_has_no_tone_class() =>
-        Render<SlBadge>(p => p.AddChildContent("Draft")).MarkupMatches("""<span class="sl-badge">Draft</span>""");
+    public void Badge_defaults_to_soft_neutral() =>
+        Render<SlBadge>(p => p.AddChildContent("Draft")).MarkupMatches("""<span class="sl-badge sl-badge--soft sl-tone-neutral">Draft</span>""");
+
+    [Theory]
+    [InlineData(BadgeVariant.Solid, "sl-badge--solid")]
+    [InlineData(BadgeVariant.Outlined, "sl-badge--outlined")]
+    public void Badge_variants_size_and_icon(BadgeVariant variant, string cls)
+    {
+        var cut = Render<SlBadge>(p => p.Add(x => x.Variant, variant).Add(x => x.Size, BadgeSize.Small).Add(x => x.Icon, "check").AddChildContent("Ok"));
+        var badge = cut.Find(".sl-badge");
+        Assert.Contains(cls, badge.ClassList);
+        Assert.Contains("sl-badge--small", badge.ClassList);
+        Assert.NotNull(cut.Find("svg.sl-icon.sl-badge__icon"));
+    }
 
     [Theory]
     [InlineData(Severity.Info, "sl-alert--info", "info", null)]
@@ -70,11 +82,30 @@ public class DisplayTests : SlateTestContext
         var cut = Render<SlAlert>(p => p.Add(x => x.Severity, severity).Add(x => x.Title, "Title").AddChildContent("Message"));
         var root = cut.Find(".sl-alert");
         Assert.Contains(cls, root.ClassList);
+        Assert.Contains("sl-alert--soft", root.ClassList);
+        Assert.Contains($"sl-tone-{(severity == Severity.Error ? "danger" : severity.ToString().ToLowerInvariant())}", root.ClassList);
         Assert.Equal(role, root.GetAttribute("role"));
         Assert.Equal(SlateIcons.All[icon], cut.Find(".sl-alert__icon path").GetAttribute("d"));
         Assert.Equal("Title", cut.Find(".sl-alert__title").TextContent);
         Assert.Equal("Message", cut.Find(".sl-alert__message").TextContent);
     }
+
+    [Fact]
+    public void Alert_variant_dense_and_icon_override()
+    {
+        var cut = Render<SlAlert>(p => p.Add(x => x.Variant, AlertVariant.Solid).Add(x => x.Dense, true).Add(x => x.Icon, "bell"));
+        var root = cut.Find(".sl-alert");
+        Assert.Contains("sl-alert--solid", root.ClassList);
+        Assert.Contains("sl-alert--dense", root.ClassList);
+        Assert.Equal(SlateIcons.Bell, cut.Find(".sl-alert__icon path").GetAttribute("d"));
+
+        var none = Render<SlAlert>(p => p.Add(x => x.Icon, "none"));
+        Assert.Empty(none.FindAll(".sl-alert__icon"));
+    }
+
+    [Fact]
+    public void Normal_severity_alert_is_neutral() =>
+        Assert.Contains("sl-tone-neutral", Render<SlAlert>(p => p.Add(x => x.Severity, Severity.Normal)).Find(".sl-alert").ClassList);
 
     [Fact]
     public void Live_alert_is_a_status()
@@ -87,7 +118,7 @@ public class DisplayTests : SlateTestContext
     public void Dismissible_alert_closes_and_raises_event()
     {
         var dismissed = false;
-        var cut = Render<SlAlert>(p => p.Add(x => x.Dismissible, true).Add(x => x.OnDismiss, () => dismissed = true).AddChildContent("x"));
+        var cut = Render<SlAlert>(p => p.Add(x => x.Dismissible, true).Add(x => x.Dismissed, () => dismissed = true).AddChildContent("x"));
         var close = cut.Find(".sl-alert__close");
         Assert.Equal("Dismiss", close.GetAttribute("aria-label"));
         close.Click();
@@ -99,7 +130,7 @@ public class DisplayTests : SlateTestContext
     public void Progress_determinate_clamps_and_sets_value() =>
         Render<SlProgress>(p => p.Add(x => x.Value, 140).Add(x => x.Label, "Uploading"))
             .MarkupMatches("""
-                <div class="sl-progress" style="--_value: 100%;" role="progressbar" aria-label="Uploading" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+                <div class="sl-progress sl-tone-accent" style="--_value: 100%;" role="progressbar" aria-label="Uploading" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
                   <div class="sl-progress__bar"></div>
                 </div>
                 """);
@@ -114,9 +145,26 @@ public class DisplayTests : SlateTestContext
     }
 
     [Fact]
+    public void Progress_tone_size_max_and_show_value()
+    {
+        var cut = Render<SlProgress>(p => p.Add(x => x.Value, 30).Add(x => x.Max, 60).Add(x => x.Tone, Tone.Success)
+            .Add(x => x.Size, ControlSize.Large).Add(x => x.ShowValue, true).Add(x => x.Label, "Sync"));
+        var bar = cut.Find(".sl-progress-row > .sl-progress");
+        Assert.Contains("sl-tone-success", bar.ClassList);
+        Assert.Contains("sl-progress--large", bar.ClassList);
+        Assert.Equal("60", bar.GetAttribute("aria-valuemax"));
+        Assert.Equal("30", bar.GetAttribute("aria-valuenow"));
+        Assert.Equal("50%", cut.Find(".sl-progress__value").TextContent);
+    }
+
+    [Fact]
     public void Spinner() =>
         Render<SlSpinner>(p => p.Add(x => x.Size, ControlSize.Small))
-            .MarkupMatches("""<span class="sl-spinner sl-spinner--sm" role="status" aria-label="Loading"></span>""");
+            .MarkupMatches("""<span class="sl-spinner sl-spinner--small" role="status" aria-label="Loading"></span>""");
+
+    [Fact]
+    public void Spinner_tone_adds_tone_class_except_neutral() =>
+        Assert.Contains("sl-tone-accent", Render<SlSpinner>(p => p.Add(x => x.Tone, Tone.Accent)).Find("span").ClassList);
 
     [Fact]
     public void Class_style_and_extra_attributes_pass_through()

@@ -5,8 +5,8 @@
         <SlTextField @bind-Value="_model.Name" Label="Package name" HelperText="Shown on NuGet and in the feed." autofocus />
     </SlDialogBody>
     <SlDialogFooter>
-        <SlButton OnClick="() => Dialog.Cancel()">Cancel</SlButton>
-        <SlButton Type="ButtonType.Submit" Variant="ButtonVariant.Primary">Rename</SlButton>
+        <SlButton Click="() => Dialog.Cancel()">Cancel</SlButton>
+        <SlButton Type="ButtonType.Submit" Variant="ButtonVariant.Solid" Tone="Tone.Accent">Rename</SlButton>
     </SlDialogFooter>
 </EditForm>
 

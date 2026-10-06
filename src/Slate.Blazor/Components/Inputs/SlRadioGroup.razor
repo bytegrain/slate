@@ -2,7 +2,7 @@
 @typeparam TValue
 @inherits SlInputBase<TValue>
 <CascadingValue Value="this" IsFixed="true">
-    <fieldset @attributes="AdditionalAttributes" class="@(Css.Of("sl-radio-group").Add("sl-radio-group--row", Row).Add(Class))" style="@Style"
+    <fieldset @attributes="AdditionalAttributes" class="@(Css.Of("sl-radio-group").Add("sl-radio-group--row", Direction == Slate.Direction.Row).Add(Class))" style="@Style"
               disabled="@Disabled" aria-invalid="@(IsInvalid ? "true" : null)" aria-describedby="@(ErrorText is null ? null : $"{ElementId}-err")">
         @if (Label is not null)
         {
@@ -17,8 +17,13 @@
 </CascadingValue>
 
 @code {
-    /// <summary>Lay options out horizontally.</summary>
-    [Parameter] public bool Row { get; set; }
+    /// <summary>Column (default) or Row.</summary>
+    [Parameter] public Direction Direction { get; set; } = Direction.Column;
+
+    /// <summary>Colour of the selected radios. Default accent.</summary>
+    [Parameter] public Tone Tone { get; set; } = Tone.Accent;
+
+    [Parameter] public ControlSize Size { get; set; } = ControlSize.Medium;
 
     /// <summary>The radios' shared name (generated if omitted).</summary>
     [Parameter] public string? Name { get; set; }

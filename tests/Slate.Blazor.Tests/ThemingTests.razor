@@ -1,0 +1,100 @@
+@inherits SlateTestContext
+
+@code {
+    private static readonly SlateThemeOptions Orange = new() { Accent = "#FF5A1F", RadiusScale = 1.5 };
+
+    private static string Var(string path) => Slate.Blazor.Internal.Names.CssVariable(path);
+
+    [Fact]
+    public void Css_variable_names_match_the_generator()
+    {
+        Assert.Equal("--sl-color-text-on-accent", Var("color.text.onAccent"));
+        Assert.Equal("--sl-space-0-5", Var("space.0_5"));
+        Assert.Equal("--sl-component-button-padding-sm", Var("component.button.paddingSm"));
+    }
+
+    [Fact]
+    public void Theme_options_render_scoped_variables_identical_to_the_theme_builder()
+    {
+        var cut = Render<SlateProvider>(p => p.Add(x => x.Mode, ThemeMode.Light).Add(x => x.ThemeOptions, Orange));
+        var root = cut.Find(".sl-root");
+        var scope = root.GetAttribute("data-sl-scope");
+        Assert.NotNull(scope);
+        Assert.Equal("light", root.GetAttribute("data-sl-theme"));
+
+        var css = cut.Find("style").TextContent;
+        var expected = ThemeBuilder.Build(Orange with { Base = ThemeNames.Light });
+        Assert.StartsWith($"[data-sl-scope=\"{scope}\"]{{", css);
+        foreach (var path in expected.ChangedPaths)
+            Assert.Contains($"{Var(path)}:{expected.Values[path]};", css);
+        Assert.Contains($"{Var("color.accent.default")}:{expected.Values["color.accent.default"]};", css);
+        Assert.Contains($"{Var("component.button.radius")}:9px;", css);
+    }
+
+    [Fact]
+    public void Dark_mode_builds_on_the_dark_base()
+    {
+        var cut = Render<SlateProvider>(p => p.Add(x => x.Mode, ThemeMode.Dark).Add(x => x.ThemeOptions, Orange));
+        var dark = ThemeBuilder.Build(Orange with { Base = ThemeNames.Dark });
+        Assert.Contains($"{Var("color.accent.default")}:{dark.Values["color.accent.default"]};", cut.Find("style").TextContent);
+        Assert.DoesNotContain("@media", cut.Find("style").TextContent);
+    }
+
+    [Fact]
+    public void System_mode_emits_light_rules_and_a_dark_media_query_without_script()
+    {
+        var cut = Render<SlateProvider>(p => p.Add(x => x.ThemeOptions, Orange));
+        var css = cut.Find("style").TextContent;
+        var light = ThemeBuilder.Build(Orange with { Base = ThemeNames.Light });
+        var dark = ThemeBuilder.Build(Orange with { Base = ThemeNames.Dark });
+        var media = css.IndexOf("@media (prefers-color-scheme: dark){", StringComparison.Ordinal);
+        Assert.True(media > 0);
+        Assert.Contains($"{Var("color.accent.default")}:{light.Values["color.accent.default"]};", css[..media]);
+        Assert.Contains($"{Var("color.accent.default")}:{dark.Values["color.accent.default"]};", css[media..]);
+        Assert.Equal("auto", cut.Find(".sl-root").GetAttribute("data-sl-theme"));
+    }
+
+    [Fact]
+    public void A_prebuilt_definition_fixes_the_base_theme()
+    {
+        var theme = ThemeBuilder.Build(new SlateThemeOptions { Base = ThemeNames.Dark, Accent = "#5B3DF5" });
+        var cut = Render<SlateProvider>(p => p.Add(x => x.Mode, ThemeMode.Light).Add(x => x.Theme, theme));
+        Assert.Equal("dark", cut.Find(".sl-root").GetAttribute("data-sl-theme"));
+        Assert.Equal("dark", cut.Instance.EffectiveTheme);
+        Assert.Contains($"{Var("color.accent.default")}:{theme.Values["color.accent.default"]};", cut.Find("style").TextContent);
+    }
+
+    [Fact]
+    public void Built_in_theme_renders_no_style_and_no_scope()
+    {
+        var cut = Render<SlateProvider>();
+        Assert.Empty(cut.FindAll("style"));
+        Assert.Null(cut.Find(".sl-root").GetAttribute("data-sl-scope"));
+    }
+
+    [Fact]
+    public void Nested_provider_scopes_theme_and_density_without_hosting_systems()
+    {
+        var cut = Render(@<SlateProvider Mode="ThemeMode.Light">
+            <SlateProvider Mode="ThemeMode.Dark" Density="Density.Comfortable" ThemeOptions="Orange" id="inner">
+                <SlButton>Inside</SlButton>
+            </SlateProvider>
+        </SlateProvider>);
+        var inner = cut.Find("#inner");
+        Assert.Equal("dark", inner.GetAttribute("data-sl-theme"));
+        Assert.Equal("comfortable", inner.GetAttribute("data-sl-density"));
+        Assert.DoesNotContain("sl-root", inner.ClassList);
+        Assert.NotNull(inner.QuerySelector("style"));
+        Assert.Single(cut.FindAll(".sl-snackbar-host"));
+        Assert.Single(cut.FindAll(".sl-provider__content"));
+    }
+
+    [Fact]
+    public void Overrides_cannot_break_out_of_the_style_element()
+    {
+        var options = new SlateThemeOptions { FontFamily = "Evil</style><script>x</script>{}; sans-serif" };
+        var css = Render<SlateProvider>(p => p.Add(x => x.Mode, ThemeMode.Light).Add(x => x.ThemeOptions, options)).Find("style").TextContent;
+        Assert.DoesNotContain("</style>", css);
+        Assert.DoesNotContain("<script>", css);
+    }
+}

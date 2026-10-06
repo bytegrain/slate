@@ -112,7 +112,8 @@
         Assert.Equal(cut.Find(".sl-dialog__description").Id, cut.Find(".sl-dialog").GetAttribute("aria-describedby"));
         var buttons = cut.FindAll(".sl-dialog__footer button");
         Assert.Equal(["Cancel", "OK"], buttons.Select(b => b.TextContent));
-        Assert.Contains("sl-button--primary", buttons[1].ClassList);
+        Assert.Contains("sl-button--solid", buttons[1].ClassList);
+        Assert.Contains("sl-tone-accent", buttons[1].ClassList);
         Assert.True(buttons[1].HasAttribute("autofocus"));
         Assert.Empty(cut.FindAll(".sl-dialog__close")); // message boxes end through their buttons
         buttons[1].Click();
@@ -132,9 +133,10 @@
             Title = "Delete Slate.Wpf?", Message = "This can't be undone.", ConfirmText = "Delete", Destructive = true,
         });
 
-        Assert.Contains("sl-dialog__icon--danger", cut.Find(".sl-dialog__icon").ClassList);
+        Assert.Contains("sl-tone-danger", cut.Find(".sl-dialog__icon").ClassList);
         var buttons = cut.FindAll(".sl-dialog__footer button");
-        Assert.Contains("sl-button--danger-solid", buttons[1].ClassList);
+        Assert.Contains("sl-button--solid", buttons[1].ClassList);
+        Assert.Contains("sl-tone-danger", buttons[1].ClassList);
         Assert.True(buttons[0].HasAttribute("autofocus"));
         Assert.False(buttons[1].HasAttribute("autofocus"));
 
@@ -150,7 +152,7 @@
         var cut = Host();
         Dialogs.AlertAsync("Saved", "Everything is up to date.", Severity.Success);
         Assert.Single(cut.FindAll(".sl-dialog__footer button"));
-        Assert.Contains("sl-dialog__icon--success", cut.Find(".sl-dialog__icon").ClassList);
+        Assert.Contains("sl-tone-success", cut.Find(".sl-dialog__icon").ClassList);
     }
 
     [Fact]

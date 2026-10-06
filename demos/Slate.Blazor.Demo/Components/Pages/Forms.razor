@@ -18,19 +18,19 @@
                         <SlTextField @bind-Value="_model.OwnerEmail" Label="Owner email" InputType="email" Required="true" />
                         <SlTextField @bind-Value="_model.Repository" Label="Repository" Prefix="github.com/" Placeholder="studio/project" />
                         <SlTextField @bind-Value="_model.Seats" Label="Seats" InputType="number" HelperText="1–250" />
-                        <SlRadioGroup @bind-Value="_model.Region" Label="Region" Row="true">
+                        <SlRadioGroup @bind-Value="_model.Region" Label="Region" Direction="Direction.Row">
                             <SlRadio Value="@("eu-west")" Label="Europe West" />
                             <SlRadio Value="@("us-east")" Label="US East" />
                             <SlRadio Value="@("ap-south")" Label="Asia Pacific" />
                         </SlRadioGroup>
                         <SlTextField @bind-Value="_model.Description" Label="Description" Multiline="true" Rows="3" />
-                        <SlSwitch @bind-Value="_model.PreviewDeployments" Label="Preview deployments" Description="Every pull request gets its own URL." Spread="true" />
-                        <SlCheckbox @bind-Value="_model.AcceptTerms" Label="I accept the terms of service" />
+                        <SlSwitch @bind-Checked="_model.PreviewDeployments" Label="Preview deployments" Description="Every pull request gets its own URL." Spread="true" LabelPlacement="Placement.Start" />
+                        <SlCheckbox @bind-Checked="_model.AcceptTerms" Label="I accept the terms of service" />
                     </SlStack>
                     <SlDivider Style="margin: var(--sl-space-5) 0" />
                     <SlStack Row="true" Spacing="2" Justify="StackJustify.End">
-                        <SlButton Type="ButtonType.Reset" OnClick="Reset">Reset</SlButton>
-                        <SlButton Type="ButtonType.Submit" Variant="ButtonVariant.Primary" Loading="_saving">Create project</SlButton>
+                        <SlButton Type="ButtonType.Reset" Click="Reset">Reset</SlButton>
+                        <SlButton Type="ButtonType.Submit" Variant="ButtonVariant.Solid" Tone="Tone.Accent" Loading="_saving">Create project</SlButton>
                     </SlStack>
                 </EditForm>
             </SlCard>

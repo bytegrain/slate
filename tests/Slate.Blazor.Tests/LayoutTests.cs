@@ -7,7 +7,7 @@ public class LayoutTests : SlateTestContext
     [InlineData(ContainerWidth.Sm, "sl-container sl-container--sm")]
     [InlineData(ContainerWidth.Fluid, "sl-container sl-container--fluid")]
     public void Container_widths(ContainerWidth width, string cls) =>
-        Assert.Equal(cls, Render<SlContainer>(p => p.Add(x => x.Width, width)).Find("div").ClassName);
+        Assert.Equal(cls, Render<SlContainer>(p => p.Add(x => x.MaxWidth, width)).Find("div").ClassName);
 
     [Fact]
     public void Grid_spacing_class_and_validation()
@@ -54,9 +54,9 @@ public class LayoutTests : SlateTestContext
     public void Card_with_title_actions_body_and_footer()
     {
         var cut = Render<SlCard>(p => p.Add(x => x.Title, "Deployments").Add(x => x.Subtitle, "Last 7 days")
-            .Add(x => x.Actions, "<button>x</button>").AddChildContent("<p>Body</p>").Add(x => x.Footer, "<button>Done</button>"));
+            .Add(x => x.HeaderActions, "<button>x</button>").AddChildContent("<p>Body</p>").Add(x => x.Footer, "<button>Done</button>"));
         cut.MarkupMatches("""
-            <article class="sl-card">
+            <article class="sl-card sl-card--elevated">
               <header class="sl-card__header">
                 <div class="sl-card__titles"><h3 class="sl-card__title">Deployments</h3><p class="sl-card__subtitle">Last 7 days</p></div>
                 <div class="sl-card__actions"><button>x</button></div>
@@ -71,8 +71,8 @@ public class LayoutTests : SlateTestContext
     public void Card_variants_and_interactive_keyboard()
     {
         var clicks = 0;
-        var cut = Render<SlCard>(p => p.Add(x => x.Outlined, true).Add(x => x.Interactive, true).Add(x => x.FlushBody, true)
-            .Add(x => x.OnClick, () => clicks++).AddChildContent("x"));
+        var cut = Render<SlCard>(p => p.Add(x => x.Variant, CardVariant.Outlined).Add(x => x.Interactive, true).Add(x => x.Flush, true)
+            .Add(x => x.Click, () => clicks++).AddChildContent("x"));
         var card = cut.Find("article");
         Assert.Equal("sl-card sl-card--outlined sl-card--interactive", card.ClassName);
         Assert.Equal("0", card.GetAttribute("tabindex"));
@@ -84,7 +84,33 @@ public class LayoutTests : SlateTestContext
 
     [Fact]
     public void Card_omits_empty_regions() =>
-        Render<SlCard>(p => p.AddChildContent("only body")).MarkupMatches("""<article class="sl-card"><div class="sl-card__body">only body</div></article>""");
+        Render<SlCard>(p => p.AddChildContent("only body")).MarkupMatches("""<article class="sl-card sl-card--elevated"><div class="sl-card__body">only body</div></article>""");
+
+    [Theory]
+    [InlineData(CardVariant.Flat, "sl-card--flat")]
+    [InlineData(CardVariant.Outlined, "sl-card--outlined")]
+    public void Card_variants_and_radius(CardVariant variant, string cls)
+    {
+        var card = Render<SlCard>(p => p.Add(x => x.Variant, variant).Add(x => x.Radius, Radius.Large)).Find("article");
+        Assert.Contains(cls, card.ClassList);
+        Assert.Contains("sl-radius-large", card.ClassList);
+    }
+
+    [Fact]
+    public void Card_custom_header_keeps_header_actions()
+    {
+        var cut = Render<SlCard>(p => p.Add(x => x.Header, "<b>Custom</b>").Add(x => x.HeaderActions, "<i>a</i>").Add(x => x.Title, "ignored"));
+        Assert.Equal(["B", "DIV"], cut.Find(".sl-card__header").Children.Select(c => c.TagName));
+        Assert.Empty(cut.FindAll(".sl-card__title"));
+    }
+
+    [Fact]
+    public void Container_gutters_can_be_removed() =>
+        Assert.Contains("sl-container--no-gutters", Render<SlContainer>(p => p.Add(x => x.Gutters, false)).Find("div").ClassList);
+
+    [Fact]
+    public void Stack_direction_column_is_default_and_row_via_direction() =>
+        Assert.Contains("sl-stack--row", Render<SlStack>(p => p.Add(x => x.Direction, Direction.Row)).Find("div").ClassList);
 
     [Fact]
     public void Toolbar_has_role_and_label() =>

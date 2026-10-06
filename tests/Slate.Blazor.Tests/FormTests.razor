@@ -21,7 +21,7 @@
         <DataAnnotationsValidator />
         <SlTextField @bind-Value="_model.Name" Label="Name" HelperText="As it appears on invoices" id="name" />
         <SlTextField @bind-Value="_model.Email" Label="Email" id="email" />
-        <SlCheckbox @bind-Value="_model.Terms" Label="I accept the terms" id="terms" />
+        <SlCheckbox @bind-Checked="_model.Terms" Label="I accept the terms" id="terms" />
         <SlButton Type="ButtonType.Submit">Create</SlButton>
     </EditForm>);
 

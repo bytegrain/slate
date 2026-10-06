@@ -1,20 +1,57 @@
 @namespace Slate.Blazor
 @inherits SlComponentBase
 @inject SlateJs Js
-@* App frame: app bar, drawer and main. Children: SlAppBar, SlDrawer, SlMain (any order). *@
+@*
+  App frame. Either pass the regions as parameters (AppBar, Drawer, ChildContent → main), or compose
+  SlAppBar / SlDrawer / SlMain as children. The shell owns the drawer state (variant, open, breakpoint).
+*@
 <CascadingValue Value="this" IsFixed="true">
     <div @attributes="AdditionalAttributes" class="@(Css.Of("sl-app-shell").Add("sl-app-shell--viewport", FillViewport).Add(Class))" style="@Style">
-        @ChildContent
+        @if (UsesRegions)
+        {
+            @AppBar
+            @if (Drawer is not null)
+            {
+                <SlDrawer>@Drawer</SlDrawer>
+            }
+            <main class="@(Css.Of("sl-main").Add("sl-main--flush", Flush))">@ChildContent</main>
+        }
+        else
+        {
+            @ChildContent
+        }
     </div>
 </CascadingValue>
 
 @code {
-    /// <summary>Fill the browser viewport (main scrolls, not the page). Default true.</summary>
-    [Parameter] public bool FillViewport { get; set; } = true;
+    /// <summary>Responsive (default), persistent, temporary or mini.</summary>
+    [Parameter] public DrawerVariant DrawerVariant { get; set; } = DrawerVariant.Responsive;
 
+    /// <summary>Two-way bindable drawer state. Responsive drawers close themselves on narrow screens.</summary>
+    [Parameter] public bool DrawerOpen { get; set; } = true;
+    [Parameter] public EventCallback<bool> DrawerOpenChanged { get; set; }
+
+    /// <summary>Where a responsive drawer switches from overlay to docked. Default Md (900px).</summary>
+    [Parameter] public Breakpoint ResponsiveBreakpoint { get; set; } = Breakpoint.Md;
+
+    /// <summary>Fill the browser viewport (main scrolls, not the page).</summary>
+    [Parameter] public bool FillViewport { get; set; }
+
+    /// <summary>Top bar region (usually an <see cref="SlAppBar"/>).</summary>
+    [Parameter] public RenderFragment? AppBar { get; set; }
+
+    /// <summary>Drawer contents (nav items); wrapped in an <see cref="SlDrawer"/>.</summary>
+    [Parameter] public RenderFragment? Drawer { get; set; }
+
+    /// <summary>Main content (when using the region parameters), or SlAppBar/SlDrawer/SlMain children.</summary>
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
-    internal SlDrawer? Drawer { get; private set; }
+    /// <summary>Main area without padding (region mode).</summary>
+    [Parameter] public bool Flush { get; set; }
+
+    private bool UsesRegions => AppBar is not null || Drawer is not null;
+
+    internal SlDrawer? DrawerComponent { get; private set; }
 
     internal ElementReference? ToggleButton { get; set; }
 
@@ -22,17 +59,27 @@
 
     internal void Register(SlDrawer drawer)
     {
-        Drawer = drawer;
+        DrawerComponent = drawer;
         DrawerChanged?.Invoke();
     }
 
     internal void Unregister(SlDrawer drawer)
     {
-        if (ReferenceEquals(Drawer, drawer)) Drawer = null;
+        if (ReferenceEquals(DrawerComponent, drawer)) DrawerComponent = null;
         DrawerChanged?.Invoke();
     }
 
     internal void NotifyDrawerChanged() => DrawerChanged?.Invoke();
+
+    internal async Task SetDrawerOpenAsync(bool open)
+    {
+        if (DrawerOpen == open) return;
+        DrawerOpen = open;
+        await DrawerOpenChanged.InvokeAsync(open);
+        DrawerChanged?.Invoke();
+    }
+
+    protected override void OnParametersSet() => DrawerChanged?.Invoke();
 
     /// <summary>Returns focus to the app bar's menu button after an overlay drawer closes.</summary>
     internal async Task FocusToggleAsync()

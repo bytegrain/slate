@@ -15,6 +15,13 @@
 
     [Parameter] public string? Title { get; set; }
     [Parameter] public string? Description { get; set; }
+
+    /// <summary>Icon in a tinted tile beside the title.</summary>
+    [Parameter] public string? Icon { get; set; }
+
+    /// <summary>Colour of the icon tile. Default neutral.</summary>
+    [Parameter] public Tone Tone { get; set; } = Tone.Neutral;
+
     [Parameter] public DialogWidth MaxWidth { get; set; } = DialogWidth.Sm;
     [Parameter] public bool FullWidth { get; set; }
     [Parameter] public bool FullScreen { get; set; }
@@ -22,9 +29,27 @@
     [Parameter] public bool CloseOnEscape { get; set; } = true;
     [Parameter] public bool CloseOnBackdropClick { get; set; } = true;
     [Parameter] public bool ShowCloseButton { get; set; } = true;
+    /// <summary>The body (or SlDialogBody/SlDialogFooter children when <see cref="Footer"/> isn't used).</summary>
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
+    /// <summary>Footer actions — secondary first, primary last. When set, ChildContent becomes the body.</summary>
+    [Parameter] public RenderFragment? Footer { get; set; }
+
     private DialogReference? _dialog;
+
+    private RenderFragment Body => Footer is null
+        ? b => b.AddContent(0, ChildContent)
+        : b =>
+        {
+            b.OpenElement(0, "div");
+            b.AddAttribute(1, "class", "sl-dialog__body");
+            b.AddContent(2, ChildContent);
+            b.CloseElement();
+            b.OpenElement(3, "footer");
+            b.AddAttribute(4, "class", "sl-dialog__footer");
+            b.AddContent(5, Footer);
+            b.CloseElement();
+        };
 
     private async Task WaitForCloseAsync(DialogReference dialog)
     {
@@ -46,10 +71,10 @@
         if (Open && _dialog is null)
         {
             var dialog = _dialog = Dialogs.Show(
-                new DialogContent { Fragment = b => b.AddContent(0, ChildContent), Description = Description },
+                new DialogContent { Fragment = Body, Description = Description },
                 new DialogOptions
                 {
-                    Title = Title, MaxWidth = MaxWidth, FullWidth = FullWidth, FullScreen = FullScreen, Placement = Placement,
+                    Title = Title, Description = Description, Icon = Icon, Tone = Tone, MaxWidth = MaxWidth, FullWidth = FullWidth, FullScreen = FullScreen, Placement = Placement,
                     CloseOnEscape = CloseOnEscape, CloseOnBackdropClick = CloseOnBackdropClick, ShowCloseButton = ShowCloseButton,
                 });
             _ = WaitForCloseAsync(dialog);

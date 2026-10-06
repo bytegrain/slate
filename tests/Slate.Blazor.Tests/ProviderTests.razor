@@ -7,7 +7,7 @@
     [InlineData(ThemeMode.System, "auto")]
     public void Provider_sets_theme_attribute(ThemeMode mode, string expected)
     {
-        var cut = Render<SlateProvider>(p => p.Add(x => x.Theme, mode));
+        var cut = Render<SlateProvider>(p => p.Add(x => x.Mode, mode));
         var root = cut.Find(".sl-root");
         Assert.Equal(expected, root.GetAttribute("data-sl-theme"));
         Assert.Equal("compact", root.GetAttribute("data-sl-density"));
@@ -28,7 +28,7 @@
         var module = Module;
         module.Setup<bool>("mediaMatches", _ => true).SetResult(true);
         string? effective = null;
-        var cut = Render<SlateProvider>(p => p.Add(x => x.Theme, ThemeMode.System).Add(x => x.EffectiveThemeChanged, (string t) => effective = t));
+        var cut = Render<SlateProvider>(p => p.Add(x => x.Mode, ThemeMode.System).Add(x => x.EffectiveThemeChanged, (string t) => effective = t));
         Assert.Equal("dark", effective);
         Assert.True(cut.Instance.IsDark);
 
@@ -40,8 +40,8 @@
     public async Task Set_theme_and_density_from_code()
     {
         ThemeMode theme = ThemeMode.Light;
-        var cut = Render<SlateProvider>(p => p.Add(x => x.Theme, theme).Add(x => x.ThemeChanged, (ThemeMode t) => theme = t));
-        await cut.InvokeAsync(() => cut.Instance.SetThemeAsync(ThemeMode.Dark));
+        var cut = Render<SlateProvider>(p => p.Add(x => x.Mode, theme).Add(x => x.ModeChanged, (ThemeMode t) => theme = t));
+        await cut.InvokeAsync(() => cut.Instance.SetModeAsync(ThemeMode.Dark));
         Assert.Equal(ThemeMode.Dark, theme);
         Assert.Equal("dark", cut.Find(".sl-root").GetAttribute("data-sl-theme"));
 

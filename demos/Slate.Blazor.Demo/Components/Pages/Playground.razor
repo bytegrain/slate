@@ -1,0 +1,213 @@
+@page "/playground"
+<PageTitle>Playground · Slate</PageTitle>
+
+<div class="demo-page">
+    <PageHeader Title="Playground">Every option of every component is a control. The generated markup is the Razor you'd write.</PageHeader>
+
+    <DemoSection Title="Button">
+        <div class="demo-playground">
+            <div class="demo-stage">
+                <SlButton Variant="_b.Variant" Tone="_b.Tone" Size="_b.Size" Radius="_b.Radius" StartIcon="@_b.StartIcon" EndIcon="@(IconOnly ? null : _b.EndIcon)"
+                          IconOnly="IconOnly" Label="@(IconOnly ? _b.Text : null)" Loading="_b.Loading" Disabled="_b.Disabled" FullWidth="_b.FullWidth"
+                          Shortcut="@(string.IsNullOrEmpty(_b.Shortcut) ? null : _b.Shortcut)">@_b.Text</SlButton>
+            </div>
+            <div class="demo-controls">
+                <EnumSelect TEnum="ButtonVariant" Label="Variant" @bind-Value="_b.Variant" />
+                <EnumSelect TEnum="Tone" Label="Tone" @bind-Value="_b.Tone" />
+                <EnumSelect TEnum="ControlSize" Label="Size" @bind-Value="_b.Size" />
+                <EnumSelect TEnum="Radius" Label="Radius" @bind-Value="_b.Radius" />
+                <TextSelect Label="Start icon" Options="Icons" @bind-Value="_b.StartIcon" />
+                <TextSelect Label="End icon" Options="Icons" @bind-Value="_b.EndIcon" />
+                <SlTextField @bind-Value="_b.Text" Label="Text" Size="ControlSize.Small" Immediate="true" />
+                <SlTextField @bind-Value="_b.Shortcut" Label="Shortcut" Size="ControlSize.Small" Immediate="true" />
+                <SlCheckbox @bind-Checked="_b.IconOnly" Label="Icon only" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_b.Loading" Label="Loading" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_b.Disabled" Label="Disabled" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_b.FullWidth" Label="Full width" Size="ControlSize.Small" />
+                <pre class="demo-code demo-span"><code>@ButtonCode</code></pre>
+            </div>
+        </div>
+    </DemoSection>
+
+    <DemoSection Title="Text field">
+        <div class="demo-playground">
+            <div class="demo-stage">
+                <div style="width: min(100%, 360px)">
+                    <SlTextField @bind-Value="_f.Value" Variant="_f.Variant" Size="_f.Size" Radius="_f.Radius" Label="@_f.Label" Placeholder="@_f.Placeholder"
+                                 HelperText="@_f.Helper" Error="@(_f.ShowError ? "Something's not right — fix it and try again." : null)" Required="_f.Required"
+                                 Disabled="_f.Disabled" ReadOnly="_f.ReadOnly" Multiline="_f.Multiline" Counter="_f.Counter" MaxLength="@(_f.Counter ? 40 : null)"
+                                 Clearable="_f.Clearable" Prefix="@_f.Prefix" Suffix="@_f.Suffix" StartIcon="@_f.StartIcon" EndIcon="@_f.EndIcon" Immediate="true" />
+                </div>
+            </div>
+            <div class="demo-controls">
+                <EnumSelect TEnum="FieldVariant" Label="Variant" @bind-Value="_f.Variant" />
+                <EnumSelect TEnum="ControlSize" Label="Size" @bind-Value="_f.Size" />
+                <EnumSelect TEnum="Radius" Label="Radius" @bind-Value="_f.Radius" />
+                <TextSelect Label="Start icon" Options="Icons" @bind-Value="_f.StartIcon" />
+                <SlTextField @bind-Value="_f.Label" Label="Label" Size="ControlSize.Small" Immediate="true" />
+                <SlTextField @bind-Value="_f.Placeholder" Label="Placeholder" Size="ControlSize.Small" Immediate="true" />
+                <SlTextField @bind-Value="_f.Helper" Label="Helper text" Size="ControlSize.Small" Immediate="true" />
+                <TextSelect Label="End icon" Options="Icons" @bind-Value="_f.EndIcon" />
+                <SlTextField @bind-Value="_f.Prefix" Label="Prefix" Size="ControlSize.Small" Immediate="true" />
+                <SlTextField @bind-Value="_f.Suffix" Label="Suffix" Size="ControlSize.Small" Immediate="true" />
+                <SlCheckbox @bind-Checked="_f.ShowError" Label="Error" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_f.Required" Label="Required" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_f.Counter" Label="Counter (max 40)" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_f.Clearable" Label="Clearable" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_f.Multiline" Label="Multiline" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_f.Disabled" Label="Disabled" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_f.ReadOnly" Label="Read only" Size="ControlSize.Small" />
+            </div>
+        </div>
+    </DemoSection>
+
+    <DemoSection Title="Card">
+        <div class="demo-playground">
+            <div class="demo-stage">
+                <SlCard Variant="_c.Variant" Radius="_c.Radius" Title="@_c.Title" Subtitle="@_c.Subtitle" Flush="_c.Flush" Interactive="_c.Interactive"
+                        HeaderActions="@(_c.HeaderActions ? CardActions : null)" Footer="@(_c.Footer ? CardFooter : null)" Style="width: min(100%, 380px)">
+                    <SlText Tone="TextTone.Secondary">Deployments for slate-web over the last 7 days. 42 succeeded, 3 failed.</SlText>
+                </SlCard>
+            </div>
+            <div class="demo-controls">
+                <EnumSelect TEnum="CardVariant" Label="Variant" @bind-Value="_c.Variant" />
+                <EnumSelect TEnum="Radius" Label="Radius" @bind-Value="_c.Radius" />
+                <SlTextField @bind-Value="_c.Title" Label="Title" Size="ControlSize.Small" Immediate="true" />
+                <SlTextField @bind-Value="_c.Subtitle" Label="Subtitle" Size="ControlSize.Small" Immediate="true" />
+                <SlCheckbox @bind-Checked="_c.HeaderActions" Label="Header actions" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_c.Footer" Label="Footer" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_c.Flush" Label="Flush body" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_c.Interactive" Label="Interactive" Size="ControlSize.Small" />
+            </div>
+        </div>
+    </DemoSection>
+
+    <SlGrid>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Alert">
+                <SlStack Spacing="4">
+                    @if (_alertVisible)
+                    {
+                        <SlAlert Severity="_a.Severity" Variant="_a.Variant" Title="@_a.Title" Dense="_a.Dense" Dismissible="_a.Dismissible"
+                                 Icon="@(_a.HideIcon ? "none" : _a.Icon)" Dismissed="() => _alertVisible = false" Actions="@(_a.Actions ? AlertActions : null)">
+                            Build minutes reset on the 1st of each month.
+                        </SlAlert>
+                    }
+                    else
+                    {
+                        <SlButton Click="() => _alertVisible = true">Show alert again</SlButton>
+                    }
+                    <div class="demo-controls">
+                        <EnumSelect TEnum="Severity" Label="Severity" @bind-Value="_a.Severity" />
+                        <EnumSelect TEnum="AlertVariant" Label="Variant" @bind-Value="_a.Variant" />
+                        <SlTextField @bind-Value="_a.Title" Label="Title" Size="ControlSize.Small" Immediate="true" />
+                        <TextSelect Label="Icon override" Options="Icons" @bind-Value="_a.Icon" />
+                        <SlCheckbox @bind-Checked="_a.Dense" Label="Dense" Size="ControlSize.Small" />
+                        <SlCheckbox @bind-Checked="_a.Dismissible" Label="Dismissible" Size="ControlSize.Small" />
+                        <SlCheckbox @bind-Checked="_a.Actions" Label="Actions" Size="ControlSize.Small" />
+                        <SlCheckbox @bind-Checked="_a.HideIcon" Label="Hide icon" Size="ControlSize.Small" />
+                    </div>
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Badge">
+                <SlStack Spacing="4">
+                    <div class="demo-stage"><SlBadge Tone="_g.Tone" Variant="_g.Variant" Size="_g.Size" Dot="_g.Dot" Icon="@_g.Icon">@_g.Text</SlBadge></div>
+                    <div class="demo-controls">
+                        <EnumSelect TEnum="Tone" Label="Tone" @bind-Value="_g.Tone" />
+                        <EnumSelect TEnum="BadgeVariant" Label="Variant" @bind-Value="_g.Variant" />
+                        <EnumSelect TEnum="BadgeSize" Label="Size" @bind-Value="_g.Size" />
+                        <TextSelect Label="Icon" Options="Icons" @bind-Value="_g.Icon" />
+                        <SlTextField @bind-Value="_g.Text" Label="Text" Size="ControlSize.Small" Immediate="true" />
+                        <SlCheckbox @bind-Checked="_g.Dot" Label="Dot" Size="ControlSize.Small" />
+                    </div>
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+    </SlGrid>
+</div>
+
+@code {
+    private static readonly IReadOnlyList<(string, string)> Icons =
+        SlateIcons.All.Keys.Order().Select(k => (k, k)).ToList();
+
+    private sealed class ButtonState
+    {
+        public ButtonVariant Variant = ButtonVariant.Solid;
+        public Tone Tone = Tone.Accent;
+        public ControlSize Size = ControlSize.Medium;
+        public Radius Radius = Radius.Default;
+        public string? StartIcon = "check", EndIcon, Text = "Deploy", Shortcut = "";
+        public bool IconOnly, Loading, Disabled, FullWidth;
+    }
+
+    private sealed class FieldState
+    {
+        public FieldVariant Variant = FieldVariant.Outlined;
+        public ControlSize Size = ControlSize.Medium;
+        public Radius Radius = Radius.Default;
+        public string? Value = "slate-dashboard", Label = "Project name", Placeholder = "my-project", Helper = "Lowercase, numbers and dashes.";
+        public string? Prefix, Suffix, StartIcon, EndIcon;
+        public bool ShowError, Required, Counter, Clearable = true, Multiline, Disabled, ReadOnly;
+    }
+
+    private sealed class CardState
+    {
+        public CardVariant Variant = CardVariant.Elevated;
+        public Radius Radius = Radius.Default;
+        public string? Title = "Deployments", Subtitle = "Last 7 days";
+        public bool HeaderActions = true, Footer = true, Flush, Interactive;
+    }
+
+    private sealed class AlertState
+    {
+        public Severity Severity = Severity.Warning;
+        public AlertVariant Variant = AlertVariant.Soft;
+        public string? Title = "Usage at 80%", Icon;
+        public bool Dense, Dismissible = true, Actions = true, HideIcon;
+    }
+
+    private sealed class BadgeState
+    {
+        public Tone Tone = Tone.Success;
+        public BadgeVariant Variant = BadgeVariant.Soft;
+        public BadgeSize Size = BadgeSize.Medium;
+        public string? Icon, Text = "Ready";
+        public bool Dot = true;
+    }
+
+    private bool IconOnly => _b.IconOnly && _b.StartIcon is not null && !string.IsNullOrWhiteSpace(_b.Text);
+
+    private static readonly RenderFragment CardActions = @<SlButton IconOnly="true" Variant="ButtonVariant.Ghost" Size="ControlSize.Small" StartIcon="more-horizontal" Label="More" />;
+    private static readonly RenderFragment CardFooter = @<text><SlButton Size="ControlSize.Small">Dismiss</SlButton><SlButton Size="ControlSize.Small" Variant="ButtonVariant.Solid" Tone="Tone.Accent">Open</SlButton></text>;
+    private static readonly RenderFragment AlertActions = @<SlButton Size="ControlSize.Small">View usage</SlButton>;
+
+    private readonly ButtonState _b = new();
+    private readonly FieldState _f = new();
+    private readonly CardState _c = new();
+    private readonly AlertState _a = new();
+    private readonly BadgeState _g = new();
+    private bool _alertVisible = true;
+
+    private string ButtonCode
+    {
+        get
+        {
+            var attrs = new List<string>();
+            if (_b.Variant != ButtonVariant.Outlined) attrs.Add($"Variant=\"ButtonVariant.{_b.Variant}\"");
+            if (_b.Tone != Tone.Neutral) attrs.Add($"Tone=\"Tone.{_b.Tone}\"");
+            if (_b.Size != ControlSize.Medium) attrs.Add($"Size=\"ControlSize.{_b.Size}\"");
+            if (_b.Radius != Radius.Default) attrs.Add($"Radius=\"Radius.{_b.Radius}\"");
+            if (_b.StartIcon is { } s) attrs.Add($"StartIcon=\"{s}\"");
+            if (_b.EndIcon is { } e && !IconOnly) attrs.Add($"EndIcon=\"{e}\"");
+            if (IconOnly) attrs.Add($"IconOnly=\"true\" Label=\"{_b.Text}\"");
+            if (_b.Loading) attrs.Add("Loading=\"true\"");
+            if (_b.Disabled) attrs.Add("Disabled=\"true\"");
+            if (_b.FullWidth) attrs.Add("FullWidth=\"true\"");
+            if (!string.IsNullOrEmpty(_b.Shortcut)) attrs.Add($"Shortcut=\"{_b.Shortcut}\"");
+            var open = attrs.Count == 0 ? "<SlButton" : "<SlButton " + string.Join(" ", attrs);
+            return IconOnly ? open + " />" : $"{open}>{_b.Text}</SlButton>";
+        }
+    }
+}

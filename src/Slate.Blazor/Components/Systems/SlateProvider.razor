@@ -9,34 +9,115 @@
   script only reports the effective theme to .NET (EffectiveTheme / IsDark).
 *@
 <CascadingValue Value="this">
-    <div @attributes="AdditionalAttributes" class="@(Css.Of("sl-root").Add(Class))" style="@Style"
-         data-sl-theme="@Names.Theme(Theme)" data-sl-density="@(Density == Density.Comfortable ? "comfortable" : "compact")">
-        <div class="sl-provider__content" inert="@(_dialogsOpen)">@ChildContent</div>
-        @if (Snackbars)
+    <div @attributes="AdditionalAttributes" class="@(new Css().Add("sl-root", IsRoot).Add(Class))" style="@Style"
+         data-sl-theme="@ThemeAttribute" data-sl-density="@(Density == Density.Comfortable ? "comfortable" : "compact")"
+         data-sl-scope="@(ThemeCss is null ? null : UniqueId)">
+        @if (ThemeCss is { } css)
         {
-            <SlSnackbarHost PositionOverride="SnackbarPosition" />
+            <style>@((MarkupString)css)</style>
         }
-        <SlDialogHost />
+        @if (IsRoot)
+        {
+            <div class="sl-provider__content" inert="@(_dialogsOpen)">@ChildContent</div>
+            @if (Snackbars)
+            {
+                <SlSnackbarHost Position="SnackbarPosition" />
+            }
+            <SlDialogHost />
+        }
+        else
+        {
+            @ChildContent
+        }
     </div>
 </CascadingValue>
 
 @code {
-    [Parameter] public ThemeMode Theme { get; set; } = ThemeMode.System;
-    [Parameter] public EventCallback<ThemeMode> ThemeChanged { get; set; }
+    [CascadingParameter] private SlateProvider? Parent { get; set; }
+
+    [Inject] private SlateOptions Options { get; set; } = default!;
+
+    /// <summary>Light, dark, or System (follows the OS without script, also during prerender).</summary>
+    [Parameter] public ThemeMode Mode { get; set; } = ThemeMode.System;
+    [Parameter] public EventCallback<ThemeMode> ModeChanged { get; set; }
+
+    /// <summary>
+    /// A custom theme built on top of Alloy (accent, radius scale, fonts, token overrides). With Mode=System both
+    /// light and dark variants are generated. Defaults to <c>AddSlate(o => o.Theme = …)</c> on the root provider.
+    /// </summary>
+    [Parameter] public SlateThemeOptions? ThemeOptions { get; set; }
+
+    /// <summary>A pre-built theme (from <see cref="ThemeBuilder"/>). Wins over ThemeOptions and fixes the mode to its base.</summary>
+    [Parameter] public SlateThemeDefinition? Theme { get; set; }
 
     [Parameter] public Density Density { get; set; } = Density.Compact;
     [Parameter] public EventCallback<Density> DensityChanged { get; set; }
 
-    /// <summary>Render the snackbar layer (default true). Turn off for nested providers.</summary>
+    /// <summary>Render the snackbar layer (root provider only; default true).</summary>
     [Parameter] public bool Snackbars { get; set; } = true;
 
     /// <summary>Overrides the configured snackbar position.</summary>
     [Parameter] public Slate.Snackbars.SnackbarPosition? SnackbarPosition { get; set; }
 
-    /// <summary>Raised when the effective theme changes (including OS changes while Theme is System).</summary>
+    /// <summary>Raised when the effective theme changes (including OS changes while Mode is System).</summary>
     [Parameter] public EventCallback<string> EffectiveThemeChanged { get; set; }
 
     [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>The outermost provider hosts snackbars and dialogs; nested providers only scope theme and density.</summary>
+    public bool IsRoot => Parent is null;
+
+    private string ThemeAttribute => Theme is { } t ? t.BaseTheme : Names.Theme(Mode);
+
+    // Nested providers inherit the surrounding custom theme and re-derive it for their own mode
+    // (a dark region inside a light app keeps the brand accent, derived for dark).
+    internal SlateThemeOptions? EffectiveOptions => ThemeOptions ?? (IsRoot ? Options.Theme : Parent!.EffectiveOptions);
+
+    private string? ThemeCss { get; set; }
+    private (SlateThemeDefinition? Theme, SlateThemeOptions? Options, ThemeMode Mode) _builtFor;
+
+    protected override void OnParametersSet()
+    {
+        var key = (Theme, EffectiveOptions, Mode);
+        if (key == _builtFor) return;
+        _builtFor = key;
+        ThemeCss = BuildThemeCss(UniqueId, Theme, EffectiveOptions, Mode);
+    }
+
+    /// <summary>Scoped CSS for a custom theme: only the tokens that differ from the built-in base theme.</summary>
+    internal static string? BuildThemeCss(string scope, SlateThemeDefinition? theme, SlateThemeOptions? options, ThemeMode mode)
+    {
+        var selector = $"[data-sl-scope=\"{scope}\"]";
+        if (theme is not null)
+            return Block(selector, theme, theme.ChangedPaths);
+        if (options is null)
+            return null;
+
+        if (mode != ThemeMode.System)
+        {
+            var single = ThemeBuilder.Build(options with { Base = mode == ThemeMode.Dark ? ThemeNames.Dark : ThemeNames.Light });
+            return Block(selector, single, single.ChangedPaths);
+        }
+
+        var light = ThemeBuilder.Build(options with { Base = ThemeNames.Light });
+        var dark = ThemeBuilder.Build(options with { Base = ThemeNames.Dark });
+        var union = light.ChangedPaths.Union(dark.ChangedPaths).ToList();
+        return Block(selector, light, light.ChangedPaths)
+               + "@media (prefers-color-scheme: dark){" + Block(selector, dark, union) + "}";
+    }
+
+    private static string Block(string selector, SlateThemeDefinition theme, IEnumerable<string> paths)
+    {
+        var sb = new System.Text.StringBuilder(selector).Append('{');
+        foreach (var path in paths.Order(StringComparer.Ordinal))
+        {
+            if (!theme.Values.TryGetValue(path, out var value)) continue;
+            // Values are token data, never markup: strip anything that could end the style element or the rule.
+            var safe = new string(value.Where(c => c is not ('<' or '>' or '{' or '}' or ';')).ToArray());
+            sb.Append(Names.CssVariable(path)).Append(':').Append(safe).Append(';');
+        }
+        return sb.Append('}').ToString();
+    }
 
     private bool _systemDark;
     private bool _dialogsOpen;
@@ -44,17 +125,18 @@
     private DotNetObjectReference<SlateProvider>? _self;
 
     /// <summary>"light" or "dark" — what is actually showing.</summary>
-    public string EffectiveTheme => ThemeNames.Resolve(Theme, _systemDark);
+    public string EffectiveTheme => Theme?.BaseTheme ?? ThemeNames.Resolve(Mode, _systemDark);
 
     public bool IsDark => EffectiveTheme == ThemeNames.Dark;
 
-    /// <summary>Change the theme from code (e.g. a toggle in the app bar).</summary>
-    public async Task SetThemeAsync(ThemeMode theme)
+    /// <summary>Change the theme mode from code (e.g. a toggle in the app bar).</summary>
+    public async Task SetModeAsync(ThemeMode mode)
     {
-        if (Theme == theme) return;
+        if (Mode == mode) return;
         var before = EffectiveTheme;
-        Theme = theme;
-        await ThemeChanged.InvokeAsync(theme);
+        Mode = mode;
+        OnParametersSet();
+        await ModeChanged.InvokeAsync(mode);
         if (before != EffectiveTheme) await EffectiveThemeChanged.InvokeAsync(EffectiveTheme);
         StateHasChanged();
     }
@@ -69,6 +151,7 @@
 
     protected override void OnInitialized()
     {
+        if (!IsRoot) return;
         Dialogs.Changed += OnDialogsChanged;
         _dialogsOpen = Dialogs.Open.Count > 0;
     }
@@ -83,7 +166,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender) return;
+        if (!firstRender || !IsRoot) return;
         await JsSafe.Run(async () =>
         {
             _self = DotNetObjectReference.Create(this);

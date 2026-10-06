@@ -4,33 +4,53 @@
 <header @attributes="AdditionalAttributes" class="@(Css.Of("sl-app-bar").Add(Class))" style="@Style">
     @if (ShowToggle)
     {
-        <button @ref="_toggle" type="button" class="sl-button sl-button--ghost sl-button--icon" aria-label="@ToggleLabel"
-                aria-expanded="@(Shell!.Drawer!.Open ? "true" : "false")" aria-controls="@Shell.Drawer.DrawerId"
-                @onclick="() => Shell.Drawer.ToggleAsync()"><SlIcon Name="menu" /></button>
+        <button @ref="_toggle" type="button" class="sl-button sl-button--ghost sl-tone-neutral sl-button--icon-only" aria-label="@MenuLabel"
+                aria-expanded="@(Shell!.DrawerComponent!.IsOpen ? "true" : "false")" aria-controls="@Shell.DrawerComponent.DrawerId"
+                @onclick="() => Shell.DrawerComponent.ToggleAsync()"><span class="sl-button__start"><SlIcon Name="menu" Class="sl-button__icon" /></span></button>
+    }
+    @if (Leading is not null)
+    {
+        <div class="sl-app-bar__leading">@Leading</div>
     }
     @if (Title is not null)
     {
         <span class="sl-app-bar__title">@Title</span>
     }
-    @ChildContent
+    @if (Center is not null || ChildContent is not null)
+    {
+        <div class="sl-app-bar__center">@Center@ChildContent</div>
+    }
+    @if (Actions is not null)
+    {
+        <div class="sl-app-bar__actions">@Actions</div>
+    }
 </header>
 
 @code {
     [CascadingParameter] private SlAppShell? Shell { get; set; }
 
-    /// <summary>Text or markup in the title slot.</summary>
-    [Parameter] public RenderFragment? Title { get; set; }
+    [Parameter] public string? Title { get; set; }
 
+    /// <summary>Content before the title (logo, workspace switcher…).</summary>
+    [Parameter] public RenderFragment? Leading { get; set; }
+
+    /// <summary>Centre region (search, tabs…).</summary>
+    [Parameter] public RenderFragment? Center { get; set; }
+
+    /// <summary>Trailing actions (right side).</summary>
+    [Parameter] public RenderFragment? Actions { get; set; }
+
+    /// <summary>Extra content, placed in the centre region.</summary>
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
     /// <summary>Show the drawer toggle when the shell has a drawer. Default true.</summary>
-    [Parameter] public bool DrawerToggle { get; set; } = true;
+    [Parameter] public bool ShowMenuButton { get; set; } = true;
 
-    [Parameter] public string ToggleLabel { get; set; } = "Toggle navigation";
+    [Parameter] public string MenuLabel { get; set; } = "Toggle navigation";
 
     private ElementReference _toggle;
 
-    private bool ShowToggle => DrawerToggle && Shell?.Drawer is not null;
+    private bool ShowToggle => ShowMenuButton && Shell?.DrawerComponent is not null;
 
     protected override void OnInitialized()
     {

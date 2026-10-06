@@ -3,24 +3,42 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Slate.Blazor.Internal;
 using Slate.Blazor.Services;
 using Slate.Snackbars;
+using Slate.Theming;
 
 namespace Slate.Blazor;
 
 /// <summary>App-wide Slate settings, configured with <see cref="SlateServiceCollectionExtensions.AddSlate"/>.</summary>
 public sealed class SlateOptions
 {
-    /// <summary>Snackbar behaviour (position, limits, durations). Defaults come from the design tokens.</summary>
-    public SnackbarConfiguration Snackbars { get; set; } = new();
+    /// <summary>
+    /// App-wide component defaults (Slate.Core <see cref="SlateDefaults"/>). A parameter set on a component always
+    /// wins; unset parameters read these at render time.
+    /// </summary>
+    public SlateDefaults Defaults { get; } = new();
 
-    /// <summary>Clock used by snackbar timers. Replace with a fake in tests.</summary>
+    /// <summary>
+    /// The app's custom theme (accent, radius scale, fonts, token overrides), applied by every
+    /// <c>SlateProvider</c> that doesn't set its own. Null = built-in Alloy.
+    /// </summary>
+    public SlateThemeOptions? Theme { get; set; }
+
+    /// <summary>Snackbar behaviour. Shorthand for <c>Defaults.Snackbar</c>.</summary>
+    public SnackbarConfiguration Snackbars
+    {
+        get => Defaults.Snackbar;
+        set => Defaults.Snackbar = value;
+    }
+
+    /// <summary>Clock used by snackbar timers and debounces. Replace with a fake in tests.</summary>
     public TimeProvider TimeProvider { get; set; } = TimeProvider.System;
 }
 
 public static class SlateServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="ISnackbarService"/> and <see cref="IDialogService"/> (scoped: one per user circuit / browser tab).
-    /// Then place <c>&lt;SlateProvider&gt;</c> around your app (it hosts the snackbar and dialog layers).
+    /// Registers <see cref="ISnackbarService"/> and <see cref="IDialogService"/> (scoped: one per user circuit / browser tab)
+    /// and the app-wide <see cref="SlateOptions"/>. Then place <c>&lt;SlateProvider&gt;</c> around your app.
+    /// <code>services.AddSlate(o => { o.Defaults.Button.Size = ControlSize.Small; o.Theme = new() { Accent = "#5B3DF5" }; });</code>
     /// </summary>
     public static IServiceCollection AddSlate(this IServiceCollection services, Action<SlateOptions>? configure = null)
     {

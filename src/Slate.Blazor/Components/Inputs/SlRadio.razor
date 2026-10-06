@@ -3,7 +3,7 @@
 @inherits SlComponentBase
 @implements IDisposable
 @* Native radios: arrow keys move the selection within the group (one tab stop). *@
-<label class="@(Css.Of("sl-radio").Add("is-disabled", Disabled || Group.Disabled).Add(Class))" style="@Style">
+<label class="@(Css.Of("sl-radio").Add(Names.Tone(Group.Tone)).Add(Names.Size(Group.Size, "sl-radio")).Add("is-disabled", Disabled || Group.Disabled).Add(Class))" style="@Style">
     <input @attributes="AdditionalAttributes" id="@ElementId" type="radio" class="sl-radio__input" name="@Group.GroupName"
            value="@Value?.ToString()" checked="@Group.IsSelected(Value)" disabled="@Disabled"
            aria-describedby="@(Description is null ? null : $"{ElementId}-desc")" @onchange="() => Group.Select(Value)" />

@@ -2,7 +2,7 @@
 @implements IDisposable
 @inject ISnackbarService Snackbars
 @inject SlateOptions Options
-<section class="sl-snackbar-host sl-snackbar-host--@Names.Kebab(Position.ToString())" aria-label="@Label">
+<section class="sl-snackbar-host sl-snackbar-host--@Names.Kebab(EffectivePosition.ToString())" aria-label="@Label">
     @foreach (var s in _items)
     {
         var leaving = s.State == SnackbarState.Closed;
@@ -46,13 +46,13 @@
 </section>
 
 @code {
-    /// <summary>Defaults to the configured <see cref="SnackbarConfiguration.Position"/>.</summary>
-    [Parameter] public SnackbarPosition? PositionOverride { get; set; }
+    /// <summary>Defaults to the configured <see cref="SnackbarConfiguration.Position"/> (<c>Defaults.Snackbar</c>).</summary>
+    [Parameter] public SnackbarPosition? Position { get; set; }
 
     [Parameter] public string Label { get; set; } = "Notifications";
     [Parameter] public string DismissLabel { get; set; } = "Dismiss";
 
-    private SnackbarPosition Position => PositionOverride ?? Snackbars.Configuration.Position;
+    private SnackbarPosition EffectivePosition => Position ?? Snackbars.Configuration.Position;
 
     // Visible snackbars plus ones playing their exit animation.
     private List<Snackbar> _items = [];

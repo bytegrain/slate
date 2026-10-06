@@ -3,24 +3,29 @@
 @implements IAsyncDisposable
 @inject SlateJs Js
 @inject NavigationManager Navigation
-<nav @attributes="AdditionalAttributes" id="@DrawerId" class="@CssClass" style="@Style" aria-label="@AriaLabel" @onkeydown="OnKeyDownAsync">
+<nav @attributes="AdditionalAttributes" id="@DrawerId" class="@CssClass" style="@Style" aria-label="@Label" @onkeydown="OnKeyDownAsync">
     @ChildContent
 </nav>
-@if (Open && IsOverlayVariant)
+@if (IsOpen && IsOverlay)
 {
-    <div class="@(Css.Of("sl-drawer-scrim").Add("sl-drawer-scrim--responsive", Variant == DrawerVariant.Responsive).Add("sl-drawer-scrim--unresolved", Variant == DrawerVariant.Responsive && !_resolved))" @onclick="CloseFromOverlayAsync"></div>
+    <div class="sl-drawer-scrim" @onclick="CloseFromOverlayAsync"></div>
 }
 
 @code {
     [CascadingParameter] private SlAppShell? Shell { get; set; }
 
+    /// <summary>Used when the drawer is not inside an <see cref="SlAppShell"/> (the shell's DrawerVariant wins).</summary>
     [Parameter] public DrawerVariant Variant { get; set; } = DrawerVariant.Responsive;
 
-    /// <summary>Two-way bindable. Responsive drawers start closed on narrow screens.</summary>
+    /// <summary>Used when the drawer is not inside an <see cref="SlAppShell"/> (bind the shell's DrawerOpen instead).</summary>
     [Parameter] public bool Open { get; set; } = true;
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
 
-    [Parameter] public string AriaLabel { get; set; } = "Navigation";
+    /// <summary>Used when the drawer is not inside an <see cref="SlAppShell"/>.</summary>
+    [Parameter] public Breakpoint Breakpoint { get; set; } = Breakpoint.Md;
+
+    /// <summary>Accessible name of the navigation landmark.</summary>
+    [Parameter] public string Label { get; set; } = "Navigation";
 
     /// <summary>Close overlay drawers after navigating. Default true.</summary>
     [Parameter] public bool CloseOnNavigate { get; set; } = true;
@@ -29,24 +34,30 @@
 
     internal string DrawerId => ElementId;
 
-    private const string NarrowQuery = "(max-width: 899.98px)";
+    private DrawerVariant EffectiveVariant => Shell?.DrawerVariant ?? Variant;
+    private Breakpoint EffectiveBreakpoint => Shell?.ResponsiveBreakpoint ?? Breakpoint;
+
+    /// <summary>Whether the drawer is open (the shell's DrawerOpen when inside a shell).</summary>
+    public bool IsOpen => Shell?.DrawerOpen ?? Open;
+
+    private string NarrowQuery => $"(max-width: {Names.Number(Breakpoints.MinWidth(EffectiveBreakpoint) - 0.02)}px)";
     private bool _narrow;
     private IJSObjectReference? _media;
     private DotNetObjectReference<SlDrawer>? _self;
 
-    /// <summary>True when the drawer currently overlays content (temporary, or responsive on a narrow screen).</summary>
-    public bool IsOverlay => Variant == DrawerVariant.Temporary || (Variant == DrawerVariant.Responsive && _narrow);
-
-    private bool IsOverlayVariant => Variant is DrawerVariant.Temporary or DrawerVariant.Responsive;
+    /// <summary>True when the drawer currently overlays content (temporary, or responsive below its breakpoint).</summary>
+    public bool IsOverlay => EffectiveVariant == DrawerVariant.Temporary || (EffectiveVariant == DrawerVariant.Responsive && _narrow);
 
     // Until script has measured the viewport (prerender, or before the circuit connects) a responsive drawer
     // can't know whether it should overlay; slate-blazor.css hides it on narrow screens until then.
     private bool _resolved;
 
     private string CssClass => Css.Of("sl-drawer")
-        .Add($"sl-drawer--{Names.Kebab(Variant.ToString())}")
-        .Add("is-open", Open)
-        .Add("sl-drawer--unresolved", Variant == DrawerVariant.Responsive && !_resolved)
+        .Add(Names.Variant(EffectiveVariant, "sl-drawer"))
+        .Add($"sl-drawer--breakpoint-{Names.Kebab(EffectiveBreakpoint.ToString())}", EffectiveBreakpoint != Breakpoint.Md)
+        .Add("is-open", IsOpen)
+        .Add("is-overlay", IsOverlay)
+        .Add("sl-drawer--unresolved", EffectiveVariant == DrawerVariant.Responsive && !_resolved)
         .Add(Class);
 
     protected override void OnInitialized()
@@ -59,7 +70,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender || Variant != DrawerVariant.Responsive) return;
+        if (!firstRender || EffectiveVariant != DrawerVariant.Responsive) return;
         try
         {
             await JsSafe.Run(async () =>
@@ -67,7 +78,7 @@
                 _self = DotNetObjectReference.Create(this);
                 _media = await Js.WatchMediaAsync(NarrowQuery, _self);
                 _narrow = await Js.MediaMatchesAsync(NarrowQuery);
-                if (_narrow && Open) await SetOpenAsync(false);
+                if (_narrow && IsOpen) await SetOpenAsync(false);
             });
         }
         finally
@@ -85,14 +96,24 @@
         await InvokeAsync(() => SetOpenAsync(!narrow));
     }
 
-    public Task ToggleAsync() => SetOpenAsync(!Open);
+    public Task ToggleAsync() => SetOpenAsync(!IsOpen);
 
     public async Task SetOpenAsync(bool open)
     {
-        if (Open == open) return;
-        Open = open;
-        await OpenChanged.InvokeAsync(open);
-        Shell?.NotifyDrawerChanged();
+        if (IsOpen == open)
+        {
+            StateHasChanged();
+            return;
+        }
+        if (Shell is not null)
+        {
+            await Shell.SetDrawerOpenAsync(open);
+        }
+        else
+        {
+            Open = open;
+            await OpenChanged.InvokeAsync(open);
+        }
         StateHasChanged();
     }
 
@@ -104,12 +125,12 @@
 
     private async Task OnKeyDownAsync(KeyboardEventArgs e)
     {
-        if (e.Key == "Escape" && Open && IsOverlay) await CloseFromOverlayAsync();
+        if (e.Key == "Escape" && IsOpen && IsOverlay) await CloseFromOverlayAsync();
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        if (CloseOnNavigate && Open && IsOverlay) _ = InvokeAsync(() => SetOpenAsync(false));
+        if (CloseOnNavigate && IsOpen && IsOverlay) _ = InvokeAsync(() => SetOpenAsync(false));
     }
 
     public async ValueTask DisposeAsync()

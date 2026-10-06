@@ -11,11 +11,11 @@
 
     <DemoSection Title="Service dialogs">
         <div class="demo-row">
-            <SlButton Variant="ButtonVariant.Primary" OnClick="RenameAsync">Rename package…</SlButton>
-            <SlButton OnClick="ConfirmAsync">Confirm</SlButton>
-            <SlButton Variant="ButtonVariant.Danger" OnClick="DeleteAsync">Delete package…</SlButton>
-            <SlButton OnClick="@(() => Dialogs.AlertAsync("All caught up", "There are no pending reviews.", Severity.Success))">Alert</SlButton>
-            <SlButton OnClick="Stacked">Stacked dialogs</SlButton>
+            <SlButton Variant="ButtonVariant.Solid" Tone="Tone.Accent" Click="RenameAsync">Rename package…</SlButton>
+            <SlButton Click="ConfirmAsync">Confirm</SlButton>
+            <SlButton Tone="Tone.Danger" Click="DeleteAsync">Delete package…</SlButton>
+            <SlButton Click="@(() => Dialogs.AlertAsync("All caught up", "There are no pending reviews.", Severity.Success))">Alert</SlButton>
+            <SlButton Click="Stacked">Stacked dialogs</SlButton>
         </div>
         @if (_last is not null)
         {
@@ -24,7 +24,7 @@
     </DemoSection>
 
     <DemoSection Title="Declarative dialog" Subtitle="SlDialog with two-way Open binding">
-        <SlButton OnClick="() => _inlineOpen = true">Open inline dialog</SlButton>
+        <SlButton Click="() => _inlineOpen = true">Open inline dialog</SlButton>
         <SlDialog @bind-Open="_inlineOpen" Title="Keyboard shortcuts" Description="Work faster with Slate apps." MaxWidth="DialogWidth.Md">
             <SlDialogBody>
                 <SlStack Spacing="2">
@@ -35,7 +35,7 @@
                 </SlStack>
             </SlDialogBody>
             <SlDialogFooter>
-                <SlButton Variant="ButtonVariant.Primary" OnClick="() => _inlineOpen = false">Done</SlButton>
+                <SlButton Variant="ButtonVariant.Solid" Tone="Tone.Accent" Click="() => _inlineOpen = false">Done</SlButton>
             </SlDialogFooter>
         </SlDialog>
     </DemoSection>

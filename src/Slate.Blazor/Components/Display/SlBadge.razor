@@ -1,17 +1,27 @@
 @namespace Slate.Blazor
 @inherits SlComponentBase
 <span @attributes="AdditionalAttributes" class="@CssClass" style="@Style">@if (Dot)
-{<span class="sl-badge__dot" aria-hidden="true"></span>}@ChildContent</span>
+{<span class="sl-badge__dot" aria-hidden="true"></span>}@if (Icon is not null)
+{<SlIcon Name="@Icon" Class="sl-badge__icon" />}@ChildContent</span>
 
 @code {
-    [Parameter] public BadgeTone Tone { get; set; } = BadgeTone.Neutral;
+    [Parameter] public Tone Tone { get; set; } = Tone.Neutral;
+
+    /// <summary>Soft (default), solid or outlined.</summary>
+    [Parameter] public BadgeVariant Variant { get; set; } = BadgeVariant.Soft;
+
+    [Parameter] public BadgeSize Size { get; set; } = BadgeSize.Medium;
 
     /// <summary>Leading status dot in the badge's colour.</summary>
     [Parameter] public bool Dot { get; set; }
 
+    [Parameter] public string? Icon { get; set; }
+
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
     private string CssClass => Css.Of("sl-badge")
-        .Add($"sl-badge--{Names.Kebab(Tone.ToString())}", Tone != BadgeTone.Neutral)
+        .Add(Names.Variant(Variant, "sl-badge"))
+        .Add(Names.Tone(Tone))
+        .Add("sl-badge--small", Size == BadgeSize.Small)
         .Add(Class);
 }

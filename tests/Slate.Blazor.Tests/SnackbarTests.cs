@@ -22,7 +22,7 @@ public class SnackbarTests : SlateTestContext
     [Fact]
     public void Position_override() =>
         Assert.Contains("sl-snackbar-host--top-center",
-            Render<SlSnackbarHost>(p => p.Add(x => x.PositionOverride, SnackbarPosition.TopCenter)).Find("section").ClassList);
+            Render<SlSnackbarHost>(p => p.Add(x => x.Position, SnackbarPosition.TopCenter)).Find("section").ClassList);
 
     [Fact]
     public void Renders_contract_markup_for_a_titled_success_with_action()

@@ -31,3 +31,22 @@ html, body { margin: 0; height: 100%; }
 
 /* FocusOnNavigate moves focus to the page heading for screen readers; don't draw a ring for that. */
 h1:focus { outline: none; }
+
+/* Theming page */
+.demo-preset { width: 32px; height: 32px; border-radius: var(--sl-radius-full); border: 2px solid var(--sl-color-background-surface);
+  background: var(--preset); box-shadow: 0 0 0 1px var(--sl-color-border-strong); cursor: pointer; padding: 0; }
+.demo-preset[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--sl-color-text-primary); }
+.demo-preset:focus-visible { outline: 2px solid var(--sl-color-focus-ring); outline-offset: 2px; }
+.demo-range { width: 100%; accent-color: var(--sl-color-accent-default); }
+.demo-preview { padding: var(--sl-space-4); border-radius: var(--sl-component-card-radius); background: var(--sl-color-background-canvas);
+  color: var(--sl-color-text-primary); box-shadow: inset 0 0 0 1px var(--sl-color-border-default); font-family: var(--sl-font-family-ui); }
+.demo-chip { display: inline-block; width: 14px; height: 14px; border-radius: var(--sl-radius-sm); background: var(--chip);
+  box-shadow: inset 0 0 0 1px var(--sl-color-border-default); vertical-align: -2px; margin-right: var(--sl-space-2); }
+.demo-code { margin: 0; padding: var(--sl-space-4); border-radius: var(--sl-radius-lg); background: var(--sl-color-background-subtle);
+  font-family: var(--sl-font-family-mono); font-size: var(--sl-font-size-xs); overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+.demo-playground { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); gap: var(--sl-space-5); align-items: start; }
+.demo-stage { display: grid; place-items: center; min-height: 160px; padding: var(--sl-space-6); border-radius: var(--sl-radius-lg);
+  background: var(--sl-color-background-canvas); box-shadow: inset 0 0 0 1px var(--sl-color-border-default); }
+.demo-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sl-space-3); }
+.demo-controls > .demo-span { grid-column: 1 / -1; }
+@media (max-width: 900px) { .demo-playground { grid-template-columns: minmax(0, 1fr); } }

@@ -158,7 +158,7 @@
   --_h: var(--sl-component-progress-height);
 
   position: relative;
-  flex: 1;
+  flex: none; /* never collapse inside column flex layouts */
   height: var(--_h);
   overflow: hidden;
   background: var(--sl-component-progress-track);
@@ -191,6 +191,8 @@
   align-items: center;
   gap: var(--sl-space-2);
 }
+
+.sl-progress-row > .sl-progress { flex: 1 1 auto; }
 
 .sl-progress__value {
   flex: none;

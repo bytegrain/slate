@@ -1,59 +1,78 @@
 @inherits LayoutComponentBase
+@implements IDisposable
+@inject DemoTheme Demo
 
-<SlateProvider @bind-Theme="_theme" @bind-Density="_density">
-    <SlAppShell>
-        <SlAppBar>
-            <Title>
-                <SlStack Row="true" Spacing="2" Align="StackAlign.Center">
-                    <SlIcon Name="layers" Size="ControlSize.Large" />
-                    <span>Slate</span>
-                    <SlBadge>Blazor · 0.1</SlBadge>
-                </SlStack>
-            </Title>
-            <ChildContent>
-                <SlSpacer />
-                <SlButton Class="demo-narrow" IconOnly="true" Variant="ButtonVariant.Ghost" StartIcon="@(_theme == ThemeMode.Dark ? "moon" : "sun")"
-                          AriaLabel="@($"Theme: {_theme}. Change theme")" OnClick="CycleTheme" />
-                <SlButtonGroup Label="Theme" Class="demo-wide">
-                    <SlButton Size="ControlSize.Small" StartIcon="sun" Pressed="@(_theme == ThemeMode.Light)" OnClick="() => _theme = ThemeMode.Light">Light</SlButton>
-                    <SlButton Size="ControlSize.Small" StartIcon="moon" Pressed="@(_theme == ThemeMode.Dark)" OnClick="() => _theme = ThemeMode.Dark">Dark</SlButton>
-                    <SlButton Size="ControlSize.Small" Pressed="@(_theme == ThemeMode.System)" OnClick="() => _theme = ThemeMode.System">System</SlButton>
-                </SlButtonGroup>
-                <SlButtonGroup Label="Density" Class="demo-wide">
-                    <SlButton Size="ControlSize.Small" Pressed="@(_density == Density.Compact)" OnClick="() => _density = Density.Compact">Compact</SlButton>
-                    <SlButton Size="ControlSize.Small" Pressed="@(_density == Density.Comfortable)" OnClick="() => _density = Density.Comfortable">Comfortable</SlButton>
-                </SlButtonGroup>
-            </ChildContent>
-        </SlAppBar>
-        <SlDrawer @bind-Open="_drawerOpen">
+<SlateProvider Mode="Demo.Mode" ModeChanged="m => { Demo.Mode = m; }" Density="Demo.Density" ThemeOptions="Demo.Options">
+    <SlAppShell @bind-DrawerOpen="_drawerOpen" FillViewport="true">
+        <AppBar>
+            <SlAppBar>
+                <Leading>
+                    <SlStack Row="true" Spacing="2" Align="StackAlign.Center">
+                        <SlIcon Name="layers" Size="ControlSize.Large" />
+                        <strong>Slate</strong>
+                        <SlBadge Size="BadgeSize.Small">Blazor · 0.1</SlBadge>
+                    </SlStack>
+                </Leading>
+                <Actions>
+                    <SlButton Class="demo-narrow" IconOnly="true" Variant="ButtonVariant.Ghost" StartIcon="@(Demo.Mode == ThemeMode.Dark ? "moon" : "sun")"
+                              Label="@($"Theme: {Demo.Mode}. Change theme")" Click="CycleTheme" />
+                    <SlButtonGroup Label="Theme" Class="demo-wide">
+                        <SlButton Size="ControlSize.Small" StartIcon="sun" Pressed="@(Demo.Mode == ThemeMode.Light)" Click="() => SetMode(ThemeMode.Light)">Light</SlButton>
+                        <SlButton Size="ControlSize.Small" StartIcon="moon" Pressed="@(Demo.Mode == ThemeMode.Dark)" Click="() => SetMode(ThemeMode.Dark)">Dark</SlButton>
+                        <SlButton Size="ControlSize.Small" Pressed="@(Demo.Mode == ThemeMode.System)" Click="() => SetMode(ThemeMode.System)">System</SlButton>
+                    </SlButtonGroup>
+                    <SlButtonGroup Label="Density" Class="demo-wide">
+                        <SlButton Size="ControlSize.Small" Pressed="@(Demo.Density == Density.Compact)" Click="() => SetDensity(Density.Compact)">Compact</SlButton>
+                        <SlButton Size="ControlSize.Small" Pressed="@(Demo.Density == Density.Comfortable)" Click="() => SetDensity(Density.Comfortable)">Comfortable</SlButton>
+                    </SlButtonGroup>
+                </Actions>
+            </SlAppBar>
+        </AppBar>
+        <Drawer>
             <SlNav>
                 <SlNavHeading>Getting started</SlNavHeading>
-                <SlNavLink Href="" Icon="home" Match="NavLinkMatch.All">Overview</SlNavLink>
+                <SlNavItem Href="" Icon="home" Label="Overview" Match="NavLinkMatch.All" />
+                <SlNavItem Href="theming" Icon="settings" Label="Theming" />
+                <SlNavItem Href="playground" Icon="sun" Label="Playground" />
                 <SlNavHeading>Library</SlNavHeading>
-                <SlNavLink Href="components" Icon="layers">Components</SlNavLink>
-                <SlNavLink Href="forms" Icon="pencil">Forms</SlNavLink>
-                <SlNavLink Href="layout" Icon="copy">Layout</SlNavLink>
-                <SlNavLink Href="feedback" Icon="bell">Feedback</SlNavLink>
-                <SlNavLink Href="dialogs" Icon="external-link">Dialogs</SlNavLink>
+                <SlNavItem Href="components" Icon="layers" Label="Components" />
+                <SlNavItem Href="forms" Icon="pencil" Label="Forms" />
+                <SlNavItem Href="layout" Icon="copy" Label="Layout" />
+                <SlNavItem Href="feedback" Icon="bell" Label="Feedback" />
+                <SlNavItem Href="dialogs" Icon="external-link" Label="Dialogs" />
                 <SlNavHeading>Examples</SlNavHeading>
-                <SlNavLink Href="examples/issues" Icon="check-circle" Meta="24">Issue tracker</SlNavLink>
+                <SlNavItem Href="examples/issues" Icon="check-circle" Label="Issue tracker" Trailing="24" />
             </SlNav>
-        </SlDrawer>
-        <SlMain>
-            @Body
-        </SlMain>
+        </Drawer>
+        <ChildContent>@Body</ChildContent>
     </SlAppShell>
 </SlateProvider>
 
 @code {
-    private ThemeMode _theme = ThemeMode.System;
-    private Density _density = Density.Compact;
     private bool _drawerOpen = true;
 
-    private void CycleTheme() => _theme = _theme switch
+    protected override void OnInitialized() => Demo.Changed += OnDemoChanged;
+
+    private void OnDemoChanged() => InvokeAsync(StateHasChanged);
+
+    private void SetMode(ThemeMode mode)
+    {
+        Demo.Mode = mode;
+        Demo.Notify();
+    }
+
+    private void SetDensity(Density density)
+    {
+        Demo.Density = density;
+        Demo.Notify();
+    }
+
+    private void CycleTheme() => SetMode(Demo.Mode switch
     {
         ThemeMode.System => ThemeMode.Light,
         ThemeMode.Light => ThemeMode.Dark,
         _ => ThemeMode.System,
-    };
+    });
+
+    public void Dispose() => Demo.Changed -= OnDemoChanged;
 }

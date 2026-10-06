@@ -12,10 +12,10 @@
         <SlSpacer />
         <SlTextField @bind-Value="_filter" Placeholder="Filter issues" StartIcon="search" Immediate="true" Size="ControlSize.Small" aria-label="Filter issues" />
         <SlButtonGroup Label="View">
-            <SlButton Size="ControlSize.Small" Pressed="_board" OnClick="() => _board = true">Board</SlButton>
-            <SlButton Size="ControlSize.Small" Pressed="!_board" OnClick="() => _board = false">List</SlButton>
+            <SlButton Size="ControlSize.Small" Pressed="_board" Click="() => _board = true">Board</SlButton>
+            <SlButton Size="ControlSize.Small" Pressed="!_board" Click="() => _board = false">List</SlButton>
         </SlButtonGroup>
-        <SlButton Variant="ButtonVariant.Primary" Size="ControlSize.Small" StartIcon="plus" Shortcut="C" OnClick="NewIssue">New issue</SlButton>
+        <SlButton Variant="ButtonVariant.Solid" Tone="Tone.Accent" Size="ControlSize.Small" StartIcon="plus" Shortcut="C" Click="NewIssue">New issue</SlButton>
     </SlStack>
 
     <SlGrid Spacing="3">
@@ -35,7 +35,7 @@
                     <div class="demo-column-head">@status <SlBadge>@items.Count</SlBadge></div>
                     @foreach (var issue in items)
                     {
-                        <SlCard Interactive="true" OnClick="() => Open(issue)" aria-label="@($"{issue.Id}: {issue.Title}")">
+                        <SlCard Interactive="true" Click="() => Open(issue)" aria-label="@($"{issue.Id}: {issue.Title}")">
                             <div class="demo-issue">
                                 <SlStack Row="true" Spacing="2" Align="StackAlign.Center">
                                     <span class="demo-mono">@issue.Id</span>
@@ -58,7 +58,7 @@
     }
     else
     {
-        <SlCard FlushBody="true">
+        <SlCard Flush="true">
             <div class="demo-table-wrap">
                 <table class="demo-table">
                     <thead><tr><th>ID</th><th>Title</th><th>Status</th><th>Priority</th><th>Labels</th><th>Assignee</th></tr></thead>
@@ -67,7 +67,7 @@
                         {
                             <tr>
                                 <td class="demo-mono">@issue.Id</td>
-                                <td><SlButton Variant="ButtonVariant.Link" OnClick="() => Open(issue)">@issue.Title</SlButton></td>
+                                <td><SlButton Variant="ButtonVariant.Link" Click="() => Open(issue)">@issue.Title</SlButton></td>
                                 <td><SlBadge Dot="true" Tone="@StatusTone(issue.Status)">@issue.Status</SlBadge></td>
                                 <td><SlBadge Tone="@PriorityTone(issue.Priority)">@issue.Priority</SlBadge></td>
                                 <td>@string.Join(", ", issue.Labels)</td>
@@ -109,8 +109,8 @@
         : _issues.Where(i => i.Title.Contains(_filter, StringComparison.OrdinalIgnoreCase) || i.Id.Contains(_filter, StringComparison.OrdinalIgnoreCase)
                              || i.Labels.Any(l => l.Contains(_filter, StringComparison.OrdinalIgnoreCase)));
 
-    private static BadgeTone PriorityTone(string p) => p switch { "Urgent" => BadgeTone.Danger, "High" => BadgeTone.Warning, "Low" => BadgeTone.Neutral, _ => BadgeTone.Info };
-    private static BadgeTone StatusTone(string s) => s switch { "Done" => BadgeTone.Success, "In progress" => BadgeTone.Accent, _ => BadgeTone.Neutral };
+    private static Tone PriorityTone(string p) => p switch { "Urgent" => Tone.Danger, "High" => Tone.Warning, "Low" => Tone.Neutral, _ => Tone.Info };
+    private static Tone StatusTone(string s) => s switch { "Done" => Tone.Success, "In progress" => Tone.Accent, _ => Tone.Neutral };
 
     private async Task Open(Issue issue)
     {

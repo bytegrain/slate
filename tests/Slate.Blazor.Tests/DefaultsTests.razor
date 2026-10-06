@@ -1,0 +1,72 @@
+@inherits SlateTestContext
+
+@code {
+    protected override void ConfigureSlate(SlateOptions o)
+    {
+        o.Defaults.Button.Size = ControlSize.Small;
+        o.Defaults.Button.Variant = ButtonVariant.Soft;
+        o.Defaults.Button.Tone = Tone.Accent;
+        o.Defaults.Button.Radius = Radius.Full;
+        o.Defaults.Field.Variant = FieldVariant.Filled;
+        o.Defaults.Field.Size = ControlSize.Large;
+        o.Defaults.Card.Variant = CardVariant.Outlined;
+        o.Defaults.Selection.LabelPlacement = Placement.Start;
+        o.Defaults.Dialog = new DialogOptions { MaxWidth = DialogWidth.Lg, CloseOnBackdropClick = false };
+        o.Defaults.Snackbar = new SnackbarConfiguration { Position = SnackbarPosition.TopCenter };
+        o.Theme = new SlateThemeOptions { Accent = "#5B3DF5" };
+    }
+
+    [Fact]
+    public void Unset_parameters_read_app_defaults()
+    {
+        var classes = Render<SlButton>(p => p.AddChildContent("x")).Find("button").ClassList;
+        Assert.Contains("sl-button--small", classes);
+        Assert.Contains("sl-button--soft", classes);
+        Assert.Contains("sl-tone-accent", classes);
+        Assert.Contains("sl-radius-full", classes);
+
+        var field = Render<SlTextField<string>>().Find(".sl-field").ClassList;
+        Assert.Contains("sl-field--filled", field);
+        Assert.Contains("sl-field--large", field);
+
+        Assert.Contains("sl-card--outlined", Render<SlCard>().Find("article").ClassList);
+        Assert.Contains("sl-checkbox--label-start", Render<SlCheckbox<bool>>().Find("label").ClassList);
+        Assert.Contains("sl-switch--label-start", Render<SlSwitch>().Find("label").ClassList);
+    }
+
+    [Fact]
+    public void Explicit_parameters_always_win()
+    {
+        var classes = Render<SlButton>(p => p.Add(x => x.Size, ControlSize.Medium).Add(x => x.Variant, ButtonVariant.Ghost)
+            .Add(x => x.Tone, Tone.Neutral).Add(x => x.Radius, Radius.Default)).Find("button").ClassList;
+        Assert.Equal(["sl-button", "sl-button--ghost", "sl-tone-neutral"], classes);
+        Assert.Contains("sl-field--outlined", Render<SlTextField<string>>(p => p.Add(x => x.Variant, FieldVariant.Outlined)).Find(".sl-field").ClassList);
+        Assert.Contains("sl-checkbox--label-end", Render<SlCheckbox<bool>>(p => p.Add(x => x.LabelPlacement, Placement.End)).Find("label").ClassList);
+    }
+
+    [Fact]
+    public void Dialog_service_uses_default_dialog_options_when_none_are_passed()
+    {
+        var cut = Render(@<SlateProvider />);
+        var dialog = Dialogs.Show<TestDialog>("Rename");
+        Assert.Equal(DialogWidth.Lg, dialog.Options.MaxWidth);
+        Assert.False(dialog.Options.CloseOnBackdropClick);
+        cut.WaitForAssertion(() => Assert.Contains("sl-dialog--lg", cut.Find(".sl-dialog").ClassList));
+    }
+
+    [Fact]
+    public void Snackbar_defaults_set_the_host_position() =>
+        Assert.Contains("sl-snackbar-host--top-center", Render(@<SlateProvider />).Find("section").ClassList);
+
+    [Fact]
+    public void App_theme_is_inherited_and_rederived_by_nested_providers()
+    {
+        var cut = Render(@<SlateProvider Mode="ThemeMode.Light"><SlateProvider Mode="ThemeMode.Dark" id="inner" /></SlateProvider>);
+        var light = ThemeBuilder.Build(new SlateThemeOptions { Base = ThemeNames.Light, Accent = "#5B3DF5" });
+        var dark = ThemeBuilder.Build(new SlateThemeOptions { Base = ThemeNames.Dark, Accent = "#5B3DF5" });
+        var styles = cut.FindAll("style");
+        Assert.Equal(2, styles.Count);
+        Assert.Contains($"--sl-color-accent-default:{light.Values["color.accent.default"]};", styles[0].TextContent);
+        Assert.Contains($"--sl-color-accent-default:{dark.Values["color.accent.default"]};", cut.Find("#inner > style").TextContent);
+    }
+}

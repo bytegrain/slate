@@ -1,34 +1,51 @@
 @namespace Slate.Blazor
 @inherits SlComponentBase
-@if (Href is not null)
+@if (Href is not null && !Disabled)
 {
-    <a @attributes="AdditionalAttributes" class="@CssClass" style="@Style" href="@(IsInert ? null : Href)" target="@Target"
-       role="@(IsInert ? "link" : null)" aria-disabled="@(IsInert ? "true" : null)" tabindex="@(Disabled ? "-1" : null)"
-       aria-label="@AriaLabel" aria-busy="@(IsLoading ? "true" : null)" aria-keyshortcuts="@Shortcut" aria-pressed="@PressedValue"
-       @onclick="OnClickAsync">@Content</a>
+    <a @attributes="AdditionalAttributes" class="@CssClass" style="@Style" href="@(IsLoading ? null : Href)" target="@Target"
+       rel="@(Target == "_blank" ? "noreferrer noopener" : null)"
+       role="@(IsLoading ? "link" : null)" aria-disabled="@(IsLoading ? "true" : null)"
+       aria-label="@Label" aria-busy="@(IsLoading ? "true" : null)" aria-keyshortcuts="@Shortcut" aria-pressed="@PressedValue"
+       @onclick="OnClickAsync">@Inner</a>
 }
 else
 {
     <button @attributes="AdditionalAttributes" type="@TypeValue" class="@CssClass" style="@Style" disabled="@Disabled"
-            aria-label="@AriaLabel" aria-busy="@(IsLoading ? "true" : null)" aria-disabled="@(IsLoading ? "true" : null)"
-            aria-keyshortcuts="@Shortcut" aria-pressed="@PressedValue" @onclick="OnClickAsync">@Content</button>
+            aria-label="@Label" aria-busy="@(IsLoading ? "true" : null)" aria-disabled="@(IsLoading ? "true" : null)"
+            aria-keyshortcuts="@Shortcut" aria-pressed="@PressedValue" @onclick="OnClickAsync">@Inner</button>
 }
 
 @code {
-    [Parameter] public ButtonVariant Variant { get; set; } = ButtonVariant.Secondary;
-    [Parameter] public ControlSize Size { get; set; } = ControlSize.Medium;
+    /// <summary>Chrome: outlined (default), solid, soft, ghost or link. Primary action = Solid + Accent.</summary>
+    [Parameter] public ButtonVariant? Variant { get; set; }
+
+    /// <summary>Colour role. Default neutral (or <c>Defaults.Button.Tone</c>).</summary>
+    [Parameter] public Tone? Tone { get; set; }
+
+    [Parameter] public ControlSize? Size { get; set; }
+
+    /// <summary>Corner radius override; Default uses <c>component.button.radius</c>.</summary>
+    [Parameter] public Radius? Radius { get; set; }
 
     /// <summary>Icon name before the label (replaced by a spinner while loading).</summary>
     [Parameter] public string? StartIcon { get; set; }
     [Parameter] public string? EndIcon { get; set; }
 
-    /// <summary>Square, icon-only button showing <see cref="StartIcon"/>. Requires <see cref="AriaLabel"/>.</summary>
+    /// <summary>Custom leading content (replaces <see cref="StartIcon"/>).</summary>
+    [Parameter] public RenderFragment? StartContent { get; set; }
+
+    /// <summary>Custom trailing content (replaces <see cref="EndIcon"/>).</summary>
+    [Parameter] public RenderFragment? EndContent { get; set; }
+
+    /// <summary>Square, icon-only button showing <see cref="StartIcon"/>. Requires <see cref="Label"/>.</summary>
     [Parameter] public bool IconOnly { get; set; }
 
-    [Parameter] public string? AriaLabel { get; set; }
+    /// <summary>Accessible name (aria-label). Required for icon-only buttons.</summary>
+    [Parameter] public string? Label { get; set; }
+
     [Parameter] public bool Loading { get; set; }
 
-    /// <summary>Show the loading state automatically while an async OnClick runs (also prevents double submits).</summary>
+    /// <summary>Show the loading state automatically while an async Click handler runs (also prevents double submits).</summary>
     [Parameter] public bool LoadingWhileBusy { get; set; }
 
     [Parameter] public bool Disabled { get; set; }
@@ -46,7 +63,7 @@ else
     /// <summary>Toggle buttons: true/false sets aria-pressed; null (default) is a normal button.</summary>
     [Parameter] public bool? Pressed { get; set; }
 
-    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
     private bool _busy;
@@ -59,46 +76,61 @@ else
 
     protected override void OnParametersSet()
     {
-        if (IconOnly && string.IsNullOrWhiteSpace(AriaLabel))
-            throw new InvalidOperationException("Icon-only SlButton needs an AriaLabel so assistive technology can name it.");
-        if (IconOnly && StartIcon is null)
-            throw new InvalidOperationException("Icon-only SlButton needs a StartIcon.");
+        if (IconOnly && string.IsNullOrWhiteSpace(Label))
+            throw new InvalidOperationException("Icon-only SlButton needs a Label so assistive technology can name it.");
+        if (IconOnly && StartIcon is null && StartContent is null)
+            throw new InvalidOperationException("Icon-only SlButton needs a StartIcon (or StartContent).");
     }
 
     private string CssClass => Css.Of("sl-button")
-        .Add(Variant switch
-        {
-            ButtonVariant.Primary => "sl-button--primary",
-            ButtonVariant.Ghost => "sl-button--ghost",
-            ButtonVariant.Danger => "sl-button--danger",
-            ButtonVariant.DangerSolid => "sl-button--danger-solid",
-            ButtonVariant.Link => "sl-button--link",
-            _ => null,
-        })
-        .Add(Names.Size(Size, "sl-button"))
-        .Add("sl-button--icon", IconOnly)
+        .Add(Names.Variant(Variant ?? Defaults.Button.Variant, "sl-button"))
+        .Add(Names.Tone(Tone ?? Defaults.Button.Tone))
+        .Add(Names.Size(Size ?? Defaults.Button.Size, "sl-button"))
+        .Add(Names.Radius(Radius ?? Defaults.Button.Radius))
+        .Add("sl-button--icon-only", IconOnly)
         .Add("sl-button--full", FullWidth)
         .Add("is-loading", IsLoading)
         .Add(Class);
 
-    private RenderFragment Content => @<text>
-        @if (IsLoading)
+    private bool HasStart => IsLoading || StartIcon is not null || StartContent is not null;
+    private bool HasEnd => !IconOnly && (EndIcon is not null || EndContent is not null);
+
+    private RenderFragment Inner => @<text>
+        @if (HasStart)
         {
-            <span class="sl-spinner sl-button__icon" aria-hidden="true"></span>
+            <span class="sl-button__start">
+                @if (IsLoading)
+                {
+                    <span class="sl-spinner sl-button__icon" aria-hidden="true"></span>
+                }
+                else if (StartContent is not null)
+                {
+                    @StartContent
+                }
+                else
+                {
+                    <SlIcon Name="@StartIcon" Class="sl-button__icon" />
+                }
+            </span>
         }
-        else if (StartIcon is not null)
-        {
-            <SlIcon Name="@StartIcon" Class="sl-button__icon" />
-        }
-        @if (!IconOnly && ChildContent is not null)
+        @if (!IconOnly)
         {
             <span class="sl-button__label">@ChildContent</span>
         }
-        @if (EndIcon is not null && !IconOnly)
+        @if (HasEnd)
         {
-            <SlIcon Name="@EndIcon" Class="sl-button__icon" />
+            <span class="sl-button__end">
+                @if (EndContent is not null)
+                {
+                    @EndContent
+                }
+                else
+                {
+                    <SlIcon Name="@EndIcon" Class="sl-button__icon" />
+                }
+            </span>
         }
-        @if (Shortcut is not null && !IconOnly)
+        @if (Shortcut is not null)
         {
             <kbd class="sl-kbd" aria-hidden="true">@Shortcut</kbd>
         }
@@ -109,12 +141,12 @@ else
         if (IsInert) return;
         if (!LoadingWhileBusy)
         {
-            await OnClick.InvokeAsync(e);
+            await Click.InvokeAsync(e);
             return;
         }
 
         _busy = true;
-        try { await OnClick.InvokeAsync(e); }
+        try { await Click.InvokeAsync(e); }
         finally { _busy = false; }
     }
 }

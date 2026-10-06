@@ -6,11 +6,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Snackbar and dialog services (one set per circuit). Options: position, limits, durations.
+// Snackbar and dialog services (one set per circuit) plus app-wide defaults and an optional custom theme:
+//   options.Defaults.Button.Size = ControlSize.Small;  options.Theme = new() { Accent = "#5B3DF5" };
 builder.Services.AddSlate(options =>
 {
-    options.Snackbars = options.Snackbars with { Position = Slate.Snackbars.SnackbarPosition.BottomRight };
+    options.Defaults.Snackbar = options.Defaults.Snackbar with { Position = Slate.Snackbars.SnackbarPosition.BottomRight };
 });
+builder.Services.AddScoped<Slate.Blazor.Demo.DemoTheme>();
 
 var app = builder.Build();
 

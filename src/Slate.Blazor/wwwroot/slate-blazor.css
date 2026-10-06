@@ -6,14 +6,18 @@
 /* The provider wraps app content in a plain element; it must not affect layout. */
 .sl-provider__content { display: contents; }
 
-/* Responsive drawers are persistent from 900px (md) up, so their scrim only exists below that. */
-@media (min-width: 900px) {
-  .sl-drawer-scrim--responsive { display: none; }
+/* Responsive drawers are rendered open on the server; below their breakpoint keep them out of view until script
+   has measured the viewport and closed them, so phones don't flash a covering drawer. */
+@media (max-width: 899.98px) {
+  .sl-drawer--responsive.sl-drawer--unresolved:not([class*="sl-drawer--breakpoint-"]) { visibility: hidden; transform: translateX(-100%); transition: none; }
+}
+@media (max-width: 599.98px) {
+  .sl-drawer--responsive.sl-drawer--unresolved.sl-drawer--breakpoint-sm { visibility: hidden; transform: translateX(-100%); transition: none; }
+}
+@media (max-width: 1199.98px) {
+  .sl-drawer--responsive.sl-drawer--unresolved.sl-drawer--breakpoint-lg { visibility: hidden; transform: translateX(-100%); transition: none; }
+}
+@media (max-width: 1535.98px) {
+  .sl-drawer--responsive.sl-drawer--unresolved.sl-drawer--breakpoint-xl { visibility: hidden; transform: translateX(-100%); transition: none; }
 }
 
-/* Responsive drawers are rendered open on the server; on narrow screens keep them (and their scrim) out of
-   view until script has measured the viewport and closed them, so phones don't flash a covering drawer. */
-@media (max-width: 899.98px) {
-  .sl-drawer.sl-drawer--responsive.sl-drawer--unresolved { visibility: hidden; transform: translateX(-100%); transition: none; }
-  .sl-drawer-scrim.sl-drawer-scrim--unresolved { display: none; }
-}

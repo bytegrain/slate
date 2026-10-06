@@ -20,5 +20,5 @@
     private string PathData => Path ?? (Name is null ? "" :
         SlateIcons.All.TryGetValue(Name, out var d) ? d : throw new ArgumentException($"Unknown Slate icon '{Name}'.", nameof(Name)));
 
-    private string CssClass => Css.Of("sl-icon").Add(Names.Size(Size, "sl-icon")).Add(Class);
+    private string CssClass => Css.Of("sl-icon").Add(Names.IconSize(Size)).Add(Class);
 }

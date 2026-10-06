@@ -1,9 +1,9 @@
 @namespace Slate.Blazor
 @typeparam TValue
-@inherits SlInputBase<TValue>
+@inherits SlCheckedBase<TValue>
 @inject SlateJs Js
 @* TValue is bool, or bool? where null renders the indeterminate state. *@
-<label class="@(Css.Of("sl-checkbox").Add("is-disabled", Disabled).Add(Class))" style="@Style">
+<label class="@CssClass" style="@Style">
     <input @attributes="AdditionalAttributes" @ref="_input" id="@ElementId" type="checkbox"
            class="@(Css.Of("sl-checkbox__input").Add("is-indeterminate", IsIndeterminate))"
            checked="@IsChecked" disabled="@Disabled" aria-checked="@(IsIndeterminate ? "mixed" : null)"
@@ -20,6 +20,15 @@
 
 @code {
     [Parameter] public string? Description { get; set; }
+
+    /// <summary>Colour of the checked fill. Default accent.</summary>
+    [Parameter] public Tone? Tone { get; set; }
+
+    [Parameter] public ControlSize? Size { get; set; }
+
+    /// <summary>Label after the box (End, default) or before it (Start).</summary>
+    [Parameter] public Placement? LabelPlacement { get; set; }
+
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
     private ElementReference _input;
@@ -27,8 +36,15 @@
 
     private string DescriptionId => $"{ElementId}-desc";
 
-    private bool IsIndeterminate => Value is null && Nullable.GetUnderlyingType(typeof(TValue)) == typeof(bool);
-    private bool IsChecked => Value is true;
+    private bool IsIndeterminate => Checked is null && Nullable.GetUnderlyingType(typeof(TValue)) == typeof(bool);
+    private bool IsChecked => Checked is true;
+
+    private string CssClass => Css.Of("sl-checkbox")
+        .Add(Names.Tone(Tone ?? Slate.Tone.Accent))
+        .Add(Names.Size(Size ?? ControlSize.Medium, "sl-checkbox"))
+        .Add((LabelPlacement ?? Defaults.Selection.LabelPlacement) == Placement.Start ? "sl-checkbox--label-start" : "sl-checkbox--label-end")
+        .Add("is-disabled", Disabled)
+        .Add(Class);
 
     protected override void OnInitialized()
     {

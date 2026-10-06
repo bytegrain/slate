@@ -1,0 +1,215 @@
+@page "/theming"
+@inject DemoTheme Demo
+<PageTitle>Theming · Slate</PageTitle>
+
+<div class="demo-page">
+    <PageHeader Title="Theming">
+        Build a theme on top of Alloy: pick a brand colour, soften or sharpen the corners, swap the font. Slate derives every
+        accent state and keeps all contrast rules — the whole app updates live.
+    </PageHeader>
+
+    <SlGrid>
+        <SlItem Xs="12" Lg="5">
+            <DemoSection Title="Theme" Subtitle="Applies to the whole demo">
+                <SlStack Spacing="4">
+                    <div>
+                        <SlText Typo="Typo.Label" Tag="p" Class="demo-caption">Accent</SlText>
+                        <div class="demo-row" role="group" aria-label="Accent presets">
+                            @foreach (var (name, hex) in Presets)
+                            {
+                                <button type="button" class="demo-preset" style="--preset: @hex" aria-pressed="@(string.Equals(_accent, hex, StringComparison.OrdinalIgnoreCase) ? "true" : "false")"
+                                        aria-label="@name" title="@name" @onclick="() => SetAccent(hex)"></button>
+                            }
+                        </div>
+                    </div>
+                    <SlTextField TValue="string" Value="_accentText" Label="Custom hex" Placeholder="#5B3DF5" Error="@_accentError" Clearable="true"
+                                 HelperText="Any #RRGGBB colour; lightness is adjusted only as far as accessibility requires." Immediate="true"
+                                 DebounceMilliseconds="250" ValueChanged="OnAccentTyped" />
+                    <div class="sl-field sl-field--outlined">
+                        <label class="sl-field__label" for="radius">Radius scale · @_radius.ToString("0.##")×</label>
+                        <input id="radius" type="range" min="0" max="2.5" step="0.25" value="@_radius" @oninput="OnRadius" class="demo-range" />
+                        <div class="sl-field__footer"><p class="sl-field__helper">0 = square · 1 = Alloy · 2.5 = round</p></div>
+                    </div>
+                    <TextSelect Label="Font" Options="Fonts" Value="@_font" ValueChanged="SetFont" AllowNone="false" />
+                    <SlStack Row="true" Spacing="2" Wrap="true">
+                        <SlButton Variant="ButtonVariant.Ghost" StartIcon="x" Click="Reset">Reset to Alloy</SlButton>
+                    </SlStack>
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+        <SlItem Xs="12" Lg="7">
+            <DemoSection Title="Live preview" Subtitle="@($"Light and dark side by side · {(Demo.Options is null ? "built-in Alloy" : "custom")}")">
+                <SlGrid Spacing="3">
+                    @foreach (var mode in new[] { ThemeMode.Light, ThemeMode.Dark })
+                    {
+                        <SlItem Xs="12" Md="6">
+                            <SlateProvider Mode="mode" Density="Demo.Density" ThemeOptions="Demo.Options" Class="demo-preview">
+                                <SlStack Spacing="3">
+                                    <SlText Typo="Typo.Overline">@mode</SlText>
+                                    <div class="demo-row">
+                                        <SlButton Variant="ButtonVariant.Solid" Tone="Tone.Accent" StartIcon="check">Deploy</SlButton>
+                                        <SlButton>Cancel</SlButton>
+                                        <SlButton Variant="ButtonVariant.Soft" Tone="Tone.Accent">Soft</SlButton>
+                                    </div>
+                                    <SlTextField @bind-Value="_previewText" Label="Project" Clearable="true" />
+                                    <SlCheckbox @bind-Checked="_previewCheck" Label="Run tests" />
+                                    <SlSwitch @bind-Checked="_previewSwitch" Label="Preview builds" />
+                                    <div class="demo-row"><SlBadge Tone="Tone.Accent">New</SlBadge><SlBadge Tone="Tone.Success" Dot="true">Ready</SlBadge><a class="sl-link" href="theming">Link</a></div>
+                                    <SlProgress Value="62" Label="Upload" />
+                                </SlStack>
+                            </SlateProvider>
+                        </SlItem>
+                    }
+                </SlGrid>
+            </DemoSection>
+        </SlItem>
+    </SlGrid>
+
+    <DemoSection Title="Derived accent" Subtitle="What ThemeBuilder generated from your colour (identical on every platform)">
+        <div class="demo-table-wrap">
+            <table class="demo-table">
+                <thead><tr><th>Token</th><th>Light</th><th>Dark</th></tr></thead>
+                <tbody>
+                    @foreach (var path in AccentPaths)
+                    {
+                        <tr>
+                            <td class="demo-mono">@path</td>
+                            @foreach (var theme in new[] { _light, _dark })
+                            {
+                                var value = theme.Values[path];
+                                <td><span class="demo-chip" style="--chip: @value"></span><span class="demo-mono">@value</span></td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </DemoSection>
+
+    <DemoSection Title="Use it in your app" Subtitle="Program.cs">
+        <pre class="demo-code"><code>@Snippet</code></pre>
+    </DemoSection>
+</div>
+
+@code {
+    private static readonly (string Name, string Hex)[] Presets =
+    [
+        ("Alloy teal", "#0E5E6F"), ("Violet", "#5B3DF5"), ("Cobalt", "#2F4FD8"), ("Signal orange", "#FF5A1F"),
+        ("Rose", "#D6336C"), ("Forest", "#1F7A4D"), ("Amber", "#FFB020"), ("Graphite", "#3A4250"),
+    ];
+
+    private static readonly IReadOnlyList<(string, string)> Fonts =
+    [
+        ("", "Instrument Sans (Alloy)"),
+        ("system-ui, sans-serif", "System UI"),
+        ("Georgia, \"Times New Roman\", serif", "Serif"),
+        ("\"IBM Plex Mono\", ui-monospace, monospace", "Monospace"),
+    ];
+
+    private static readonly string[] AccentPaths =
+        ["color.accent.default", "color.accent.hover", "color.accent.pressed", "color.accent.subtle", "color.accent.text", "color.text.onAccent", "color.text.link"];
+
+    private string? _accent;
+    private string? _accentText;
+    private string? _accentError;
+    private double _radius = 1;
+    private string? _font = "";
+    private SlateThemeDefinition _light = ThemeBuilder.Build(new() { Base = ThemeNames.Light });
+    private SlateThemeDefinition _dark = ThemeBuilder.Build(new() { Base = ThemeNames.Dark });
+
+    private string? _previewText = "slate-web";
+    private bool _previewCheck = true, _previewSwitch = true;
+
+    protected override void OnInitialized()
+    {
+        if (Demo.Options is { } o)
+        {
+            _accent = o.Accent;
+            _accentText = o.Accent;
+            _radius = o.RadiusScale;
+            _font = o.FontFamily ?? "";
+        }
+        Rebuild(apply: false);
+    }
+
+    private void SetAccent(string hex)
+    {
+        _accent = hex;
+        _accentText = hex;
+        _accentError = null;
+        Rebuild();
+    }
+
+    private void OnAccentTyped(string? text)
+    {
+        _accentText = text;
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            _accentError = null;
+            _accent = null;
+            Rebuild();
+            return;
+        }
+        var hex = text.Trim().StartsWith('#') ? text.Trim() : "#" + text.Trim();
+        if (SlateColor.TryParse(hex, out var c) && c.IsOpaque && hex.Length is 4 or 7)
+        {
+            _accentError = null;
+            _accent = c.ToHex();
+            Rebuild();
+        }
+        else
+        {
+            _accentError = "Use #RGB or #RRGGBB.";
+        }
+    }
+
+    private void OnRadius(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var r))
+        {
+            _radius = r;
+            Rebuild();
+        }
+    }
+
+    private void SetFont(string? font)
+    {
+        _font = font;
+        Rebuild();
+    }
+
+    private void Reset()
+    {
+        _accent = _accentText = _accentError = null;
+        _radius = 1;
+        _font = "";
+        Rebuild();
+    }
+
+    private SlateThemeOptions? CurrentOptions =>
+        _accent is null && _radius == 1 && string.IsNullOrEmpty(_font)
+            ? null
+            : new SlateThemeOptions { Accent = _accent, RadiusScale = _radius, FontFamily = string.IsNullOrEmpty(_font) ? null : _font };
+
+    private void Rebuild(bool apply = true)
+    {
+        var options = CurrentOptions ?? new SlateThemeOptions();
+        _light = ThemeBuilder.Build(options with { Base = ThemeNames.Light });
+        _dark = ThemeBuilder.Build(options with { Base = ThemeNames.Dark });
+        if (apply) Demo.Apply(CurrentOptions);
+    }
+
+    private string Snippet
+    {
+        get
+        {
+            var o = CurrentOptions;
+            if (o is null) return "builder.Services.AddSlate(); // built-in Alloy";
+            var lines = new List<string>();
+            if (o.Accent is { } a) lines.Add($"        Accent = \"{a}\",");
+            if (o.RadiusScale != 1) lines.Add($"        RadiusScale = {o.RadiusScale.ToString(System.Globalization.CultureInfo.InvariantCulture)},");
+            if (o.FontFamily is { } f) lines.Add($"        FontFamily = \"{f.Replace("\"", "\\\"")}\",");
+            return "builder.Services.AddSlate(options =>\n{\n    options.Theme = new SlateThemeOptions\n    {\n" + string.Join("\n", lines) + "\n    };\n});";
+        }
+    }
+}

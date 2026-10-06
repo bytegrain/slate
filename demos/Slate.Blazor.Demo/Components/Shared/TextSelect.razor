@@ -1,0 +1,33 @@
+@* Demo-only labelled select over strings (null option = "None"). *@
+<div class="sl-field sl-field--outlined sl-field--small">
+    <label class="sl-field__label" for="@_id">@Label</label>
+    <div class="sl-field__control">
+        <select id="@_id" class="sl-field__input" @onchange="OnChange">
+            @if (AllowNone)
+            {
+                <option value="" selected="@(Value is null)">None</option>
+            }
+            @foreach (var (value, text) in Options)
+            {
+                <option value="@value" selected="@(value == Value)">@text</option>
+            }
+        </select>
+    </div>
+</div>
+
+@code {
+    private readonly string _id = $"sel{Guid.NewGuid():N}";
+
+    [Parameter, EditorRequired] public string Label { get; set; } = "";
+    [Parameter, EditorRequired] public IReadOnlyList<(string Value, string Text)> Options { get; set; } = [];
+    [Parameter] public bool AllowNone { get; set; } = true;
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+
+    private async Task OnChange(ChangeEventArgs e)
+    {
+        var v = e.Value?.ToString();
+        Value = string.IsNullOrEmpty(v) ? null : v;
+        await ValueChanged.InvokeAsync(Value);
+    }
+}

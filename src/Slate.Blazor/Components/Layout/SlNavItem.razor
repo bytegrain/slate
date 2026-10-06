@@ -1,0 +1,80 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@implements IDisposable
+@inject NavigationManager Navigation
+@if (Href is not null && !Disabled)
+{
+    <a @attributes="AdditionalAttributes" class="@CssClass" style="@Style" href="@Href" title="@MiniTitle"
+       aria-current="@(IsActive ? "page" : null)" @onclick="OnClickAsync">@Inner</a>
+}
+else
+{
+    <button @attributes="AdditionalAttributes" type="button" class="@CssClass" style="@Style" title="@MiniTitle" disabled="@Disabled"
+            aria-disabled="@(Disabled ? "true" : null)" aria-current="@(IsActive ? "page" : null)" @onclick="OnClickAsync">@Inner</button>
+}
+
+@code {
+    [CascadingParameter] private SlAppShell? Shell { get; set; }
+
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Icon { get; set; }
+
+    /// <summary>Count or short status at the end.</summary>
+    [Parameter] public string? Trailing { get; set; }
+
+    /// <summary>Active state. Null (default) = automatic from the current URL when <see cref="Href"/> is set.</summary>
+    [Parameter] public bool? Active { get; set; }
+
+    [Parameter] public string? Href { get; set; }
+
+    /// <summary>Prefix (default) or exact URL matching for the automatic active state.</summary>
+    [Parameter] public NavLinkMatch Match { get; set; } = NavLinkMatch.Prefix;
+
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
+
+    /// <summary>Custom label content (replaces <see cref="Label"/>).</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool IsMini => Shell?.DrawerVariant == DrawerVariant.Mini && Shell.DrawerOpen == false;
+
+    // In a collapsed mini drawer only the icon shows; expose the label as a tooltip.
+    private string? MiniTitle => IsMini ? Label : null;
+
+    private string CssClass => Css.Of("sl-nav__item").Add("is-active", IsActive).Add("is-disabled", Disabled).Add(Class);
+
+    private RenderFragment Inner => @<text>@if (Icon is not null)
+        {<SlIcon Name="@Icon" />}<span class="sl-nav__label">@if (ChildContent is not null)
+        {@ChildContent}
+        else
+        {@Label}</span>@if (Trailing is not null)
+        {<span class="sl-nav__meta">@Trailing</span>}</text>;
+
+    private bool IsActive => Active ?? (Href is not null && MatchesLocation());
+
+    private bool MatchesLocation()
+    {
+        var target = Navigation.ToAbsoluteUri(Href).GetLeftPart(UriPartial.Path).TrimEnd('/');
+        var current = Navigation.ToAbsoluteUri(Navigation.Uri).GetLeftPart(UriPartial.Path).TrimEnd('/');
+        if (string.Equals(target, current, StringComparison.OrdinalIgnoreCase)) return true;
+        var isRoot = Navigation.ToBaseRelativePath(Navigation.ToAbsoluteUri(Href).ToString()).Trim('/').Length == 0;
+        return Match == NavLinkMatch.Prefix && !isRoot && current.StartsWith(target + "/", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private Task OnClickAsync(MouseEventArgs e) => Disabled ? Task.CompletedTask : Click.InvokeAsync(e);
+
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += OnLocationChanged;
+        if (Shell is not null) Shell.DrawerChanged += OnShellChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) => InvokeAsync(StateHasChanged);
+    private void OnShellChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+        if (Shell is not null) Shell.DrawerChanged -= OnShellChanged;
+    }
+}
