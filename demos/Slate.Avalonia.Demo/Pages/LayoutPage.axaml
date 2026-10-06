@@ -1,0 +1,95 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sl="https://slate.dev/avalonia"
+             x:Class="Slate.Avalonia.Demo.Pages.LayoutPage">
+  <UserControl.Styles>
+    <Style Selector="Border.cell">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Subtle}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Height" Value="44" />
+    </Style>
+    <Style Selector="Border.cell > TextBlock">
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="FontFamily" Value="{DynamicResource Sl.Font.Family.Mono}" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Accent.Text}" />
+    </Style>
+  </UserControl.Styles>
+  <sl:Container Size="Xl" Margin="0,24,0,40">
+    <sl:Stack Spacing="6">
+      <StackPanel Spacing="4">
+        <TextBlock Text="Layout framework" Theme="{DynamicResource Sl.Typography.H2}" />
+        <TextBlock Text="Container, 12-column ResponsiveGrid, Stack, Spacer, Divider and Card — the same primitives as Slate on the web. Resize the window to see the grid respond."
+                   Foreground="{DynamicResource Sl.Brush.Text.Secondary}" TextWrapping="Wrap" />
+      </StackPanel>
+
+      <sl:Card Header="ResponsiveGrid" Subtitle="Xs=12 · Sm=6 · Md=4 · Lg=3 — spans inherit upwards">
+        <sl:ResponsiveGrid Spacing="3">
+          <Border Classes="cell" sl:ResponsiveGrid.Sm="6" sl:ResponsiveGrid.Md="4" sl:ResponsiveGrid.Lg="3"><TextBlock Text="1" /></Border>
+          <Border Classes="cell" sl:ResponsiveGrid.Sm="6" sl:ResponsiveGrid.Md="4" sl:ResponsiveGrid.Lg="3"><TextBlock Text="2" /></Border>
+          <Border Classes="cell" sl:ResponsiveGrid.Sm="6" sl:ResponsiveGrid.Md="4" sl:ResponsiveGrid.Lg="3"><TextBlock Text="3" /></Border>
+          <Border Classes="cell" sl:ResponsiveGrid.Sm="6" sl:ResponsiveGrid.Md="12" sl:ResponsiveGrid.Lg="3"><TextBlock Text="4" /></Border>
+          <Border Classes="cell" sl:ResponsiveGrid.Md="8"><TextBlock Text="Md 8" /></Border>
+          <Border Classes="cell" sl:ResponsiveGrid.Md="4"><TextBlock Text="Md 4" /></Border>
+        </sl:ResponsiveGrid>
+      </sl:Card>
+
+      <sl:Card Header="Stack" Subtitle="Spacing in token steps; Spacer takes the free space; Justify and AlignItems like flexbox">
+        <sl:Stack Spacing="4">
+          <sl:Stack Orientation="Horizontal" AlignItems="Center">
+            <Button Content="Back" Classes="ghost" sl:Sl.Icon="arrow-left" />
+            <TextBlock Text="Release 0.1.4" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <sl:Spacer />
+            <Button Content="Discard" />
+            <Button Content="Publish" Classes="primary" />
+          </sl:Stack>
+          <sl:Divider />
+          <sl:Stack Orientation="Horizontal" Justify="SpaceBetween">
+            <Border Classes="cell" Width="120"><TextBlock Text="between" /></Border>
+            <Border Classes="cell" Width="120"><TextBlock Text="between" /></Border>
+            <Border Classes="cell" Width="120"><TextBlock Text="between" /></Border>
+          </sl:Stack>
+          <sl:Stack Orientation="Horizontal" Wrap="True" Spacing="2">
+            <sl:Badge Text="avalonia" /><sl:Badge Text="blazor" /><sl:Badge Text="wpf" /><sl:Badge Text="web" />
+            <sl:Badge Text="tokens" /><sl:Badge Text="a11y" /><sl:Badge Text="dark-mode" /><sl:Badge Text="density" />
+          </sl:Stack>
+        </sl:Stack>
+      </sl:Card>
+
+      <sl:ResponsiveGrid>
+        <sl:Card sl:ResponsiveGrid.Md="4" Header="Plain card">
+          <TextBlock Text="Surface, e1 shadow, 10px radius." TextWrapping="Wrap" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
+        </sl:Card>
+        <sl:Card sl:ResponsiveGrid.Md="4" Header="Outlined" IsOutlined="True">
+          <TextBlock Text="Hairline instead of shadow, for dense dashboards." TextWrapping="Wrap" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
+        </sl:Card>
+        <sl:Card sl:ResponsiveGrid.Md="4" Header="Interactive" Subtitle="Lifts on hover" IsInteractive="True">
+          <sl:Card.HeaderActions>
+            <Button Classes="ghost" sl:Sl.Size="Small" sl:Sl.Icon="more-horizontal" AutomationProperties.Name="More" />
+          </sl:Card.HeaderActions>
+          <TextBlock Text="With header actions and a footer." TextWrapping="Wrap" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
+          <sl:Card.Footer>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Button Content="Cancel" sl:Sl.Size="Small" />
+              <Button Content="Open" sl:Sl.Size="Small" Classes="primary" />
+            </StackPanel>
+          </sl:Card.Footer>
+        </sl:Card>
+      </sl:ResponsiveGrid>
+
+      <sl:Card Header="Toolbar">
+        <sl:Toolbar>
+          <Button Classes="ghost" sl:Sl.Icon="arrow-left" AutomationProperties.Name="Back" />
+          <Button Classes="ghost" sl:Sl.Icon="arrow-right" AutomationProperties.Name="Forward" />
+          <sl:Divider Orientation="Vertical" Height="18" Margin="4,0" />
+          <Button Classes="ghost" sl:Sl.Icon="copy" Content="Duplicate" />
+          <Button Classes="ghost" sl:Sl.Icon="pencil" Content="Rename" />
+          <Button Classes="ghost danger" sl:Sl.Icon="trash" Content="Delete" />
+        </sl:Toolbar>
+      </sl:Card>
+    </sl:Stack>
+  </sl:Container>
+</UserControl>

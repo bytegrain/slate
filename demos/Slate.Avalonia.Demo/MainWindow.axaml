@@ -1,0 +1,56 @@
+<sl:SlateWindow xmlns="https://github.com/avaloniaui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:sl="https://slate.dev/avalonia"
+                x:Class="Slate.Avalonia.Demo.MainWindow"
+                Title="Slate" Subtitle="Avalonia demo"
+                Width="1280" Height="820" MinWidth="560" MinHeight="420"
+                WindowStartupLocation="CenterScreen">
+  <sl:SlateWindow.TitleBarContent>
+    <TextBox Width="300" MinHeight="26" Height="26" PlaceholderText="Search components" FontSize="13">
+      <TextBox.InnerRightContent>
+        <sl:Kbd Text="⌘K" Margin="0,0,6,0" />
+      </TextBox.InnerRightContent>
+    </TextBox>
+  </sl:SlateWindow.TitleBarContent>
+  <sl:SlateWindow.TitleBarActions>
+    <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+      <ToggleButton x:Name="LightButton" Classes="ghost" sl:Sl.Size="Small" sl:Sl.Icon="sun" ToolTip.Tip="Light theme" AutomationProperties.Name="Light theme" />
+      <ToggleButton x:Name="DarkButton" Classes="ghost" sl:Sl.Size="Small" sl:Sl.Icon="moon" ToolTip.Tip="Dark theme" AutomationProperties.Name="Dark theme" />
+      <ToggleButton x:Name="SystemButton" Classes="ghost" sl:Sl.Size="Small" sl:Sl.Icon="settings" ToolTip.Tip="Follow system" AutomationProperties.Name="Follow system theme" />
+      <sl:Divider Orientation="Vertical" Height="16" Margin="6,0" />
+      <ToggleSwitch x:Name="DensitySwitch" Content="Comfortable" FontSize="12.5" />
+    </StackPanel>
+  </sl:SlateWindow.TitleBarActions>
+
+  <sl:AppShell x:Name="Shell" DrawerVariant="Responsive">
+    <sl:AppShell.AppBar>
+      <sl:AppBar x:Name="Bar" Title="Components">
+        <sl:AppBar.Actions>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <sl:Badge Text="v0.1 preview" Tone="Accent" />
+            <Button Classes="ghost" sl:Sl.Icon="external-link" AutomationProperties.Name="Open docs" ToolTip.Tip="Design rules" />
+          </StackPanel>
+        </sl:AppBar.Actions>
+      </sl:AppBar>
+    </sl:AppShell.AppBar>
+    <sl:AppShell.Drawer>
+      <sl:Drawer>
+        <sl:Drawer.Header>
+          <TextBlock Text="LIBRARY" FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="10.5" Margin="8,4,0,0"
+                     Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+        </sl:Drawer.Header>
+        <StackPanel x:Name="Nav" Spacing="2">
+          <sl:NavItem Tag="components" Label="Components" Icon="layers" IsActive="True" />
+          <sl:NavItem Tag="layout" Label="Layout" Icon="home" />
+          <sl:NavItem Tag="feedback" Label="Feedback" Icon="bell" Count="4" />
+          <sl:NavItem Tag="dialogs" Label="Dialogs" Icon="copy" />
+          <sl:NavItem Tag="sample" Label="Migration tool" Icon="upload" />
+        </StackPanel>
+        <sl:Drawer.Footer>
+          <TextBlock Text="Alloy · tokens 0.1" FontSize="11.5" Margin="8,0" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+        </sl:Drawer.Footer>
+      </sl:Drawer>
+    </sl:AppShell.Drawer>
+    <ContentControl x:Name="Page" />
+  </sl:AppShell>
+</sl:SlateWindow>

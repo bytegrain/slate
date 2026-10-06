@@ -1,0 +1,118 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sl="https://slate.dev/avalonia"
+             x:Class="Slate.Avalonia.Demo.Pages.ComponentsPage">
+  <sl:Container Size="Xl" Margin="0,24,0,40">
+    <sl:Stack Spacing="6">
+      <StackPanel Spacing="4">
+        <TextBlock Text="STYLE 09 — ALLOY" FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="11"
+                   Foreground="{DynamicResource Sl.Brush.Accent.Text}" />
+        <TextBlock Text="Engineered for the eight-hour day." Theme="{DynamicResource Sl.Typography.H2}" />
+        <TextBlock Text="Every control here is a native Avalonia control styled by SlateTheme, or a Slate control built on the same tokens."
+                   Foreground="{DynamicResource Sl.Brush.Text.Secondary}" TextWrapping="Wrap" />
+      </StackPanel>
+
+      <sl:Card Header="Buttons" Subtitle="Six variants, three sizes. Primary appears once per view.">
+        <sl:Stack Spacing="5">
+          <sl:Stack Orientation="Horizontal" Wrap="True">
+            <Button Content="Deploy" sl:Sl.Variant="Primary" sl:Sl.Shortcut="⌘↵" />
+            <Button Content="Secondary" />
+            <Button Content="Ghost" Classes="ghost" />
+            <Button Content="Delete" Classes="danger" sl:Sl.Icon="trash" />
+            <Button Content="Delete package" Classes="danger-solid" />
+            <Button Content="Learn more" Classes="link" />
+          </sl:Stack>
+          <sl:Stack Orientation="Horizontal" Wrap="True" AlignItems="Center">
+            <Button Content="Small" sl:Sl.Size="Small" Classes="primary" />
+            <Button Content="Medium" Classes="primary" />
+            <Button Content="Large" sl:Sl.Size="Large" Classes="primary" sl:Sl.Icon="arrow-right" />
+            <Button Content="Export" sl:Sl.Icon="download" />
+            <Button sl:Sl.Icon="plus" AutomationProperties.Name="Add" ToolTip.Tip="Add" />
+            <Button sl:Sl.Icon="more-horizontal" Classes="ghost" AutomationProperties.Name="More" />
+          </sl:Stack>
+          <sl:Stack Orientation="Horizontal" Wrap="True" AlignItems="Center">
+            <Button x:Name="LoadingButton" Content="Deploying…" Classes="primary" sl:Sl.IsLoading="True" />
+            <Button Content="Disabled" Classes="primary" IsEnabled="False" />
+            <Button Content="Disabled" IsEnabled="False" />
+            <ToggleButton Content="Toggle" IsChecked="True" />
+            <Button x:Name="ToggleLoading" Content="Toggle loading" Classes="ghost" />
+          </sl:Stack>
+        </sl:Stack>
+      </sl:Card>
+
+      <sl:ResponsiveGrid>
+        <sl:Card sl:ResponsiveGrid.Md="6" Header="Text fields">
+          <sl:Stack Spacing="4">
+            <sl:TextField Label="Project name" Text="slate-dashboard" HelperText="Lowercase, numbers and dashes." />
+            <sl:TextField x:Name="EmailField" Label="Owner email" Text="aaron@" IsRequired="True" Error="Enter a complete email address." />
+            <sl:TextField Label="Domain" Prefix="https://" Suffix=".dev" Text="slate" />
+            <sl:TextField Label="Search" StartIcon="search" Placeholder="Search packages" />
+            <sl:TextField Label="Notes" IsMultiline="True" Placeholder="Anything reviewers should know" />
+          </sl:Stack>
+        </sl:Card>
+        <sl:Stack sl:ResponsiveGrid.Md="6" Spacing="4">
+          <sl:Card Header="Checkbox &amp; radio">
+            <sl:Stack Spacing="3">
+              <CheckBox Content="Run tests before deploy" IsChecked="True" />
+              <CheckBox Content="Notify on failure" IsThreeState="True" IsChecked="{x:Null}" />
+              <CheckBox Content="Auto-merge when green" />
+              <CheckBox Content="Disabled option" IsEnabled="False" />
+              <sl:Divider Margin="0,4" />
+              <RadioButton GroupName="plan" Content="Team — unlimited projects, SSO" IsChecked="True" />
+              <RadioButton GroupName="plan" Content="Solo — three projects" />
+            </sl:Stack>
+          </sl:Card>
+          <sl:Card Header="Switches &amp; progress">
+            <sl:Stack Spacing="4">
+              <ToggleSwitch Content="Preview deployments" IsChecked="True" />
+              <ToggleSwitch Content="Compact density" />
+              <sl:Stack Spacing="1">
+                <sl:Stack Orientation="Horizontal">
+                  <TextBlock Text="Uploading assets" FontSize="13" />
+                  <sl:Spacer />
+                  <TextBlock Text="64%" FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="12" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
+                </sl:Stack>
+                <ProgressBar Value="64" />
+              </sl:Stack>
+              <ProgressBar IsIndeterminate="True" />
+              <sl:Stack Orientation="Horizontal" AlignItems="Center">
+                <sl:LoadingSpinner />
+                <TextBlock Text="Indexing…" FontSize="13" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
+              </sl:Stack>
+            </sl:Stack>
+          </sl:Card>
+        </sl:Stack>
+      </sl:ResponsiveGrid>
+
+      <sl:ResponsiveGrid>
+        <sl:Card sl:ResponsiveGrid.Md="6" Header="Badges &amp; keys">
+          <sl:Stack Spacing="4">
+            <sl:Stack Orientation="Horizontal" Wrap="True">
+              <sl:Badge Text="Ready" Tone="Success" ShowDot="True" />
+              <sl:Badge Text="Building" Tone="Warning" ShowDot="True" />
+              <sl:Badge Text="Failed" Tone="Danger" ShowDot="True" />
+              <sl:Badge Text="In progress" Tone="Info" />
+              <sl:Badge Text="New" Tone="Accent" />
+              <sl:Badge Text="Draft" />
+            </sl:Stack>
+            <sl:Stack Orientation="Horizontal" AlignItems="Center">
+              <TextBlock Text="Command palette" FontSize="13" />
+              <sl:Kbd Text="⌘K" />
+              <TextBlock Text="Commit" FontSize="13" Margin="12,0,0,0" />
+              <sl:Kbd Text="⌘↵" />
+            </sl:Stack>
+          </sl:Stack>
+        </sl:Card>
+        <sl:Card sl:ResponsiveGrid.Md="6" Header="Typography">
+          <sl:Stack Spacing="2">
+            <TextBlock Text="Heading" Theme="{DynamicResource Sl.Typography.H3}" />
+            <TextBlock Text="Title — dialog and panel headers" Theme="{DynamicResource Sl.Typography.Title}" />
+            <TextBlock Text="Body — Slate ships matching packages for Web, Blazor, WPF and Avalonia." Theme="{DynamicResource Sl.Typography.Body}" TextWrapping="Wrap" />
+            <TextBlock Text="Caption — 12 minutes ago" Theme="{DynamicResource Sl.Typography.Caption}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+            <TextBlock Text="dotnet add package Slate.Avalonia" Theme="{DynamicResource Sl.Typography.Mono}" />
+          </sl:Stack>
+        </sl:Card>
+      </sl:ResponsiveGrid>
+    </sl:Stack>
+  </sl:Container>
+</UserControl>

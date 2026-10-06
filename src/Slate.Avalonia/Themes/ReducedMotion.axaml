@@ -1,0 +1,29 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sl="using:Slate.Avalonia.Controls">
+  <!-- Added by SlateTheme.ReduceMotion: no transitions, no looping animation. -->
+  <Style Selector="ToggleSwitch">
+    <Setter Property="KnobTransitions" Value="{x:Null}" />
+  </Style>
+  <Style Selector="sl|LoadingSpinner /template/ Arc#PART_Arc">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+  <Style Selector="sl|LoadingSpinner /template/ Ellipse#PART_Track">
+    <Setter Property="Opacity" Value="0.8" />
+  </Style>
+  <Style Selector="ProgressBar:indeterminate /template/ Panel#IndeterminateRoot">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+  <Style Selector="ProgressBar:indeterminate">
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Subtle}" />
+  </Style>
+  <Style Selector="sl|SnackbarItem /template/ Border#PART_Progress">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+  <Style Selector="sl|DialogContainer, sl|DialogContainer /template/ Border#PART_Panel, sl|SnackbarItem">
+    <Setter Property="Transitions" Value="{x:Null}" />
+  </Style>
+  <Style Selector="Button /template/ Border#PART_Border, ToggleSwitch /template/ Border#PART_Track">
+    <Setter Property="Transitions" Value="{x:Null}" />
+  </Style>
+</Styles>

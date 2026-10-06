@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Embedded fonts (design/fonts, SIL OFL) replace the generated family lists. -->
+  <FontFamily x:Key="Sl.Font.Family.Ui">avares://Slate.Avalonia/Assets/Fonts#Instrument Sans</FontFamily>
+  <FontFamily x:Key="Sl.Font.Family.Mono">avares://Slate.Avalonia/Assets/Fonts#IBM Plex Mono</FontFamily>
+
+  <!-- Fluent resources mapped to Alloy so un-restyled Fluent controls blend in. -->
+  <FontFamily x:Key="ContentControlThemeFontFamily">avares://Slate.Avalonia/Assets/Fonts#Instrument Sans</FontFamily>
+  <CornerRadius x:Key="ControlCornerRadius">6</CornerRadius>
+  <CornerRadius x:Key="OverlayCornerRadius">8</CornerRadius>
+  <x:Double x:Key="ControlContentThemeFontSize">14</x:Double>
+  <!-- Placeholder colour is already a contrast-checked token; Fluent's extra fade would break it. -->
+  <x:Double x:Key="TextControlPlaceholderOpacity">1</x:Double>
+
+  <!-- Keyboard focus indicator: 2px ring outside a 2px gap. Shown only for keyboard focus. -->
+  <FocusAdornerTemplate x:Key="Sl.FocusAdorner">
+    <Border Margin="-4" CornerRadius="10" BorderThickness="2" BorderBrush="{DynamicResource Sl.Brush.Focus.Ring}" />
+  </FocusAdornerTemplate>
+  <FocusAdornerTemplate x:Key="Sl.FocusAdorner.Pill">
+    <Border Margin="-4" CornerRadius="999" BorderThickness="2" BorderBrush="{DynamicResource Sl.Brush.Focus.Ring}" />
+  </FocusAdornerTemplate>
+  <FocusAdornerTemplate x:Key="Sl.FocusAdorner.Tight">
+    <Border Margin="-3" CornerRadius="8" BorderThickness="2" BorderBrush="{DynamicResource Sl.Brush.Focus.Ring}" />
+  </FocusAdornerTemplate>
+</ResourceDictionary>

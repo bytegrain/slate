@@ -1,0 +1,208 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sl="using:Slate.Avalonia.Controls"
+                    xmlns:slate="using:Slate.Avalonia">
+
+  <!-- SnackbarHost: content plus an overlay stack anchored per SnackbarPosition (docs/design/systems.md). -->
+  <ControlTheme x:Key="{x:Type sl:SnackbarHost}" TargetType="sl:SnackbarHost">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" />
+          <StackPanel Name="PART_Items" Spacing="8" Margin="16"
+                      HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                      />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <!-- SnackbarItem: inverse surface, severity tile, title/message, action, close, remaining-time line. -->
+  <ControlTheme x:Key="{x:Type sl:SnackbarItem}" TargetType="sl:SnackbarItem">
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Inverse.Background}" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Inverse.Text}" />
+    <Setter Property="MinWidth" Value="{DynamicResource Sl.Size.Snackbar.Min}" />
+    <Setter Property="MaxWidth" Value="{DynamicResource Sl.Size.Snackbar.Max}" />
+    <Setter Property="FontSize" Value="13.5" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.16" />
+      </Transitions>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="PART_Root" Background="{TemplateBinding Background}" CornerRadius="{DynamicResource Sl.CornerRadius.Lg}"
+                BoxShadow="{DynamicResource Sl.Shadow.E3}" ClipToBounds="True">
+          <Panel>
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="12,10,6,10">
+              <Border Name="PART_IconTile" Width="18" Height="18" CornerRadius="4" Margin="0,1,10,0" VerticalAlignment="Top"
+                      IsVisible="{Binding $parent[sl:SnackbarItem].HasIcon}">
+                <sl:Icon Name="PART_Icon" Kind="{Binding $parent[sl:SnackbarItem].IconKind}" Size="12" StrokeThickness="3"
+                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+              <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                <TextBlock Name="PART_Title" Text="{Binding $parent[sl:SnackbarItem].Title}" FontWeight="SemiBold" TextWrapping="Wrap" IsVisible="False" />
+                <TextBlock Name="PART_Message" Text="{Binding $parent[sl:SnackbarItem].Message}" TextWrapping="Wrap" />
+              </StackPanel>
+              <Button Name="PART_Action" Grid.Column="2" Classes="ghost small snackbar-action" Margin="8,0,0,0" VerticalAlignment="Center"
+                      Content="{Binding $parent[sl:SnackbarItem].ActionLabel}" IsVisible="False" />
+              <Button Name="PART_Close" Grid.Column="3" Classes="ghost small snackbar-close" slate:Sl.Icon="x" Margin="2,0,0,0"
+                      VerticalAlignment="Center" AutomationProperties.Name="Dismiss notification"
+                      IsVisible="{Binding $parent[sl:SnackbarItem].ShowCloseButton}" />
+            </Grid>
+            <Border Name="PART_Progress" Height="2" VerticalAlignment="Bottom" HorizontalAlignment="Left"
+                    Background="{DynamicResource Sl.Brush.Focus.Ring}" IsVisible="False">
+              <Border.Width>
+                <MultiBinding Converter="{x:Static slate:SlateConverters.Multiply}">
+                  <Binding Path="$parent[sl:SnackbarItem].Progress" />
+                  <Binding Path="$parent[Border].Bounds.Width" />
+                </MultiBinding>
+              </Border.Width>
+            </Border>
+          </Panel>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:has-title /template/ TextBlock#PART_Title">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:has-title /template/ TextBlock#PART_Message">
+      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Inverse.TextMuted}" />
+    </Style>
+    <Style Selector="^:has-action /template/ Button#PART_Action">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:timed /template/ Border#PART_Progress">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^ /template/ Button.snackbar-action, ^ /template/ Button.snackbar-close">
+      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Inverse.Text}" />
+    </Style>
+    <Style Selector="^ /template/ Button.snackbar-action:pointerover, ^ /template/ Button.snackbar-close:pointerover">
+      <Setter Property="Background" Value="#1FFFFFFF" />
+      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Inverse.Text}" />
+    </Style>
+    <Style Selector="^ /template/ Button.snackbar-action">
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <!-- Severity tile: status solid + onSolid glyph (contrast-checked pair). -->
+    <Style Selector="^:info /template/ Border#PART_IconTile"><Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Info.Solid}" /></Style>
+    <Style Selector="^:info /template/ sl|Icon#PART_Icon"><Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Info.OnSolid}" /></Style>
+    <Style Selector="^:success /template/ Border#PART_IconTile"><Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Success.Solid}" /></Style>
+    <Style Selector="^:success /template/ sl|Icon#PART_Icon"><Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Success.OnSolid}" /></Style>
+    <Style Selector="^:warning /template/ Border#PART_IconTile"><Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Warning.Solid}" /></Style>
+    <Style Selector="^:warning /template/ sl|Icon#PART_Icon"><Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Warning.OnSolid}" /></Style>
+    <Style Selector="^:error /template/ Border#PART_IconTile"><Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Danger.Solid}" /></Style>
+    <Style Selector="^:error /template/ sl|Icon#PART_Icon"><Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Danger.OnSolid}" /></Style>
+  </ControlTheme>
+
+  <!-- DialogHost: content plus an overlay for the dialog stack. -->
+  <ControlTheme x:Key="{x:Type sl:DialogHost}" TargetType="sl:DialogHost">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" />
+          <Panel Name="PART_Overlay" IsVisible="False" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <!-- DialogContainer (docs/design/systems.md#dialogs): scrim + raised panel with header / body / footer. -->
+  <ControlTheme x:Key="{x:Type sl:DialogContainer}" TargetType="sl:DialogContainer">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Scrim" Background="{DynamicResource Sl.Brush.Scrim}" />
+          <Border Name="PART_Panel"
+                  Background="{DynamicResource Sl.Brush.Background.Raised}"
+                  CornerRadius="{DynamicResource Sl.CornerRadius.2xl}"
+                  BoxShadow="{DynamicResource Sl.Shadow.E3}"
+                  MinWidth="320"
+                  MaxWidth="{Binding $parent[sl:DialogContainer].PanelMaxWidth}"
+                  MaxHeight="{Binding $parent[sl:DialogContainer].PanelMaxHeight}"
+                  VerticalAlignment="Center"
+                  Margin="32"
+                  ClipToBounds="True"
+                  Focusable="True"
+                  KeyboardNavigation.TabNavigation="Cycle"
+                  AutomationProperties.ControlTypeOverride="Window">
+            <DockPanel>
+              <!-- header -->
+              <Grid Name="PART_Header" DockPanel.Dock="Top" ColumnDefinitions="Auto,*,Auto" Margin="20,18,14,0">
+                <Border Name="PART_IconTile" Width="36" Height="36" CornerRadius="9" Margin="0,0,12,0" VerticalAlignment="Top"
+                        Background="{DynamicResource Sl.Brush.Status.Info.Bg}" IsVisible="False">
+                  <sl:Icon Name="PART_Icon" Kind="{Binding $parent[sl:DialogContainer].IconKind}" Size="18"
+                           Foreground="{DynamicResource Sl.Brush.Status.Info.Fg}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                  <TextBlock Name="PART_Title" Text="{Binding $parent[sl:DialogContainer].Title}" Theme="{DynamicResource Sl.Typography.Title}"
+                             TextWrapping="Wrap" IsVisible="False" />
+                  <TextBlock Name="PART_Description" Text="{Binding $parent[sl:DialogContainer].Description}" TextWrapping="Wrap"
+                             Foreground="{DynamicResource Sl.Brush.Text.Secondary}" FontSize="13.5"
+                             IsVisible="{Binding $parent[sl:DialogContainer].Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                </StackPanel>
+                <Button Name="PART_Close" Grid.Column="2" Classes="ghost small" slate:Sl.Icon="x" VerticalAlignment="Top"
+                        AutomationProperties.Name="Close dialog"
+                        IsVisible="{Binding $parent[sl:DialogContainer].ShowCloseButton}" />
+              </Grid>
+              <!-- footer -->
+              <Border Name="PART_Footer" DockPanel.Dock="Bottom" Padding="20,12" IsVisible="False"
+                      Background="{DynamicResource Sl.Brush.Background.Subtle}"
+                      BorderThickness="0,1,0,0" BorderBrush="{DynamicResource Sl.Brush.Border.Default}">
+                <ContentPresenter Content="{Binding $parent[sl:DialogContainer].Footer}" HorizontalAlignment="Right" />
+              </Border>
+              <!-- body -->
+              <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <ContentPresenter Name="PART_Body" Content="{Binding $parent[sl:DialogContainer].Body}" Margin="20,16,20,20" />
+              </ScrollViewer>
+            </DockPanel>
+          </Border>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:has-title /template/ TextBlock#PART_Title">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:has-icon /template/ Border#PART_IconTile">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:has-footer /template/ Border#PART_Footer">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:destructive">
+      <Style Selector="^ /template/ Border#PART_IconTile">
+        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Danger.Bg}" />
+      </Style>
+      <Style Selector="^ /template/ sl|Icon#PART_Icon">
+        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
+      </Style>
+    </Style>
+    <Style Selector="^:placement-top /template/ Border#PART_Panel">
+      <Setter Property="VerticalAlignment" Value="Top" />
+      <Setter Property="Margin" Value="32,64,32,32" />
+    </Style>
+    <Style Selector="^:full-screen /template/ Border#PART_Panel">
+      <Setter Property="Margin" Value="0" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="VerticalAlignment" Value="Stretch" />
+    </Style>
+    <!-- Lower dialogs keep their scrim but are not interactive. -->
+    <Style Selector="^:not(:top) /template/ Border#PART_Panel">
+      <Setter Property="Opacity" Value="0.96" />
+    </Style>
+    <Style Selector="^ /template/ TextBlock.dialog-message">
+      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Secondary}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type sl:DialogContent}" TargetType="sl:DialogContent">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" />
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

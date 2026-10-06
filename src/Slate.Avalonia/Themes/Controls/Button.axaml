@@ -1,0 +1,225 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sl="using:Slate.Avalonia.Controls"
+                    xmlns:slate="using:Slate.Avalonia">
+  <!--
+    Button (docs/design/components.md#button)
+    Variants via classes or sl:Sl.Variant: (secondary) primary ghost danger danger-solid link
+    Sizes: small large (sl:Sl.Size). States: loading (sl:Sl.IsLoading), icon-only (sl:Sl.Icon without content).
+  -->
+  <ControlTheme x:Key="{x:Type Button}" TargetType="Button">
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Surface}" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.Strong}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Sl.CornerRadius.Md}" />
+    <Setter Property="Height" Value="{DynamicResource Sl.Size.Control.Md}" />
+    <Setter Property="MinWidth" Value="{DynamicResource Sl.Size.Control.Md}" />
+    <Setter Property="Padding" Value="12,0" />
+    <Setter Property="FontFamily" Value="{DynamicResource Sl.Font.Family.Ui}" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusAdorner" Value="{DynamicResource Sl.FocusAdorner}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Border"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  BoxShadow="{DynamicResource Sl.Shadow.Control}" />
+          <!-- Darkening layer for solid variants (hover/press) -->
+          <Border Name="PART_Overlay" CornerRadius="{TemplateBinding CornerRadius}" Background="Transparent" IsHitTestVisible="False" />
+          <StackPanel Name="PART_Row"
+                      Orientation="Horizontal"
+                      Margin="{TemplateBinding Padding}"
+                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+            <sl:LoadingSpinner Name="PART_Spinner" Size="14" IsVisible="False" Margin="0,0,6,0" VerticalAlignment="Center" />
+            <sl:Icon Name="PART_Icon" Kind="{TemplateBinding (slate:Sl.Icon)}" VerticalAlignment="Center" Margin="0,0,6,0" />
+            <ContentPresenter Name="PART_ContentPresenter"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              RecognizesAccessKey="True"
+                              VerticalAlignment="Center" />
+            <sl:Kbd Name="PART_Shortcut" Text="{TemplateBinding (slate:Sl.Shortcut)}" IsVisible="False" Margin="8,0,0,0" VerticalAlignment="Center" />
+          </StackPanel>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- Transitions are set by style (not in the template) so ReduceMotion can remove them. -->
+    <Style Selector="^ /template/ Border#PART_Border">
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.12" />
+          <BrushTransition Property="BorderBrush" Duration="0:0:0.12" />
+        </Transitions>
+      </Setter>
+    </Style>
+
+    <!-- states (secondary) -->
+    <Style Selector="^:pointerover">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Hover}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.ControlHover}" />
+    </Style>
+    <Style Selector="^:pressed">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Pressed}" />
+      <Style Selector="^ /template/ Border#PART_Border">
+        <Setter Property="BoxShadow" Value="{DynamicResource Sl.Shadow.Pressed}" />
+      </Style>
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />
+      <Setter Property="Cursor" Value="Arrow" />
+    </Style>
+
+    <!-- parts -->
+    <Style Selector="^.icon-only">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Width" Value="{DynamicResource Sl.Size.Control.Md}" />
+      <Style Selector="^ /template/ sl|Icon#PART_Icon">
+        <Setter Property="Margin" Value="0" />
+      </Style>
+    </Style>
+    <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter:empty">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^.has-shortcut /template/ sl|Kbd#PART_Shortcut">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^.loading">
+      <Setter Property="IsHitTestVisible" Value="False" />
+      <Setter Property="Cursor" Value="Wait" />
+      <Style Selector="^ /template/ sl|LoadingSpinner#PART_Spinner">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+      <Style Selector="^ /template/ sl|Icon#PART_Icon">
+        <Setter Property="IsVisible" Value="False" />
+      </Style>
+    </Style>
+    <Style Selector="^.icon-only.loading /template/ sl|LoadingSpinner#PART_Spinner">
+      <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <!-- sizes -->
+    <Style Selector="^.small">
+      <Setter Property="Height" Value="{DynamicResource Sl.Size.Control.Sm}" />
+      <Setter Property="MinWidth" Value="{DynamicResource Sl.Size.Control.Sm}" />
+      <Setter Property="Padding" Value="8,0" />
+      <Setter Property="FontSize" Value="12.5" />
+      <Setter Property="CornerRadius" Value="5" />
+    </Style>
+    <Style Selector="^.small.icon-only">
+      <Setter Property="Width" Value="{DynamicResource Sl.Size.Control.Sm}" />
+      <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="^.large">
+      <Setter Property="Height" Value="{DynamicResource Sl.Size.Control.Lg}" />
+      <Setter Property="MinWidth" Value="{DynamicResource Sl.Size.Control.Lg}" />
+      <Setter Property="Padding" Value="16,0" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="CornerRadius" Value="7" />
+    </Style>
+    <Style Selector="^.large.icon-only">
+      <Setter Property="Width" Value="{DynamicResource Sl.Size.Control.Lg}" />
+      <Setter Property="Padding" Value="0" />
+    </Style>
+
+    <!-- primary -->
+    <Style Selector="^.primary">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.OnAccent}" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Style Selector="^ /template/ Border#PART_Border">
+        <Setter Property="BoxShadow" Value="{DynamicResource Sl.Shadow.Primary}" />
+      </Style>
+      <Style Selector="^:pointerover">
+        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Hover}" />
+      </Style>
+      <Style Selector="^:pressed">
+        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Pressed}" />
+      </Style>
+    </Style>
+
+    <!-- ghost -->
+    <Style Selector="^.ghost">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Secondary}" />
+      <Style Selector="^ /template/ Border#PART_Border">
+        <Setter Property="BoxShadow" Value="none" />
+      </Style>
+      <Style Selector="^:pointerover">
+        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Muted}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+      </Style>
+      <Style Selector="^:pressed">
+        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Pressed}" />
+      </Style>
+    </Style>
+
+    <!-- danger (neutral chrome, danger text) -->
+    <Style Selector="^.danger">
+      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
+    </Style>
+
+    <!-- danger-solid -->
+    <Style Selector="^.danger-solid">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Danger.Solid}" />
+      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Danger.OnSolid}" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Style Selector="^ /template/ Border#PART_Border">
+        <Setter Property="BoxShadow" Value="{DynamicResource Sl.Shadow.Primary}" />
+      </Style>
+      <Style Selector="^:pointerover">
+        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Danger.Solid}" />
+        <Style Selector="^ /template/ Border#PART_Overlay">
+          <Setter Property="Background" Value="#1A000000" />
+        </Style>
+      </Style>
+      <Style Selector="^:pressed /template/ Border#PART_Overlay">
+        <Setter Property="Background" Value="#33000000" />
+      </Style>
+    </Style>
+
+    <!-- link -->
+    <Style Selector="^.link">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Link}" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="MinWidth" Value="0" />
+      <Setter Property="Height" Value="NaN" />
+      <Style Selector="^ /template/ Border#PART_Border">
+        <Setter Property="BoxShadow" Value="none" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter > TextBlock">
+        <Setter Property="TextDecorations" Value="Underline" />
+      </Style>
+      <Style Selector="^:pointerover">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.LinkHover}" />
+      </Style>
+      <Style Selector="^:pressed">
+        <Setter Property="Background" Value="Transparent" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <!-- ToggleButton shares the Button look; checked uses the accent tint. -->
+  <ControlTheme x:Key="{x:Type ToggleButton}" TargetType="ToggleButton" BasedOn="{StaticResource {x:Type Button}}">
+    <Style Selector="^:checked">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Subtle}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Accent.Text}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

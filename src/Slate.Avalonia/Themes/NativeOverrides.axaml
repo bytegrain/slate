@@ -1,0 +1,105 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!--
+    Alloy styling for native controls that keep Fluent's templates (their template parts are stable):
+    Window, TextBox, ProgressBar, ScrollBar, ToolTip. Styles outrank ControlTheme setters.
+  -->
+
+  <Style Selector="Window">
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Canvas}" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="FontFamily" Value="{DynamicResource Sl.Font.Family.Ui}" />
+    <Setter Property="FontSize" Value="14" />
+  </Style>
+
+  <!-- TextBox (field part of TextField) -->
+  <Style Selector="TextBox">
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Sunken}" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.Strong}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Sl.CornerRadius.Md}" />
+    <Setter Property="MinHeight" Value="{DynamicResource Sl.Size.Control.Md}" />
+    <Setter Property="Padding" Value="10,0" />
+    <Setter Property="FontFamily" Value="{DynamicResource Sl.Font.Family.Ui}" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="PlaceholderForeground" Value="{DynamicResource Sl.Brush.Text.Placeholder}" />
+    <Setter Property="CaretBrush" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="SelectionBrush" Value="{DynamicResource Sl.Brush.Selection.Background}" />
+    <Setter Property="SelectionForegroundBrush" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+  </Style>
+  <Style Selector="TextBox /template/ Border#PART_BorderElement">
+    <Setter Property="BoxShadow" Value="{DynamicResource Sl.Shadow.Inset}" />
+  </Style>
+  <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Sunken}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.ControlHover}" />
+  </Style>
+  <Style Selector="TextBox:pointerover">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+  </Style>
+  <Style Selector="TextBox:focus">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+  </Style>
+  <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Sunken}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BoxShadow" Value="{DynamicResource Sl.Shadow.FocusRing}" />
+  </Style>
+  <Style Selector="TextBox.invalid /template/ Border#PART_BorderElement, TextBox:error /template/ Border#PART_BorderElement">
+    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
+  </Style>
+  <Style Selector="TextBox.invalid:focus /template/ Border#PART_BorderElement">
+    <Setter Property="BoxShadow" Value="{DynamicResource Sl.Shadow.FocusRingDanger}" />
+  </Style>
+  <Style Selector="TextBox:disabled">
+    <Setter Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />
+  </Style>
+  <Style Selector="TextBox:disabled /template/ Border#PART_BorderElement">
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Sunken}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.Strong}" />
+  </Style>
+  <Style Selector="TextBox[AcceptsReturn=True]">
+    <Setter Property="Padding" Value="10,7" />
+    <Setter Property="VerticalContentAlignment" Value="Top" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="MinHeight" Value="76" />
+  </Style>
+
+  <!-- ProgressBar: 6px pill track. -->
+  <Style Selector="ProgressBar">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Muted}" />
+    <Setter Property="CornerRadius" Value="999" />
+  </Style>
+  <Style Selector="ProgressBar:horizontal">
+    <Setter Property="MinHeight" Value="6" />
+    <Setter Property="Height" Value="6" />
+    <Setter Property="MinWidth" Value="80" />
+  </Style>
+  <Style Selector="ProgressBar:vertical">
+    <Setter Property="MinWidth" Value="6" />
+    <Setter Property="Width" Value="6" />
+  </Style>
+
+  <!-- ScrollBar: quiet thumb in border.strong. -->
+  <Style Selector="ScrollBar /template/ Thumb">
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Border.Strong}" />
+  </Style>
+  <Style Selector="ScrollBar /template/ Thumb:pointerover">
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Border.ControlHover}" />
+  </Style>
+
+  <!-- ToolTip: inverse chip. -->
+  <Style Selector="ToolTip">
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Inverse.Background}" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Inverse.Text}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Sl.CornerRadius.Md}" />
+    <Setter Property="Padding" Value="8,5" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="Medium" />
+  </Style>
+</Styles>

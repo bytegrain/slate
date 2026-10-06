@@ -1,0 +1,37 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sl="https://slate.dev/avalonia"
+             x:Class="Slate.Avalonia.Demo.Pages.FeedbackPage">
+  <sl:Container Size="Xl" Margin="0,24,0,40">
+    <sl:Stack Spacing="6">
+      <StackPanel Spacing="4">
+        <TextBlock Text="Feedback" Theme="{DynamicResource Sl.Typography.H2}" />
+        <TextBlock Text="Status is never colour alone: every state pairs a hue with an icon and words."
+                   Foreground="{DynamicResource Sl.Brush.Text.Secondary}" TextWrapping="Wrap" />
+      </StackPanel>
+
+      <sl:ResponsiveGrid Spacing="3">
+        <sl:Alert sl:ResponsiveGrid.Md="6" Severity="Info" Title="New tokens available" Content="Pull v0.2 to get the updated focus ring." />
+        <sl:Alert sl:ResponsiveGrid.Md="6" Severity="Success" Title="Deployed to production" Content="slate-web is live in 3 regions." IsDismissible="True" />
+        <sl:Alert sl:ResponsiveGrid.Md="6" Severity="Warning" Title="Usage at 80%" Content="Build minutes reset on the 1st.">
+          <sl:Alert.Actions>
+            <Button Content="Upgrade" sl:Sl.Size="Small" />
+          </sl:Alert.Actions>
+        </sl:Alert>
+        <sl:Alert sl:ResponsiveGrid.Md="6" Severity="Error" Title="Build failed" Content="3 tests failed in Slate.Wpf.Tests." IsDismissible="True" />
+      </sl:ResponsiveGrid>
+
+      <sl:Card Header="Snackbars" Subtitle="Max 3 visible, the rest queue · errors linger 8s · hover or focus to pause · Esc dismisses">
+        <sl:Stack Orientation="Horizontal" Wrap="True">
+          <Button x:Name="Simple" Content="Simple" />
+          <Button x:Name="Success" Content="Success with title" />
+          <Button x:Name="Undo" Content="With Undo action" />
+          <Button x:Name="Error" Content="Error" Classes="danger" />
+          <Button x:Name="Sticky" Content="Sticky (needs dismiss)" />
+          <Button x:Name="Burst" Content="Burst of 6" Classes="primary" />
+          <Button x:Name="Clear" Content="Clear all" Classes="ghost" />
+        </sl:Stack>
+      </sl:Card>
+    </sl:Stack>
+  </sl:Container>
+</UserControl>

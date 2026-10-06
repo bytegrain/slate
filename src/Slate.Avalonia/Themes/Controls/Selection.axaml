@@ -1,0 +1,224 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sl="using:Slate.Avalonia.Controls">
+
+  <!-- CheckBox (docs/design/components.md#checkbox): 16px box, accent fill when checked or indeterminate. -->
+  <ControlTheme x:Key="{x:Type CheckBox}" TargetType="CheckBox">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="FocusAdorner" Value="{DynamicResource Sl.FocusAdorner.Tight}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid ColumnDefinitions="Auto,*" Background="{TemplateBinding Background}">
+          <Border Name="PART_Box"
+                  Width="16" Height="16"
+                  VerticalAlignment="Center"
+                  CornerRadius="{DynamicResource Sl.CornerRadius.Sm}"
+                  BorderThickness="1"
+                  BorderBrush="{DynamicResource Sl.Brush.Border.Control}"
+                  Background="{DynamicResource Sl.Brush.Background.Sunken}"
+                  BoxShadow="{DynamicResource Sl.Shadow.Inset}">
+            <Panel>
+              <sl:Icon Name="PART_Check" Kind="check" Size="12" StrokeThickness="3.5" Foreground="{DynamicResource Sl.Brush.Text.OnAccent}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False" />
+              <sl:Icon Name="PART_Indeterminate" Kind="minus" Size="12" StrokeThickness="3.5" Foreground="{DynamicResource Sl.Brush.Text.OnAccent}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False" />
+            </Panel>
+          </Border>
+          <ContentPresenter Name="PART_ContentPresenter"
+                            Grid.Column="1"
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            RecognizesAccessKey="True"
+                            TextWrapping="Wrap" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter:empty">
+      <Setter Property="Margin" Value="0" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#PART_Box">
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.ControlHover}" />
+    </Style>
+    <Style Selector="^:checked, ^:indeterminate">
+      <Style Selector="^ /template/ Border#PART_Box">
+        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+        <Setter Property="BoxShadow" Value="none" />
+      </Style>
+    </Style>
+    <Style Selector="^:checked:pointerover /template/ Border#PART_Box, ^:indeterminate:pointerover /template/ Border#PART_Box">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Hover}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Hover}" />
+    </Style>
+    <Style Selector="^:checked /template/ sl|Icon#PART_Check">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:indeterminate /template/ sl|Icon#PART_Indeterminate">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />
+    </Style>
+  </ControlTheme>
+
+  <!-- RadioButton: 16px circle; checked = accent fill with a 6px dot. Arrow keys move within a group. -->
+  <ControlTheme x:Key="{x:Type RadioButton}" TargetType="RadioButton">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="FocusAdorner" Value="{DynamicResource Sl.FocusAdorner.Tight}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid ColumnDefinitions="Auto,*" Background="{TemplateBinding Background}">
+          <Border Name="PART_Ring"
+                  Width="16" Height="16"
+                  VerticalAlignment="Center"
+                  CornerRadius="8"
+                  BorderThickness="1"
+                  BorderBrush="{DynamicResource Sl.Brush.Border.Control}"
+                  Background="{DynamicResource Sl.Brush.Background.Sunken}"
+                  BoxShadow="{DynamicResource Sl.Shadow.Inset}">
+            <Ellipse Name="PART_Dot" Width="6" Height="6" Fill="{DynamicResource Sl.Brush.Text.OnAccent}" IsVisible="False" />
+          </Border>
+          <ContentPresenter Name="PART_ContentPresenter"
+                            Grid.Column="1"
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            RecognizesAccessKey="True"
+                            TextWrapping="Wrap" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter:empty">
+      <Setter Property="Margin" Value="0" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#PART_Ring">
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.ControlHover}" />
+    </Style>
+    <Style Selector="^:checked">
+      <Style Selector="^ /template/ Border#PART_Ring">
+        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+        <Setter Property="BoxShadow" Value="none" />
+      </Style>
+      <Style Selector="^ /template/ Ellipse#PART_Dot">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />
+    </Style>
+  </ControlTheme>
+
+  <!--
+    ToggleSwitch (docs/design/components.md#switch). Label (Content) before the track.
+    PART_SwitchKnob's width is the knob's travel; ToggleSwitch moves PART_MovingKnobs along it.
+  -->
+  <ControlTheme x:Key="{x:Type ToggleSwitch}" TargetType="ToggleSwitch">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="FocusAdorner" Value="{DynamicResource Sl.FocusAdorner.Tight}" />
+    <Setter Property="KnobTransitions">
+      <Transitions>
+        <DoubleTransition Property="Canvas.Left" Duration="0:0:0.12">
+          <DoubleTransition.Easing>
+            <SplineEasing X1="0.2" Y1="0" X2="0" Y2="1" />
+          </DoubleTransition.Easing>
+        </DoubleTransition>
+      </Transitions>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid ColumnDefinitions="*,Auto" Background="{TemplateBinding Background}">
+          <ContentPresenter Name="PART_ContentPresenter"
+                            Margin="0,0,12,0"
+                            VerticalAlignment="Center"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            RecognizesAccessKey="True" />
+          <Grid Name="PART_TrackArea" Grid.Column="1"
+                Width="{DynamicResource Sl.Switch.TrackWidth}"
+                Height="{DynamicResource Sl.Switch.TrackHeight}"
+                VerticalAlignment="Center">
+            <!-- Off: track + a border.control outline (>= 3:1, docs/design/color.md). -->
+            <Border Name="PART_Track"
+                    CornerRadius="999"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource Sl.Brush.Border.Control}"
+                    Background="{DynamicResource Sl.Brush.Control.Track}"
+                    BoxShadow="{DynamicResource Sl.Shadow.Inset}" />
+            <Canvas Name="PART_SwitchKnob"
+                    Width="{DynamicResource Sl.Switch.KnobTravel}"
+                    HorizontalAlignment="Left">
+              <Panel Name="PART_MovingKnobs"
+                     Width="{DynamicResource Sl.Switch.KnobSlot}"
+                     Height="{DynamicResource Sl.Switch.KnobSlot}"
+                     Background="Transparent">
+                <Border Name="PART_Knob"
+                        Width="{DynamicResource Sl.Switch.KnobSize}"
+                        Height="{DynamicResource Sl.Switch.KnobSize}"
+                        CornerRadius="999"
+                        BoxShadow="0 1 2 0 #4D000000"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                  <Border.Background>
+                    <LinearGradientBrush StartPoint="50%,0%" EndPoint="50%,100%">
+                      <GradientStop Offset="0" Color="{DynamicResource Sl.Color.Control.Thumb}" />
+                      <GradientStop Offset="1" Color="{DynamicResource Sl.Color.Control.ThumbShade}" />
+                    </LinearGradientBrush>
+                  </Border.Background>
+                </Border>
+              </Panel>
+            </Canvas>
+          </Grid>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter:empty">
+      <Setter Property="Margin" Value="0" />
+    </Style>
+    <Style Selector="^ /template/ Border#PART_Track">
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.12" />
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="^:checked /template/ Border#PART_Track">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+      <Setter Property="BoxShadow" Value="none" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#PART_Track">
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.ControlHover}" />
+    </Style>
+    <Style Selector="^:checked:pointerover /template/ Border#PART_Track">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Hover}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Hover}" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

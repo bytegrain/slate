@@ -1,0 +1,23 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Slate.Avalonia.SlateTheme">
+  <!-- Base templates for everything Slate does not restyle (re-coloured from tokens in SlateTheme.cs). -->
+  <FluentTheme />
+
+  <Styles.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://Slate.Avalonia/Themes/Generated/Tokens.axaml" />
+        <ResourceInclude Source="avares://Slate.Avalonia/Themes/Resources.axaml" />
+        <ResourceInclude Source="avares://Slate.Avalonia/Themes/Controls/Button.axaml" />
+        <ResourceInclude Source="avares://Slate.Avalonia/Themes/Controls/Selection.axaml" />
+        <ResourceInclude Source="avares://Slate.Avalonia/Themes/Controls/Display.axaml" />
+        <ResourceInclude Source="avares://Slate.Avalonia/Themes/Controls/Fields.axaml" />
+        <ResourceInclude Source="avares://Slate.Avalonia/Themes/Controls/Shell.axaml" />
+        <ResourceInclude Source="avares://Slate.Avalonia/Themes/Controls/Systems.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Styles.Resources>
+
+  <StyleInclude Source="avares://Slate.Avalonia/Themes/NativeOverrides.axaml" />
+</Styles>
