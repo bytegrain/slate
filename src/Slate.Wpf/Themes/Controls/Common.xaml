@@ -84,8 +84,8 @@
 
   <!-- ToolTip: inverse bubble, label size. -->
   <Style TargetType="ToolTip">
-    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Inverse.Background}" />
-    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Inverse.Text}" />
+    <Setter Property="Background" Value="{DynamicResource Sl.Component.Tooltip.Background.Brush}" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Component.Tooltip.Foreground.Brush}" />
     <Setter Property="FontFamily" Value="{DynamicResource Sl.Font.Family.Ui}" />
     <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Xs}" />
     <Setter Property="FontWeight" Value="{DynamicResource Sl.Font.Weight.Medium}" />
@@ -94,10 +94,12 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="ToolTip">
-          <Border Background="{TemplateBinding Background}" CornerRadius="{DynamicResource Sl.CornerRadius.Md}"
-                  Padding="{TemplateBinding Padding}" Margin="4" Effect="{DynamicResource Sl.Effect.E2}">
-            <ContentPresenter TextElement.Foreground="{TemplateBinding Foreground}" />
-          </Border>
+          <Grid Margin="4">
+            <Border Background="{TemplateBinding Background}" CornerRadius="{DynamicResource Sl.Component.Tooltip.Radius.Corner}" Effect="{DynamicResource Sl.Effect.E2}" />
+            <Border Background="{TemplateBinding Background}" CornerRadius="{DynamicResource Sl.Component.Tooltip.Radius.Corner}" Padding="{TemplateBinding Padding}">
+              <ContentPresenter TextElement.Foreground="{TemplateBinding Foreground}" />
+            </Border>
+          </Grid>
         </ControlTemplate>
       </Setter.Value>
     </Setter>

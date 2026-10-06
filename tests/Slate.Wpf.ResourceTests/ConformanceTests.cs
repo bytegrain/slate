@@ -35,7 +35,23 @@ public partial class ConformanceTests
         ["Stack"] = ("sl:Stack", false),
         ["SnackbarHost"] = ("sl:SnackbarHost", false),
         ["Dialog"] = ("sl:DialogContent", false),
+        ["Select"] = ("sl:Select", false),
+        ["Menu"] = ("sl:Menu", false),
+        ["Tabs"] = ("sl:Tabs", false),
+        ["Tooltip"] = ("sl:Tooltip", false),
+        ["Popover"] = ("sl:Popover", false),
+        ["DatePicker"] = ("sl:DatePicker", false),
+        ["TreeView"] = ("sl:TreeView", false),
+        ["SegmentedControl"] = ("sl:SegmentedControl", false),
+        ["Slider"] = ("sl:Slider", false),
+        ["Avatar"] = ("sl:Avatar", false),
+        ["Breadcrumbs"] = ("sl:Breadcrumbs", false),
+        ["Pagination"] = ("sl:Pagination", false),
+        ["Skeleton"] = ("sl:Skeleton", false),
     };
+
+    /// <summary>Components another track owns; everything else in the contract is required, whatever its "status".</summary>
+    private static readonly HashSet<string> NotYetRequired = ["DataGrid"];
 
     /// <summary>
     /// Documented WPF spellings (src/Slate.Wpf/README.md): framework-native names, and options whose canonical name
@@ -52,6 +68,11 @@ public partial class ConformanceTests
         ["Progress.Indeterminate"] = "IsIndeterminate",
         ["Container.MaxWidth"] = "ContainerMaxWidth",
         ["Dialog.MaxWidth"] = "DialogMaxWidth",
+        ["Menu.ContextMenu"] = "AsContextMenu",
+        ["Tooltip.Placement"] = "TooltipPlacement",
+        ["Avatar.Name"] = "DisplayName",
+        ["Slider.Min"] = "Minimum",
+        ["Slider.Max"] = "Maximum",
     };
 
     public static TheoryData<string> Components => new(Implementations.Keys);
@@ -77,7 +98,8 @@ public partial class ConformanceTests
     [Fact]
     public void Every_contract_component_has_a_wpf_implementation()
     {
-        var contract = Api.GetProperty("components").EnumerateObject().Where(c => !(c.Value.TryGetProperty("status", out var st) && st.GetString() == "planned")).Select(c => c.Name).ToHashSet();
+        // "status": "planned" is ignored on purpose: a wave stays required here even while the contract still marks it planned.
+        var contract = Api.GetProperty("components").EnumerateObject().Select(c => c.Name).Where(c => !NotYetRequired.Contains(c)).ToHashSet();
         Assert.Empty(contract.Except(Implementations.Keys));
         foreach (var (component, (type, _)) in Implementations)
             Assert.True(WpfMetadata.Find(type) is not null, $"{component}: type {type} not found");
@@ -230,8 +252,9 @@ public partial class ConformanceTests
     public void Resource_keys_used_in_code_exist()
     {
         var defined = XamlResourceTests.AllDefinedKeys();
-        var code = File.ReadAllText(Path.Combine(Root, "src", "Slate.Wpf", "Styling.cs"))
-                   + File.ReadAllText(Path.Combine(Root, "src", "Slate.Wpf", "Services", "DialogHost.cs"));
+        var code = string.Concat(Directory.EnumerateFiles(Path.Combine(Root, "src", "Slate.Wpf"), "*.cs", SearchOption.AllDirectories)
+            .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}") && !f.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}"))
+            .Select(File.ReadAllText));
         var keys = new HashSet<string>();
         foreach (Match m in Regex.Matches(code, "\\$?\"(Sl\\.[A-Za-z0-9_.{}()]+)\""))
         {
@@ -246,5 +269,50 @@ public partial class ConformanceTests
         var missing = keys.Where(k => !defined.Contains(k)).ToList();
         Assert.True(missing.Count == 0, $"Code references undefined keys: {string.Join(", ", missing)}");
         Assert.Contains("Sl.Component.Button.PaddingMd", keys);
+        Assert.Contains("Sl.Component.Tree.Indent", keys);
+    }
+
+    [Theory, MemberData(nameof(Components))]
+    public void Slate_controls_have_a_default_template(string component)
+    {
+        var (typeName, native) = Implementations[component];
+        if (native) return;
+        // Only templated controls need a theme style; panels and self-drawn elements (Stack, Spinner) don't.
+        var templated = false;
+        for (var t = WpfMetadata.Find(typeName); t is not null; t = t.BaseType)
+            templated |= t.FullName == "System.Windows.Controls.Control";
+        if (!templated) return;
+        var themes = Path.Combine(Root, "src", "Slate.Wpf", "Themes");
+        var styled = Directory.EnumerateFiles(themes, "*.xaml", SearchOption.AllDirectories)
+            .Any(f => File.ReadAllText(f).Contains($"TargetType=\"{typeName}\""));
+        Assert.True(styled, $"{component}: no implicit Style TargetType=\"{typeName}\" in Themes/");
+    }
+
+    /// <summary>Wave-2 surfaces must draw from their component tokens, not raw palette picks.</summary>
+    [Theory]
+    [InlineData("sl:Popover", "Sl.Component.Popover.")]
+    [InlineData("sl:Tooltip", "Sl.Component.Tooltip.")]
+    [InlineData("sl:Tab", "Sl.Component.Tabs.")]
+    [InlineData("sl:Tabs", "Sl.Component.Tabs.")]
+    [InlineData("sl:Avatar", "Sl.Component.Avatar.")]
+    [InlineData("sl:Skeleton", "Sl.Component.Skeleton.")]
+    [InlineData("sl:Select", "Sl.Component.Menu.")]
+    [InlineData("sl:Select", "Sl.Component.Field.")]
+    [InlineData("sl:DatePicker", "Sl.Component.Field.")]
+    [InlineData("Sl.CalendarDay", "Sl.Component.Calendar.")]
+    [InlineData("sl:TreeView", "Sl.Component.Tree.")]
+    public void Wave2_styles_use_component_tokens(string style, string prefix)
+    {
+        var xaml = File.ReadAllText(Path.Combine(Root, "src", "Slate.Wpf", "Themes", "Generic.xaml"));
+        var doc = XDocument.Parse(xaml);
+        XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
+        var element = doc.Root!.Elements().FirstOrDefault(e => e.Name.LocalName == "Style"
+            && ((string?)e.Attribute(x + "Key") == style || ((string?)e.Attribute("TargetType") == style && e.Attribute(x + "Key") is null)));
+        Assert.True(element is not null, $"no style {style}");
+        var body = element!.ToString();
+        // Shared templates (StaticResource) count: the overlay panel and option rows live beside the style.
+        foreach (Match m in Regex.Matches(body, "StaticResource (Sl\\.[A-Za-z.]+)"))
+            body += doc.Root.Elements().FirstOrDefault(e => (string?)e.Attribute(x + "Key") == m.Groups[1].Value)?.ToString();
+        Assert.Contains(prefix, body);
     }
 }

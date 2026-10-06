@@ -3,6 +3,13 @@ using System.Windows.Controls.Primitives;
 
 namespace Slate.Wpf;
 
+/// <summary>Field-like controls (TextField, Select, DatePicker) that share the text-field chrome.</summary>
+internal interface IFieldChrome
+{
+    DependencyProperty FieldVariantProperty { get; }
+    void SetActualVariant(FieldVariant variant);
+}
+
 /// <summary>
 /// Turns Slate options (variant × tone × size × radius, falling back to <see cref="SlateTheme.Defaults"/>) into the
 /// computed <see cref="Sl"/> properties templates bind to. Colours are resource <em>references</em>, so theme
@@ -48,7 +55,7 @@ internal static class Styling
             case SlKind.Badge when fe is Badge b: StyleBadge(b); break;
             case SlKind.Alert when fe is Alert a: StyleAlert(a); break;
             case SlKind.Card when fe is Card c: StyleCard(c); break;
-            case SlKind.Field when fe is TextField t: StyleField(t); break;
+            case SlKind.Field when fe is IFieldChrome f: StyleField(fe, f); break;
         }
     }
 
@@ -239,11 +246,11 @@ internal static class Styling
         ApplyRadius(c, Pick(c, Sl.RadiusProperty, Defaults.Card.Radius), "Sl.Component.Card.Radius.Corner");
     }
 
-    private static void StyleField(TextField t)
+    private static void StyleField(FrameworkElement t, IFieldChrome field)
     {
         var d = Defaults.Field;
-        var variant = Pick(t, TextField.VariantProperty, d.Variant);
-        t.SetActualVariant(variant);
+        var variant = Pick(t, field.FieldVariantProperty, d.Variant);
+        field.SetActualVariant(variant);
         Sl.SetActualSize(t, Pick(t, Sl.SizeProperty, d.Size));
         Ref(t, Sl.PaddingXProperty, "Sl.Component.Field.PaddingX");
         if (variant == FieldVariant.Underlined)

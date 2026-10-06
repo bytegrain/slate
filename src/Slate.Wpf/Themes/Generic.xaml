@@ -1309,4 +1309,1160 @@
       </DataTrigger>
     </DataTemplate.Triggers>
   </DataTemplate>
+
+  <!-- ======================= Wave 2: overlays, navigation, pickers, collections ======================= -->
+
+  <!-- Raised overlay panel (popover tokens): shadow on its own layer so text keeps ClearType. -->
+  <ControlTemplate x:Key="Sl.OverlayPanel" TargetType="ContentControl">
+    <Grid Margin="8,4,8,16">
+      <Border CornerRadius="{DynamicResource Sl.Component.Popover.Radius.Corner}" Background="{DynamicResource Sl.Component.Popover.Background.Brush}"
+              Effect="{DynamicResource Sl.Component.Popover.Shadow.Effect}" />
+      <Border CornerRadius="{DynamicResource Sl.Component.Popover.Radius.Corner}" Background="{DynamicResource Sl.Component.Popover.Background.Brush}"
+              BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="1" Padding="{DynamicResource Sl.Component.Popover.Padding.Thickness}"
+              TextElement.Foreground="{DynamicResource Sl.Brush.Text.Primary}" TextElement.FontFamily="{DynamicResource Sl.Font.Family.Ui}"
+              TextElement.FontSize="{DynamicResource Sl.Font.Size.Md}">
+        <ContentPresenter />
+      </Border>
+    </Grid>
+  </ControlTemplate>
+
+  <Style TargetType="sl:Popover">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="sl:Popover">
+          <Grid>
+            <ContentPresenter x:Name="PART_Anchor" Content="{TemplateBinding Anchor}" />
+            <Popup x:Name="PART_Popup" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+              <ContentControl Template="{StaticResource Sl.OverlayPanel}" Focusable="False" IsTabStop="False" KeyboardNavigation.TabNavigation="Continue">
+                <ContentPresenter x:Name="PART_Panel" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Margin="8" />
+              </ContentControl>
+            </Popup>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="sl:Tooltip">
+    <Setter Property="Background" Value="{DynamicResource Sl.Component.Tooltip.Background.Brush}" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Component.Tooltip.Foreground.Brush}" />
+    <Setter Property="FontFamily" Value="{DynamicResource Sl.Font.Family.Ui}" />
+    <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Xs}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Sl.Font.Weight.Medium}" />
+    <Setter Property="Padding" Value="8,5" />
+    <Setter Property="HasDropShadow" Value="False" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="sl:Tooltip">
+          <Grid Margin="4">
+            <Border CornerRadius="{DynamicResource Sl.Component.Tooltip.Radius.Corner}" Background="{TemplateBinding Background}" Effect="{DynamicResource Sl.Effect.E2}" />
+            <Border CornerRadius="{DynamicResource Sl.Component.Tooltip.Radius.Corner}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+              <StackPanel Orientation="Horizontal" TextElement.Foreground="{TemplateBinding Foreground}">
+                <TextBlock x:Name="TextHost" Text="{TemplateBinding Text}" VerticalAlignment="Center" MaxWidth="320" TextWrapping="Wrap" />
+                <ContentPresenter x:Name="ContentHost" VerticalAlignment="Center" />
+                <Border x:Name="ShortcutBox" Margin="8,0,-2,0" CornerRadius="{DynamicResource Sl.CornerRadius.Xs}" BorderThickness="1"
+                        BorderBrush="{DynamicResource Sl.Brush.Inverse.TextMuted}" Padding="4,0" VerticalAlignment="Center">
+                  <TextBlock Text="{TemplateBinding Shortcut}" FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="{DynamicResource Sl.Font.Size.2xs}"
+                             Foreground="{DynamicResource Sl.Brush.Inverse.TextMuted}" />
+                </Border>
+              </StackPanel>
+            </Border>
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Content" Value="{x:Null}">
+              <Setter TargetName="ContentHost" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource Self}, Converter={x:Static sl:IsNotNullConverter.Instance}}" Value="True">
+              <Setter TargetName="TextHost" Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+            <Trigger Property="Shortcut" Value="{x:Null}">
+              <Setter TargetName="ShortcutBox" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="sl:Menu">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="sl:Menu">
+          <ContentPresenter x:Name="PART_Trigger" Content="{TemplateBinding Trigger}" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- ===== Tabs ===== -->
+
+  <Style TargetType="sl:Tabs">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="sl:Tabs">
+          <DockPanel KeyboardNavigation.TabNavigation="Local" LastChildFill="True">
+            <Border x:Name="Strip" DockPanel.Dock="Top" BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="0,0,0,1">
+              <ScrollViewer x:Name="StripScroll" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled" Focusable="False">
+                <TabPanel x:Name="HeaderPanel" IsItemsHost="True" KeyboardNavigation.TabIndex="1" Background="Transparent" />
+              </ScrollViewer>
+            </Border>
+            <Border x:Name="ContentBorder" Background="{TemplateBinding Background}" BorderBrush="{DynamicResource Sl.Brush.Border.Default}"
+                    BorderThickness="0" Padding="0,16,0,0" KeyboardNavigation.TabIndex="2">
+              <Grid>
+                <ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent" />
+                <Grid x:Name="PART_KeepAliveHost" />
+              </Grid>
+            </Border>
+          </DockPanel>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Direction" Value="Column">
+              <Setter TargetName="Strip" Property="DockPanel.Dock" Value="Left" />
+              <Setter TargetName="Strip" Property="BorderThickness" Value="0,0,1,0" />
+              <Setter TargetName="StripScroll" Property="HorizontalScrollBarVisibility" Value="Disabled" />
+              <Setter TargetName="StripScroll" Property="VerticalScrollBarVisibility" Value="Auto" />
+              <Setter TargetName="ContentBorder" Property="Padding" Value="20,0,0,0" />
+            </Trigger>
+            <Trigger Property="Variant" Value="Pills">
+              <Setter TargetName="Strip" Property="BorderThickness" Value="0" />
+              <Setter TargetName="Strip" Property="Background" Value="{DynamicResource Sl.Component.Tabs.PillBackground.Brush}" />
+              <Setter TargetName="Strip" Property="CornerRadius" Value="{DynamicResource Sl.CornerRadius.Lg}" />
+              <Setter TargetName="Strip" Property="Padding" Value="3" />
+              <Setter TargetName="Strip" Property="HorizontalAlignment" Value="Left" />
+            </Trigger>
+            <Trigger Property="Variant" Value="Enclosed">
+              <Setter TargetName="ContentBorder" Property="BorderThickness" Value="1,0,1,1" />
+              <Setter TargetName="ContentBorder" Property="Background" Value="{DynamicResource Sl.Brush.Background.Surface}" />
+              <Setter TargetName="ContentBorder" Property="Padding" Value="16" />
+              <Setter TargetName="ContentBorder" Property="CornerRadius" Value="0,0,8,8" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="sl:Tab">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Secondary}" />
+    <Setter Property="FontFamily" Value="{DynamicResource Sl.Font.Family.Ui}" />
+    <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Sm}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Sl.Font.Weight.Medium}" />
+    <Setter Property="Height" Value="{DynamicResource Sl.Size.Control.Md}" />
+    <Setter Property="Padding" Value="12,0" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource Sl.FocusVisual}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="sl:Tab">
+          <Grid x:Name="Root" SnapsToDevicePixels="True" Background="Transparent">
+            <Border x:Name="Pill" CornerRadius="{DynamicResource Sl.CornerRadius.Md}" Background="Transparent" BorderThickness="0" />
+            <StackPanel Orientation="Horizontal" Margin="{TemplateBinding Padding}" VerticalAlignment="Center">
+              <sl:Icon x:Name="IconGlyph" Kind="{TemplateBinding Icon}" Margin="0,0,6,0" VerticalAlignment="Center" />
+              <TextBlock x:Name="LabelText" Text="{TemplateBinding Label}" VerticalAlignment="Center" />
+              <ContentPresenter x:Name="HeaderHost" ContentSource="Header" VerticalAlignment="Center" RecognizesAccessKey="True" />
+              <Border x:Name="BadgeBox" Margin="6,0,0,0" CornerRadius="9" Background="{DynamicResource Sl.Brush.Background.Muted}" Padding="6,0" VerticalAlignment="Center">
+                <TextBlock Text="{TemplateBinding Badge}" FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="{DynamicResource Sl.Font.Size.2xs}"
+                           Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
+              </Border>
+              <Button x:Name="PART_Close" Margin="4,0,-6,0" Width="20" Height="20" sl:Sl.Variant="Ghost" sl:Sl.Size="Small" sl:Sl.StartIcon="x"
+                      sl:Sl.IconOnly="True" sl:Sl.Label="Close tab" Focusable="False" Visibility="Collapsed" />
+            </StackPanel>
+            <Border x:Name="Indicator" Height="{DynamicResource Sl.Component.Tabs.IndicatorHeight}" VerticalAlignment="Bottom" Margin="8,0,8,-1"
+                    Background="{DynamicResource Sl.Component.Tabs.Indicator.Brush}" Visibility="Hidden" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Icon" Value="{x:Null}">
+              <Setter TargetName="IconGlyph" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Label" Value="{x:Null}">
+              <Setter TargetName="LabelText" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <DataTrigger Binding="{Binding Label, RelativeSource={RelativeSource Self}, Converter={x:Static sl:IsNotNullConverter.Instance}}" Value="True">
+              <Setter TargetName="HeaderHost" Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+            <Trigger Property="Badge" Value="{x:Null}">
+              <Setter TargetName="BadgeBox" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Closable" Value="True">
+              <Setter TargetName="PART_Close" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+            </Trigger>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="IsSelected" Value="True" />
+                <Condition Property="ActualVariant" Value="Line" />
+              </MultiTrigger.Conditions>
+              <Setter TargetName="Indicator" Property="Visibility" Value="Visible" />
+            </MultiTrigger>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="IsSelected" Value="True" />
+                <Condition Property="ActualVariant" Value="Pills" />
+              </MultiTrigger.Conditions>
+              <Setter TargetName="Pill" Property="Background" Value="{DynamicResource Sl.Brush.Background.Surface}" />
+              <Setter TargetName="Pill" Property="Effect" Value="{DynamicResource Sl.Effect.Control}" />
+            </MultiTrigger>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="IsSelected" Value="True" />
+                <Condition Property="ActualVariant" Value="Enclosed" />
+              </MultiTrigger.Conditions>
+              <Setter TargetName="Pill" Property="Background" Value="{DynamicResource Sl.Brush.Background.Surface}" />
+              <Setter TargetName="Pill" Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.Default}" />
+              <Setter TargetName="Pill" Property="BorderThickness" Value="1,1,1,0" />
+              <Setter TargetName="Pill" Property="CornerRadius" Value="8,8,0,0" />
+              <Setter TargetName="Pill" Property="Margin" Value="0,0,0,-1" />
+            </MultiTrigger>
+            <Trigger Property="TabStripPlacement" Value="Left">
+              <Setter TargetName="Indicator" Property="VerticalAlignment" Value="Stretch" />
+              <Setter TargetName="Indicator" Property="HorizontalAlignment" Value="Right" />
+              <Setter TargetName="Indicator" Property="Height" Value="NaN" />
+              <Setter TargetName="Indicator" Property="Width" Value="2" />
+              <Setter TargetName="Indicator" Property="Margin" Value="0,4,-1,4" />
+            </Trigger>
+            <Trigger Property="sl:Sl.ActualSize" Value="Small">
+              <Setter Property="Height" Value="{DynamicResource Sl.Size.Control.Sm}" />
+              <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Xs}" />
+            </Trigger>
+            <Trigger Property="sl:Sl.ActualSize" Value="Large">
+              <Setter Property="Height" Value="{DynamicResource Sl.Size.Control.Lg}" />
+              <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Md}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="Root" Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- ===== Breadcrumbs, pagination, segmented ===== -->
+
+  <Style TargetType="sl:Breadcrumbs">
+    <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Sm}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="sl:Breadcrumbs">
+          <ItemsControl ItemsSource="{TemplateBinding Entries}" Focusable="False">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <StackPanel Orientation="Horizontal">
+                  <sl:Icon x:Name="Sep" Size="14" Margin="2,0" VerticalAlignment="Center" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}"
+                           Kind="{Binding Separator, RelativeSource={RelativeSource AncestorType=sl:Breadcrumbs}}" />
+                  <Button x:Name="Link" sl:Sl.Variant="Ghost" sl:Sl.Size="Small" sl:Sl.StartIcon="{Binding Icon}" Content="{Binding Label}" />
+                  <TextBlock x:Name="Current" Text="{Binding Label}" Margin="8,0" VerticalAlignment="Center" Visibility="Collapsed"
+                             FontWeight="{DynamicResource Sl.Font.Weight.Medium}" Foreground="{DynamicResource Sl.Brush.Text.Primary}" />
+                </StackPanel>
+                <DataTemplate.Triggers>
+                  <DataTrigger Binding="{Binding ShowSeparator}" Value="False">
+                    <Setter TargetName="Sep" Property="Visibility" Value="Collapsed" />
+                  </DataTrigger>
+                  <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter TargetName="Link" Property="Visibility" Value="Collapsed" />
+                    <Setter TargetName="Current" Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                  <DataTrigger Binding="{Binding IsEllipsis}" Value="True">
+                    <Setter TargetName="Link" Property="sl:Sl.Label" Value="Show hidden path items" />
+                  </DataTrigger>
+                </DataTemplate.Triggers>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="sl:Pagination">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="sl:Pagination">
+          <StackPanel Orientation="Horizontal">
+            <TextBlock x:Name="Range" Text="{TemplateBinding RangeText}" VerticalAlignment="Center" Margin="0,0,16,0"
+                       FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="{DynamicResource Sl.Font.Size.Xs}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+            <ComboBox x:Name="PART_PageSize" ItemsSource="{TemplateBinding PageSizes}" Margin="0,0,12,0" MinWidth="72" VerticalAlignment="Center"
+                      SelectedItem="{Binding PageSize, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" AutomationProperties.Name="Rows per page" />
+            <Button x:Name="PART_Previous" IsEnabled="{TemplateBinding CanGoPrevious}" sl:Sl.Variant="Ghost" sl:Sl.Size="{TemplateBinding Size}" sl:Sl.StartIcon="chevron-left" sl:Sl.IconOnly="True" sl:Sl.Label="Previous page" />
+            <ItemsControl ItemsSource="{TemplateBinding Pages}" Focusable="False" Margin="2,0">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Grid Margin="1,0">
+                    <Button x:Name="PageButton" Content="{Binding Label}" MinWidth="32" sl:Sl.Variant="Ghost"
+                            sl:Sl.Size="{Binding Size, RelativeSource={RelativeSource AncestorType=sl:Pagination}}" AutomationProperties.Name="{Binding AccessibleName}" />
+                    <TextBlock x:Name="Dots" Text="…" MinWidth="24" TextAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"
+                               Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+                  </Grid>
+                  <DataTemplate.Triggers>
+                    <DataTrigger Binding="{Binding IsEllipsis}" Value="True">
+                      <Setter TargetName="PageButton" Property="Visibility" Value="Collapsed" />
+                      <Setter TargetName="Dots" Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                      <Setter TargetName="PageButton" Property="sl:Sl.Pressed" Value="True" />
+                      <Setter TargetName="PageButton" Property="AutomationProperties.ItemStatus" Value="current page" />
+                    </DataTrigger>
+                  </DataTemplate.Triggers>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Button x:Name="PART_Next" IsEnabled="{TemplateBinding CanGoNext}" sl:Sl.Variant="Ghost" sl:Sl.Size="{TemplateBinding Size}" sl:Sl.StartIcon="chevron-right" sl:Sl.IconOnly="True" sl:Sl.Label="Next page" />
+          </StackPanel>
+          <ControlTemplate.Triggers>
+            <Trigger Property="RangeText" Value="{x:Null}">
+              <Setter TargetName="Range" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="PageSizes" Value="{x:Null}">
+              <Setter TargetName="PART_PageSize" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="Sl.SegmentItem" TargetType="ListBoxItem">
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource Sl.FocusVisual}" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Secondary}" />
+    <Setter Property="Padding" Value="12,0" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="AutomationProperties.Name" Value="{Binding Text}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ListBoxItem">
+          <Grid>
+            <Border x:Name="Shadow" CornerRadius="{DynamicResource Sl.CornerRadius.Md}" Background="{DynamicResource Sl.Brush.Background.Surface}"
+                    Effect="{DynamicResource Sl.Effect.Control}" Visibility="Collapsed" />
+            <Border x:Name="Bd" CornerRadius="{DynamicResource Sl.CornerRadius.Md}" Background="Transparent" Padding="{TemplateBinding Padding}">
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <sl:Icon x:Name="Glyph" Kind="{Binding Icon}" Size="14" Margin="0,0,6,0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding Text}" VerticalAlignment="Center" />
+              </StackPanel>
+            </Border>
+          </Grid>
+          <ControlTemplate.Triggers>
+            <DataTrigger Binding="{Binding Icon}" Value="{x:Null}">
+              <Setter TargetName="Glyph" Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter TargetName="Shadow" Property="Visibility" Value="Visible" />
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Sl.Brush.Background.Surface}" />
+              <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="sl:SegmentedControl">
+    <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Sm}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Sl.Font.Weight.Medium}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="sl:SegmentedControl">
+          <Border x:Name="Trough" Background="{DynamicResource Sl.Brush.Background.Muted}" CornerRadius="{DynamicResource Sl.CornerRadius.Lg}"
+                  Padding="2" Height="{DynamicResource Sl.Size.Control.Md}">
+            <ListBox x:Name="PART_List" ItemsSource="{TemplateBinding Segments}" SelectedItem="{Binding SelectedSegment, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                     Background="Transparent" BorderThickness="0" Padding="0" ItemContainerStyle="{StaticResource Sl.SegmentItem}"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                     KeyboardNavigation.DirectionalNavigation="None" AutomationProperties.Name="{TemplateBinding AutomationProperties.Name}">
+              <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+              </ListBox.ItemsPanel>
+            </ListBox>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="FullWidth" Value="True">
+              <Setter TargetName="PART_List" Property="ItemsPanel">
+                <Setter.Value>
+                  <ItemsPanelTemplate>
+                    <UniformGrid Rows="1" />
+                  </ItemsPanelTemplate>
+                </Setter.Value>
+              </Setter>
+            </Trigger>
+            <Trigger Property="Size" Value="Small">
+              <Setter TargetName="Trough" Property="Height" Value="{DynamicResource Sl.Size.Control.Sm}" />
+              <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Xs}" />
+            </Trigger>
+            <Trigger Property="Size" Value="Large">
+              <Setter TargetName="Trough" Property="Height" Value="{DynamicResource Sl.Size.Control.Lg}" />
+              <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Md}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="Trough" Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <Trigger Property="FullWidth" Value="True">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- ===== Avatar, skeleton, slider ===== -->
+
+  <Style TargetType="sl:Avatar">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="sl:Avatar">
+          <Grid x:Name="Root" Width="32" Height="32">
+            <Border x:Name="Disc" CornerRadius="{DynamicResource Sl.Component.Avatar.Radius.Corner}"
+                    Background="{Binding Path=(sl:Sl.ChromeBackground), RelativeSource={RelativeSource TemplatedParent}}">
+              <TextBlock x:Name="InitialsText" Text="{TemplateBinding Initials}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                         FontWeight="{DynamicResource Sl.Font.Weight.Semibold}" FontSize="12"
+                         Foreground="{Binding Path=(sl:Sl.ChromeForeground), RelativeSource={RelativeSource TemplatedParent}}" />
+            </Border>
+            <Border x:Name="Photo" CornerRadius="{DynamicResource Sl.Component.Avatar.Radius.Corner}">
+              <Border.Background>
+                <ImageBrush ImageSource="{Binding ImageSource, RelativeSource={RelativeSource TemplatedParent}}" Stretch="UniformToFill" />
+              </Border.Background>
+            </Border>
+            <Border x:Name="Dot" Width="10" Height="10" CornerRadius="6" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-1,-1"
+                    Background="{Binding Path=(sl:Sl.Fill), RelativeSource={RelativeSource TemplatedParent}}"
+                    BorderBrush="{DynamicResource Sl.Brush.Background.Surface}" BorderThickness="2" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="ImageSource" Value="{x:Null}">
+              <Setter TargetName="Photo" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Status" Value="None">
+              <Setter TargetName="Dot" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="sl:Sl.ActualSize" Value="Small">
+              <Setter TargetName="Root" Property="Width" Value="24" />
+              <Setter TargetName="Root" Property="Height" Value="24" />
+              <Setter TargetName="InitialsText" Property="FontSize" Value="10" />
+              <Setter TargetName="Dot" Property="Width" Value="8" />
+              <Setter TargetName="Dot" Property="Height" Value="8" />
+            </Trigger>
+            <Trigger Property="sl:Sl.ActualSize" Value="Large">
+              <Setter TargetName="Root" Property="Width" Value="40" />
+              <Setter TargetName="Root" Property="Height" Value="40" />
+              <Setter TargetName="InitialsText" Property="FontSize" Value="14" />
+              <Setter TargetName="Dot" Property="Width" Value="12" />
+              <Setter TargetName="Dot" Property="Height" Value="12" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="sl:Skeleton">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="sl:Skeleton">
+          <Grid x:Name="PART_Root">
+            <ItemsControl x:Name="LineList" ItemsSource="{TemplateBinding LineWidths}" Focusable="False">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border Height="10" Margin="0,0,0,8" HorizontalAlignment="Left" CornerRadius="{DynamicResource Sl.CornerRadius.Sm}"
+                          Background="{DynamicResource Sl.Component.Skeleton.Background.Brush}">
+                    <Border.Width>
+                      <MultiBinding Converter="{x:Static sl:MultiplyConverter.Instance}">
+                        <Binding />
+                        <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+                      </MultiBinding>
+                    </Border.Width>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Border x:Name="Block" MinHeight="40" CornerRadius="{DynamicResource Sl.CornerRadius.Md}" Visibility="Collapsed"
+                    Background="{DynamicResource Sl.Component.Skeleton.Background.Brush}" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Shape" Value="Rect">
+              <Setter TargetName="LineList" Property="Visibility" Value="Collapsed" />
+              <Setter TargetName="Block" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="Shape" Value="Circle">
+              <Setter TargetName="LineList" Property="Visibility" Value="Collapsed" />
+              <Setter TargetName="Block" Property="Visibility" Value="Visible" />
+              <Setter TargetName="Block" Property="CornerRadius" Value="9999" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="Sl.SliderThumb" TargetType="Thumb">
+    <Setter Property="Focusable" Value="True" />
+    <Setter Property="IsTabStop" Value="True" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource Sl.FocusVisual}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Thumb">
+          <Grid>
+            <Border CornerRadius="8" Background="{DynamicResource Sl.Brush.Control.Thumb}" Effect="{DynamicResource Sl.Effect.Control}" />
+            <Border CornerRadius="8" Background="{DynamicResource Sl.Brush.Control.Thumb}" BorderThickness="2"
+                    BorderBrush="{Binding Path=(sl:Sl.Fill), RelativeSource={RelativeSource AncestorType=sl:Slider}}" />
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="sl:Slider">
+    <Setter Property="MinWidth" Value="120" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="sl:Slider">
+          <StackPanel>
+            <DockPanel x:Name="Header" Margin="0,0,0,6">
+              <TextBlock x:Name="ValueLabel" DockPanel.Dock="Right" Text="{TemplateBinding ValueText}" VerticalAlignment="Center"
+                         FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="{DynamicResource Sl.Font.Size.Xs}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+              <TextBlock x:Name="LabelText" Text="{TemplateBinding Label}" FontSize="{DynamicResource Sl.Font.Size.Sm}"
+                         FontWeight="{DynamicResource Sl.Font.Weight.Medium}" Foreground="{DynamicResource Sl.Brush.Text.Primary}" />
+            </DockPanel>
+            <Canvas x:Name="PART_Canvas" Height="22" Background="Transparent" ClipToBounds="False">
+              <Border Canvas.Top="9" Height="4" CornerRadius="2" Width="{Binding ActualWidth, ElementName=PART_Canvas}"
+                      Background="{Binding Path=(sl:Sl.ChromeBackground), RelativeSource={RelativeSource TemplatedParent}}" />
+              <Border x:Name="PART_Fill" Canvas.Top="9" Height="4" CornerRadius="2"
+                      Background="{Binding Path=(sl:Sl.Fill), RelativeSource={RelativeSource TemplatedParent}}" />
+              <sl:SliderTicks x:Name="PART_Ticks" Canvas.Top="17" Height="4" Width="{Binding ActualWidth, ElementName=PART_Canvas}" Brush="{DynamicResource Sl.Brush.Border.Strong}" />
+              <Thumb x:Name="PART_Thumb" Canvas.Top="3" Width="16" Height="16" Style="{StaticResource Sl.SliderThumb}" />
+              <Thumb x:Name="PART_Thumb2" Canvas.Top="3" Width="16" Height="16" Style="{StaticResource Sl.SliderThumb}" Visibility="Collapsed" />
+            </Canvas>
+          </StackPanel>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Label" Value="{x:Null}">
+              <Setter TargetName="LabelText" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="ShowValue" Value="False">
+              <Setter TargetName="ValueLabel" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="Label" Value="{x:Null}" />
+                <Condition Property="ShowValue" Value="False" />
+              </MultiTrigger.Conditions>
+              <Setter TargetName="Header" Property="Visibility" Value="Collapsed" />
+            </MultiTrigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- ===== Select ===== -->
+
+  <Style x:Key="Sl.SelectOption" TargetType="ListBoxItem">
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="Padding" Value="8,0" />
+    <Setter Property="MinHeight" Value="{DynamicResource Sl.Component.Menu.ItemHeight}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ListBoxItem">
+          <Border x:Name="Bd" Background="Transparent" CornerRadius="{DynamicResource Sl.Component.Menu.ItemRadius.Corner}" Padding="{TemplateBinding Padding}"
+                  MinHeight="{TemplateBinding MinHeight}">
+            <ContentPresenter VerticalAlignment="Center" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Sl.Component.Menu.ItemHover.Brush}" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Sl.Component.Menu.ItemHover.Brush}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding IsHeader}" Value="True">
+        <Setter Property="IsHitTestVisible" Value="False" />
+        <Setter Property="MinHeight" Value="26" />
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style TargetType="sl:Select">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Md}" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="sl:Select">
+          <StackPanel>
+            <StackPanel x:Name="LabelRow" Orientation="Horizontal" Margin="0,0,0,6">
+              <TextBlock Text="{TemplateBinding Label}" FontSize="{DynamicResource Sl.Font.Size.Sm}" FontWeight="{DynamicResource Sl.Font.Weight.Medium}" />
+              <TextBlock x:Name="RequiredMark" Text=" *" Foreground="{DynamicResource Sl.Brush.Status.Danger.Fg}" FontWeight="{DynamicResource Sl.Font.Weight.Semibold}" Visibility="Collapsed" />
+            </StackPanel>
+            <Grid x:Name="PART_Field" MinHeight="{DynamicResource Sl.Size.Control.Md}" SnapsToDevicePixels="True" Cursor="Hand">
+              <Border x:Name="Ring" Margin="-4" BorderThickness="2" BorderBrush="{DynamicResource Sl.Brush.Focus.Ring}" Visibility="Collapsed"
+                      CornerRadius="{Binding Path=(sl:Sl.ActualCornerRadius), RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static sl:CornerInflateConverter.Instance}, ConverterParameter=4}">
+                <Border BorderThickness="2" BorderBrush="{DynamicResource Sl.Brush.Background.Canvas}"
+                        CornerRadius="{Binding Path=(sl:Sl.ActualCornerRadius), RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static sl:CornerInflateConverter.Instance}, ConverterParameter=2}" />
+              </Border>
+              <Border x:Name="Chrome" BorderThickness="1"
+                      Background="{Binding Path=(sl:Sl.ChromeBackground), RelativeSource={RelativeSource TemplatedParent}}"
+                      BorderBrush="{Binding Path=(sl:Sl.ChromeBorder), RelativeSource={RelativeSource TemplatedParent}}"
+                      CornerRadius="{Binding Path=(sl:Sl.ActualCornerRadius), RelativeSource={RelativeSource TemplatedParent}}">
+                <DockPanel>
+                  <sl:Icon x:Name="Chevron" DockPanel.Dock="Right" Kind="chevron-down" Margin="0,0,10,0" VerticalAlignment="Center" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+                  <sl:Spinner x:Name="Busy" DockPanel.Dock="Right" Size="Small" Margin="0,0,8,0" VerticalAlignment="Center" Visibility="Collapsed" />
+                  <Button x:Name="PART_Clear" DockPanel.Dock="Right" sl:Sl.Variant="Ghost" sl:Sl.Size="Small" sl:Sl.StartIcon="x" sl:Sl.IconOnly="True"
+                          sl:Sl.Label="Clear" Margin="0,0,2,0" VerticalAlignment="Center" Visibility="Collapsed" Focusable="False" />
+                  <WrapPanel VerticalAlignment="Center"
+                             Margin="{Binding Path=(sl:Sl.PaddingX), RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static sl:HorizontalThicknessConverter.Instance}}">
+                    <ItemsControl x:Name="ChipList" ItemsSource="{TemplateBinding Chips}" Focusable="False" Visibility="Collapsed">
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                          <WrapPanel />
+                        </ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Border Margin="0,3,4,3" Height="22" CornerRadius="{DynamicResource Sl.CornerRadius.Sm}" Background="{DynamicResource Sl.Brush.Background.Muted}" Padding="7,0,2,0">
+                            <StackPanel Orientation="Horizontal">
+                              <TextBlock Text="{Binding Text}" VerticalAlignment="Center" FontSize="{DynamicResource Sl.Font.Size.Sm}" />
+                              <Button x:Name="PART_RemoveChip" Width="18" Height="18" Margin="2,0,0,0" sl:Sl.Variant="Ghost" sl:Sl.Size="Small" sl:Sl.StartIcon="x"
+                                      sl:Sl.IconOnly="True" sl:Sl.Label="Remove" Focusable="False" />
+                            </StackPanel>
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock x:Name="Overflow" Text="{TemplateBinding OverflowText}" VerticalAlignment="Center" Margin="0,0,6,0" Visibility="Collapsed"
+                               FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="{DynamicResource Sl.Font.Size.Xs}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+                    <Grid MinWidth="40">
+                      <TextBlock x:Name="ValueText" Text="{TemplateBinding DisplayText}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                      <TextBlock x:Name="PlaceholderText" Text="{TemplateBinding Placeholder}" VerticalAlignment="Center" Visibility="Collapsed"
+                                 Foreground="{DynamicResource Sl.Brush.Text.Placeholder}" />
+                      <TextBox x:Name="PART_Search" Style="{StaticResource Sl.TextBox.Bare}" MinWidth="60" Visibility="Collapsed" Background="Transparent"
+                               Text="{Binding SearchText, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged}"
+                               AutomationProperties.Name="{TemplateBinding Label}" />
+                    </Grid>
+                  </WrapPanel>
+                </DockPanel>
+              </Border>
+              <Popup x:Name="PART_Popup" AllowsTransparency="True" Focusable="False" StaysOpen="False" PopupAnimation="Fade">
+                <ContentControl Template="{StaticResource Sl.OverlayPanel}" Focusable="False" IsTabStop="False">
+                  <Grid MaxHeight="320">
+                    <ListBox x:Name="PART_List" ItemsSource="{TemplateBinding Options}" Focusable="False" Background="Transparent" BorderThickness="0"
+                             ItemContainerStyle="{StaticResource Sl.SelectOption}" VirtualizingPanel.IsVirtualizing="True" AutomationProperties.Name="{TemplateBinding Label}">
+                      <ListBox.ItemTemplate>
+                        <DataTemplate>
+                          <Grid>
+                            <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="*" />
+                              <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="OptionText" Text="{Binding Text}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            <ContentPresenter x:Name="Custom" Content="{Binding Item}" Visibility="Collapsed"
+                                              ContentTemplate="{Binding ItemTemplate, RelativeSource={RelativeSource AncestorType=sl:Select}}" />
+                            <sl:Icon x:Name="Tick" Grid.Column="1" Kind="check" Size="14" Margin="12,0,0,0" VerticalAlignment="Center"
+                                     Foreground="{DynamicResource Sl.Brush.Accent.Text}" Visibility="Collapsed" />
+                          </Grid>
+                          <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                              <Setter TargetName="Tick" Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsHeader}" Value="True">
+                              <Setter TargetName="OptionText" Property="FontFamily" Value="{DynamicResource Sl.Font.Family.Mono}" />
+                              <Setter TargetName="OptionText" Property="FontSize" Value="{DynamicResource Sl.Font.Size.2xs}" />
+                              <Setter TargetName="OptionText" Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Tertiary}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsCreate}" Value="True">
+                              <Setter TargetName="OptionText" Property="Foreground" Value="{DynamicResource Sl.Brush.Accent.Text}" />
+                            </DataTrigger>
+                            <MultiDataTrigger>
+                              <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ItemTemplate, RelativeSource={RelativeSource AncestorType=sl:Select}, Converter={x:Static sl:IsNotNullConverter.Instance}}" Value="True" />
+                                <Condition Binding="{Binding IsHeader}" Value="False" />
+                                <Condition Binding="{Binding IsCreate}" Value="False" />
+                              </MultiDataTrigger.Conditions>
+                              <Setter TargetName="Custom" Property="Visibility" Value="Visible" />
+                              <Setter TargetName="OptionText" Property="Visibility" Value="Collapsed" />
+                            </MultiDataTrigger>
+                          </DataTemplate.Triggers>
+                        </DataTemplate>
+                      </ListBox.ItemTemplate>
+                    </ListBox>
+                    <ContentPresenter x:Name="Empty" Content="{TemplateBinding EmptyContent}" Margin="10,8" Visibility="Collapsed"
+                                      TextElement.Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+                    <sl:Spinner x:Name="ListBusy" Size="Small" Margin="10" HorizontalAlignment="Center" Visibility="Collapsed" />
+                  </Grid>
+                </ContentControl>
+              </Popup>
+            </Grid>
+            <StackPanel x:Name="HelperRow" Orientation="Horizontal" Margin="0,6,0,0">
+              <sl:Icon x:Name="ErrorIcon" Kind="alert-circle" Size="14" Margin="0,0,6,0" VerticalAlignment="Center"
+                       Foreground="{DynamicResource Sl.Brush.Status.Danger.Fg}" Visibility="Collapsed" />
+              <TextBlock x:Name="Helper" Text="{TemplateBinding HelperText}" TextWrapping="Wrap" FontSize="{DynamicResource Sl.Font.Size.Xs}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+            </StackPanel>
+          </StackPanel>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Label" Value="{x:Null}">
+              <Setter TargetName="LabelRow" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Required" Value="True">
+              <Setter TargetName="RequiredMark" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="HelperText" Value="{x:Null}">
+              <Setter TargetName="HelperRow" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Multiple" Value="True">
+              <Setter TargetName="ChipList" Property="Visibility" Value="Visible" />
+              <Setter TargetName="Overflow" Property="Visibility" Value="Visible" />
+              <Setter TargetName="ValueText" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="OverflowText" Value="{x:Null}">
+              <Setter TargetName="Overflow" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="HasValue" Value="False" />
+                <Condition Property="Searchable" Value="False" />
+              </MultiTrigger.Conditions>
+              <Setter TargetName="PlaceholderText" Property="Visibility" Value="Visible" />
+            </MultiTrigger>
+            <Trigger Property="Searchable" Value="True">
+              <Setter TargetName="PART_Search" Property="Visibility" Value="Visible" />
+              <Setter Property="Focusable" Value="False" />
+            </Trigger>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="Searchable" Value="True" />
+                <Condition Property="HasValue" Value="False" />
+              </MultiTrigger.Conditions>
+              <Setter TargetName="PART_Search" Property="sl:Sl.Placeholder" Value="{Binding Placeholder, RelativeSource={RelativeSource TemplatedParent}}" />
+            </MultiTrigger>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="Searchable" Value="True" />
+                <Condition Property="Multiple" Value="False" />
+                <Condition Property="IsKeyboardFocusWithin" Value="True" />
+              </MultiTrigger.Conditions>
+              <Setter TargetName="ValueText" Property="Opacity" Value="0.55" />
+            </MultiTrigger>
+            <Trigger Property="ShowClear" Value="True">
+              <Setter TargetName="PART_Clear" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="Loading" Value="True">
+              <Setter TargetName="Busy" Property="Visibility" Value="Visible" />
+              <Setter TargetName="ListBusy" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <DataTrigger Binding="{Binding Options.Count, RelativeSource={RelativeSource Self}}" Value="0">
+              <Setter TargetName="Empty" Property="Visibility" Value="Visible" />
+            </DataTrigger>
+            <Trigger Property="sl:Sl.ActualSize" Value="Small">
+              <Setter TargetName="PART_Field" Property="MinHeight" Value="{DynamicResource Sl.Size.Control.Sm}" />
+              <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Sm}" />
+            </Trigger>
+            <Trigger Property="sl:Sl.ActualSize" Value="Large">
+              <Setter TargetName="PART_Field" Property="MinHeight" Value="{DynamicResource Sl.Size.Control.Lg}" />
+              <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Lg}" />
+            </Trigger>
+            <Trigger Property="ActualVariant" Value="Underlined">
+              <Setter TargetName="Chrome" Property="BorderThickness" Value="0,0,0,1" />
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="{Binding Path=(sl:Sl.HoverBorder), RelativeSource={RelativeSource TemplatedParent}}" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Sl.Component.Field.BorderFocus.Brush}" />
+              <Setter TargetName="Ring" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="IsDropDownOpen" Value="True">
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Sl.Component.Field.BorderFocus.Brush}" />
+            </Trigger>
+            <Trigger Property="HasError" Value="True">
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
+              <Setter TargetName="HelperRow" Property="Visibility" Value="Visible" />
+              <Setter TargetName="ErrorIcon" Property="Visibility" Value="Visible" />
+              <Setter TargetName="Helper" Property="Text" Value="{Binding Error, RelativeSource={RelativeSource TemplatedParent}}" />
+              <Setter TargetName="Helper" Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="PART_Field" Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- ===== Calendar & date picker ===== -->
+
+  <Style x:Key="Sl.CalendarDay" TargetType="Button">
+    <Setter Property="Width" Value="{DynamicResource Sl.Component.Calendar.DaySize}" />
+    <Setter Property="Height" Value="{DynamicResource Sl.Component.Calendar.DaySize}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="FontFamily" Value="{DynamicResource Sl.Font.Family.Mono}" />
+    <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Xs}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource Sl.FocusVisual}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName}" />
+    <Setter Property="Content" Value="{Binding Text}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{DynamicResource Sl.CornerRadius.Sm}" SnapsToDevicePixels="True">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <Trigger Property="IsMouseOver" Value="True">
+        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Hover}" />
+      </Trigger>
+      <DataTrigger Binding="{Binding Day.InMonth}" Value="False">
+        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Tertiary}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Day.IsToday}" Value="True">
+        <Setter Property="BorderBrush" Value="{DynamicResource Sl.Component.Calendar.Today.Brush}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Day.InRange}" Value="True">
+        <Setter Property="Background" Value="{DynamicResource Sl.Component.Calendar.Range.Brush}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Day.InPreview}" Value="True">
+        <Setter Property="Background" Value="{DynamicResource Sl.Component.Calendar.Range.Brush}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Day.IsSelected}" Value="True">
+        <Setter Property="Background" Value="{DynamicResource Sl.Component.Calendar.Selected.Brush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.OnAccent}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Day.IsRangeStart}" Value="True">
+        <Setter Property="Background" Value="{DynamicResource Sl.Component.Calendar.Selected.Brush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.OnAccent}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Day.IsRangeEnd}" Value="True">
+        <Setter Property="Background" Value="{DynamicResource Sl.Component.Calendar.Selected.Brush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.OnAccent}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding IsFocused}" Value="True">
+        <Setter Property="IsTabStop" Value="True" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Day.IsDisabled}" Value="True">
+        <Setter Property="IsEnabled" Value="False" />
+        <Setter Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style TargetType="sl:CalendarView">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="sl:CalendarView">
+          <StackPanel Orientation="Horizontal">
+            <Border x:Name="PresetPane" BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="0,0,1,0" Padding="0,0,8,0" Margin="0,0,10,0">
+              <ItemsControl ItemsSource="{TemplateBinding Presets}" Focusable="False">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Button Content="{Binding Label}" sl:Sl.Variant="Ghost" sl:Sl.Size="Small" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </Border>
+            <StackPanel>
+              <DockPanel Margin="0,0,0,8">
+                <Button x:Name="PART_Previous" DockPanel.Dock="Left" sl:Sl.Variant="Ghost" sl:Sl.Size="Small" sl:Sl.StartIcon="chevron-left" sl:Sl.IconOnly="True" sl:Sl.Label="Previous month" />
+                <Button x:Name="PART_Next" DockPanel.Dock="Right" sl:Sl.Variant="Ghost" sl:Sl.Size="Small" sl:Sl.StartIcon="chevron-right" sl:Sl.IconOnly="True" sl:Sl.Label="Next month" />
+                <TextBlock Text="{TemplateBinding Title}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="{DynamicResource Sl.Font.Weight.Semibold}"
+                           FontSize="{DynamicResource Sl.Font.Size.Sm}" />
+              </DockPanel>
+              <ItemsControl ItemsSource="{TemplateBinding Weekdays}" Focusable="False" Margin="0,0,0,4">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <UniformGrid Columns="7" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding}" TextAlignment="Center" FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="{DynamicResource Sl.Font.Size.2xs}"
+                               Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <ItemsControl ItemsSource="{TemplateBinding Weeks}" Focusable="False" AutomationProperties.Name="{TemplateBinding Title}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <ItemsControl ItemsSource="{Binding Days}" Focusable="False">
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                          <UniformGrid Columns="7" />
+                        </ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Button Style="{DynamicResource Sl.CalendarDay}" Margin="1" />
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </StackPanel>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Presets" Value="{x:Null}">
+              <Setter TargetName="PresetPane" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="sl:DatePicker">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Md}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="sl:DatePicker">
+          <Grid>
+            <StackPanel x:Name="FieldLayout">
+              <StackPanel x:Name="LabelRow" Orientation="Horizontal" Margin="0,0,0,6">
+                <Label Content="{TemplateBinding Label}" Target="{Binding ElementName=PART_Input}" />
+              </StackPanel>
+              <Grid x:Name="PART_Field" Height="{DynamicResource Sl.Size.Control.Md}" SnapsToDevicePixels="True">
+                <Border x:Name="Ring" Margin="-4" BorderThickness="2" BorderBrush="{DynamicResource Sl.Brush.Focus.Ring}" Visibility="Collapsed"
+                        CornerRadius="{Binding Path=(sl:Sl.ActualCornerRadius), RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static sl:CornerInflateConverter.Instance}, ConverterParameter=4}">
+                  <Border BorderThickness="2" BorderBrush="{DynamicResource Sl.Brush.Background.Canvas}"
+                          CornerRadius="{Binding Path=(sl:Sl.ActualCornerRadius), RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static sl:CornerInflateConverter.Instance}, ConverterParameter=2}" />
+                </Border>
+                <Border x:Name="Chrome" BorderThickness="1"
+                        Background="{Binding Path=(sl:Sl.ChromeBackground), RelativeSource={RelativeSource TemplatedParent}}"
+                        BorderBrush="{Binding Path=(sl:Sl.ChromeBorder), RelativeSource={RelativeSource TemplatedParent}}"
+                        CornerRadius="{Binding Path=(sl:Sl.ActualCornerRadius), RelativeSource={RelativeSource TemplatedParent}}">
+                  <DockPanel>
+                    <Button x:Name="PART_Toggle" DockPanel.Dock="Right" sl:Sl.Variant="Ghost" sl:Sl.Size="Small" sl:Sl.StartIcon="chevron-down" sl:Sl.IconOnly="True"
+                            sl:Sl.Label="Choose date" Margin="0,0,3,0" VerticalAlignment="Center" />
+                    <Button x:Name="PART_Clear" DockPanel.Dock="Right" sl:Sl.Variant="Ghost" sl:Sl.Size="Small" sl:Sl.StartIcon="x" sl:Sl.IconOnly="True"
+                            sl:Sl.Label="Clear" VerticalAlignment="Center" Visibility="Collapsed" Focusable="False" />
+                    <TextBox x:Name="PART_Input" Style="{StaticResource Sl.TextBox.Bare}" FontSize="{TemplateBinding FontSize}"
+                             Margin="{Binding Path=(sl:Sl.PaddingX), RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static sl:HorizontalThicknessConverter.Instance}, ConverterParameter=-2}"
+                             Text="{Binding InputText, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged}"
+                             sl:Sl.Placeholder="{TemplateBinding Placeholder}" />
+                  </DockPanel>
+                </Border>
+                <Popup x:Name="PART_Popup" AllowsTransparency="True" StaysOpen="False" PopupAnimation="Fade">
+                  <ContentControl Template="{StaticResource Sl.OverlayPanel}" Focusable="False" IsTabStop="False" KeyboardNavigation.TabNavigation="Cycle">
+                    <sl:CalendarView x:Name="PART_Calendar" Margin="8"
+                                     Selection="{TemplateBinding Selection}" SelectedDate="{Binding Value, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                     Range="{Binding Range, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                     Min="{TemplateBinding Min}" Max="{TemplateBinding Max}" DisabledDates="{TemplateBinding DisabledDates}"
+                                     FirstDayOfWeek="{TemplateBinding FirstDayOfWeek}" Presets="{TemplateBinding Presets}" Today="{TemplateBinding Today}" />
+                  </ContentControl>
+                </Popup>
+              </Grid>
+              <StackPanel x:Name="HelperRow" Orientation="Horizontal" Margin="0,6,0,0">
+                <sl:Icon x:Name="ErrorIcon" Kind="alert-circle" Size="14" Margin="0,0,6,0" VerticalAlignment="Center"
+                         Foreground="{DynamicResource Sl.Brush.Status.Danger.Fg}" Visibility="Collapsed" />
+                <TextBlock x:Name="Helper" Text="{TemplateBinding HelperText}" TextWrapping="Wrap" FontSize="{DynamicResource Sl.Font.Size.Xs}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+              </StackPanel>
+            </StackPanel>
+            <sl:CalendarView x:Name="InlineCalendar" Visibility="Collapsed"
+                             Selection="{TemplateBinding Selection}" SelectedDate="{Binding Value, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                             Range="{Binding Range, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                             Min="{TemplateBinding Min}" Max="{TemplateBinding Max}" DisabledDates="{TemplateBinding DisabledDates}"
+                             FirstDayOfWeek="{TemplateBinding FirstDayOfWeek}" Presets="{TemplateBinding Presets}" Today="{TemplateBinding Today}" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Label" Value="{x:Null}">
+              <Setter TargetName="LabelRow" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="HelperText" Value="{x:Null}">
+              <Setter TargetName="HelperRow" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Inline" Value="True">
+              <Setter TargetName="FieldLayout" Property="Visibility" Value="Collapsed" />
+              <Setter TargetName="InlineCalendar" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="ShowClear" Value="True">
+              <Setter TargetName="PART_Clear" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="sl:Sl.ActualSize" Value="Small">
+              <Setter TargetName="PART_Field" Property="Height" Value="{DynamicResource Sl.Size.Control.Sm}" />
+              <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Sm}" />
+            </Trigger>
+            <Trigger Property="sl:Sl.ActualSize" Value="Large">
+              <Setter TargetName="PART_Field" Property="Height" Value="{DynamicResource Sl.Size.Control.Lg}" />
+              <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Lg}" />
+            </Trigger>
+            <Trigger Property="ActualVariant" Value="Underlined">
+              <Setter TargetName="Chrome" Property="BorderThickness" Value="0,0,0,1" />
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="{Binding Path=(sl:Sl.HoverBorder), RelativeSource={RelativeSource TemplatedParent}}" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Sl.Component.Field.BorderFocus.Brush}" />
+              <Setter TargetName="Ring" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="HasError" Value="True">
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
+              <Setter TargetName="HelperRow" Property="Visibility" Value="Visible" />
+              <Setter TargetName="ErrorIcon" Property="Visibility" Value="Visible" />
+              <Setter TargetName="Helper" Property="Text" Value="{Binding Error, RelativeSource={RelativeSource TemplatedParent}}" />
+              <Setter TargetName="Helper" Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="PART_Field" Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- ===== TreeView ===== -->
+
+  <Style x:Key="Sl.TreeExpander" TargetType="Button">
+    <Setter Property="Width" Value="20" />
+    <Setter Property="Height" Value="20" />
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Tertiary}" />
+    <Setter Property="AutomationProperties.Name" Value="Expand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Bd" Background="Transparent" CornerRadius="{DynamicResource Sl.CornerRadius.Sm}">
+            <Grid>
+              <sl:Icon x:Name="Right" Kind="chevron-right" Size="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+              <sl:Icon x:Name="Down" Kind="chevron-down" Size="14" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />
+            </Grid>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Sl.Brush.Background.Muted}" />
+            </Trigger>
+            <DataTrigger Binding="{Binding Expanded}" Value="True">
+              <Setter TargetName="Right" Property="Visibility" Value="Collapsed" />
+              <Setter TargetName="Down" Property="Visibility" Value="Visible" />
+            </DataTrigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="Sl.TreeRow" TargetType="ListBoxItem">
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource Sl.FocusVisual}" />
+    <Setter Property="Padding" Value="4,0" />
+    <Setter Property="Height" Value="{DynamicResource Sl.Size.Control.Md}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="AutomationProperties.Name" Value="{Binding Text}" />
+    <Setter Property="AutomationProperties.PositionInSet" Value="{Binding PositionInSet}" />
+    <Setter Property="AutomationProperties.SizeOfSet" Value="{Binding SetSize}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ListBoxItem">
+          <Border x:Name="Bd" Background="Transparent" CornerRadius="{DynamicResource Sl.CornerRadius.Sm}" SnapsToDevicePixels="True">
+            <Grid>
+              <Border x:Name="Indicator" Width="2" HorizontalAlignment="Left" Background="{DynamicResource Sl.Brush.Selection.Indicator}" Visibility="Collapsed" />
+              <ContentPresenter Margin="{TemplateBinding Padding}" VerticalAlignment="Center" />
+            </Grid>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Sl.Brush.Background.Hover}" />
+            </Trigger>
+            <DataTrigger Binding="{Binding Selected}" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Sl.Brush.Selection.Background}" />
+              <Setter TargetName="Indicator" Property="Visibility" Value="Visible" />
+            </DataTrigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding Dense, RelativeSource={RelativeSource AncestorType=sl:TreeView}}" Value="True">
+        <Setter Property="Height" Value="{DynamicResource Sl.Component.Tree.ItemHeight}" />
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style TargetType="sl:TreeView">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Md}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="sl:TreeView">
+          <sl:TreeList x:Name="PART_List" ItemsSource="{TemplateBinding Rows}" Background="Transparent" BorderThickness="0"
+                   ItemContainerStyle="{StaticResource Sl.TreeRow}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+                   ScrollViewer.HorizontalScrollBarVisibility="Disabled" AutomationProperties.Name="{TemplateBinding AutomationProperties.Name}">
+            <sl:TreeList.ItemTemplate>
+              <DataTemplate>
+                <StackPanel Orientation="Horizontal" Margin="{Binding Indent, Converter={x:Static sl:LeftThicknessConverter.Instance}}">
+                  <Button x:Name="PART_Expander" Style="{DynamicResource Sl.TreeExpander}" Margin="0,0,4,0" />
+                  <CheckBox x:Name="Check" IsChecked="{Binding IsChecked, Mode=OneWay}" Focusable="False" Margin="0,0,8,0" VerticalAlignment="Center"
+                            Visibility="Collapsed" AutomationProperties.Name="{Binding Text}" />
+                  <sl:Icon x:Name="ItemIconGlyph" Kind="{Binding Icon}" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+                  <ContentPresenter x:Name="Custom" Content="{Binding}" Visibility="Collapsed" VerticalAlignment="Center"
+                                    ContentTemplate="{Binding ItemTemplate, RelativeSource={RelativeSource AncestorType=sl:TreeView}}" />
+                  <TextBlock x:Name="TextLabel" Text="{Binding Text}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                  <sl:Spinner x:Name="Busy" Size="Small" Margin="8,0,0,0" VerticalAlignment="Center" Visibility="Collapsed" />
+                </StackPanel>
+                <DataTemplate.Triggers>
+                  <DataTrigger Binding="{Binding HasChildren}" Value="False">
+                    <Setter TargetName="PART_Expander" Property="Visibility" Value="Hidden" />
+                  </DataTrigger>
+                  <DataTrigger Binding="{Binding ShowCheckbox}" Value="True">
+                    <Setter TargetName="Check" Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                  <DataTrigger Binding="{Binding Icon}" Value="{x:Null}">
+                    <Setter TargetName="ItemIconGlyph" Property="Visibility" Value="Collapsed" />
+                  </DataTrigger>
+                  <DataTrigger Binding="{Binding Loading}" Value="True">
+                    <Setter TargetName="Busy" Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                  <DataTrigger Binding="{Binding ItemTemplate, RelativeSource={RelativeSource AncestorType=sl:TreeView}, Converter={x:Static sl:IsNotNullConverter.Instance}}" Value="True">
+                    <Setter TargetName="Custom" Property="Visibility" Value="Visible" />
+                    <Setter TargetName="TextLabel" Property="Visibility" Value="Collapsed" />
+                  </DataTrigger>
+                </DataTemplate.Triggers>
+              </DataTemplate>
+            </sl:TreeList.ItemTemplate>
+          </sl:TreeList>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
 </ResourceDictionary>

@@ -10,6 +10,7 @@ public partial class MainWindow : SlateWindow
     private readonly Dictionary<string, Func<UserControl>> _pages = new()
     {
         ["Components"] = () => new ComponentsPage(),
+        ["Pickers"] = () => new PickersPage(),
         ["Layout"] = () => new LayoutPage(),
         ["Feedback"] = () => new FeedbackPage(),
         ["Dialogs"] = () => new DialogsPage(),

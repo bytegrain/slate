@@ -1,0 +1,267 @@
+<UserControl x:Class="Slate.Wpf.Demo.Pages.PickersPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sl="https://slate.dev/wpf">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <sl:Container ContainerMaxWidth="Lg" Margin="0,28,0,48">
+      <sl:Stack Spacing="6">
+        <StackPanel>
+          <TextBlock Style="{DynamicResource Sl.Typography.Overline}" Foreground="{DynamicResource Sl.Brush.Accent.Text}" Text="WAVE 2" />
+          <TextBlock Style="{DynamicResource Sl.Typography.H2}" Margin="0,6,0,4" Text="Overlays, navigation and pickers" />
+          <TextBlock Style="{DynamicResource Sl.Text.Secondary}" TextWrapping="Wrap"
+                     Text="Popovers, menus, tabs, select, date picker, tree, slider and friends. Overlays position with Slate's shared positioner, close on Escape or an outside click and hand focus back." />
+          <TextBlock x:Name="LastEvent" Style="{DynamicResource Sl.Text.Mono}" Margin="0,8,0,0" Text="Events appear here." />
+        </StackPanel>
+
+        <!-- Overlays -->
+        <sl:Card Title="Popover, tooltip, menu" Subtitle="Twelve placements, flip and shift at the screen edge. Escape closes; focus returns to the anchor.">
+          <sl:Stack Spacing="4">
+            <sl:Stack Direction="Row" Spacing="2" Align="Center">
+              <sl:Popover x:Name="FilterPopover" Placement="BottomStart" OpenChanged="OnOpenChanged">
+                <sl:Popover.Anchor>
+                  <Button sl:Sl.StartIcon="layers" Content="Filters" />
+                </sl:Popover.Anchor>
+                <sl:Stack Spacing="3" Width="240">
+                  <TextBlock FontWeight="SemiBold" Text="Filter results" />
+                  <CheckBox Content="Only mine" IsChecked="True" />
+                  <CheckBox Content="Include archived" />
+                  <Button sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" Content="Apply" Click="OnApplyFilters" />
+                </sl:Stack>
+              </sl:Popover>
+              <sl:Popover Placement="Right" MatchAnchorWidth="False" CloseOnOutsideClick="False">
+                <sl:Popover.Anchor>
+                  <Button Content="Sticky (right)" />
+                </sl:Popover.Anchor>
+                <TextBlock Width="200" TextWrapping="Wrap" Text="CloseOnOutsideClick is off: Escape or the anchor closes me." />
+              </sl:Popover>
+              <sl:Popover Placement="Top" Modal="True" Offset="12">
+                <sl:Popover.Anchor>
+                  <Button Content="Modal (top, offset 12)" />
+                </sl:Popover.Anchor>
+                <TextBox Width="200" sl:Sl.Placeholder="Focus is trapped here" />
+              </sl:Popover>
+            </sl:Stack>
+
+            <sl:Stack Direction="Row" Spacing="2" Align="Center">
+              <Button sl:Sl.StartIcon="copy" Content="Hover me">
+                <Button.ToolTip>
+                  <sl:Tooltip Text="Copy to clipboard" Shortcut="Ctrl+C" />
+                </Button.ToolTip>
+              </Button>
+              <Button Content="Bottom, no delay">
+                <Button.ToolTip>
+                  <sl:Tooltip Text="Shows instantly below" TooltipPlacement="Bottom" Delay="0" />
+                </Button.ToolTip>
+              </Button>
+              <Button Content="Rich content">
+                <Button.ToolTip>
+                  <sl:Tooltip TooltipPlacement="Right">
+                    <StackPanel>
+                      <TextBlock FontWeight="SemiBold" Text="Deploy" />
+                      <TextBlock Text="Ships main to production." />
+                    </StackPanel>
+                  </sl:Tooltip>
+                </Button.ToolTip>
+              </Button>
+              <Button Content="Disabled tooltip">
+                <Button.ToolTip>
+                  <sl:Tooltip Text="You won't see this" IsEnabled="False" />
+                </Button.ToolTip>
+              </Button>
+            </sl:Stack>
+
+            <sl:Stack Direction="Row" Spacing="2" Align="Center">
+              <sl:Menu Placement="BottomStart" OpenChanged="OnOpenChanged">
+                <sl:Menu.Trigger>
+                  <Button sl:Sl.EndIcon="chevron-down" Content="Actions" />
+                </sl:Menu.Trigger>
+                <MenuItem Header="Rename" sl:Sl.StartIcon="pencil" sl:Sl.Shortcut="F2" Click="OnMenuItem" />
+                <MenuItem Header="Duplicate" sl:Sl.StartIcon="copy" InputGestureText="Ctrl+D" Click="OnMenuItem" />
+                <MenuItem Header="Move to">
+                  <MenuItem Header="Archive" Click="OnMenuItem" />
+                  <MenuItem Header="Shared" Click="OnMenuItem" />
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="Delete" sl:Sl.StartIcon="trash" sl:Sl.Tone="Danger" Click="OnMenuItem" />
+              </sl:Menu>
+              <sl:Menu Placement="BottomEnd">
+                <sl:Menu.Trigger>
+                  <Button sl:Sl.Variant="Ghost" sl:Sl.StartIcon="more-horizontal" sl:Sl.IconOnly="True" sl:Sl.Label="More" />
+                </sl:Menu.Trigger>
+                <MenuItem Header="Settings" sl:Sl.StartIcon="settings" Click="OnMenuItem" />
+                <MenuItem Header="Help" sl:Sl.StartIcon="info" Click="OnMenuItem" />
+              </sl:Menu>
+              <sl:Menu AsContextMenu="True">
+                <sl:Menu.Trigger>
+                  <Border Padding="16,10" BorderThickness="1" BorderBrush="{DynamicResource Sl.Brush.Border.Default}" CornerRadius="{DynamicResource Sl.CornerRadius.Md}"
+                          Background="{DynamicResource Sl.Brush.Background.Muted}">
+                    <TextBlock Style="{DynamicResource Sl.Text.Secondary}" Text="Right-click this area" />
+                  </Border>
+                </sl:Menu.Trigger>
+                <MenuItem Header="Cut" sl:Sl.Shortcut="Ctrl+X" Click="OnMenuItem" />
+                <MenuItem Header="Copy" sl:Sl.Shortcut="Ctrl+C" Click="OnMenuItem" />
+                <MenuItem Header="Paste" sl:Sl.Shortcut="Ctrl+V" IsEnabled="False" />
+              </sl:Menu>
+            </sl:Stack>
+          </sl:Stack>
+        </sl:Card>
+
+        <!-- Tabs -->
+        <sl:Card Title="Tabs" Subtitle="Line, pills and enclosed; three sizes; row or column; icons, badges, closable tabs and keep-alive panels.">
+          <sl:Stack Spacing="5">
+            <sl:Tabs Value="overview" ValueChanged="OnTabChanged">
+              <sl:Tab Key="overview" Label="Overview" Icon="home">
+                <TextBlock Style="{DynamicResource Sl.Text.Secondary}" Text="Line variant (default). Arrow keys move between tabs." />
+              </sl:Tab>
+              <sl:Tab Key="activity" Label="Activity" Icon="bell" Badge="12">
+                <TextBlock Style="{DynamicResource Sl.Text.Secondary}" Text="Badges count things." />
+              </sl:Tab>
+              <sl:Tab Key="settings" Label="Settings" Icon="settings">
+                <TextBlock Style="{DynamicResource Sl.Text.Secondary}" Text="Settings panel." />
+              </sl:Tab>
+              <sl:Tab Key="disabled" Label="Disabled" IsEnabled="False" />
+            </sl:Tabs>
+
+            <sl:Tabs Variant="Pills" Size="Small">
+              <sl:Tab Key="day" Label="Day"><TextBlock Text="Pills, small." /></sl:Tab>
+              <sl:Tab Key="week" Label="Week"><TextBlock Text="Week view." /></sl:Tab>
+              <sl:Tab Key="month" Label="Month"><TextBlock Text="Month view." /></sl:Tab>
+            </sl:Tabs>
+
+            <sl:Tabs Variant="Enclosed" KeepAlive="True">
+              <sl:Tab Key="a" Label="draft.md" Closable="True">
+                <TextBox AcceptsReturn="True" Height="70" Text="Keep-alive: type here, switch tabs, come back." />
+              </sl:Tab>
+              <sl:Tab Key="b" Label="notes.md" Closable="True">
+                <TextBox AcceptsReturn="True" Height="70" Text="Each visited panel keeps its state." />
+              </sl:Tab>
+              <sl:Tab Key="c" Label="todo.md" Closable="True">
+                <TextBox AcceptsReturn="True" Height="70" Text="Delete or the × closes a tab." />
+              </sl:Tab>
+            </sl:Tabs>
+
+            <sl:Tabs Direction="Column" Size="Large" Height="140">
+              <sl:Tab Key="profile" Label="Profile" Icon="user"><TextBlock Text="Column direction, large." /></sl:Tab>
+              <sl:Tab Key="files" Label="Files" Icon="folder"><TextBlock Text="Files." /></sl:Tab>
+              <sl:Tab Key="alerts" Label="Alerts" Icon="bell"><TextBlock Text="Alerts." /></sl:Tab>
+            </sl:Tabs>
+          </sl:Stack>
+        </sl:Card>
+
+        <!-- Breadcrumbs, pagination, segmented -->
+        <sl:Card Title="Breadcrumbs, pagination, segmented control" Subtitle="Long paths collapse into a menu; pagination keeps your place when the page size changes.">
+          <sl:Stack Spacing="5">
+            <sl:Breadcrumbs x:Name="Crumbs" ItemClick="OnCrumb" />
+            <sl:Breadcrumbs x:Name="LongCrumbs" MaxItems="3" Separator="arrow-right" ItemClick="OnCrumb" />
+            <sl:Pagination x:Name="Pager" TotalCount="1234" PageSize="50" PageChanged="OnPageChanged" PageSizeChanged="OnPageSizeChanged" />
+            <sl:Stack Direction="Row" Spacing="3" Align="Center">
+              <sl:Pagination PageCount="20" Page="10" Siblings="2" Size="Small" />
+              <sl:Pagination PageCount="5" Size="Large" />
+            </sl:Stack>
+            <sl:Stack Direction="Row" Spacing="3" Align="Center">
+              <sl:SegmentedControl x:Name="Views" ValueChanged="OnSegmentChanged" AutomationProperties.Name="View" />
+              <sl:SegmentedControl x:Name="Ranges" Size="Small" />
+              <sl:SegmentedControl x:Name="Disabled" IsEnabled="False" />
+            </sl:Stack>
+            <sl:SegmentedControl x:Name="Wide" FullWidth="True" Size="Large" />
+          </sl:Stack>
+        </sl:Card>
+
+        <!-- Select -->
+        <sl:Card Title="Select" Subtitle="Single or multiple, searchable with fuzzy matching, creatable, grouped, with chips, loading and empty states.">
+          <sl:ResponsiveGrid Spacing="5">
+            <sl:Select x:Name="Country" sl:ResponsiveGrid.Md="6" Label="Country" Placeholder="Choose a country" HelperText="Type to jump (typeahead)." Clearable="True" ValueChanged="OnSelectValue" />
+            <sl:Select x:Name="City" sl:ResponsiveGrid.Md="6" Label="City" Searchable="True" Placeholder="Search cities" Required="True" ValueChanged="OnSelectValue" />
+            <sl:Select x:Name="Tags" sl:ResponsiveGrid.Md="6" Label="Tags" Multiple="True" Searchable="True" Creatable="True" MaxVisibleChips="3"
+                       Placeholder="Add tags" HelperText="Create new tags by typing." ValuesChanged="OnSelectValues" />
+            <sl:Select x:Name="Grouped" sl:ResponsiveGrid.Md="6" Label="Fruit (grouped)" Searchable="True" Placeholder="Pick a fruit" />
+            <sl:Select x:Name="Filled" sl:ResponsiveGrid.Md="4" Label="Filled, small" Variant="Filled" Size="Small" Radius="Full" />
+            <sl:Select x:Name="Underlined" sl:ResponsiveGrid.Md="4" Label="Underlined, large" Variant="Underlined" Size="Large" />
+            <sl:Select x:Name="Errored" sl:ResponsiveGrid.Md="4" Label="Region" Error="Choose a region to continue." />
+            <sl:Select x:Name="Busy" sl:ResponsiveGrid.Md="4" Label="Loading" Loading="True" Placeholder="Fetching…" />
+            <sl:Select x:Name="Empty" sl:ResponsiveGrid.Md="4" Label="No options" Searchable="True" EmptyContent="Nothing here yet" />
+            <sl:Select x:Name="Off" sl:ResponsiveGrid.Md="4" Label="Disabled" IsEnabled="False" />
+            <sl:Select x:Name="People" sl:ResponsiveGrid.Md="6" Label="Assignee (custom template)">
+              <sl:Select.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel Orientation="Horizontal">
+                    <sl:Avatar DisplayName="{Binding}" Size="Small" Margin="0,0,8,0" />
+                    <TextBlock Text="{Binding}" VerticalAlignment="Center" />
+                  </StackPanel>
+                </DataTemplate>
+              </sl:Select.ItemTemplate>
+            </sl:Select>
+          </sl:ResponsiveGrid>
+        </sl:Card>
+
+        <!-- Dates -->
+        <sl:Card Title="Date picker" Subtitle="Type a date or pick one. Single or range, presets, min/max, disabled days, first day of week, custom formats.">
+          <sl:ResponsiveGrid Spacing="5">
+            <sl:DatePicker x:Name="Due" sl:ResponsiveGrid.Md="6" Label="Due date" Clearable="True" HelperText="Alt+Down opens the calendar." ValueChanged="OnDateChanged" />
+            <sl:DatePicker x:Name="Stay" sl:ResponsiveGrid.Md="6" Label="Stay" Selection="Range" Clearable="True" RangeChanged="OnRangeChanged" />
+            <sl:DatePicker x:Name="Weekdays" sl:ResponsiveGrid.Md="4" Label="Weekdays only" Format="yyyy-MM-dd" FirstDayOfWeek="Monday" Placeholder="yyyy-MM-dd" />
+            <sl:DatePicker sl:ResponsiveGrid.Md="4" Label="Filled, small" Variant="Filled" Size="Small" Format="dd MMM yyyy" />
+            <sl:DatePicker sl:ResponsiveGrid.Md="4" Label="With error" Error="Pick a date in the future." />
+            <sl:DatePicker x:Name="InlineRange" sl:ResponsiveGrid.Md="6" Inline="True" Selection="Range" />
+            <sl:DatePicker sl:ResponsiveGrid.Md="6" Inline="True" FirstDayOfWeek="Sunday" />
+          </sl:ResponsiveGrid>
+        </sl:Card>
+
+        <!-- Tree -->
+        <sl:Card Title="Tree view" Subtitle="Keyboard (arrows, Home/End, * expands siblings, typeahead), single / multi / checkbox selection, lazy loading and filtering.">
+          <sl:ResponsiveGrid Spacing="5">
+            <StackPanel sl:ResponsiveGrid.Md="6">
+              <TextBlock Style="{DynamicResource Sl.Text.Tertiary}" Margin="0,0,0,6" Text="Single selection, filterable" />
+              <TextBox x:Name="TreeFilter" sl:Sl.Placeholder="Filter files" Margin="0,0,0,8" TextChanged="OnTreeFilter" />
+              <sl:TreeView x:Name="Files" Height="220" ItemActivated="OnTreeActivated" SelectionChanged="OnTreeSelection" AutomationProperties.Name="Files" />
+            </StackPanel>
+            <StackPanel sl:ResponsiveGrid.Md="6">
+              <TextBlock Style="{DynamicResource Sl.Text.Tertiary}" Margin="0,0,0,6" Text="Checkbox (tri-state), dense" />
+              <sl:TreeView x:Name="Permissions" Height="260" SelectionMode="Checkbox" Dense="True" AutomationProperties.Name="Permissions" />
+            </StackPanel>
+            <StackPanel sl:ResponsiveGrid.Md="6">
+              <TextBlock Style="{DynamicResource Sl.Text.Tertiary}" Margin="0,0,0,6" Text="Multi (Ctrl / Shift), lazy children" />
+              <sl:TreeView x:Name="Lazy" Height="200" SelectionMode="Multi" AutomationProperties.Name="Remote folders" />
+            </StackPanel>
+          </sl:ResponsiveGrid>
+        </sl:Card>
+
+        <!-- Slider -->
+        <sl:Card Title="Slider" Subtitle="Single or range, steps, ticks, tones. Arrows step, Page keys jump, Home/End go to the ends.">
+          <sl:ResponsiveGrid Spacing="5">
+            <sl:Slider sl:ResponsiveGrid.Md="6" Label="Volume" Value="40" Maximum="100" ShowValue="True" ValueChanged="OnSlider" />
+            <sl:Slider sl:ResponsiveGrid.Md="6" Label="Price range" Minimum="0" Maximum="500" Step="10" Value="80" RangeEnd="320" ShowValue="True" />
+            <sl:Slider sl:ResponsiveGrid.Md="6" Label="Rating" Minimum="1" Maximum="5" Step="1" Value="3" Ticks="True" ShowValue="True" Tone="Warning" />
+            <sl:Slider sl:ResponsiveGrid.Md="6" Label="Danger zone" Value="70" Maximum="100" Tone="Danger" />
+            <sl:Slider sl:ResponsiveGrid.Md="6" Label="Success" Value="90" Maximum="100" Tone="Success" Step="0.5" ShowValue="True" />
+            <sl:Slider sl:ResponsiveGrid.Md="6" Label="Disabled" Value="30" Maximum="100" IsEnabled="False" />
+          </sl:ResponsiveGrid>
+        </sl:Card>
+
+        <!-- Avatar & skeleton -->
+        <sl:Card Title="Avatar and skeleton" Subtitle="Initials and a stable tone from the name; presence dots. Skeletons pulse unless motion is reduced.">
+          <sl:Stack Spacing="5">
+            <sl:Stack Direction="Row" Spacing="3" Align="Center">
+              <sl:Avatar DisplayName="Ada Lovelace" Size="Small" />
+              <sl:Avatar DisplayName="Grace Hopper" Status="Online" />
+              <sl:Avatar DisplayName="Alan Turing" Size="Large" Status="Away" />
+              <sl:Avatar DisplayName="Katherine Johnson" Size="Large" Status="Busy" Tone="Accent" />
+              <sl:Avatar DisplayName="Linus" Status="Offline" Tone="Neutral" />
+              <sl:Avatar DisplayName="Margaret Hamilton" Tone="Success" />
+              <sl:Avatar DisplayName="Radia Perlman" Tone="Danger" />
+              <sl:Avatar DisplayName="?" />
+            </sl:Stack>
+            <sl:ResponsiveGrid Spacing="5">
+              <StackPanel sl:ResponsiveGrid.Md="6" Orientation="Horizontal">
+                <sl:Skeleton Shape="Circle" Width="40" Height="40" Margin="0,0,12,0" />
+                <sl:Skeleton Lines="3" Width="240" />
+              </StackPanel>
+              <sl:Skeleton sl:ResponsiveGrid.Md="3" Shape="Rect" Height="80" />
+              <sl:Skeleton sl:ResponsiveGrid.Md="3" Shape="Rect" Height="80" Animated="False" />
+            </sl:ResponsiveGrid>
+          </sl:Stack>
+        </sl:Card>
+      </sl:Stack>
+    </sl:Container>
+  </ScrollViewer>
+</UserControl>

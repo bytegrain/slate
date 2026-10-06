@@ -80,4 +80,16 @@ internal static class Wpf
 
     /// <summary>Processes queued dispatcher work (layout, bindings, BeginInvoke).</summary>
     public static void Pump() => Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+
+    /// <summary>First visual descendant of type T (depth-first), or throws.</summary>
+    public static T Find<T>(DependencyObject root, Func<T, bool>? match = null) where T : DependencyObject
+    {
+        for (var i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(root, i);
+            if (child is T t && (match?.Invoke(t) ?? true)) return t;
+            try { return Find(child, match); } catch (InvalidOperationException) { }
+        }
+        throw new InvalidOperationException($"No {typeof(T).Name} under {root}");
+    }
 }

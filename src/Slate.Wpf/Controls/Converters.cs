@@ -96,3 +96,14 @@ public sealed class CornerInflateConverter : IValueConverter
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotSupportedException();
 }
+
+/// <summary>A number → Thickness(n, 0, 0, 0) (tree indentation).</summary>
+public sealed class LeftThicknessConverter : IValueConverter
+{
+    public static LeftThicknessConverter Instance { get; } = new();
+
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        new System.Windows.Thickness(value is double d && !double.IsNaN(d) ? d : 0, 0, 0, 0);
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotSupportedException();
+}

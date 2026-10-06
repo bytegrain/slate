@@ -16,7 +16,7 @@ namespace Slate.Wpf;
 [TemplatePart(Name = PartTextBox, Type = typeof(TextBox))]
 [TemplatePart(Name = PartPasswordBox, Type = typeof(PasswordBox))]
 [TemplatePart(Name = PartClear, Type = typeof(ButtonBase))]
-public class TextField : Control
+public class TextField : Control, IFieldChrome
 {
     public const string PartTextBox = "PART_TextBox";
     public const string PartPasswordBox = "PART_PasswordBox";
@@ -148,6 +148,9 @@ public class TextField : Control
     public string? Description => HasError ? Error : HelperText;
 
     internal void SetActualVariant(FieldVariant v) => SetValue(ActualVariantPropertyKey, v);
+
+    DependencyProperty IFieldChrome.FieldVariantProperty => VariantProperty;
+    void IFieldChrome.SetActualVariant(FieldVariant variant) => SetActualVariant(variant);
 
     /// <summary>Clears the value (what the clear button does) and keeps focus in the field.</summary>
     public void Clear()

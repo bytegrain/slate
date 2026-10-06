@@ -40,6 +40,7 @@
           <sl:SectionHeader Content="Library" Margin="8,4,0,0" />
           <ListBox x:Name="Nav" Style="{DynamicResource Sl.NavList}" SelectionChanged="OnNavigate" Padding="8,0">
             <sl:NavItem Icon="layers" Content="Components" Tag="Components" />
+            <sl:NavItem Icon="menu" Content="Overlays &amp; pickers" Tag="Pickers" />
             <sl:NavItem Icon="settings" Content="Layout" Tag="Layout" />
             <sl:NavItem Icon="bell" Content="Feedback" Tag="Feedback">
               <sl:NavItem.Trailing>

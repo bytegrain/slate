@@ -6,8 +6,10 @@
 
   <ControlTemplate x:Key="Sl.MenuPanel" TargetType="ContentControl">
     <Grid Margin="8,4,8,16">
-      <Border CornerRadius="{DynamicResource Sl.CornerRadius.Lg}" Background="{DynamicResource Sl.Brush.Background.Raised}"
-              BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="1" Effect="{DynamicResource Sl.Effect.E3}" />
+      <Border CornerRadius="{DynamicResource Sl.Component.Popover.Radius.Corner}" Background="{DynamicResource Sl.Component.Popover.Background.Brush}"
+              Effect="{DynamicResource Sl.Component.Popover.Shadow.Effect}" />
+      <Border CornerRadius="{DynamicResource Sl.Component.Popover.Radius.Corner}" Background="{DynamicResource Sl.Component.Popover.Background.Brush}"
+              BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="1" />
       <ContentPresenter Margin="4" />
     </Grid>
   </ControlTemplate>
@@ -42,7 +44,8 @@
   <!-- Items inside a menu panel (SubmenuItem / SubmenuHeader). -->
   <ControlTemplate x:Key="Sl.MenuItem.Sub" TargetType="MenuItem">
     <Grid x:Name="Root" SnapsToDevicePixels="True">
-      <Border x:Name="Bd" CornerRadius="5" Background="Transparent" MinHeight="30" Padding="8,0">
+      <Border x:Name="Bd" CornerRadius="{DynamicResource Sl.Component.Menu.ItemRadius.Corner}" Background="Transparent"
+              MinHeight="{DynamicResource Sl.Component.Menu.ItemHeight}" Padding="8,0">
         <Grid>
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" SharedSizeGroup="MenuIcon" />
@@ -57,7 +60,7 @@
             <sl:Icon x:Name="Check" Kind="check" Foreground="{DynamicResource Sl.Brush.Accent.Text}" Visibility="Collapsed" />
           </Grid>
           <ContentPresenter Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" VerticalAlignment="Center" />
-          <TextBlock Grid.Column="2" Margin="24,0,0,0" VerticalAlignment="Center" Text="{TemplateBinding InputGestureText}"
+          <TextBlock x:Name="Gesture" Grid.Column="2" Margin="24,0,0,0" VerticalAlignment="Center" Text="{TemplateBinding InputGestureText}"
                      FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="{DynamicResource Sl.Font.Size.2xs}"
                      Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
           <sl:Icon x:Name="Arrow" Grid.Column="3" Kind="chevron-right" Size="14" Margin="8,0,0,0" VerticalAlignment="Center"
@@ -80,7 +83,13 @@
         <Setter TargetName="NamedIcon" Property="Visibility" Value="Collapsed" />
       </Trigger>
       <Trigger Property="IsHighlighted" Value="True">
-        <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Sl.Brush.Background.Hover}" />
+        <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Sl.Component.Menu.ItemHover.Brush}" />
+      </Trigger>
+      <Trigger Property="InputGestureText" Value="">
+        <Setter TargetName="Gesture" Property="Text" Value="{Binding Path=(sl:Sl.Shortcut), RelativeSource={RelativeSource TemplatedParent}}" />
+      </Trigger>
+      <Trigger Property="InputGestureText" Value="{x:Null}">
+        <Setter TargetName="Gesture" Property="Text" Value="{Binding Path=(sl:Sl.Shortcut), RelativeSource={RelativeSource TemplatedParent}}" />
       </Trigger>
       <Trigger Property="sl:Sl.Tone" Value="Danger">
         <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
