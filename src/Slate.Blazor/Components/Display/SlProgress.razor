@@ -1,0 +1,21 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+<div @attributes="AdditionalAttributes" class="@CssClass" style="@StyleValue" role="progressbar" aria-label="@Label"
+     aria-valuemin="0" aria-valuemax="100" aria-valuenow="@(Indeterminate ? null : Clamped.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))"
+     aria-busy="@(Indeterminate ? "true" : null)">
+    <div class="sl-progress__bar"></div>
+</div>
+
+@code {
+    /// <summary>0-100. Ignored when <see cref="Indeterminate"/>.</summary>
+    [Parameter] public double Value { get; set; }
+    [Parameter] public bool Indeterminate { get; set; }
+    [Parameter, EditorRequired] public string Label { get; set; } = "";
+
+    private double Clamped => Math.Clamp(double.IsNaN(Value) ? 0 : Value, 0, 100);
+
+    private string CssClass => Css.Of("sl-progress").Add("sl-progress--indeterminate", Indeterminate).Add(Class);
+
+    private string StyleValue => Indeterminate ? Style ?? "" :
+        $"--_value: {Clamped.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)}%;{Style}";
+}

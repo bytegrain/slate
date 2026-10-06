@@ -1,0 +1,78 @@
+@page "/dialogs"
+@inject IDialogService Dialogs
+@inject ISnackbarService Snackbar
+<PageTitle>Dialogs · Slate</PageTitle>
+
+<div class="demo-page">
+    <PageHeader Title="Dialogs">
+        <code>IDialogService</code> for components and confirmations, or a declarative <code>SlDialog</code>.
+        Focus is trapped and restored; the page behind is inert.
+    </PageHeader>
+
+    <DemoSection Title="Service dialogs">
+        <div class="demo-row">
+            <SlButton Variant="ButtonVariant.Primary" OnClick="RenameAsync">Rename package…</SlButton>
+            <SlButton OnClick="ConfirmAsync">Confirm</SlButton>
+            <SlButton Variant="ButtonVariant.Danger" OnClick="DeleteAsync">Delete package…</SlButton>
+            <SlButton OnClick="@(() => Dialogs.AlertAsync("All caught up", "There are no pending reviews.", Severity.Success))">Alert</SlButton>
+            <SlButton OnClick="Stacked">Stacked dialogs</SlButton>
+        </div>
+        @if (_last is not null)
+        {
+            <SlText Typo="Typo.Caption" Tone="TextTone.Tertiary" Style="margin-top: var(--sl-space-3)">Last result: @_last</SlText>
+        }
+    </DemoSection>
+
+    <DemoSection Title="Declarative dialog" Subtitle="SlDialog with two-way Open binding">
+        <SlButton OnClick="() => _inlineOpen = true">Open inline dialog</SlButton>
+        <SlDialog @bind-Open="_inlineOpen" Title="Keyboard shortcuts" Description="Work faster with Slate apps." MaxWidth="DialogWidth.Md">
+            <SlDialogBody>
+                <SlStack Spacing="2">
+                    @foreach (var (keys, action) in _shortcuts)
+                    {
+                        <SlStack Row="true" Align="StackAlign.Center"><SlText>@action</SlText><SlSpacer /><SlKbd>@keys</SlKbd></SlStack>
+                    }
+                </SlStack>
+            </SlDialogBody>
+            <SlDialogFooter>
+                <SlButton Variant="ButtonVariant.Primary" OnClick="() => _inlineOpen = false">Done</SlButton>
+            </SlDialogFooter>
+        </SlDialog>
+    </DemoSection>
+</div>
+
+@code {
+    private string? _last;
+    private bool _inlineOpen;
+    private string _package = "Slate.Wpf";
+    private readonly (string, string)[] _shortcuts = [("⌘K", "Command menu"), ("G C", "Go to components"), ("⌘↵", "Commit"), ("Esc", "Close dialog")];
+
+    private async Task RenameAsync()
+    {
+        var result = await Dialogs.ShowAsync<RenameDialog>("Rename package",
+            new DialogParameters().Set(nameof(RenameDialog.Name), _package), new DialogOptions { MaxWidth = DialogWidth.Xs, CloseOnBackdropClick = false });
+        _last = result.Canceled ? "Rename cancelled" : $"Renamed to {result.GetData<string>()}";
+        if (!result.Canceled) _package = result.GetData<string>()!;
+    }
+
+    private async Task ConfirmAsync()
+    {
+        var ok = await Dialogs.ConfirmAsync(new MessageBoxOptions { Title = "Publish 0.1.4?", Message = "Packages go live on npm and NuGet.", ConfirmText = "Publish" });
+        _last = ok ? "Published" : "Cancelled";
+    }
+
+    private async Task DeleteAsync()
+    {
+        var ok = await Dialogs.ConfirmAsync(new MessageBoxOptions
+        {
+            Title = $"Delete {_package}?",
+            Message = "This removes the package and its 14 versions from the feed. This can't be undone.",
+            ConfirmText = "Delete package",
+            Destructive = true,
+        });
+        _last = ok ? $"Deleted {_package}" : "Kept";
+        if (ok) Snackbar.Add(new SnackbarOptions { Message = $"{_package} deleted", Severity = Severity.Success, Action = SnackbarAction.Create("Undo", () => _last = "Restored") });
+    }
+
+    private void Stacked() => Dialogs.Show<StackedDialog>("Dialog 1", options: new DialogOptions { MaxWidth = DialogWidth.Sm });
+}

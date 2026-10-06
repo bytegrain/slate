@@ -1,0 +1,51 @@
+@namespace Slate.Blazor
+@implements IDisposable
+@inject IDialogService Dialogs
+@inject SlateOptions Options
+@foreach (var d in _rendered)
+{
+    <SlDialogFrame @key="d.Id" Dialog="d" IsTop="@(d == _top)" IsClosing="@(!d.IsOpen)" />
+}
+
+@code {
+    private List<DialogReference> _rendered = [];
+    private readonly HashSet<long> _removing = [];
+    private DialogReference? _top;
+
+    private static readonly TimeSpan CloseDuration = TimeSpan.FromMilliseconds(SlateTokens.Motion.Duration.Base);
+
+    protected override void OnInitialized()
+    {
+        Dialogs.Changed += OnChanged;
+        Sync();
+    }
+
+    private void Sync()
+    {
+        var open = Dialogs.Open;
+        _top = open.Count > 0 ? open[^1] : null;
+        // Keep closed dialogs in place (in their stack position) while they animate out, then remove them.
+        _rendered = _rendered.Union(open).ToList();
+        foreach (var d in _rendered.Where(d => !d.IsOpen && _removing.Add(d.Id)).ToList()) _ = RemoveAfterCloseAsync(d);
+    }
+
+    private void OnChanged(object? sender, EventArgs e) => InvokeAsync(() =>
+    {
+        Sync();
+        StateHasChanged();
+    });
+
+    private async Task RemoveAfterCloseAsync(DialogReference d)
+    {
+        try { await Task.Delay(CloseDuration, Options.TimeProvider); }
+        catch (TaskCanceledException) { }
+        await InvokeAsync(() =>
+        {
+            _rendered.Remove(d);
+            _removing.Remove(d.Id);
+            StateHasChanged();
+        });
+    }
+
+    public void Dispose() => Dialogs.Changed -= OnChanged;
+}

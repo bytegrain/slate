@@ -1,0 +1,17 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+<span @attributes="AdditionalAttributes" class="@CssClass" style="@Style">@if (Dot)
+{<span class="sl-badge__dot" aria-hidden="true"></span>}@ChildContent</span>
+
+@code {
+    [Parameter] public BadgeTone Tone { get; set; } = BadgeTone.Neutral;
+
+    /// <summary>Leading status dot in the badge's colour.</summary>
+    [Parameter] public bool Dot { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string CssClass => Css.Of("sl-badge")
+        .Add($"sl-badge--{Names.Kebab(Tone.ToString())}", Tone != BadgeTone.Neutral)
+        .Add(Class);
+}

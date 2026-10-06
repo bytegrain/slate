@@ -1,0 +1,7 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+<div @attributes="AdditionalAttributes" class="@(Css.Of("sl-dialog__body").Add(Class))" style="@Style">@ChildContent</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

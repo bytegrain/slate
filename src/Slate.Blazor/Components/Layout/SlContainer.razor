@@ -1,0 +1,12 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+<div @attributes="AdditionalAttributes" class="@CssClass" style="@Style">@ChildContent</div>
+
+@code {
+    /// <summary>Max content width (container tokens). Default Lg (1200px).</summary>
+    [Parameter] public ContainerWidth Width { get; set; } = ContainerWidth.Lg;
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string CssClass => Css.Of("sl-container").Add($"sl-container--{Names.Kebab(Width.ToString())}", Width != ContainerWidth.Lg).Add(Class);
+}

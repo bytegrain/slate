@@ -1,0 +1,51 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@implements IDisposable
+<header @attributes="AdditionalAttributes" class="@(Css.Of("sl-app-bar").Add(Class))" style="@Style">
+    @if (ShowToggle)
+    {
+        <button @ref="_toggle" type="button" class="sl-button sl-button--ghost sl-button--icon" aria-label="@ToggleLabel"
+                aria-expanded="@(Shell!.Drawer!.Open ? "true" : "false")" aria-controls="@Shell.Drawer.DrawerId"
+                @onclick="() => Shell.Drawer.ToggleAsync()"><SlIcon Name="menu" /></button>
+    }
+    @if (Title is not null)
+    {
+        <span class="sl-app-bar__title">@Title</span>
+    }
+    @ChildContent
+</header>
+
+@code {
+    [CascadingParameter] private SlAppShell? Shell { get; set; }
+
+    /// <summary>Text or markup in the title slot.</summary>
+    [Parameter] public RenderFragment? Title { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Show the drawer toggle when the shell has a drawer. Default true.</summary>
+    [Parameter] public bool DrawerToggle { get; set; } = true;
+
+    [Parameter] public string ToggleLabel { get; set; } = "Toggle navigation";
+
+    private ElementReference _toggle;
+
+    private bool ShowToggle => DrawerToggle && Shell?.Drawer is not null;
+
+    protected override void OnInitialized()
+    {
+        if (Shell is not null) Shell.DrawerChanged += OnDrawerChanged;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (Shell is not null && ShowToggle) Shell.ToggleButton = _toggle;
+    }
+
+    private void OnDrawerChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        if (Shell is not null) Shell.DrawerChanged -= OnDrawerChanged;
+    }
+}

@@ -1,0 +1,33 @@
+/* Demo-only layout helpers. Component visuals come from slate.css; this file only arranges demo pages. */
+html, body { margin: 0; height: 100%; }
+
+.demo-page { display: flex; flex-direction: column; gap: var(--sl-space-6); max-width: 1200px; }
+.demo-hero { display: flex; flex-direction: column; gap: var(--sl-space-3); padding: var(--sl-space-4) 0 var(--sl-space-2); }
+.demo-hero p { max-width: 640px; margin: 0; }
+.demo-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sl-space-2); }
+.demo-caption { margin: 0 0 var(--sl-space-3); }
+.demo-swatch { height: 56px; border-radius: var(--sl-radius-lg); box-shadow: inset 0 0 0 1px var(--sl-color-border-default); }
+.demo-stat { font-size: var(--sl-font-size-3xl); font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+.demo-table-wrap { overflow-x: auto; }
+.demo-table { width: 100%; border-collapse: collapse; font-size: var(--sl-font-size-sm); min-width: 640px; }
+.demo-table th { text-align: left; font-weight: 600; font-size: var(--sl-font-size-xs); color: var(--sl-color-text-tertiary);
+  padding: var(--sl-space-2) var(--sl-space-3); background: var(--sl-color-background-subtle); border-bottom: 1px solid var(--sl-color-border-default); }
+.demo-table td { padding: var(--sl-space-2) var(--sl-space-3); border-bottom: 1px solid var(--sl-color-border-default); }
+.demo-table tr:last-child td { border-bottom: 0; }
+.demo-mono { font-family: var(--sl-font-family-mono); font-size: var(--sl-font-size-xs); color: var(--sl-color-text-tertiary); }
+.demo-board { display: grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap: var(--sl-space-3); overflow-x: auto; }
+.demo-column { display: flex; flex-direction: column; gap: var(--sl-space-2); min-width: 0; }
+.demo-column-head { display: flex; align-items: center; gap: var(--sl-space-2); font-weight: 600; font-size: var(--sl-font-size-sm); padding: 0 var(--sl-space-1); }
+.demo-issue { display: flex; flex-direction: column; gap: var(--sl-space-2); }
+.demo-issue-title { font-size: var(--sl-font-size-sm); font-weight: 500; line-height: 1.35; margin: 0; }
+
+/* App bar: full theme/density controls on wide screens, a single theme button on phones. */
+.demo-narrow { display: none; }
+@media (max-width: 760px) {
+  .demo-wide { display: none; }
+  .demo-narrow { display: inline-flex; }
+  .demo-board { grid-template-columns: repeat(4, minmax(240px, 1fr)); }
+}
+
+/* FocusOnNavigate moves focus to the page heading for screen readers; don't draw a ring for that. */
+h1:focus { outline: none; }

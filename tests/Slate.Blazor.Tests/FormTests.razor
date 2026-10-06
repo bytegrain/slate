@@ -1,0 +1,73 @@
+@inherits SlateTestContext
+@using System.ComponentModel.DataAnnotations
+
+@code {
+    public sealed class Signup
+    {
+        [Required(ErrorMessage = "Enter your name.")]
+        public string? Name { get; set; }
+
+        [Required, EmailAddress(ErrorMessage = "Enter a complete email address.")]
+        public string? Email { get; set; }
+
+        [Range(typeof(bool), "true", "true", ErrorMessage = "You must accept the terms.")]
+        public bool Terms { get; set; }
+    }
+
+    private readonly Signup _model = new();
+    private bool _submitted;
+
+    private IRenderedComponent<EditForm> RenderForm() => Render<EditForm>(@<EditForm Model="_model" OnValidSubmit="() => _submitted = true">
+        <DataAnnotationsValidator />
+        <SlTextField @bind-Value="_model.Name" Label="Name" HelperText="As it appears on invoices" id="name" />
+        <SlTextField @bind-Value="_model.Email" Label="Email" id="email" />
+        <SlCheckbox @bind-Value="_model.Terms" Label="I accept the terms" id="terms" />
+        <SlButton Type="ButtonType.Submit">Create</SlButton>
+    </EditForm>);
+
+    [Fact]
+    public void Submitting_an_invalid_form_shows_validation_messages_on_the_fields()
+    {
+        var cut = RenderForm();
+        cut.Find("form").Submit();
+
+        Assert.False(_submitted);
+        var name = cut.Find("#name");
+        Assert.Equal("true", name.GetAttribute("aria-invalid"));
+        Assert.Equal("Enter your name.", cut.Find($"#{name.GetAttribute("aria-describedby")}").TextContent.Trim());
+        Assert.Equal("true", cut.Find("#terms").GetAttribute("aria-invalid"));
+        Assert.Equal(2, cut.FindAll(".sl-field--invalid").Count);
+    }
+
+    [Fact]
+    public void Fixing_a_field_clears_its_error_and_restores_the_helper()
+    {
+        var cut = RenderForm();
+        cut.Find("form").Submit();
+
+        cut.Find("#name").Change("Aaron");
+        var name = cut.Find("#name");
+        Assert.Equal("false", name.GetAttribute("aria-invalid"));
+        Assert.Equal("As it appears on invoices", cut.Find($"#{name.GetAttribute("aria-describedby")}").TextContent);
+    }
+
+    [Fact]
+    public void Field_specific_validation_runs_on_change()
+    {
+        var cut = RenderForm();
+        cut.Find("#email").Change("aaron@");
+        Assert.Contains("Enter a complete email address.", cut.Find(".sl-field__error").TextContent);
+    }
+
+    [Fact]
+    public void Valid_form_submits()
+    {
+        var cut = RenderForm();
+        cut.Find("#name").Change("Aaron");
+        cut.Find("#email").Change("aaron@slate.dev");
+        cut.Find("#terms").Change(true);
+        cut.Find("form").Submit();
+        Assert.True(_submitted);
+        Assert.Empty(cut.FindAll(".sl-field--invalid"));
+    }
+}

@@ -1,0 +1,3 @@
+# Copied from packages/web/dist at build time (see Slate.Blazor.csproj)
+wwwroot/slate.css
+wwwroot/fonts/

@@ -1,0 +1,55 @@
+@namespace Slate.Blazor
+@typeparam TValue
+@inherits SlInputBase<TValue>
+<CascadingValue Value="this" IsFixed="true">
+    <fieldset @attributes="AdditionalAttributes" class="@(Css.Of("sl-radio-group").Add("sl-radio-group--row", Row).Add(Class))" style="@Style"
+              disabled="@Disabled" aria-invalid="@(IsInvalid ? "true" : null)" aria-describedby="@(ErrorText is null ? null : $"{ElementId}-err")">
+        @if (Label is not null)
+        {
+            <legend class="sl-radio-group__label">@Label</legend>
+        }
+        <div class="sl-radio-group__options">@ChildContent</div>
+        @if (ErrorText is { } error)
+        {
+            <p class="sl-field__error" id="@($"{ElementId}-err")"><SlIcon Name="alert-circle" />@error</p>
+        }
+    </fieldset>
+</CascadingValue>
+
+@code {
+    /// <summary>Lay options out horizontally.</summary>
+    [Parameter] public bool Row { get; set; }
+
+    /// <summary>The radios' shared name (generated if omitted).</summary>
+    [Parameter] public string? Name { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    internal string GroupName => Name ?? UniqueId;
+
+    internal bool IsSelected(TValue value) => EqualityComparer<TValue?>.Default.Equals(Value, value);
+
+    // Radios only take primitive parameters, so Blazor won't re-render them when the group's value changes;
+    // the group tells them directly.
+    private readonly List<SlRadio<TValue>> _radios = [];
+
+    internal void Register(SlRadio<TValue> radio) => _radios.Add(radio);
+    internal void Unregister(SlRadio<TValue> radio) => _radios.Remove(radio);
+
+    internal void Select(TValue value)
+    {
+        CurrentValue = value;
+        RefreshRadios();
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        RefreshRadios();
+    }
+
+    private void RefreshRadios()
+    {
+        foreach (var radio in _radios.ToList()) radio.Refresh();
+    }
+}

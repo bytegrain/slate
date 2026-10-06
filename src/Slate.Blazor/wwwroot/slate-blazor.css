@@ -1,0 +1,19 @@
+/*
+  Slate.Blazor glue — the only CSS this package adds on top of @slate/web's slate.css.
+  Keep it tiny; anything visual belongs in packages/web/src/styles.
+*/
+
+/* The provider wraps app content in a plain element; it must not affect layout. */
+.sl-provider__content { display: contents; }
+
+/* Responsive drawers are persistent from 900px (md) up, so their scrim only exists below that. */
+@media (min-width: 900px) {
+  .sl-drawer-scrim--responsive { display: none; }
+}
+
+/* Responsive drawers are rendered open on the server; on narrow screens keep them (and their scrim) out of
+   view until script has measured the viewport and closed them, so phones don't flash a covering drawer. */
+@media (max-width: 899.98px) {
+  .sl-drawer.sl-drawer--responsive.sl-drawer--unresolved { visibility: hidden; transform: translateX(-100%); transition: none; }
+  .sl-drawer-scrim.sl-drawer-scrim--unresolved { display: none; }
+}

@@ -1,0 +1,73 @@
+@namespace Slate.Blazor
+@implements IDisposable
+@inject IDialogService Dialogs
+@*
+  Declarative dialog: <SlDialog @bind-Open="_open" Title="Rename"> <SlDialogBody>…</SlDialogBody> <SlDialogFooter>…</SlDialogFooter> </SlDialog>
+  Rendered by the provider's dialog host so it stacks, traps focus and makes the page inert like service dialogs.
+*@
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    /// <summary>Raised when the dialog ends (Escape, scrim, close button, or SlDialogInstance.Close).</summary>
+    [Parameter] public EventCallback<DialogResult> OnClose { get; set; }
+
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public DialogWidth MaxWidth { get; set; } = DialogWidth.Sm;
+    [Parameter] public bool FullWidth { get; set; }
+    [Parameter] public bool FullScreen { get; set; }
+    [Parameter] public DialogPlacement Placement { get; set; } = DialogPlacement.Center;
+    [Parameter] public bool CloseOnEscape { get; set; } = true;
+    [Parameter] public bool CloseOnBackdropClick { get; set; } = true;
+    [Parameter] public bool ShowCloseButton { get; set; } = true;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private DialogReference? _dialog;
+
+    private async Task WaitForCloseAsync(DialogReference dialog)
+    {
+        var result = await dialog.Result;
+        await InvokeAsync(async () =>
+        {
+            if (_dialog == dialog) _dialog = null;
+            await OnClose.InvokeAsync(result);
+            if (Open)
+            {
+                Open = false;
+                await OpenChanged.InvokeAsync(false);
+            }
+        });
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Open && _dialog is null)
+        {
+            var dialog = _dialog = Dialogs.Show(
+                new DialogContent { Fragment = b => b.AddContent(0, ChildContent), Description = Description },
+                new DialogOptions
+                {
+                    Title = Title, MaxWidth = MaxWidth, FullWidth = FullWidth, FullScreen = FullScreen, Placement = Placement,
+                    CloseOnEscape = CloseOnEscape, CloseOnBackdropClick = CloseOnBackdropClick, ShowCloseButton = ShowCloseButton,
+                });
+            _ = WaitForCloseAsync(dialog);
+        }
+        else if (!Open && _dialog is not null)
+        {
+            Dialogs.Close(_dialog);
+            _dialog = null;
+        }
+        else if (_dialog is not null)
+        {
+            // Parent re-rendered: refresh the host so the dialog shows current state.
+            Dialogs.Refresh();
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_dialog is not null) Dialogs.Close(_dialog);
+    }
+}

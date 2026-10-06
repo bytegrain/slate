@@ -1,0 +1,8 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@* Actions, right-aligned: secondary first, primary last. *@
+<footer @attributes="AdditionalAttributes" class="@(Css.Of("sl-dialog__footer").Add(Class))" style="@Style">@ChildContent</footer>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

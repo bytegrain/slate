@@ -1,0 +1,11 @@
+<div class="demo-hero">
+    <SlText Typo="Typo.Overline" Tone="TextTone.Accent">@Eyebrow</SlText>
+    <SlText Typo="Typo.H2" Tag="h1">@Title</SlText>
+    <SlText Tone="TextTone.Secondary">@ChildContent</SlText>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = "";
+    [Parameter] public string Eyebrow { get; set; } = "Slate for Blazor";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

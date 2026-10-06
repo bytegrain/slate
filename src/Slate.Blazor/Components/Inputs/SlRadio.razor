@@ -1,0 +1,38 @@
+@namespace Slate.Blazor
+@typeparam TValue
+@inherits SlComponentBase
+@implements IDisposable
+@* Native radios: arrow keys move the selection within the group (one tab stop). *@
+<label class="@(Css.Of("sl-radio").Add("is-disabled", Disabled || Group.Disabled).Add(Class))" style="@Style">
+    <input @attributes="AdditionalAttributes" id="@ElementId" type="radio" class="sl-radio__input" name="@Group.GroupName"
+           value="@Value?.ToString()" checked="@Group.IsSelected(Value)" disabled="@Disabled"
+           aria-describedby="@(Description is null ? null : $"{ElementId}-desc")" @onchange="() => Group.Select(Value)" />
+    <span class="sl-radio__text">
+        <span class="sl-radio__label">@(Label)@ChildContent</span>
+        @if (Description is not null)
+        {
+            <span class="sl-radio__description" id="@($"{ElementId}-desc")">@Description</span>
+        }
+    </span>
+</label>
+
+@code {
+    [CascadingParameter] private SlRadioGroup<TValue> Group { get; set; } = default!;
+
+    [Parameter, EditorRequired] public TValue Value { get; set; } = default!;
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Group is null)
+            throw new InvalidOperationException("SlRadio must be placed inside an SlRadioGroup with the same TValue.");
+        Group.Register(this);
+    }
+
+    internal void Refresh() => StateHasChanged();
+
+    public void Dispose() => Group?.Unregister(this);
+}

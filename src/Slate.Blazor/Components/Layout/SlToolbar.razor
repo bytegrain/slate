@@ -1,0 +1,10 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+<div @attributes="AdditionalAttributes" class="@(Css.Of("sl-toolbar").Add("sl-toolbar--flat", Flat).Add(Class))" style="@Style"
+     role="toolbar" aria-label="@Label">@ChildContent</div>
+
+@code {
+    [Parameter, EditorRequired] public string Label { get; set; } = "";
+    [Parameter] public bool Flat { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

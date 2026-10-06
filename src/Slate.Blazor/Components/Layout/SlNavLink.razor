@@ -1,0 +1,39 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@implements IDisposable
+@inject NavigationManager Navigation
+<a @attributes="AdditionalAttributes" class="@(Css.Of("sl-nav__item").Add(Class))" style="@Style" href="@Href"
+   aria-current="@(IsActive ? "page" : null)">@if (Icon is not null)
+    {<SlIcon Name="@Icon" />}<span class="sl-nav__label">@ChildContent</span>@if (Meta is not null)
+    {<span class="sl-nav__meta">@Meta</span>}</a>
+
+@code {
+    [Parameter, EditorRequired] public string Href { get; set; } = "";
+    [Parameter] public string? Icon { get; set; }
+
+    /// <summary>Trailing text such as a count.</summary>
+    [Parameter] public string? Meta { get; set; }
+
+    /// <summary>Prefix (default) or exact URL matching for the active state.</summary>
+    [Parameter] public NavLinkMatch Match { get; set; } = NavLinkMatch.Prefix;
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool IsActive
+    {
+        get
+        {
+            var target = Navigation.ToAbsoluteUri(Href).GetLeftPart(UriPartial.Path).TrimEnd('/');
+            var current = Navigation.ToAbsoluteUri(Navigation.Uri).GetLeftPart(UriPartial.Path).TrimEnd('/');
+            if (string.Equals(target, current, StringComparison.OrdinalIgnoreCase)) return true;
+            var isRoot = Navigation.ToBaseRelativePath(Navigation.ToAbsoluteUri(Href).ToString()).Trim('/').Length == 0;
+            return Match == NavLinkMatch.Prefix && !isRoot && current.StartsWith(target + "/", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    protected override void OnInitialized() => Navigation.LocationChanged += OnLocationChanged;
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Navigation.LocationChanged -= OnLocationChanged;
+}

@@ -1,0 +1,53 @@
+@namespace Slate.Blazor
+@inherits SlInputBase<bool>
+@inject SlateJs Js
+<label class="@CssClass" style="@Style">
+    @if (LabelPosition == LabelPosition.End)
+    {
+        @Input
+    }
+    <span class="sl-switch__text">
+        <span class="sl-switch__label">@(Label)@ChildContent</span>
+        @if (Description is not null)
+        {
+            <span class="sl-switch__description" id="@DescriptionId">@Description</span>
+        }
+    </span>
+    @if (LabelPosition == LabelPosition.Start)
+    {
+        @Input
+    }
+</label>
+
+@code {
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public LabelPosition LabelPosition { get; set; } = LabelPosition.Start;
+
+    /// <summary>Label and switch at opposite ends of the row (settings lists).</summary>
+    [Parameter] public bool Spread { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string DescriptionId => $"{ElementId}-desc";
+
+    private string CssClass => Css.Of("sl-switch")
+        .Add(LabelPosition == LabelPosition.Start ? "sl-switch--label-start" : "sl-switch--label-end")
+        .Add("sl-switch--spread", Spread)
+        .Add("is-disabled", Disabled)
+        .Add(Class);
+
+    private ElementReference _input;
+
+    private RenderFragment Input => @<input @attributes="AdditionalAttributes" @ref="_input" id="@ElementId" type="checkbox" role="switch" class="sl-switch__input"
+                                            checked="@Value" aria-checked="@(Value ? "true" : "false")" disabled="@Disabled"
+                                            aria-describedby="@(Description is null ? null : DescriptionId)"
+                                            @onchange="OnChange" />;
+
+    private void OnChange(ChangeEventArgs e) => CurrentValue = e.Value is true || e.Value is "true" || e.Value is "on";
+
+    // Enter must not submit the surrounding form (Space toggles natively). Needs a real listener, so it's done in JS.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) await JsSafe.Run(() => Js.PreventEnterAsync(_input));
+    }
+}

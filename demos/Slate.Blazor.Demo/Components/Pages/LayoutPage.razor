@@ -1,0 +1,83 @@
+@page "/layout"
+<PageTitle>Layout · Slate</PageTitle>
+
+<div class="demo-page">
+    <PageHeader Title="Layout framework">
+        App shell, drawer, container, 12-column grid, stacks and cards. Resize the window: the drawer becomes an
+        overlay below 900px and grid items reflow mobile-first.
+    </PageHeader>
+
+    <DemoSection Title="Grid" Subtitle="Xs=12 · Sm=6 · Lg=3">
+        <SlGrid Spacing="3">
+            @for (var i = 1; i <= 4; i++)
+            {
+                var n = i;
+                <SlItem Xs="12" Sm="6" Lg="3">
+                    <SlCard Outlined="true"><SlText Typo="Typo.Label">Item @n</SlText></SlCard>
+                </SlItem>
+            }
+            <SlItem Xs="12" Md="8"><SlCard Outlined="true"><SlText Typo="Typo.Label">Md=8</SlText></SlCard></SlItem>
+            <SlItem Xs="12" Md="4"><SlCard Outlined="true"><SlText Typo="Typo.Label">Md=4</SlText></SlCard></SlItem>
+        </SlGrid>
+    </DemoSection>
+
+    <DemoSection Title="Stack" Subtitle="Row, spacing, alignment and wrap">
+        <SlStack Spacing="4">
+            <SlStack Row="true" Spacing="2" Align="StackAlign.Center">
+                <SlBadge>One</SlBadge><SlBadge>Two</SlBadge><SlBadge>Three</SlBadge>
+                <SlSpacer />
+                <SlButton Size="ControlSize.Small">Pushed right by a spacer</SlButton>
+            </SlStack>
+            <SlDivider />
+            <SlStack Row="true" Spacing="6" Justify="StackJustify.Between" Wrap="true">
+                <SlText>Justify between</SlText><SlText>with</SlText><SlText>wrapping</SlText>
+            </SlStack>
+        </SlStack>
+    </DemoSection>
+
+    <SlGrid>
+        <SlItem Xs="12" Md="4">
+            <SlCard Title="Default card" Subtitle="Resting elevation">
+                <SlText Tone="TextTone.Secondary">Surface, shadow e1, 10px radius.</SlText>
+            </SlCard>
+        </SlItem>
+        <SlItem Xs="12" Md="4">
+            <SlCard Title="Outlined" Outlined="true">
+                <Actions><SlButton IconOnly="true" Variant="ButtonVariant.Ghost" Size="ControlSize.Small" StartIcon="more-horizontal" AriaLabel="More" /></Actions>
+                <ChildContent><SlText Tone="TextTone.Secondary">Hairline instead of shadow, with header actions.</SlText></ChildContent>
+            </SlCard>
+        </SlItem>
+        <SlItem Xs="12" Md="4">
+            <SlCard Title="Interactive" Interactive="true" OnClick="() => _clicks++">
+                <ChildContent><SlText Tone="TextTone.Secondary">Hover lifts it; Enter or click activates. Clicked @_clicks times.</SlText></ChildContent>
+                <Footer><SlButton Size="ControlSize.Small">Cancel</SlButton><SlButton Size="ControlSize.Small" Variant="ButtonVariant.Primary">Open</SlButton></Footer>
+            </SlCard>
+        </SlItem>
+    </SlGrid>
+
+    <DemoSection Title="Toolbar">
+        <SlToolbar Label="Formatting">
+            <SlButton IconOnly="true" Variant="ButtonVariant.Ghost" StartIcon="copy" AriaLabel="Copy" />
+            <SlButton IconOnly="true" Variant="ButtonVariant.Ghost" StartIcon="pencil" AriaLabel="Edit" />
+            <SlDivider Vertical="true" />
+            <SlButton IconOnly="true" Variant="ButtonVariant.Ghost" StartIcon="trash" AriaLabel="Delete" />
+            <SlSpacer />
+            <SlButton Size="ControlSize.Small" StartIcon="download">Export</SlButton>
+        </SlToolbar>
+    </DemoSection>
+
+    <DemoSection Title="Containers" Subtitle="Max widths from the container tokens">
+        <SlStack Spacing="2">
+            @foreach (var w in Enum.GetValues<ContainerWidth>())
+            {
+                <SlContainer Width="w" Style="background: var(--sl-color-accent-subtle); border-radius: var(--sl-radius-md); padding-block: var(--sl-space-2)">
+                    <SlText Typo="Typo.Label">@w</SlText>
+                </SlContainer>
+            }
+        </SlStack>
+    </DemoSection>
+</div>
+
+@code {
+    private int _clicks;
+}

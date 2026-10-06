@@ -1,0 +1,37 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@* A grid cell. Spans are mobile-first: unset breakpoints inherit from the next smaller one (Slate.Core GridSpan). *@
+<div @attributes="AdditionalAttributes" class="@CssClass" style="@Style">@ChildContent</div>
+
+@code {
+    [Parameter] public int? Xs { get; set; }
+    [Parameter] public int? Sm { get; set; }
+    [Parameter] public int? Md { get; set; }
+    [Parameter] public int? Lg { get; set; }
+    [Parameter] public int? Xl { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    public GridSpan Span => new(Xs, Sm, Md, Lg, Xl);
+
+    protected override void OnParametersSet()
+    {
+        foreach (var bp in Enum.GetValues<Breakpoint>()) Span.Resolve(bp); // validates 1..12
+    }
+
+    private string CssClass
+    {
+        get
+        {
+            var css = Css.Of("sl-grid__item");
+            // Emit only the breakpoints that change, mirroring how the CSS inherits upwards.
+            int? previous = null;
+            foreach (var bp in Enum.GetValues<Breakpoint>())
+            {
+                var span = Span.Resolve(bp);
+                if (span != previous) css = css.Add($"sl-col-{bp.ToString().ToLowerInvariant()}-{span}");
+                previous = span;
+            }
+            return css.Add(Class);
+        }
+    }
+}

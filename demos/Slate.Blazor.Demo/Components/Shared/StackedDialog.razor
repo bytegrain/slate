@@ -1,0 +1,18 @@
+@* Opens another dialog on top of itself to demonstrate stacking. *@
+@inject IDialogService Dialogs
+<SlDialogBody>
+    <SlText Tone="TextTone.Secondary">Level @Level. Only the top dialog is interactive; Escape closes one at a time.</SlText>
+</SlDialogBody>
+<SlDialogFooter>
+    <SlButton OnClick="() => Dialog.Cancel()">Close</SlButton>
+    <SlButton Variant="ButtonVariant.Primary" OnClick="OpenAnother">Open another</SlButton>
+</SlDialogFooter>
+
+@code {
+    [CascadingParameter] public SlDialogInstance Dialog { get; set; } = default!;
+    [Parameter] public int Level { get; set; } = 1;
+
+    private void OpenAnother() =>
+        Dialogs.Show<StackedDialog>($"Dialog {Level + 1}", new DialogParameters().Set(nameof(Level), Level + 1),
+            new DialogOptions { MaxWidth = DialogWidth.Xs });
+}

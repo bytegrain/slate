@@ -1,0 +1,13 @@
+@* Test host for the declarative SlDialog: a real component, so its state changes re-render the dialog. *@
+<button id="open" @onclick="() => Open = true">Open</button>
+<button id="close" @onclick="() => Open = false">Close from page</button>
+<SlDialog @bind-Open="Open" Title="Inline" OnClose="r => Closed = r">
+    <SlDialogBody><span id="count">@Counter</span></SlDialogBody>
+    <SlDialogFooter><button id="inc" @onclick="() => Counter++">+</button></SlDialogFooter>
+</SlDialog>
+
+@code {
+    public bool Open { get; set; }
+    public int Counter { get; set; }
+    public DialogResult? Closed { get; set; }
+}

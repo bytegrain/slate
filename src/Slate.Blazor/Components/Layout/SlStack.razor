@@ -1,0 +1,33 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+<DynamicTag Tag="@Tag" Attributes="AdditionalAttributes" Class="@CssClass" Style="@Style">@ChildContent</DynamicTag>
+
+@code {
+    [Parameter] public StackDirection Direction { get; set; } = StackDirection.Column;
+
+    /// <summary>Gap as a space-token step. Default 2 (8px).</summary>
+    [Parameter] public double Spacing { get; set; } = 2;
+
+    [Parameter] public StackAlign? Align { get; set; }
+    [Parameter] public StackJustify? Justify { get; set; }
+    [Parameter] public bool Wrap { get; set; }
+    [Parameter] public string Tag { get; set; } = "div";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Shorthand for Direction="StackDirection.Row".</summary>
+    [Parameter] public bool Row { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (!Names.SpacingSteps.Contains(Spacing))
+            throw new ArgumentOutOfRangeException(nameof(Spacing), Spacing, $"Spacing must be one of {string.Join(", ", Names.SpacingSteps)}.");
+    }
+
+    private string CssClass => Css.Of("sl-stack")
+        .Add("sl-stack--row", Row || Direction == StackDirection.Row)
+        .Add($"sl-stack--spacing-{Names.Spacing(Spacing)}")
+        .Add(Align is { } a ? $"sl-stack--align-{Names.Kebab(a.ToString())}" : null)
+        .Add(Justify is { } j ? $"sl-stack--justify-{Names.Kebab(j.ToString())}" : null)
+        .Add("sl-stack--wrap", Wrap)
+        .Add(Class);
+}

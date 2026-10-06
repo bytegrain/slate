@@ -1,0 +1,27 @@
+@* A form dialog that validates and returns the new name. *@
+<EditForm Model="_model" OnValidSubmit="() => Dialog.Ok(_model.Name)" FormName="rename-dialog">
+    <DataAnnotationsValidator />
+    <SlDialogBody>
+        <SlTextField @bind-Value="_model.Name" Label="Package name" HelperText="Shown on NuGet and in the feed." autofocus />
+    </SlDialogBody>
+    <SlDialogFooter>
+        <SlButton OnClick="() => Dialog.Cancel()">Cancel</SlButton>
+        <SlButton Type="ButtonType.Submit" Variant="ButtonVariant.Primary">Rename</SlButton>
+    </SlDialogFooter>
+</EditForm>
+
+@code {
+    [CascadingParameter] public SlDialogInstance Dialog { get; set; } = default!;
+    [Parameter] public string? Name { get; set; }
+
+    private sealed class Model
+    {
+        [Required(ErrorMessage = "Enter a name.")]
+        [RegularExpression(@"^[A-Za-z][A-Za-z0-9.]*$", ErrorMessage = "Start with a letter; use letters, numbers and dots.")]
+        public string? Name { get; set; }
+    }
+
+    private readonly Model _model = new();
+
+    protected override void OnInitialized() => _model.Name = Name;
+}

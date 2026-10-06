@@ -1,0 +1,117 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@implements IAsyncDisposable
+@inject IDialogService Dialogs
+@inject SlateJs Js
+@*
+  App root: theme + density for everything inside, and the snackbar + dialog layers.
+  Theme "System" renders data-sl-theme="auto" so CSS follows the OS without script (works during prerender);
+  script only reports the effective theme to .NET (EffectiveTheme / IsDark).
+*@
+<CascadingValue Value="this">
+    <div @attributes="AdditionalAttributes" class="@(Css.Of("sl-root").Add(Class))" style="@Style"
+         data-sl-theme="@Names.Theme(Theme)" data-sl-density="@(Density == Density.Comfortable ? "comfortable" : "compact")">
+        <div class="sl-provider__content" inert="@(_dialogsOpen)">@ChildContent</div>
+        @if (Snackbars)
+        {
+            <SlSnackbarHost PositionOverride="SnackbarPosition" />
+        }
+        <SlDialogHost />
+    </div>
+</CascadingValue>
+
+@code {
+    [Parameter] public ThemeMode Theme { get; set; } = ThemeMode.System;
+    [Parameter] public EventCallback<ThemeMode> ThemeChanged { get; set; }
+
+    [Parameter] public Density Density { get; set; } = Density.Compact;
+    [Parameter] public EventCallback<Density> DensityChanged { get; set; }
+
+    /// <summary>Render the snackbar layer (default true). Turn off for nested providers.</summary>
+    [Parameter] public bool Snackbars { get; set; } = true;
+
+    /// <summary>Overrides the configured snackbar position.</summary>
+    [Parameter] public Slate.Snackbars.SnackbarPosition? SnackbarPosition { get; set; }
+
+    /// <summary>Raised when the effective theme changes (including OS changes while Theme is System).</summary>
+    [Parameter] public EventCallback<string> EffectiveThemeChanged { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool _systemDark;
+    private bool _dialogsOpen;
+    private IJSObjectReference? _media;
+    private DotNetObjectReference<SlateProvider>? _self;
+
+    /// <summary>"light" or "dark" — what is actually showing.</summary>
+    public string EffectiveTheme => ThemeNames.Resolve(Theme, _systemDark);
+
+    public bool IsDark => EffectiveTheme == ThemeNames.Dark;
+
+    /// <summary>Change the theme from code (e.g. a toggle in the app bar).</summary>
+    public async Task SetThemeAsync(ThemeMode theme)
+    {
+        if (Theme == theme) return;
+        var before = EffectiveTheme;
+        Theme = theme;
+        await ThemeChanged.InvokeAsync(theme);
+        if (before != EffectiveTheme) await EffectiveThemeChanged.InvokeAsync(EffectiveTheme);
+        StateHasChanged();
+    }
+
+    public async Task SetDensityAsync(Density density)
+    {
+        if (Density == density) return;
+        Density = density;
+        await DensityChanged.InvokeAsync(density);
+        StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        Dialogs.Changed += OnDialogsChanged;
+        _dialogsOpen = Dialogs.Open.Count > 0;
+    }
+
+    private void OnDialogsChanged(object? sender, EventArgs e) => InvokeAsync(() =>
+    {
+        var open = Dialogs.Open.Count > 0;
+        if (open == _dialogsOpen) return;
+        _dialogsOpen = open;
+        StateHasChanged();
+    });
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        await JsSafe.Run(async () =>
+        {
+            _self = DotNetObjectReference.Create(this);
+            _media = await Js.WatchMediaAsync("(prefers-color-scheme: dark)", _self);
+            var dark = await Js.MediaMatchesAsync("(prefers-color-scheme: dark)");
+            await OnMediaChanged(dark);
+        });
+    }
+
+    [JSInvokable]
+    public async Task OnMediaChanged(bool prefersDark)
+    {
+        var before = EffectiveTheme;
+        _systemDark = prefersDark;
+        if (before != EffectiveTheme)
+        {
+            await InvokeAsync(async () =>
+            {
+                await EffectiveThemeChanged.InvokeAsync(EffectiveTheme);
+                StateHasChanged();
+            });
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Dialogs.Changed -= OnDialogsChanged;
+        await JsSafe.DisposeQuietly(_media, "dispose");
+        _self?.Dispose();
+    }
+}

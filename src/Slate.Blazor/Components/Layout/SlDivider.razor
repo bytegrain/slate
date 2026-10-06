@@ -1,0 +1,14 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@if (Vertical)
+{
+    <div @attributes="AdditionalAttributes" class="@(Css.Of("sl-divider sl-divider--vertical").Add(Class))" style="@Style" role="separator" aria-orientation="vertical"></div>
+}
+else
+{
+    <hr @attributes="AdditionalAttributes" class="@(Css.Of("sl-divider").Add(Class))" style="@Style" />
+}
+
+@code {
+    [Parameter] public bool Vertical { get; set; }
+}

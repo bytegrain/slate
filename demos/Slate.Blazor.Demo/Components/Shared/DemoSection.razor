@@ -1,0 +1,10 @@
+@* A titled card used to group examples on demo pages. *@
+<SlCard Title="@Title" Subtitle="@Subtitle">
+    @ChildContent
+</SlCard>
+
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = "";
+    [Parameter] public string? Subtitle { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

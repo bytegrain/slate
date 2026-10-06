@@ -1,0 +1,134 @@
+@namespace Slate.Blazor
+@implements IDisposable
+@inject ISnackbarService Snackbars
+@inject SlateOptions Options
+<section class="sl-snackbar-host sl-snackbar-host--@Names.Kebab(Position.ToString())" aria-label="@Label">
+    @foreach (var s in _items)
+    {
+        var leaving = s.State == SnackbarState.Closed;
+        var urgent = s.Severity is Severity.Warning or Severity.Error;
+        <div @key="s.Id" class="@(Css.Of("sl-snackbar").Add(SeverityClass(s)).Add("is-paused", s.IsPaused).Add("is-leaving", leaving))"
+             role="@(urgent ? "alert" : "status")" aria-live="@(urgent ? "assertive" : "polite")"
+             style="@(s.Duration is { } d ? $"--_duration: {(long)d.TotalMilliseconds}ms" : null)"
+             @onmouseenter="() => Hover(s, true)" @onmouseleave="() => Hover(s, false)"
+             @onfocusin="() => Focus(s, true)" @onfocusout="() => Focus(s, false)" @onkeydown="e => OnKeyDown(s, e)">
+            @if (Glyph(s) is { } glyph)
+            {
+                <span class="sl-snackbar__icon" aria-hidden="true"><SlIcon Name="@glyph" /></span>
+            }
+            <div class="sl-snackbar__content">
+                @if (s.Options.Title is not null)
+                {
+                    <strong class="sl-snackbar__title">@s.Options.Title</strong>
+                }
+                <p class="sl-snackbar__message">@s.Message</p>
+            </div>
+            @if (s.Options.Action is not null || s.Options.ShowCloseButton)
+            {
+                <div class="sl-snackbar__actions">
+                    @if (s.Options.Action is { } action)
+                    {
+                        <button class="sl-snackbar__action" type="button" disabled="@leaving" @onclick="() => Snackbars.InvokeActionAsync(s)">@action.Label</button>
+                    }
+                    @if (s.Options.ShowCloseButton)
+                    {
+                        <button class="sl-snackbar__close" type="button" aria-label="@DismissLabel" disabled="@leaving"
+                                @onclick="() => Snackbars.Dismiss(s, SnackbarCloseReason.User)"><SlIcon Name="x" /></button>
+                    }
+                </div>
+            }
+            @if (s.Duration is not null)
+            {
+                <span class="sl-snackbar__timer" aria-hidden="true"></span>
+            }
+        </div>
+    }
+</section>
+
+@code {
+    /// <summary>Defaults to the configured <see cref="SnackbarConfiguration.Position"/>.</summary>
+    [Parameter] public SnackbarPosition? PositionOverride { get; set; }
+
+    [Parameter] public string Label { get; set; } = "Notifications";
+    [Parameter] public string DismissLabel { get; set; } = "Dismiss";
+
+    private SnackbarPosition Position => PositionOverride ?? Snackbars.Configuration.Position;
+
+    // Visible snackbars plus ones playing their exit animation.
+    private List<Snackbar> _items = [];
+    private readonly List<Snackbar> _leaving = [];
+    private readonly HashSet<long> _hovered = [], _focused = [];
+
+    private static readonly TimeSpan LeaveDuration = TimeSpan.FromMilliseconds(SlateTokens.Motion.Duration.Fast);
+
+    protected override void OnInitialized()
+    {
+        Snackbars.Changed += OnChanged;
+        Snackbars.Closed += OnClosed;
+        Rebuild();
+    }
+
+    private void Rebuild()
+    {
+        lock (_leaving)
+        {
+            _items = Snackbars.Visible.Concat(_leaving).ToList();
+        }
+    }
+
+    private void OnChanged(object? sender, EventArgs e) => InvokeAsync(() =>
+    {
+        Rebuild();
+        StateHasChanged();
+    });
+
+    private void OnClosed(object? sender, SnackbarClosedEventArgs e)
+    {
+        // Only snackbars that were on screen animate out; queued ones just disappear.
+        if (!_items.Any(i => i.Id == e.Snackbar.Id)) return;
+        lock (_leaving) _leaving.Add(e.Snackbar);
+        _ = RemoveAfterLeaveAsync(e.Snackbar);
+    }
+
+    private async Task RemoveAfterLeaveAsync(Snackbar s)
+    {
+        try { await Task.Delay(LeaveDuration, Options.TimeProvider); }
+        catch (TaskCanceledException) { }
+        lock (_leaving) _leaving.Remove(s);
+        _hovered.Remove(s.Id);
+        _focused.Remove(s.Id);
+        await InvokeAsync(() => { Rebuild(); StateHasChanged(); });
+    }
+
+    private void Hover(Snackbar s, bool on) => SetPaused(s, _hovered, on);
+    private void Focus(Snackbar s, bool on) => SetPaused(s, _focused, on);
+
+    private void SetPaused(Snackbar s, HashSet<long> set, bool on)
+    {
+        if (on) set.Add(s.Id); else set.Remove(s.Id);
+        if (_hovered.Contains(s.Id) || _focused.Contains(s.Id)) Snackbars.Pause(s);
+        else Snackbars.Resume(s);
+    }
+
+    private void OnKeyDown(Snackbar s, KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape") Snackbars.Dismiss(s, SnackbarCloseReason.User);
+    }
+
+    private static string? SeverityClass(Snackbar s) => s.Severity == Severity.Normal ? null : $"sl-snackbar--{Names.Kebab(s.Severity.ToString())}";
+
+    private static string? Glyph(Snackbar s) => s.Severity switch
+    {
+        Severity.Info => "info",
+        Severity.Success => "check",
+        Severity.Warning => "alert-triangle",
+        Severity.Error => "x",
+        _ => null,
+    };
+
+    public void Dispose()
+    {
+        Snackbars.Changed -= OnChanged;
+        Snackbars.Closed -= OnClosed;
+    }
+}

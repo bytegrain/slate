@@ -1,0 +1,120 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@if (Href is not null)
+{
+    <a @attributes="AdditionalAttributes" class="@CssClass" style="@Style" href="@(IsInert ? null : Href)" target="@Target"
+       role="@(IsInert ? "link" : null)" aria-disabled="@(IsInert ? "true" : null)" tabindex="@(Disabled ? "-1" : null)"
+       aria-label="@AriaLabel" aria-busy="@(IsLoading ? "true" : null)" aria-keyshortcuts="@Shortcut" aria-pressed="@PressedValue"
+       @onclick="OnClickAsync">@Content</a>
+}
+else
+{
+    <button @attributes="AdditionalAttributes" type="@TypeValue" class="@CssClass" style="@Style" disabled="@Disabled"
+            aria-label="@AriaLabel" aria-busy="@(IsLoading ? "true" : null)" aria-disabled="@(IsLoading ? "true" : null)"
+            aria-keyshortcuts="@Shortcut" aria-pressed="@PressedValue" @onclick="OnClickAsync">@Content</button>
+}
+
+@code {
+    [Parameter] public ButtonVariant Variant { get; set; } = ButtonVariant.Secondary;
+    [Parameter] public ControlSize Size { get; set; } = ControlSize.Medium;
+
+    /// <summary>Icon name before the label (replaced by a spinner while loading).</summary>
+    [Parameter] public string? StartIcon { get; set; }
+    [Parameter] public string? EndIcon { get; set; }
+
+    /// <summary>Square, icon-only button showing <see cref="StartIcon"/>. Requires <see cref="AriaLabel"/>.</summary>
+    [Parameter] public bool IconOnly { get; set; }
+
+    [Parameter] public string? AriaLabel { get; set; }
+    [Parameter] public bool Loading { get; set; }
+
+    /// <summary>Show the loading state automatically while an async OnClick runs (also prevents double submits).</summary>
+    [Parameter] public bool LoadingWhileBusy { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool FullWidth { get; set; }
+
+    /// <summary>Keyboard hint shown as a Kbd after the label, e.g. "⌘↵". Also sets aria-keyshortcuts.</summary>
+    [Parameter] public string? Shortcut { get; set; }
+
+    [Parameter] public ButtonType Type { get; set; } = ButtonType.Button;
+
+    /// <summary>Renders an &lt;a&gt; with button styling.</summary>
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public string? Target { get; set; }
+
+    /// <summary>Toggle buttons: true/false sets aria-pressed; null (default) is a normal button.</summary>
+    [Parameter] public bool? Pressed { get; set; }
+
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool _busy;
+
+    private bool IsLoading => Loading || _busy;
+    private bool IsInert => Disabled || IsLoading;
+    private string? PressedValue => Pressed is { } p ? (p ? "true" : "false") : null;
+
+    private string TypeValue => Type switch { ButtonType.Submit => "submit", ButtonType.Reset => "reset", _ => "button" };
+
+    protected override void OnParametersSet()
+    {
+        if (IconOnly && string.IsNullOrWhiteSpace(AriaLabel))
+            throw new InvalidOperationException("Icon-only SlButton needs an AriaLabel so assistive technology can name it.");
+        if (IconOnly && StartIcon is null)
+            throw new InvalidOperationException("Icon-only SlButton needs a StartIcon.");
+    }
+
+    private string CssClass => Css.Of("sl-button")
+        .Add(Variant switch
+        {
+            ButtonVariant.Primary => "sl-button--primary",
+            ButtonVariant.Ghost => "sl-button--ghost",
+            ButtonVariant.Danger => "sl-button--danger",
+            ButtonVariant.DangerSolid => "sl-button--danger-solid",
+            ButtonVariant.Link => "sl-button--link",
+            _ => null,
+        })
+        .Add(Names.Size(Size, "sl-button"))
+        .Add("sl-button--icon", IconOnly)
+        .Add("sl-button--full", FullWidth)
+        .Add("is-loading", IsLoading)
+        .Add(Class);
+
+    private RenderFragment Content => @<text>
+        @if (IsLoading)
+        {
+            <span class="sl-spinner sl-button__icon" aria-hidden="true"></span>
+        }
+        else if (StartIcon is not null)
+        {
+            <SlIcon Name="@StartIcon" Class="sl-button__icon" />
+        }
+        @if (!IconOnly && ChildContent is not null)
+        {
+            <span class="sl-button__label">@ChildContent</span>
+        }
+        @if (EndIcon is not null && !IconOnly)
+        {
+            <SlIcon Name="@EndIcon" Class="sl-button__icon" />
+        }
+        @if (Shortcut is not null && !IconOnly)
+        {
+            <kbd class="sl-kbd" aria-hidden="true">@Shortcut</kbd>
+        }
+    </text>;
+
+    private async Task OnClickAsync(MouseEventArgs e)
+    {
+        if (IsInert) return;
+        if (!LoadingWhileBusy)
+        {
+            await OnClick.InvokeAsync(e);
+            return;
+        }
+
+        _busy = true;
+        try { await OnClick.InvokeAsync(e); }
+        finally { _busy = false; }
+    }
+}

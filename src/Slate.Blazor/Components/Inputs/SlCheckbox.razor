@@ -1,0 +1,54 @@
+@namespace Slate.Blazor
+@typeparam TValue
+@inherits SlInputBase<TValue>
+@inject SlateJs Js
+@* TValue is bool, or bool? where null renders the indeterminate state. *@
+<label class="@(Css.Of("sl-checkbox").Add("is-disabled", Disabled).Add(Class))" style="@Style">
+    <input @attributes="AdditionalAttributes" @ref="_input" id="@ElementId" type="checkbox"
+           class="@(Css.Of("sl-checkbox__input").Add("is-indeterminate", IsIndeterminate))"
+           checked="@IsChecked" disabled="@Disabled" aria-checked="@(IsIndeterminate ? "mixed" : null)"
+           aria-invalid="@(IsInvalid ? "true" : null)" aria-describedby="@(Description is null ? null : DescriptionId)"
+           @onchange="OnChange" />
+    <span class="sl-checkbox__text">
+        <span class="sl-checkbox__label">@(Label)@ChildContent</span>
+        @if (Description is not null)
+        {
+            <span class="sl-checkbox__description" id="@DescriptionId">@Description</span>
+        }
+    </span>
+</label>
+
+@code {
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private ElementReference _input;
+    private bool? _renderedIndeterminate;
+
+    private string DescriptionId => $"{ElementId}-desc";
+
+    private bool IsIndeterminate => Value is null && Nullable.GetUnderlyingType(typeof(TValue)) == typeof(bool);
+    private bool IsChecked => Value is true;
+
+    protected override void OnInitialized()
+    {
+        var t = Nullable.GetUnderlyingType(typeof(TValue)) ?? typeof(TValue);
+        if (t != typeof(bool))
+            throw new InvalidOperationException($"SlCheckbox supports bool or bool? values, not {typeof(TValue).Name}.");
+    }
+
+    // An indeterminate box becomes checked when clicked, like native checkboxes.
+    private void OnChange(ChangeEventArgs e) => CurrentValue = (TValue)(object)(e.Value is true || e.Value is "true" || e.Value is "on");
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // The DOM property can only be set from script; skip when it hasn't changed.
+        if (_renderedIndeterminate == IsIndeterminate || (firstRender && !IsIndeterminate))
+        {
+            _renderedIndeterminate = IsIndeterminate;
+            return;
+        }
+        _renderedIndeterminate = IsIndeterminate;
+        await JsSafe.Run(() => Js.SetIndeterminateAsync(_input, IsIndeterminate));
+    }
+}

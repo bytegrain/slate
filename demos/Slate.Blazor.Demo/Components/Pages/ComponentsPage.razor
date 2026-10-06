@@ -1,0 +1,125 @@
+@page "/components"
+@inject ISnackbarService Snackbar
+<PageTitle>Components · Slate</PageTitle>
+
+<div class="demo-page">
+    <PageHeader Title="Components">Every component, variant and state.</PageHeader>
+
+    <DemoSection Title="Buttons" Subtitle="Six variants, three sizes. One primary per view.">
+        <SlStack Spacing="4">
+            <div class="demo-row">
+                <SlButton Variant="ButtonVariant.Primary">Deploy</SlButton>
+                <SlButton>Secondary</SlButton>
+                <SlButton Variant="ButtonVariant.Ghost">Ghost</SlButton>
+                <SlButton Variant="ButtonVariant.Danger">Delete</SlButton>
+                <SlButton Variant="ButtonVariant.DangerSolid">Delete forever</SlButton>
+                <SlButton Variant="ButtonVariant.Link">Learn more</SlButton>
+            </div>
+            <div class="demo-row">
+                <SlButton Variant="ButtonVariant.Primary" Size="ControlSize.Small">Small</SlButton>
+                <SlButton Variant="ButtonVariant.Primary">Medium</SlButton>
+                <SlButton Variant="ButtonVariant.Primary" Size="ControlSize.Large" EndIcon="arrow-right">Large</SlButton>
+                <SlButton StartIcon="download">Export</SlButton>
+                <SlButton IconOnly="true" StartIcon="plus" AriaLabel="Add" />
+                <SlButton IconOnly="true" Variant="ButtonVariant.Ghost" StartIcon="more-horizontal" AriaLabel="More" />
+                <SlButton Shortcut="⌘↵">Commit</SlButton>
+            </div>
+            <div class="demo-row">
+                <SlButton Variant="ButtonVariant.Primary" Loading="true">Deploying</SlButton>
+                <SlButton Variant="ButtonVariant.Primary" LoadingWhileBusy="true" OnClick="SaveAsync">Save (async)</SlButton>
+                <SlButton Variant="ButtonVariant.Primary" Disabled="true">Disabled</SlButton>
+                <SlButtonGroup Label="View">
+                    <SlButton Pressed="@(_view == "day")" OnClick="@(() => _view = "day")">Day</SlButton>
+                    <SlButton Pressed="@(_view == "week")" OnClick="@(() => _view = "week")">Week</SlButton>
+                    <SlButton Pressed="@(_view == "month")" OnClick="@(() => _view = "month")">Month</SlButton>
+                </SlButtonGroup>
+            </div>
+        </SlStack>
+    </DemoSection>
+
+    <SlGrid>
+        <SlItem Xs="12" Md="6">
+            <DemoSection Title="Text fields">
+                <SlStack Spacing="4">
+                    <SlTextField @bind-Value="_name" Label="Project name" HelperText="Lowercase, numbers and dashes." />
+                    <SlTextField @bind-Value="_email" Label="Owner email" Error="Enter a complete email address." Required="true" />
+                    <SlTextField @bind-Value="_domain" Label="Domain" Prefix="https://" Suffix=".dev" />
+                    <SlTextField @bind-Value="_search" Label="Search" StartIcon="search" Placeholder="Filter packages" Immediate="true" />
+                    <SlTextField @bind-Value="_notes" Label="Notes" Multiline="true" Rows="3" Placeholder="Anything reviewers should know" />
+                    <SlTextField @bind-Value="_readonly" Label="Read only" ReadOnly="true" />
+                    <SlTextField @bind-Value="_disabled" Label="Disabled" Disabled="true" />
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+        <SlItem Xs="12" Md="6">
+            <SlStack Spacing="4">
+                <DemoSection Title="Checkbox & radio">
+                    <SlStack Spacing="3">
+                        <SlCheckbox @bind-Value="_tests" Label="Run tests before deploy" />
+                        <SlCheckbox @bind-Value="_notify" Label="Notify on failure" Description="Sends to #builds and the commit author." />
+                        <SlCheckbox @bind-Value="_selectAll" Label="Select all (indeterminate)" />
+                        <SlCheckbox @bind-Value="_disabledCheck" Label="Disabled" Disabled="true" />
+                        <SlRadioGroup @bind-Value="_plan" Label="Plan">
+                            <SlRadio Value="@("team")" Label="Team" Description="Unlimited projects, SSO" />
+                            <SlRadio Value="@("solo")" Label="Solo" Description="Three projects" />
+                            <SlRadio Value="@("legacy")" Label="Legacy" Disabled="true" />
+                        </SlRadioGroup>
+                    </SlStack>
+                </DemoSection>
+                <DemoSection Title="Switches">
+                    <SlStack Spacing="3">
+                        <SlSwitch @bind-Value="_preview" Label="Preview deployments" Spread="true" />
+                        <SlSwitch @bind-Value="_compact" Label="Compact density" Description="Applies to every table." Spread="true" />
+                        <SlSwitch @bind-Value="_end" Label="Label after" LabelPosition="LabelPosition.End" />
+                    </SlStack>
+                </DemoSection>
+            </SlStack>
+        </SlItem>
+    </SlGrid>
+
+    <DemoSection Title="Display">
+        <SlStack Spacing="4">
+            <div class="demo-row">
+                <SlBadge Tone="BadgeTone.Success" Dot="true">Ready</SlBadge>
+                <SlBadge Tone="BadgeTone.Warning" Dot="true">Building</SlBadge>
+                <SlBadge Tone="BadgeTone.Danger" Dot="true">Failed</SlBadge>
+                <SlBadge Tone="BadgeTone.Info">Info</SlBadge>
+                <SlBadge Tone="BadgeTone.Accent">New</SlBadge>
+                <SlBadge>Draft</SlBadge>
+                <SlKbd>⌘K</SlKbd>
+                <SlSpinner />
+            </div>
+            <SlStack Spacing="1">
+                <SlText Typo="Typo.Display">Display</SlText>
+                <SlText Typo="Typo.H1">Heading 1</SlText>
+                <SlText Typo="Typo.H2">Heading 2</SlText>
+                <SlText Typo="Typo.H3">Heading 3</SlText>
+                <SlText Typo="Typo.Title">Title</SlText>
+                <SlText>Body — Slate ships matching packages for Web, Blazor, WPF and Avalonia.</SlText>
+                <SlText Typo="Typo.Caption" Tone="TextTone.Tertiary">Caption · updated 2 minutes ago</SlText>
+                <SlText Typo="Typo.Overline">Overline</SlText>
+                <SlText Typo="Typo.Mono">dotnet add package Slate.Blazor</SlText>
+            </SlStack>
+            <div class="demo-row">
+                @foreach (var icon in SlateIcons.All.Keys)
+                {
+                    <span title="@icon"><SlIcon Name="@icon" Size="ControlSize.Large" /></span>
+                }
+            </div>
+        </SlStack>
+    </DemoSection>
+</div>
+
+@code {
+    private string _view = "week";
+    private string? _name = "slate-dashboard", _email = "aaron@", _domain = "slate", _search, _notes, _readonly = "Generated", _disabled = "Locked";
+    private bool _tests = true, _notify = true, _disabledCheck, _preview = true, _compact, _end = true;
+    private bool? _selectAll;
+    private string _plan = "team";
+
+    private async Task SaveAsync()
+    {
+        await Task.Delay(1200);
+        Snackbar.Success("Saved", "Settings");
+    }
+}

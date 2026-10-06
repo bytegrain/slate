@@ -1,0 +1,24 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@* Renders a built-in icon (design/icons) as inline SVG, per docs/design/css-classes.md. *@
+<svg @attributes="AdditionalAttributes" class="@CssClass" style="@Style" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"
+     aria-hidden="@(Label is null ? "true" : null)" role="@(Label is null ? null : "img")" aria-label="@Label"><path d="@PathData" /></svg>
+
+@code {
+    /// <summary>Kebab-case icon name from <see cref="SlateIcons.All"/>, e.g. "chevron-down".</summary>
+    [Parameter] public string? Name { get; set; }
+
+    /// <summary>Raw path data (24×24, stroke) instead of a named icon.</summary>
+    [Parameter] public string? Path { get; set; }
+
+    [Parameter] public ControlSize Size { get; set; } = ControlSize.Medium;
+
+    /// <summary>Accessible name. Without it the icon is decorative.</summary>
+    [Parameter] public string? Label { get; set; }
+
+    private string PathData => Path ?? (Name is null ? "" :
+        SlateIcons.All.TryGetValue(Name, out var d) ? d : throw new ArgumentException($"Unknown Slate icon '{Name}'.", nameof(Name)));
+
+    private string CssClass => Css.Of("sl-icon").Add(Names.Size(Size, "sl-icon")).Add(Class);
+}

@@ -1,0 +1,76 @@
+@page "/feedback"
+@inject ISnackbarService Snackbar
+<PageTitle>Feedback · Slate</PageTitle>
+
+<div class="demo-page">
+    <PageHeader Title="Feedback">Alerts, progress and the snackbar system. Hover a snackbar to pause it.</PageHeader>
+
+    <DemoSection Title="Snackbars" Subtitle="Queued beyond three; errors and actions linger longer">
+        <div class="demo-row">
+            <SlButton OnClick="@(() => Snackbar.Add("Copied to clipboard"))">Normal</SlButton>
+            <SlButton OnClick="@(() => Snackbar.Info("New tokens are available.", "Update"))">Info</SlButton>
+            <SlButton OnClick="@(() => Snackbar.Success("slate-web is live in 3 regions.", "Deployed"))">Success</SlButton>
+            <SlButton OnClick="@(() => Snackbar.Warning("Build minutes reset on the 1st.", "Usage at 80%"))">Warning</SlButton>
+            <SlButton OnClick="@(() => Snackbar.Error("3 tests failed in Slate.Wpf.Tests.", "Build failed"))">Error</SlButton>
+            <SlButton Variant="ButtonVariant.Primary" OnClick="WithAction">With undo</SlButton>
+            <SlButton OnClick="Sticky">Sticky</SlButton>
+            <SlButton OnClick="Burst">Burst of 6</SlButton>
+            <SlButton Variant="ButtonVariant.Ghost" OnClick="Snackbar.Clear">Clear all</SlButton>
+        </div>
+        @if (_restored > 0)
+        {
+            <SlText Typo="Typo.Caption" Tone="TextTone.Tertiary" Style="margin-top: var(--sl-space-3)">Undo used @_restored time(s).</SlText>
+        }
+    </DemoSection>
+
+    <DemoSection Title="Alerts">
+        <SlStack Spacing="3">
+            <SlAlert Severity="Severity.Info" Title="New tokens available">Pull v0.2 to get the updated focus ring.</SlAlert>
+            <SlAlert Severity="Severity.Success" Title="Deployed to production">slate-web is live in 3 regions.</SlAlert>
+            <SlAlert Severity="Severity.Warning" Title="Usage at 80%">
+                <ChildContent>Build minutes reset on the 1st.</ChildContent>
+                <Actions><SlButton Size="ControlSize.Small">View usage</SlButton></Actions>
+            </SlAlert>
+            <SlAlert Severity="Severity.Error" Title="Build failed" Dismissible="true">3 tests failed in Slate.Wpf.Tests.</SlAlert>
+            <SlAlert Title="Heads up">A neutral alert for low-stakes notes.</SlAlert>
+        </SlStack>
+    </DemoSection>
+
+    <DemoSection Title="Progress">
+        <SlStack Spacing="4">
+            <SlProgress Value="_progress" Label="Uploading assets" />
+            <SlStack Row="true" Spacing="2">
+                <SlButton Size="ControlSize.Small" OnClick="@(() => _progress = Math.Max(0, _progress - 10))">−10</SlButton>
+                <SlButton Size="ControlSize.Small" OnClick="@(() => _progress = Math.Min(100, _progress + 10))">+10</SlButton>
+            </SlStack>
+            <SlProgress Indeterminate="true" Label="Preparing build" />
+            <div class="demo-row"><SlSpinner Size="ControlSize.Small" /><SlSpinner /><SlSpinner Size="ControlSize.Large" /></div>
+        </SlStack>
+    </DemoSection>
+</div>
+
+@code {
+    private double _progress = 64;
+    private int _restored;
+
+    private void WithAction() => Snackbar.Add(new SnackbarOptions
+    {
+        Title = "Deleted 3 files",
+        Message = "They're in the bin for 30 days.",
+        Action = SnackbarAction.Create("Undo", () => _restored++),
+    });
+
+    private void Sticky() => Snackbar.Add(new SnackbarOptions
+    {
+        Title = "Connection lost",
+        Message = "Changes are saved locally until you're back online.",
+        Severity = Severity.Warning,
+        RequireInteraction = true,
+    });
+
+    private void Burst()
+    {
+        string[] packages = ["@slate/web", "Slate.Core", "Slate.Blazor", "Slate.Wpf", "Slate.Avalonia", "Slate.Tokens"];
+        foreach (var p in packages) Snackbar.Add(new SnackbarOptions { Message = $"{p} published", Severity = Severity.Success });
+    }
+}

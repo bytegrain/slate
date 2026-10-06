@@ -1,0 +1,18 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+<div @attributes="AdditionalAttributes" class="@CssClass" style="@Style">@ChildContent</div>
+
+@code {
+    /// <summary>Gap as a space-token step (0, 0.5, 1, 1.5, 2, 3, 4, 5, 6, 8, 10, 12, 16). Default 4 (16px).</summary>
+    [Parameter] public double Spacing { get; set; } = 4;
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (!Names.SpacingSteps.Contains(Spacing))
+            throw new ArgumentOutOfRangeException(nameof(Spacing), Spacing, $"Spacing must be one of {string.Join(", ", Names.SpacingSteps)}.");
+    }
+
+    private string CssClass => Css.Of("sl-grid").Add($"sl-grid--spacing-{Names.Spacing(Spacing)}").Add(Class);
+}

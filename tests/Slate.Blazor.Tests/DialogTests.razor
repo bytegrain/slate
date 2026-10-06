@@ -1,0 +1,189 @@
+@inherits SlateTestContext
+
+@code {
+    private static readonly TimeSpan CloseAnimation = TimeSpan.FromMilliseconds(SlateTokens.Motion.Duration.Base);
+
+    private IRenderedComponent<SlDialogHost> Host() => Render<SlDialogHost>();
+
+    [Fact]
+    public async Task Shows_a_component_with_parameters_and_returns_its_data()
+    {
+        var cut = Host();
+        var result = Dialogs.ShowAsync<TestDialog>("Rename", new DialogParameters().Set("Name", "slate-web"),
+            new DialogOptions { MaxWidth = DialogWidth.Xs });
+
+        var dialog = cut.Find(".sl-dialog");
+        Assert.Equal("sl-dialog sl-dialog--xs", dialog.ClassName);
+        Assert.Equal("dialog", dialog.GetAttribute("role"));
+        Assert.Equal("true", dialog.GetAttribute("aria-modal"));
+        var title = cut.Find(".sl-dialog__title");
+        Assert.Equal("Rename", title.TextContent);
+        Assert.Equal(title.Id, dialog.GetAttribute("aria-labelledby"));
+        Assert.Equal("slate-web", cut.Find("#dialog-name").GetAttribute("value"));
+
+        cut.Find("#dialog-name").Change("slate-blazor");
+        cut.Find("#ok").Click();
+
+        var r = await result;
+        Assert.False(r.Canceled);
+        Assert.Equal("slate-blazor", r.GetData<string>());
+    }
+
+    [Fact]
+    public async Task Close_button_escape_and_backdrop_cancel()
+    {
+        var cut = Host();
+        var a = Dialogs.Show<TestDialog>("A");
+        cut.Find(".sl-dialog__close").Click();
+        Assert.True((await a.Result).Canceled);
+
+        var b = Dialogs.Show<TestDialog>("B");
+        cut.Find(".sl-dialog:not(.is-closing)").KeyDown("Escape");
+        Assert.True((await b.Result).Canceled);
+
+        var c = Dialogs.Show<TestDialog>("C");
+        cut.Find(".sl-dialog:not(.is-closing) .sl-dialog__scrim").Click();
+        Assert.True((await c.Result).Canceled);
+    }
+
+    [Fact]
+    public void Options_can_forbid_escape_and_backdrop_and_hide_close()
+    {
+        var cut = Host();
+        var d = Dialogs.Show<TestDialog>("Locked", options: new DialogOptions
+        {
+            CloseOnEscape = false, CloseOnBackdropClick = false, ShowCloseButton = false,
+        });
+
+        cut.Find(".sl-dialog").KeyDown("Escape");
+        cut.Find(".sl-dialog__scrim").Click();
+        Assert.True(d.IsOpen);
+        Assert.Empty(cut.FindAll(".sl-dialog__close"));
+    }
+
+    [Fact]
+    public void Stacked_dialogs_only_the_top_is_interactive()
+    {
+        var cut = Host();
+        var bottom = Dialogs.Show<TestDialog>("Bottom");
+        var top = Dialogs.Show<TestDialog>("Top");
+
+        var dialogs = cut.FindAll(".sl-dialog");
+        Assert.Equal(2, dialogs.Count);
+        Assert.True(dialogs[0].HasAttribute("inert"));
+        Assert.False(dialogs[1].HasAttribute("inert"));
+
+        // Escape goes to the top dialog only.
+        dialogs[1].KeyDown("Escape");
+        Assert.False(top.IsOpen);
+        Assert.True(bottom.IsOpen);
+    }
+
+    [Fact]
+    public void Closing_plays_exit_then_removes()
+    {
+        var cut = Host();
+        var d = Dialogs.Show<TestDialog>("Bye");
+        Dialogs.Close(d);
+        cut.WaitForAssertion(() => Assert.Contains("is-closing", cut.Find(".sl-dialog").ClassList));
+        Assert.True(cut.Find(".sl-dialog").HasAttribute("inert"));
+        Time.Advance(CloseAnimation);
+        cut.WaitForAssertion(() => Assert.Empty(cut.FindAll(".sl-dialog")));
+    }
+
+    [Fact]
+    public void Focus_is_trapped_on_open_and_released_on_close()
+    {
+        var module = Module;
+        var trap = module.SetupModule("trapFocus", _ => true);
+        var cut = Host();
+        var d = Dialogs.Show<TestDialog>("Focus");
+        Assert.Single(module.Invocations["trapFocus"]);
+        Dialogs.Close(d);
+    }
+
+    [Fact]
+    public async Task Confirm_returns_true_on_confirm_and_false_on_cancel()
+    {
+        var cut = Host();
+        var yes = Dialogs.ConfirmAsync(new MessageBoxOptions { Title = "Publish?", Message = "Goes live now." });
+
+        Assert.Equal("Goes live now.", cut.Find(".sl-dialog__description").TextContent);
+        Assert.Equal(cut.Find(".sl-dialog__description").Id, cut.Find(".sl-dialog").GetAttribute("aria-describedby"));
+        var buttons = cut.FindAll(".sl-dialog__footer button");
+        Assert.Equal(["Cancel", "OK"], buttons.Select(b => b.TextContent));
+        Assert.Contains("sl-button--primary", buttons[1].ClassList);
+        Assert.True(buttons[1].HasAttribute("autofocus"));
+        Assert.Empty(cut.FindAll(".sl-dialog__close")); // message boxes end through their buttons
+        buttons[1].Click();
+        Assert.True(await yes);
+
+        var no = Dialogs.ConfirmAsync(new MessageBoxOptions { Message = "Sure?" });
+        cut.FindAll(".sl-dialog:not(.is-closing) .sl-dialog__footer button")[0].Click();
+        Assert.False(await no);
+    }
+
+    [Fact]
+    public async Task Destructive_confirm_uses_danger_styling_focuses_cancel_and_ignores_backdrop()
+    {
+        var cut = Host();
+        var result = Dialogs.ConfirmAsync(new MessageBoxOptions
+        {
+            Title = "Delete Slate.Wpf?", Message = "This can't be undone.", ConfirmText = "Delete", Destructive = true,
+        });
+
+        Assert.Contains("sl-dialog__icon--danger", cut.Find(".sl-dialog__icon").ClassList);
+        var buttons = cut.FindAll(".sl-dialog__footer button");
+        Assert.Contains("sl-button--danger-solid", buttons[1].ClassList);
+        Assert.True(buttons[0].HasAttribute("autofocus"));
+        Assert.False(buttons[1].HasAttribute("autofocus"));
+
+        cut.Find(".sl-dialog__scrim").Click();
+        Assert.False(result.IsCompleted);
+        cut.Find(".sl-dialog").KeyDown("Escape");
+        Assert.False(await result);
+    }
+
+    [Fact]
+    public void Alert_has_a_single_button()
+    {
+        var cut = Host();
+        Dialogs.AlertAsync("Saved", "Everything is up to date.", Severity.Success);
+        Assert.Single(cut.FindAll(".sl-dialog__footer button"));
+        Assert.Contains("sl-dialog__icon--success", cut.Find(".sl-dialog__icon").ClassList);
+    }
+
+    [Fact]
+    public void Declarative_dialog_opens_with_binding_shows_live_content_and_reports_close()
+    {
+        var host = Host();
+        var page = Render<InlineDialogPage>();
+
+        Assert.Empty(host.FindAll(".sl-dialog"));
+        page.Find("#open").Click();
+        host.WaitForAssertion(() => Assert.Equal("Inline", host.Find(".sl-dialog__title").TextContent));
+
+        host.Find("#inc").Click();
+        host.WaitForAssertion(() => Assert.Equal("1", host.Find("#count").TextContent));
+
+        host.Find(".sl-dialog__close").Click();
+        page.WaitForAssertion(() => Assert.False(page.Instance.Open));
+        Assert.True(page.Instance.Closed!.Canceled);
+    }
+
+    [Fact]
+    public void Setting_open_false_closes_the_declarative_dialog()
+    {
+        var host = Host();
+        var page = Render<InlineDialogPage>();
+        page.Find("#open").Click();
+        host.WaitForAssertion(() => Assert.Single(host.FindAll(".sl-dialog")));
+
+        page.Find("#close").Click();
+        host.WaitForAssertion(() => Assert.Contains("is-closing", host.Find(".sl-dialog").ClassList));
+    }
+
+    [Fact]
+    public void Show_rejects_empty_content() =>
+        Assert.Throws<ArgumentException>(() => Dialogs.Show(new DialogContent()));
+}

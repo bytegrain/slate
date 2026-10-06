@@ -1,0 +1,42 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@inject SlateJs Js
+@* App frame: app bar, drawer and main. Children: SlAppBar, SlDrawer, SlMain (any order). *@
+<CascadingValue Value="this" IsFixed="true">
+    <div @attributes="AdditionalAttributes" class="@(Css.Of("sl-app-shell").Add("sl-app-shell--viewport", FillViewport).Add(Class))" style="@Style">
+        @ChildContent
+    </div>
+</CascadingValue>
+
+@code {
+    /// <summary>Fill the browser viewport (main scrolls, not the page). Default true.</summary>
+    [Parameter] public bool FillViewport { get; set; } = true;
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    internal SlDrawer? Drawer { get; private set; }
+
+    internal ElementReference? ToggleButton { get; set; }
+
+    internal event Action? DrawerChanged;
+
+    internal void Register(SlDrawer drawer)
+    {
+        Drawer = drawer;
+        DrawerChanged?.Invoke();
+    }
+
+    internal void Unregister(SlDrawer drawer)
+    {
+        if (ReferenceEquals(Drawer, drawer)) Drawer = null;
+        DrawerChanged?.Invoke();
+    }
+
+    internal void NotifyDrawerChanged() => DrawerChanged?.Invoke();
+
+    /// <summary>Returns focus to the app bar's menu button after an overlay drawer closes.</summary>
+    internal async Task FocusToggleAsync()
+    {
+        if (ToggleButton is { } toggle) await JsSafe.Run(() => Js.FocusAsync(toggle));
+    }
+}

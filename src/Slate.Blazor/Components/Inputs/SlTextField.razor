@@ -1,0 +1,172 @@
+@namespace Slate.Blazor
+@typeparam TValue
+@inherits SlInputBase<TValue>
+@implements IAsyncDisposable
+@inject SlateOptions Options
+
+<div class="@CssClass" style="@Style">
+    @if (Label is not null)
+    {
+        <label class="sl-field__label" for="@ElementId">@Label@if (Required)
+            {<span class="sl-field__required" aria-hidden="true">*</span>}</label>
+    }
+    <div class="sl-field__control">
+        @if (Prefix is not null)
+        {
+            <span class="sl-field__affix sl-field__affix--prefix">@Prefix</span>
+        }
+        @if (StartIcon is not null)
+        {
+            <span class="sl-field__icon"><SlIcon Name="@StartIcon" /></span>
+        }
+        @if (Multiline)
+        {
+            <textarea @attributes="AdditionalAttributes" id="@ElementId" class="sl-field__input sl-field__input--multiline" rows="@Rows"
+                      value="@CurrentValueAsString" placeholder="@Placeholder" required="@Required" disabled="@Disabled" readonly="@ReadOnly"
+                      aria-invalid="@(IsInvalid ? "true" : "false")" aria-describedby="@DescribedBy"
+                      @onchange="OnChangeAsync" @oninput="OnInputAsync"></textarea>
+        }
+        else
+        {
+            <input @attributes="AdditionalAttributes" id="@ElementId" class="sl-field__input" type="@InputType"
+                   value="@CurrentValueAsString" placeholder="@Placeholder" required="@Required" disabled="@Disabled" readonly="@ReadOnly"
+                   aria-invalid="@(IsInvalid ? "true" : "false")" aria-describedby="@DescribedBy"
+                   @onchange="OnChangeAsync" @oninput="OnInputAsync" />
+        }
+        @if (Suffix is not null)
+        {
+            <span class="sl-field__affix sl-field__affix--suffix">@Suffix</span>
+        }
+    </div>
+    @if (ErrorText is { } error)
+    {
+        <p class="sl-field__error" id="@DescriptionId"><SlIcon Name="alert-circle" />@error</p>
+    }
+    else if (HelperText is not null)
+    {
+        <p class="sl-field__helper" id="@DescriptionId">@HelperText</p>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public string? HelperText { get; set; }
+    [Parameter] public bool Required { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+
+    /// <summary>HTML input type: text (default), password, email, number, search, tel, url…</summary>
+    [Parameter] public string InputType { get; set; } = "text";
+
+    [Parameter] public bool Multiline { get; set; }
+    [Parameter] public int Rows { get; set; } = 3;
+    [Parameter] public string? Prefix { get; set; }
+    [Parameter] public string? Suffix { get; set; }
+    [Parameter] public string? StartIcon { get; set; }
+    [Parameter] public ControlSize Size { get; set; } = ControlSize.Medium;
+
+    /// <summary>Update the value on every keystroke instead of on change (blur/Enter).</summary>
+    [Parameter] public bool Immediate { get; set; }
+
+    /// <summary>With <see cref="Immediate"/>, wait this long after typing stops before updating.</summary>
+    [Parameter] public int DebounceMilliseconds { get; set; }
+
+    /// <summary>Format used when converting the value to text (e.g. "0.00" for numbers).</summary>
+    [Parameter] public string? Format { get; set; }
+
+    /// <summary>Shown when the text can't be converted to <typeparamref name="TValue"/>.</summary>
+    [Parameter] public string ParsingErrorMessage { get; set; } = "Enter a valid value.";
+
+    private string? _parseError;
+    private string? _pendingText;
+    private CancellationTokenSource? _debounce;
+
+    private string DescriptionId => $"{ElementId}-desc";
+
+    private string? DescribedBy => ErrorText is not null || HelperText is not null ? DescriptionId : null;
+
+    private new string? ErrorText => _parseError ?? base.ErrorText;
+    private new bool IsInvalid => ErrorText is not null;
+
+    private string CssClass => Css.Of("sl-field")
+        .Add(Names.Size(Size, "sl-field"))
+        .Add("sl-field--invalid", IsInvalid)
+        .Add("sl-field--disabled", Disabled)
+        .Add("sl-field--multiline", Multiline)
+        .Add(Class);
+
+    private string? CurrentValueAsString => _pendingText ?? FormatValue(CurrentValue);
+
+    private string? FormatValue(TValue? value) => value switch
+    {
+        null => null,
+        IFormattable f when Format is not null => f.ToString(Format, System.Globalization.CultureInfo.CurrentCulture),
+        _ => BindConverter.FormatValue(value)?.ToString(),
+    };
+
+    private Task OnChangeAsync(ChangeEventArgs e)
+    {
+        if (Immediate) return Task.CompletedTask; // already handled by input
+        Commit(e.Value?.ToString());
+        return Task.CompletedTask;
+    }
+
+    private async Task OnInputAsync(ChangeEventArgs e)
+    {
+        if (!Immediate) return;
+        var text = e.Value?.ToString();
+        if (DebounceMilliseconds <= 0)
+        {
+            Commit(text);
+            return;
+        }
+
+        _pendingText = text;
+        _debounce?.Cancel();
+        _debounce = new CancellationTokenSource();
+        try
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(DebounceMilliseconds), Options.TimeProvider, _debounce.Token);
+            Commit(text);
+        }
+        catch (TaskCanceledException) { }
+    }
+
+    private void Commit(string? text)
+    {
+        _pendingText = null;
+        if (TryParse(text, out var value))
+        {
+            _parseError = null;
+            CurrentValue = value;
+        }
+        else
+        {
+            _parseError = ParsingErrorMessage;
+        }
+    }
+
+    private static bool TryParse(string? text, out TValue? value)
+    {
+        if (typeof(TValue) == typeof(string))
+        {
+            value = (TValue?)(object?)text;
+            return true;
+        }
+
+        if (string.IsNullOrWhiteSpace(text) && default(TValue) is null)
+        {
+            value = default;
+            return true;
+        }
+
+        return BindConverter.TryConvertTo(text, System.Globalization.CultureInfo.CurrentCulture, out value);
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        _debounce?.Cancel();
+        _debounce?.Dispose();
+        base.Dispose();
+        return ValueTask.CompletedTask;
+    }
+}

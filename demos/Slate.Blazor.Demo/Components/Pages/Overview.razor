@@ -1,0 +1,49 @@
+@page "/"
+<PageTitle>Slate for Blazor</PageTitle>
+
+<div class="demo-page">
+    <PageHeader Title="Engineered for the eight-hour day." Eyebrow="Alloy · Slate for Blazor">
+        Razor components that render the Alloy design system. Every pixel comes from <code>@@slate/web</code>'s
+        stylesheet, so Blazor, plain HTML, WPF and Avalonia apps share one look.
+    </PageHeader>
+
+    <SlGrid>
+        <SlItem Xs="12" Md="4">
+            <SlCard Title="One design source" Subtitle="design/tokens → every platform">
+                <SlText Tone="TextTone.Secondary">Colours, type, spacing and motion are generated from a single token set, with contrast rules enforced by tests.</SlText>
+            </SlCard>
+        </SlItem>
+        <SlItem Xs="12" Md="4">
+            <SlCard Title="Blazor-native" Subtitle="EditForm, DI, render modes">
+                <SlText Tone="TextTone.Secondary">Inputs bind and validate through EditContext. Snackbars and dialogs are injectable services. Works in Server, WebAssembly and prerendering.</SlText>
+            </SlCard>
+        </SlItem>
+        <SlItem Xs="12" Md="4">
+            <SlCard Title="Accessible by default" Subtitle="Keyboard first">
+                <SlText Tone="TextTone.Secondary">Visible focus, trapped dialog focus, live-region snackbars and labelled controls — checked by bUnit tests against the markup contract.</SlText>
+            </SlCard>
+        </SlItem>
+    </SlGrid>
+
+    <DemoSection Title="Get started" Subtitle="Three steps">
+        <SlStack Spacing="4">
+            <div>
+                <SlText Typo="Typo.Label">1. Register the services</SlText>
+                <SlText Typo="Typo.Mono" Tag="pre">builder.Services.AddSlate();</SlText>
+            </div>
+            <div>
+                <SlText Typo="Typo.Label">2. Add the stylesheet</SlText>
+                <SlText Typo="Typo.Mono" Tag="pre">&lt;link rel="stylesheet" href="_content/Slate.Blazor/slate.css" /&gt;</SlText>
+            </div>
+            <div>
+                <SlText Typo="Typo.Label">3. Wrap the app</SlText>
+                <SlText Typo="Typo.Mono" Tag="pre">&lt;SlateProvider Theme="ThemeMode.System"&gt; … &lt;/SlateProvider&gt;</SlText>
+            </div>
+        </SlStack>
+    </DemoSection>
+
+    <SlStack Row="true" Spacing="2" Wrap="true">
+        <SlButton Variant="ButtonVariant.Primary" Href="components" EndIcon="arrow-right">Browse components</SlButton>
+        <SlButton Href="examples/issues">See an example app</SlButton>
+    </SlStack>
+</div>

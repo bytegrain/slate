@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <title>Slate for Blazor</title>
+    <ResourcePreloader />
+    @* The whole look: @slate/web's stylesheet (+ fonts) shipped by Slate.Blazor, plus its tiny glue file. *@
+    <link rel="stylesheet" href="_content/Slate.Blazor/slate.css" />
+    <link rel="stylesheet" href="_content/Slate.Blazor/slate-blazor.css" />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <ImportMap />
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+
+<body>
+    <Routes @rendermode="InteractiveServer" />
+    <ReconnectModal />
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+</body>
+
+</html>

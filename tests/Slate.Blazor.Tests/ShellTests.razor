@@ -1,0 +1,111 @@
+@inherits SlateTestContext
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.Extensions.DependencyInjection
+
+@code {
+    private bool _open = true;
+
+    private IRenderedComponent<SlAppShell> RenderShell(DrawerVariant variant) => Render<SlAppShell>(@<SlAppShell>
+        <SlAppBar Title="@((RenderFragment)(b => b.AddContent(0, "Slate")))" />
+        <SlDrawer Variant="variant" @bind-Open="_open" id="nav">
+            <SlNav>
+                <SlNavHeading>Docs</SlNavHeading>
+                <SlNavLink Href="/" Icon="home" Match="NavLinkMatch.All">Overview</SlNavLink>
+                <SlNavLink Href="/components" Meta="12">Components</SlNavLink>
+            </SlNav>
+        </SlDrawer>
+        <SlMain>content</SlMain>
+    </SlAppShell>);
+
+    [Fact]
+    public void Shell_renders_app_bar_with_toggle_linked_to_the_drawer()
+    {
+        var cut = RenderShell(DrawerVariant.Persistent);
+        Assert.Equal("sl-app-shell sl-app-shell--viewport", cut.Find("div").ClassName);
+        var toggle = cut.Find(".sl-app-bar button");
+        Assert.Equal("Toggle navigation", toggle.GetAttribute("aria-label"));
+        Assert.Equal("true", toggle.GetAttribute("aria-expanded"));
+        Assert.Equal("nav", toggle.GetAttribute("aria-controls"));
+        Assert.Equal("Slate", cut.Find(".sl-app-bar__title").TextContent);
+        Assert.Equal("sl-drawer sl-drawer--persistent is-open", cut.Find("nav").ClassName);
+        Assert.Equal("Navigation", cut.Find("nav").GetAttribute("aria-label"));
+    }
+
+    [Fact]
+    public void Toggle_closes_and_reopens_with_two_way_binding()
+    {
+        var cut = RenderShell(DrawerVariant.Persistent);
+        cut.Find(".sl-app-bar button").Click();
+        Assert.False(_open);
+        cut.WaitForAssertion(() => Assert.DoesNotContain("is-open", cut.Find("nav").ClassList));
+        Assert.Equal("false", cut.Find(".sl-app-bar button").GetAttribute("aria-expanded"));
+        cut.Find(".sl-app-bar button").Click();
+        Assert.True(_open);
+    }
+
+    [Fact]
+    public void Persistent_and_mini_drawers_have_no_scrim()
+    {
+        Assert.Empty(RenderShell(DrawerVariant.Persistent).FindAll(".sl-drawer-scrim"));
+        Assert.Empty(RenderShell(DrawerVariant.Mini).FindAll(".sl-drawer-scrim"));
+    }
+
+    [Fact]
+    public void Temporary_drawer_scrim_and_escape_close_it()
+    {
+        var cut = RenderShell(DrawerVariant.Temporary);
+        Assert.Contains("sl-drawer--temporary", cut.Find("nav").ClassList);
+        cut.Find(".sl-drawer-scrim").Click();
+        Assert.False(_open);
+        cut.WaitForAssertion(() => Assert.Empty(cut.FindAll(".sl-drawer-scrim")));
+
+        cut.Find(".sl-app-bar button").Click();
+        cut.Find("nav").KeyDown("Escape");
+        Assert.False(_open);
+    }
+
+    [Fact]
+    public void Responsive_drawer_scrim_is_marked_for_narrow_screens_only()
+    {
+        var cut = RenderShell(DrawerVariant.Responsive);
+        Assert.Equal("sl-drawer-scrim sl-drawer-scrim--responsive", cut.Find(".sl-drawer-scrim").ClassName);
+    }
+
+    [Fact]
+    public void Responsive_drawer_is_unresolved_only_until_the_viewport_is_measured()
+    {
+        var cut = RenderShell(DrawerVariant.Responsive);
+        // bUnit runs OnAfterRender immediately, so the measured state is what remains; prerendered HTML carries the class.
+        Assert.DoesNotContain("sl-drawer--unresolved", cut.Find("nav").ClassList);
+        Assert.DoesNotContain("sl-drawer-scrim--unresolved", cut.Find(".sl-drawer-scrim").ClassList);
+    }
+
+    [Fact]
+    public void Responsive_drawer_closes_on_narrow_screens_after_first_render()
+    {
+        var module = Module;
+        module.Setup<bool>("mediaMatches", _ => true).SetResult(true);
+        RenderShell(DrawerVariant.Responsive);
+        Assert.False(_open);
+    }
+
+    [Fact]
+    public void Nav_links_mark_the_current_page()
+    {
+        Services.GetRequiredService<Bunit.TestDoubles.BunitNavigationManager>().NavigateTo("/components/button");
+        var cut = RenderShell(DrawerVariant.Persistent);
+        var links = cut.FindAll(".sl-nav__item");
+        Assert.Null(links[0].GetAttribute("aria-current"));          // "/" matches exactly only
+        Assert.Equal("page", links[1].GetAttribute("aria-current")); // prefix match
+        Assert.Equal("12", links[1].QuerySelector(".sl-nav__meta")!.TextContent);
+        Assert.Equal("Docs", cut.Find(".sl-nav__heading").TextContent);
+    }
+
+    [Fact]
+    public void Navigating_closes_an_overlay_drawer()
+    {
+        var cut = RenderShell(DrawerVariant.Temporary);
+        Services.GetRequiredService<Bunit.TestDoubles.BunitNavigationManager>().NavigateTo("/components");
+        cut.WaitForAssertion(() => Assert.False(_open));
+    }
+}

@@ -1,0 +1,144 @@
+@page "/examples/issues"
+@inject IDialogService Dialogs
+@inject ISnackbarService Snackbar
+<PageTitle>Issue tracker · Slate</PageTitle>
+
+<div class="demo-page" style="max-width: none">
+    <SlStack Row="true" Spacing="3" Align="StackAlign.Center" Wrap="true">
+        <SlStack Spacing="1">
+            <SlText Typo="Typo.Overline" Tone="TextTone.Tertiary">Platform · Desktop</SlText>
+            <SlText Typo="Typo.H3" Tag="h1">Active issues</SlText>
+        </SlStack>
+        <SlSpacer />
+        <SlTextField @bind-Value="_filter" Placeholder="Filter issues" StartIcon="search" Immediate="true" Size="ControlSize.Small" aria-label="Filter issues" />
+        <SlButtonGroup Label="View">
+            <SlButton Size="ControlSize.Small" Pressed="_board" OnClick="() => _board = true">Board</SlButton>
+            <SlButton Size="ControlSize.Small" Pressed="!_board" OnClick="() => _board = false">List</SlButton>
+        </SlButtonGroup>
+        <SlButton Variant="ButtonVariant.Primary" Size="ControlSize.Small" StartIcon="plus" Shortcut="C" OnClick="NewIssue">New issue</SlButton>
+    </SlStack>
+
+    <SlGrid Spacing="3">
+        <SlItem Xs="6" Md="3"><SlCard><SlText Typo="Typo.Caption" Tone="TextTone.Tertiary">Open</SlText><div class="demo-stat">@Visible.Count(i => i.Status != "Done")</div></SlCard></SlItem>
+        <SlItem Xs="6" Md="3"><SlCard><SlText Typo="Typo.Caption" Tone="TextTone.Tertiary">In progress</SlText><div class="demo-stat">@Visible.Count(i => i.Status == "In progress")</div></SlCard></SlItem>
+        <SlItem Xs="6" Md="3"><SlCard><SlText Typo="Typo.Caption" Tone="TextTone.Tertiary">Urgent</SlText><div class="demo-stat">@Visible.Count(i => i.Priority == "Urgent")</div></SlCard></SlItem>
+        <SlItem Xs="6" Md="3"><SlCard><SlText Typo="Typo.Caption" Tone="TextTone.Tertiary">Cycle progress</SlText><div class="demo-stat">62%</div><SlProgress Value="62" Label="Cycle progress" /></SlCard></SlItem>
+    </SlGrid>
+
+    @if (_board)
+    {
+        <div class="demo-board">
+            @foreach (var status in Statuses)
+            {
+                var items = Visible.Where(i => i.Status == status).ToList();
+                <div class="demo-column">
+                    <div class="demo-column-head">@status <SlBadge>@items.Count</SlBadge></div>
+                    @foreach (var issue in items)
+                    {
+                        <SlCard Interactive="true" OnClick="() => Open(issue)" aria-label="@($"{issue.Id}: {issue.Title}")">
+                            <div class="demo-issue">
+                                <SlStack Row="true" Spacing="2" Align="StackAlign.Center">
+                                    <span class="demo-mono">@issue.Id</span>
+                                    <SlSpacer />
+                                    <SlBadge Tone="@PriorityTone(issue.Priority)">@issue.Priority</SlBadge>
+                                </SlStack>
+                                <p class="demo-issue-title">@issue.Title</p>
+                                <SlStack Row="true" Spacing="1" Wrap="true">
+                                    @foreach (var label in issue.Labels)
+                                    {
+                                        <SlBadge>@label</SlBadge>
+                                    }
+                                </SlStack>
+                            </div>
+                        </SlCard>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <SlCard FlushBody="true">
+            <div class="demo-table-wrap">
+                <table class="demo-table">
+                    <thead><tr><th>ID</th><th>Title</th><th>Status</th><th>Priority</th><th>Labels</th><th>Assignee</th></tr></thead>
+                    <tbody>
+                        @foreach (var issue in Visible)
+                        {
+                            <tr>
+                                <td class="demo-mono">@issue.Id</td>
+                                <td><SlButton Variant="ButtonVariant.Link" OnClick="() => Open(issue)">@issue.Title</SlButton></td>
+                                <td><SlBadge Dot="true" Tone="@StatusTone(issue.Status)">@issue.Status</SlBadge></td>
+                                <td><SlBadge Tone="@PriorityTone(issue.Priority)">@issue.Priority</SlBadge></td>
+                                <td>@string.Join(", ", issue.Labels)</td>
+                                <td>@issue.Assignee</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </SlCard>
+    }
+</div>
+
+@code {
+    private sealed record Issue(string Id, string Title, string Status, string Priority, string[] Labels, string Assignee);
+
+    private static readonly string[] Statuses = ["Backlog", "Todo", "In progress", "Done"];
+
+    private readonly List<Issue> _issues =
+    [
+        new("SLT-171", "Tooltip flickers when moving between adjacent triggers", "Backlog", "High", ["bug", "web"], "Unassigned"),
+        new("SLT-170", "Support Windows high-contrast themes in Slate.Wpf", "Backlog", "Medium", ["a11y", "wpf"], "Rae"),
+        new("SLT-163", "Date picker: arrow keys, PgUp/PgDn month paging", "Todo", "Medium", ["a11y"], "Unassigned"),
+        new("SLT-161", "Expose density token to XAML resource dictionary", "Todo", "Medium", ["wpf", "tokens"], "Rae"),
+        new("SLT-158", "DataGrid: virtualised rows for 100k items", "Todo", "High", ["blazor", "perf"], "Jo"),
+        new("SLT-142", "Focus ring clipped inside ScrollViewer", "In progress", "Urgent", ["wpf", "bug"], "Aaron"),
+        new("SLT-150", "Combobox: multi-select chips overflow the field", "In progress", "High", ["web"], "Jo"),
+        new("SLT-147", "Token pipeline emits Avalonia styles", "In progress", "High", ["avalonia", "tokens"], "Rae"),
+        new("SLT-131", "Package Instrument Sans + Plex Mono with the theme", "Done", "Low", ["tokens"], "Aaron"),
+        new("SLT-138", "Dark theme neutral ramp", "Done", "Medium", ["tokens"], "Rae"),
+    ];
+
+    private bool _board = true;
+    private string? _filter;
+    private int _next = 172;
+
+    private IEnumerable<Issue> Visible => string.IsNullOrWhiteSpace(_filter)
+        ? _issues
+        : _issues.Where(i => i.Title.Contains(_filter, StringComparison.OrdinalIgnoreCase) || i.Id.Contains(_filter, StringComparison.OrdinalIgnoreCase)
+                             || i.Labels.Any(l => l.Contains(_filter, StringComparison.OrdinalIgnoreCase)));
+
+    private static BadgeTone PriorityTone(string p) => p switch { "Urgent" => BadgeTone.Danger, "High" => BadgeTone.Warning, "Low" => BadgeTone.Neutral, _ => BadgeTone.Info };
+    private static BadgeTone StatusTone(string s) => s switch { "Done" => BadgeTone.Success, "In progress" => BadgeTone.Accent, _ => BadgeTone.Neutral };
+
+    private async Task Open(Issue issue)
+    {
+        var close = await Dialogs.ConfirmAsync(new MessageBoxOptions
+        {
+            Title = $"{issue.Id} · {issue.Title}",
+            Message = $"{issue.Status} · {issue.Priority} priority · {issue.Assignee}. Mark it done?",
+            ConfirmText = "Mark done",
+            CancelText = "Keep open",
+        });
+        if (!close) return;
+        var index = _issues.IndexOf(issue);
+        _issues[index] = issue with { Status = "Done" };
+        Snackbar.Add(new SnackbarOptions
+        {
+            Message = $"{issue.Id} moved to Done",
+            Severity = Severity.Success,
+            Action = SnackbarAction.Create("Undo", () => InvokeAsync(() => { _issues[index] = issue; StateHasChanged(); })),
+        });
+    }
+
+    private async Task NewIssue()
+    {
+        var result = await Dialogs.ShowAsync<RenameDialog>("New issue",
+            new DialogParameters().Set(nameof(RenameDialog.Name), "Untitled"), new DialogOptions { MaxWidth = DialogWidth.Sm, CloseOnBackdropClick = false });
+        if (result.Canceled) return;
+        var id = $"SLT-{_next++}";
+        _issues.Insert(0, new Issue(id, result.GetData<string>()!, "Backlog", "Medium", ["new"], "Aaron"));
+        Snackbar.Success($"{id} created");
+    }
+}

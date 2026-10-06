@@ -1,0 +1,88 @@
+@page "/forms"
+@inject ISnackbarService Snackbar
+<PageTitle>Forms · Slate</PageTitle>
+
+<div class="demo-page">
+    <PageHeader Title="Forms">
+        Slate inputs plug into <code>EditForm</code>: two-way binding, DataAnnotations validation, and error text that
+        replaces the helper and is announced to screen readers. Submit the form empty to see it.
+    </PageHeader>
+
+    <SlGrid>
+        <SlItem Xs="12" Lg="7">
+            <SlCard Title="New project" Subtitle="Creates a repository and a preview environment">
+                <EditForm Model="_model" OnValidSubmit="SubmitAsync" FormName="new-project">
+                    <DataAnnotationsValidator />
+                    <SlStack Spacing="4">
+                        <SlTextField @bind-Value="_model.Name" Label="Project name" Required="true" HelperText="Lowercase letters, numbers and dashes." />
+                        <SlTextField @bind-Value="_model.OwnerEmail" Label="Owner email" InputType="email" Required="true" />
+                        <SlTextField @bind-Value="_model.Repository" Label="Repository" Prefix="github.com/" Placeholder="studio/project" />
+                        <SlTextField @bind-Value="_model.Seats" Label="Seats" InputType="number" HelperText="1–250" />
+                        <SlRadioGroup @bind-Value="_model.Region" Label="Region" Row="true">
+                            <SlRadio Value="@("eu-west")" Label="Europe West" />
+                            <SlRadio Value="@("us-east")" Label="US East" />
+                            <SlRadio Value="@("ap-south")" Label="Asia Pacific" />
+                        </SlRadioGroup>
+                        <SlTextField @bind-Value="_model.Description" Label="Description" Multiline="true" Rows="3" />
+                        <SlSwitch @bind-Value="_model.PreviewDeployments" Label="Preview deployments" Description="Every pull request gets its own URL." Spread="true" />
+                        <SlCheckbox @bind-Value="_model.AcceptTerms" Label="I accept the terms of service" />
+                    </SlStack>
+                    <SlDivider Style="margin: var(--sl-space-5) 0" />
+                    <SlStack Row="true" Spacing="2" Justify="StackJustify.End">
+                        <SlButton Type="ButtonType.Reset" OnClick="Reset">Reset</SlButton>
+                        <SlButton Type="ButtonType.Submit" Variant="ButtonVariant.Primary" Loading="_saving">Create project</SlButton>
+                    </SlStack>
+                </EditForm>
+            </SlCard>
+        </SlItem>
+        <SlItem Xs="12" Lg="5">
+            <SlStack Spacing="4">
+                <SlAlert Severity="Severity.Info" Title="How validation works">
+                    Errors appear after the first submit or when a field changes, replace the helper text, set
+                    <code>aria-invalid</code> and are linked with <code>aria-describedby</code>.
+                </SlAlert>
+                <SlCard Title="Model" Subtitle="Live values">
+                    <SlText Typo="Typo.Mono" Tag="pre" Style="white-space: pre-wrap; margin: 0">@System.Text.Json.JsonSerializer.Serialize(_model, new System.Text.Json.JsonSerializerOptions { WriteIndented = true })</SlText>
+                </SlCard>
+            </SlStack>
+        </SlItem>
+    </SlGrid>
+</div>
+
+@code {
+    public sealed class NewProject
+    {
+        [Required(ErrorMessage = "Enter a project name.")]
+        [RegularExpression("^[a-z0-9-]+$", ErrorMessage = "Use lowercase letters, numbers and dashes only.")]
+        public string? Name { get; set; }
+
+        [Required(ErrorMessage = "Enter the owner's email.")]
+        [EmailAddress(ErrorMessage = "Enter a complete email address, like name@studio.dev.")]
+        public string? OwnerEmail { get; set; }
+
+        public string? Repository { get; set; }
+
+        [Range(1, 250, ErrorMessage = "Seats must be between 1 and 250.")]
+        public int Seats { get; set; } = 5;
+
+        public string Region { get; set; } = "eu-west";
+        public string? Description { get; set; }
+        public bool PreviewDeployments { get; set; } = true;
+
+        [Range(typeof(bool), "true", "true", ErrorMessage = "Accept the terms to continue.")]
+        public bool AcceptTerms { get; set; }
+    }
+
+    private NewProject _model = new();
+    private bool _saving;
+
+    private async Task SubmitAsync()
+    {
+        _saving = true;
+        await Task.Delay(800);
+        _saving = false;
+        Snackbar.Add(new SnackbarOptions { Title = $"Created {_model.Name}", Message = "Your preview environment is on its way.", Severity = Severity.Success });
+    }
+
+    private void Reset() => _model = new();
+}

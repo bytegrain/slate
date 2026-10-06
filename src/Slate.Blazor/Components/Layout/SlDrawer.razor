@@ -1,0 +1,122 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@implements IAsyncDisposable
+@inject SlateJs Js
+@inject NavigationManager Navigation
+<nav @attributes="AdditionalAttributes" id="@DrawerId" class="@CssClass" style="@Style" aria-label="@AriaLabel" @onkeydown="OnKeyDownAsync">
+    @ChildContent
+</nav>
+@if (Open && IsOverlayVariant)
+{
+    <div class="@(Css.Of("sl-drawer-scrim").Add("sl-drawer-scrim--responsive", Variant == DrawerVariant.Responsive).Add("sl-drawer-scrim--unresolved", Variant == DrawerVariant.Responsive && !_resolved))" @onclick="CloseFromOverlayAsync"></div>
+}
+
+@code {
+    [CascadingParameter] private SlAppShell? Shell { get; set; }
+
+    [Parameter] public DrawerVariant Variant { get; set; } = DrawerVariant.Responsive;
+
+    /// <summary>Two-way bindable. Responsive drawers start closed on narrow screens.</summary>
+    [Parameter] public bool Open { get; set; } = true;
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter] public string AriaLabel { get; set; } = "Navigation";
+
+    /// <summary>Close overlay drawers after navigating. Default true.</summary>
+    [Parameter] public bool CloseOnNavigate { get; set; } = true;
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    internal string DrawerId => ElementId;
+
+    private const string NarrowQuery = "(max-width: 899.98px)";
+    private bool _narrow;
+    private IJSObjectReference? _media;
+    private DotNetObjectReference<SlDrawer>? _self;
+
+    /// <summary>True when the drawer currently overlays content (temporary, or responsive on a narrow screen).</summary>
+    public bool IsOverlay => Variant == DrawerVariant.Temporary || (Variant == DrawerVariant.Responsive && _narrow);
+
+    private bool IsOverlayVariant => Variant is DrawerVariant.Temporary or DrawerVariant.Responsive;
+
+    // Until script has measured the viewport (prerender, or before the circuit connects) a responsive drawer
+    // can't know whether it should overlay; slate-blazor.css hides it on narrow screens until then.
+    private bool _resolved;
+
+    private string CssClass => Css.Of("sl-drawer")
+        .Add($"sl-drawer--{Names.Kebab(Variant.ToString())}")
+        .Add("is-open", Open)
+        .Add("sl-drawer--unresolved", Variant == DrawerVariant.Responsive && !_resolved)
+        .Add(Class);
+
+    protected override void OnInitialized()
+    {
+        Shell?.Register(this);
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    protected override void OnParametersSet() => Shell?.NotifyDrawerChanged();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || Variant != DrawerVariant.Responsive) return;
+        try
+        {
+            await JsSafe.Run(async () =>
+            {
+                _self = DotNetObjectReference.Create(this);
+                _media = await Js.WatchMediaAsync(NarrowQuery, _self);
+                _narrow = await Js.MediaMatchesAsync(NarrowQuery);
+                if (_narrow && Open) await SetOpenAsync(false);
+            });
+        }
+        finally
+        {
+            _resolved = true;
+            StateHasChanged();
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnMediaChanged(bool narrow)
+    {
+        _narrow = narrow;
+        // Entering the narrow layout closes the drawer so it doesn't cover the page; widening reopens it.
+        await InvokeAsync(() => SetOpenAsync(!narrow));
+    }
+
+    public Task ToggleAsync() => SetOpenAsync(!Open);
+
+    public async Task SetOpenAsync(bool open)
+    {
+        if (Open == open) return;
+        Open = open;
+        await OpenChanged.InvokeAsync(open);
+        Shell?.NotifyDrawerChanged();
+        StateHasChanged();
+    }
+
+    private async Task CloseFromOverlayAsync()
+    {
+        await SetOpenAsync(false);
+        if (Shell is not null) await Shell.FocusToggleAsync();
+    }
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape" && Open && IsOverlay) await CloseFromOverlayAsync();
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        if (CloseOnNavigate && Open && IsOverlay) _ = InvokeAsync(() => SetOpenAsync(false));
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+        Shell?.Unregister(this);
+        await JsSafe.DisposeQuietly(_media, "dispose");
+        _self?.Dispose();
+    }
+}

@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+  <PropertyGroup>
+    <RootNamespace>Slate.Blazor</RootNamespace>
+    <PackageId>Slate.Blazor</PackageId>
+    <Description>Slate for Blazor: Razor components rendering the Alloy design system (styles from @slate/web), with layout, forms, snackbars and dialogs.</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <StaticWebAssetBasePath>_content/Slate.Blazor</StaticWebAssetBasePath>
+    <!-- Repo-relative location of the built web package whose CSS + fonts this library ships. -->
+    <SlateWebDist>$(MSBuildThisFileDirectory)..\..\packages\web\dist\</SlateWebDist>
+    <SlateWebRoot>$(MSBuildThisFileDirectory)..\..\</SlateWebRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <ProjectReference Include="..\Slate.Core\Slate.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Slate.Blazor.Tests" />
+  </ItemGroup>
+
+  <!--
+    The visuals come only from @slate/web. Before static web assets are collected, copy dist/slate.css and
+    dist/fonts into wwwroot (git-ignored). If the web package hasn't been built, build it with npm.
+  -->
+  <Target Name="SlateCopyWebAssets" BeforeTargets="BeforeBuild;ResolveProjectStaticWebAssets" Condition="'$(SlateSkipWebAssets)' != 'true'">
+    <Exec Condition="!Exists('$(SlateWebDist)slate.css')" Command="npm run build -w @slate/web" WorkingDirectory="$(SlateWebRoot)" />
+    <Error Condition="!Exists('$(SlateWebDist)slate.css')" Text="Slate.Blazor needs packages/web/dist/slate.css. Run 'npm install &amp;&amp; npm run build -w @slate/web' in the repository root." />
+    <ItemGroup>
+      <_SlateWebFiles Include="$(SlateWebDist)slate.css" />
+      <_SlateFontFiles Include="$(SlateWebDist)fonts\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_SlateWebFiles)" DestinationFolder="$(MSBuildThisFileDirectory)wwwroot" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_SlateFontFiles)" DestinationFolder="$(MSBuildThisFileDirectory)wwwroot\fonts" SkipUnchangedFiles="true" />
+    <ItemGroup>
+      <Content Include="wwwroot\slate.css;wwwroot\fonts\*.*" Exclude="@(Content)" />
+    </ItemGroup>
+  </Target>
+</Project>

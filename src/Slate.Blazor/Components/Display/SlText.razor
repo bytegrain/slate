@@ -1,0 +1,33 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@* Typography: <p class="sl-text sl-text--body sl-text--secondary">. Tag defaults by variant. *@
+<DynamicTag Tag="@ElementTag" Attributes="AdditionalAttributes" Class="@CssClass" Style="@Style">@ChildContent</DynamicTag>
+
+@code {
+    [Parameter] public Typo Typo { get; set; } = Typo.Body;
+    [Parameter] public TextTone? Tone { get; set; }
+
+    /// <summary>One line with an ellipsis.</summary>
+    [Parameter] public bool Truncate { get; set; }
+
+    /// <summary>Overrides the element (default: h1-h3 for headings, p otherwise).</summary>
+    [Parameter] public string? Tag { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ElementTag => Tag ?? Typo switch
+    {
+        Typo.Display or Typo.H1 => "h1",
+        Typo.H2 => "h2",
+        Typo.H3 => "h3",
+        Typo.Mono => "code",
+        Typo.Label or Typo.Caption or Typo.Overline => "span",
+        _ => "p",
+    };
+
+    private string CssClass => Css.Of("sl-text")
+        .Add($"sl-text--{Names.Kebab(Typo.ToString())}")
+        .Add(Tone is { } t ? $"sl-text--{Names.Kebab(t.ToString())}" : null)
+        .Add("sl-text--truncate", Truncate)
+        .Add(Class);
+}

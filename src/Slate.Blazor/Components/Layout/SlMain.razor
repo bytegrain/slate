@@ -1,0 +1,10 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+<main @attributes="AdditionalAttributes" class="@(Css.Of("sl-main").Add("sl-main--flush", Flush).Add(Class))" style="@Style">@ChildContent</main>
+
+@code {
+    /// <summary>No padding (for full-bleed pages that manage their own spacing).</summary>
+    [Parameter] public bool Flush { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

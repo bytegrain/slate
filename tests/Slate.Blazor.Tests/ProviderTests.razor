@@ -1,0 +1,68 @@
+@inherits SlateTestContext
+
+@code {
+    [Theory]
+    [InlineData(ThemeMode.Light, "light")]
+    [InlineData(ThemeMode.Dark, "dark")]
+    [InlineData(ThemeMode.System, "auto")]
+    public void Provider_sets_theme_attribute(ThemeMode mode, string expected)
+    {
+        var cut = Render<SlateProvider>(p => p.Add(x => x.Theme, mode));
+        var root = cut.Find(".sl-root");
+        Assert.Equal(expected, root.GetAttribute("data-sl-theme"));
+        Assert.Equal("compact", root.GetAttribute("data-sl-density"));
+    }
+
+    [Fact]
+    public void Provider_hosts_snackbars_and_dialogs_around_content()
+    {
+        var cut = Render(@<SlateProvider Density="Density.Comfortable"><p id="app">app</p></SlateProvider>);
+        Assert.Equal("comfortable", cut.Find(".sl-root").GetAttribute("data-sl-density"));
+        Assert.NotNull(cut.Find(".sl-provider__content #app"));
+        Assert.NotNull(cut.Find("section.sl-snackbar-host"));
+    }
+
+    [Fact]
+    public void Effective_theme_follows_the_os_when_system()
+    {
+        var module = Module;
+        module.Setup<bool>("mediaMatches", _ => true).SetResult(true);
+        string? effective = null;
+        var cut = Render<SlateProvider>(p => p.Add(x => x.Theme, ThemeMode.System).Add(x => x.EffectiveThemeChanged, (string t) => effective = t));
+        Assert.Equal("dark", effective);
+        Assert.True(cut.Instance.IsDark);
+
+        cut.InvokeAsync(() => cut.Instance.OnMediaChanged(false));
+        Assert.Equal("light", effective);
+    }
+
+    [Fact]
+    public async Task Set_theme_and_density_from_code()
+    {
+        ThemeMode theme = ThemeMode.Light;
+        var cut = Render<SlateProvider>(p => p.Add(x => x.Theme, theme).Add(x => x.ThemeChanged, (ThemeMode t) => theme = t));
+        await cut.InvokeAsync(() => cut.Instance.SetThemeAsync(ThemeMode.Dark));
+        Assert.Equal(ThemeMode.Dark, theme);
+        Assert.Equal("dark", cut.Find(".sl-root").GetAttribute("data-sl-theme"));
+
+        await cut.InvokeAsync(() => cut.Instance.SetDensityAsync(Density.Comfortable));
+        Assert.Equal("comfortable", cut.Find(".sl-root").GetAttribute("data-sl-density"));
+    }
+
+    [Fact]
+    public void Content_becomes_inert_while_a_dialog_is_open()
+    {
+        var cut = Render(@<SlateProvider><button id="behind">x</button></SlateProvider>);
+        Assert.False(cut.Find(".sl-provider__content").HasAttribute("inert"));
+
+        _ = Dialogs.ConfirmAsync(new MessageBoxOptions { Message = "Sure?" });
+        cut.WaitForAssertion(() => Assert.True(cut.Find(".sl-provider__content").HasAttribute("inert")));
+
+        Dialogs.CloseAll();
+        cut.WaitForAssertion(() => Assert.False(cut.Find(".sl-provider__content").HasAttribute("inert")));
+    }
+
+    [Fact]
+    public void Provider_can_omit_the_snackbar_layer() =>
+        Assert.Empty(Render<SlateProvider>(p => p.Add(x => x.Snackbars, false)).FindAll(".sl-snackbar-host"));
+}

@@ -1,0 +1,54 @@
+@inherits SlateTestContext
+
+@code {
+    private string? _plan = "team";
+
+    [Fact]
+    public void Radio_group_renders_fieldset_legend_and_native_radios()
+    {
+        var cut = Render(@<SlRadioGroup @bind-Value="_plan" Label="Plan" Name="plan">
+            <SlRadio Value="@("team")" Label="Team" Description="Unlimited projects, SSO" id="r1" />
+            <SlRadio Value="@("solo")" Label="Solo" id="r2" />
+        </SlRadioGroup>);
+
+        var fieldset = cut.Find("fieldset");
+        Assert.Equal("sl-radio-group", fieldset.ClassName);
+        Assert.Equal("Plan", cut.Find("legend.sl-radio-group__label").TextContent);
+        var radios = cut.FindAll("input[type=radio]");
+        Assert.All(radios, r => Assert.Equal("plan", r.GetAttribute("name")));
+        Assert.True(radios[0].HasAttribute("checked"));
+        Assert.False(radios[1].HasAttribute("checked"));
+        Assert.Equal("r1-desc", radios[0].GetAttribute("aria-describedby"));
+        Assert.Equal("Unlimited projects, SSO", cut.Find("#r1-desc").TextContent);
+    }
+
+    [Fact]
+    public void Selecting_a_radio_updates_the_bound_value_and_checked_state()
+    {
+        var cut = Render(@<SlRadioGroup @bind-Value="_plan" Label="Plan">
+            <SlRadio Value="@("team")" Label="Team" />
+            <SlRadio Value="@("solo")" Label="Solo" />
+        </SlRadioGroup>);
+
+        // Arrow keys on native radios move selection and fire change, which is what this simulates.
+        cut.FindAll("input")[1].Change("solo");
+        Assert.Equal("solo", _plan);
+        cut.WaitForAssertion(() => Assert.True(cut.FindAll("input")[1].HasAttribute("checked")));
+        Assert.False(cut.FindAll("input")[0].HasAttribute("checked"));
+    }
+
+    [Fact]
+    public void Row_layout_and_disabled_option()
+    {
+        var cut = Render(@<SlRadioGroup @bind-Value="_plan" Row="true">
+            <SlRadio Value="@("team")" Label="Team" Disabled="true" />
+        </SlRadioGroup>);
+        Assert.Contains("sl-radio-group--row", cut.Find("fieldset").ClassList);
+        Assert.Contains("is-disabled", cut.Find("label.sl-radio").ClassList);
+        Assert.True(cut.Find("input").HasAttribute("disabled"));
+    }
+
+    [Fact]
+    public void Radio_outside_a_group_throws() =>
+        Assert.Throws<InvalidOperationException>(() => Render(@<SlRadio Value="@("x")" />));
+}

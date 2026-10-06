@@ -1,0 +1,135 @@
+@namespace Slate.Blazor
+@implements IAsyncDisposable
+@inject IDialogService Dialogs
+@inject SlateJs Js
+@* One rendered dialog (contract: docs/design/css-classes.md#dialog). Internal to SlDialogHost. *@
+<div class="@CssClass" role="dialog" aria-modal="true" aria-labelledby="@(Title is null ? null : TitleId)"
+     aria-describedby="@(Description is null ? null : DescriptionId)" inert="@(!IsTop || IsClosing)" @onkeydown="OnKeyDown">
+    <div class="sl-dialog__scrim" @onclick="() => Dialogs.HandleBackdropClick(Dialog)"></div>
+    <div class="sl-dialog__panel" tabindex="-1" @ref="_panel">
+        @if (Title is not null || Options.ShowCloseButton || IconName is not null)
+        {
+            <header class="sl-dialog__header">
+                @if (IconName is not null)
+                {
+                    <div class="@(Css.Of("sl-dialog__icon").Add(IconTone))" aria-hidden="true"><SlIcon Name="@IconName" Size="ControlSize.Large" /></div>
+                }
+                <div class="sl-dialog__titles">
+                    @if (Title is not null)
+                    {
+                        <h2 class="sl-dialog__title" id="@TitleId">@Title</h2>
+                    }
+                    @if (Description is not null)
+                    {
+                        <p class="sl-dialog__description" id="@DescriptionId">@Description</p>
+                    }
+                </div>
+                @if (Options.ShowCloseButton && MessageBox is null)
+                {
+                    <button type="button" class="sl-button sl-button--ghost sl-button--sm sl-button--icon sl-dialog__close" aria-label="Close"
+                            @onclick="() => Dialogs.Close(Dialog, DialogResult.Cancel())"><SlIcon Name="x" /></button>
+                }
+            </header>
+        }
+        <CascadingValue Value="_instance" IsFixed="true">
+            @if (Content.ComponentType is { } type)
+            {
+                <DynamicComponent Type="type" Parameters="_parameters" />
+            }
+            else if (Content.Fragment is { } fragment)
+            {
+                @fragment
+            }
+            else if (MessageBox is { } box)
+            {
+                <footer class="sl-dialog__footer">
+                    @if (box.CancelText is not null)
+                    {
+                        <button type="button" class="sl-button" autofocus="@box.Destructive"
+                                @onclick="() => Dialogs.Close(Dialog, DialogResult.Cancel())">@box.CancelText</button>
+                    }
+                    <button type="button" class="@(box.Destructive ? "sl-button sl-button--danger-solid" : "sl-button sl-button--primary")"
+                            autofocus="@(!box.Destructive)" @onclick="() => Dialogs.Close(Dialog, DialogResult.Ok(true))">@box.ConfirmText</button>
+                </footer>
+            }
+        </CascadingValue>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public DialogReference Dialog { get; set; } = default!;
+    [Parameter] public bool IsTop { get; set; }
+    [Parameter] public bool IsClosing { get; set; }
+
+    private ElementReference _panel;
+    private IJSObjectReference? _trap;
+    private SlDialogInstance _instance = default!;
+    private Dictionary<string, object> _parameters = new();
+
+    private DialogContent Content => (DialogContent)Dialog.Content;
+    private DialogOptions Options => Dialog.Options;
+    private MessageBoxOptions? MessageBox => Content.MessageBox;
+    private string? Title => Options.Title;
+    private string? Description => Content.Description;
+    private string TitleId => _instance.TitleId;
+    private string DescriptionId => $"sl-dialog-{Dialog.Id}-desc";
+
+    private string CssClass => Css.Of("sl-dialog")
+        .Add($"sl-dialog--{Options.MaxWidth.ToString().ToLowerInvariant()}")
+        .Add("sl-dialog--top", Options.Placement == DialogPlacement.Top)
+        .Add("sl-dialog--full-width", Options.FullWidth)
+        .Add("sl-dialog--fullscreen", Options.FullScreen)
+        .Add("is-closing", IsClosing);
+
+    private string? IconName => MessageBox is null ? null
+        : MessageBox.Destructive ? "alert-triangle"
+        : MessageBox.Severity switch
+        {
+            Severity.Success => "check-circle",
+            Severity.Warning => "alert-triangle",
+            Severity.Error => "alert-circle",
+            Severity.Info => "info",
+            _ => null,
+        };
+
+    private string? IconTone => MessageBox is null ? null
+        : MessageBox.Destructive ? "sl-dialog__icon--danger"
+        : MessageBox.Severity switch
+        {
+            Severity.Success => "sl-dialog__icon--success",
+            Severity.Warning => "sl-dialog__icon--warning",
+            Severity.Error => "sl-dialog__icon--danger",
+            Severity.Info => "sl-dialog__icon--info",
+            _ => null,
+        };
+
+    protected override void OnInitialized()
+    {
+        if (Dialog.Content is not DialogContent)
+            throw new InvalidOperationException("Slate.Blazor dialogs must be opened through IDialogService.");
+        _instance = new SlDialogInstance(Dialogs, Dialog);
+        _parameters = Content.Parameters.ToDictionary(kv => kv.Key, kv => kv.Value!);
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape" && IsTop) Dialogs.HandleEscape();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !IsClosing)
+            await JsSafe.Run(async () => _trap = await Js.TrapFocusAsync(_panel));
+        else if (IsClosing && _trap is not null)
+            await ReleaseAsync();
+    }
+
+    private async Task ReleaseAsync()
+    {
+        var trap = _trap;
+        _trap = null;
+        await JsSafe.DisposeQuietly(trap, "release", true);
+    }
+
+    public async ValueTask DisposeAsync() => await ReleaseAsync();
+}

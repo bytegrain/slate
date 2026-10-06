@@ -1,0 +1,9 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+<span @attributes="AdditionalAttributes" class="@(Css.Of("sl-spinner").Add(Names.Size(Size, "sl-spinner")).Add(Class))" style="@Style"
+      role="status" aria-label="@Label"></span>
+
+@code {
+    [Parameter] public ControlSize Size { get; set; } = ControlSize.Medium;
+    [Parameter] public string Label { get; set; } = "Loading";
+}
