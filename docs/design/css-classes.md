@@ -435,12 +435,13 @@ Wrapper spans `.sl-popover__anchor`, `.sl-menu__trigger` and `.sl-tooltip__ancho
 <div class="sl-tabs sl-tabs--line [sl-tabs--small|--large] [sl-tabs--column]">
   <div class="sl-tabs__bar">
     <div class="sl-tabs__list" role="tablist" aria-orientation="horizontal|vertical">
-      <button class="sl-tab sl-tab--line [sl-tab--small|--large] [sl-tab--column] [is-selected]"
-              role="tab" id="t1" aria-selected="true" aria-controls="p1" tabindex="0" [aria-disabled="true"]>
+      <!-- A div, not a button: a closable tab contains its own close button, and buttons can't nest. -->
+      <div class="sl-tab sl-tab--line [sl-tab--small|--large] [sl-tab--column] [is-selected]"
+           role="tab" id="t1" aria-selected="true" aria-controls="p1" tabindex="0" [aria-disabled="true"]>
         <span class="sl-tab__icon">home</span><span class="sl-tab__label">Overview</span>
         <span class="sl-tab__badge">12</span>
-        <button class="sl-tab__close" tabindex="-1" aria-label="Close Overview">x</button>   <!-- Closable -->
-      </button>
+        <button class="sl-tab__close" type="button" tabindex="-1" aria-label="Close Overview">x</button>   <!-- Closable -->
+      </div>
       <span class="sl-tabs__indicator" style="--_x:0px;--_y:0px;--_w:88px;--_h:2px"></span>  <!-- line only -->
     </div>
     <div class="sl-tabs__overflow" hidden>…two ghost icon buttons “Scroll tabs left/right”…</div>
