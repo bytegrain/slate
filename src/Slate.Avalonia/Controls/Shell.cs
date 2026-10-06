@@ -219,7 +219,9 @@ public class Drawer : ContentControl
 {
     public static readonly StyledProperty<object?> HeaderProperty = AvaloniaProperty.Register<Drawer, object?>(nameof(Header));
     public static readonly StyledProperty<object?> FooterProperty = AvaloniaProperty.Register<Drawer, object?>(nameof(Footer));
-    public static readonly StyledProperty<bool> IsMiniProperty = AvaloniaProperty.Register<Drawer, bool>(nameof(IsMini));
+    /// <summary>Inherited, so items inside the drawer (e.g. <see cref="NavItem"/>) can switch to icon-only themselves.</summary>
+    public static readonly AttachedProperty<bool> IsMiniProperty =
+        AvaloniaProperty.RegisterAttached<Drawer, Control, bool>(nameof(IsMini), inherits: true);
 
     static Drawer()
     {
@@ -231,10 +233,13 @@ public class Drawer : ContentControl
 
     /// <summary>Set by the AppShell in Mini mode: items show icons only.</summary>
     public bool IsMini { get => GetValue(IsMiniProperty); set => SetValue(IsMiniProperty, value); }
+
+    public static bool GetIsMini(Control control) => control.GetValue(IsMiniProperty);
+    public static void SetIsMini(Control control, bool value) => control.SetValue(IsMiniProperty, value);
 }
 
 /// <summary>A drawer navigation entry: icon, label, optional count and an active state.</summary>
-[PseudoClasses(":active")]
+[PseudoClasses(":active", ":mini")]
 public class NavItem : Button
 {
     public static readonly StyledProperty<string?> IconProperty = AvaloniaProperty.Register<NavItem, string?>(nameof(Icon));
@@ -245,6 +250,9 @@ public class NavItem : Button
     static NavItem()
     {
         IsActiveProperty.Changed.AddClassHandler<NavItem>((n, e) => n.PseudoClasses.Set(":active", e.GetNewValue<bool>()));
+        // Driven by the inherited Drawer.IsMini rather than an ancestor selector: nested ancestor selectors with
+        // comma lists inside ControlThemes don't scope reliably in Avalonia 12 (labels were hidden in full drawers).
+        Drawer.IsMiniProperty.Changed.AddClassHandler<NavItem>((n, e) => n.PseudoClasses.Set(":mini", e.GetNewValue<bool>()));
         LabelProperty.Changed.AddClassHandler<NavItem>((n, e) =>
         {
             AutomationProperties.SetName(n, e.GetNewValue<string?>());

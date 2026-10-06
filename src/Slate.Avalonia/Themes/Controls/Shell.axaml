@@ -110,18 +110,21 @@
         <Setter Property="BoxShadow" Value="{DynamicResource Sl.Shadow.E1}" />
       </Style>
     </Style>
-    <Style Selector="sl|Drawer:mini ^">
+    <Style Selector="^:mini">
       <Setter Property="HorizontalContentAlignment" Value="Center" />
       <Setter Property="Padding" Value="0" />
-      <Style Selector="^ /template/ TextBlock#PART_Label, ^ /template/ TextBlock#PART_Count">
-        <Setter Property="IsVisible" Value="False" />
-      </Style>
-      <Style Selector="^ /template/ sl|Icon">
-        <Setter Property="Margin" Value="0" />
-      </Style>
-      <Style Selector="^ /template/ Grid">
-        <Setter Property="HorizontalAlignment" Value="Center" />
-      </Style>
+    </Style>
+    <Style Selector="^:mini /template/ TextBlock#PART_Label">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:mini /template/ TextBlock#PART_Count">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:mini /template/ sl|Icon">
+      <Setter Property="Margin" Value="0" />
+    </Style>
+    <Style Selector="^:mini /template/ Grid">
+      <Setter Property="HorizontalAlignment" Value="Center" />
     </Style>
     <Style Selector="^:disabled">
       <Setter Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />

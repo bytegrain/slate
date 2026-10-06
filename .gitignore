@@ -496,3 +496,7 @@ test-results/
 
 # packages/ at the repo root holds the npm packages, not NuGet output
 !/packages/*
+
+# Personal Claude Code settings
+.claude/settings.local.json
+screenshots/

@@ -1,4 +1,7 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Slate.Avalonia.Controls;
@@ -54,5 +57,60 @@ public partial class MainWindow : SlateWindow
         Page.Content = new ScrollViewer { Content = _pages[(string)item.Tag!]() };
         if (Shell.DrawerMode == DrawerMode.Temporary)
             Shell.IsDrawerOpen = false;
+    }
+
+    /// <summary>Renders each page in each theme to {dir}/{page}-{theme}.png (used by `--screenshot`).</summary>
+    public async Task CaptureAllAsync(string dir)
+    {
+        Directory.CreateDirectory(dir);
+        foreach (var mode in new[] { ThemeMode.Light, ThemeMode.Dark })
+        {
+            SetMode(mode);
+            foreach (var item in Nav.Children.OfType<NavItem>())
+            {
+                Navigate(item);
+                await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
+                await Task.Delay(1500); // let enter transitions finish
+
+                var file = Path.Combine(dir, $"{item.Tag}-{mode.ToString().ToLowerInvariant()}.png");
+                if (OperatingSystem.IsMacOS() && MacWindowNumber() is { } windowId)
+                {
+                    // Real on-screen pixels of this window only (includes OS chrome; needs Screen Recording permission).
+                    Activate();
+                    using var p = System.Diagnostics.Process.Start("screencapture", ["-x", "-o", $"-l{windowId}", file]);
+                    await p!.WaitForExitAsync();
+                }
+                else
+                {
+                    var scale = RenderScaling;
+                    var size = new PixelSize((int)(Bounds.Width * scale), (int)(Bounds.Height * scale));
+                    using var bitmap = new RenderTargetBitmap(size, new Vector(96 * scale, 96 * scale));
+                    bitmap.Render(this);
+                    bitmap.Save(file, PngBitmapEncoderOptions.Default);
+                }
+            }
+        }
+    }
+
+    /// <summary>The Quartz window number of this window on macOS (NSWindow.windowNumber).</summary>
+    private long? MacWindowNumber()
+    {
+        if (TryGetPlatformHandle() is not { } handle || handle.Handle == IntPtr.Zero)
+            return null;
+        var target = handle.Handle;
+        if (handle.HandleDescriptor == "NSView")
+            target = ObjC.Send(target, ObjC.Sel("window"));
+        return target == IntPtr.Zero ? null : ObjC.SendLong(target, ObjC.Sel("windowNumber"));
+    }
+
+    private static class ObjC
+    {
+        private const string Lib = "/usr/lib/libobjc.dylib";
+        [System.Runtime.InteropServices.DllImport(Lib, EntryPoint = "sel_registerName")]
+        public static extern IntPtr Sel(string name);
+        [System.Runtime.InteropServices.DllImport(Lib, EntryPoint = "objc_msgSend")]
+        public static extern IntPtr Send(IntPtr receiver, IntPtr selector);
+        [System.Runtime.InteropServices.DllImport(Lib, EntryPoint = "objc_msgSend")]
+        public static extern long SendLong(IntPtr receiver, IntPtr selector);
     }
 }

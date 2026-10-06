@@ -37,6 +37,8 @@ export const icons = {
   "upload": "M12 20 L12 8 M6 14 L12 8 L18 14 M4 4 L20 4",
   "settings": "M4 6 L14 6 M18 6 L20 6 M4 12 L8 12 M12 12 L20 12 M4 18 L16 18 M20 18 L20.01 18 M16 4 L16 8 M10 10 L10 14 M18 16 L18 20",
   "layers": "M3 8.5 L12 4 L21 8.5 L12 13 Z M3 12.5 L12 17 L21 12.5 M3 16.5 L12 21 L21 16.5",
+  "pause": "M8 5 L8 19 M16 5 L16 19",
+  "play": "M7 4 L19 12 L7 20 Z",
 } as const;
 
 export type IconName = keyof typeof icons;

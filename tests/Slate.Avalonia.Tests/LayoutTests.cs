@@ -195,6 +195,23 @@ public class AppShellTests
     }
 
     [AvaloniaFact]
+    public void Full_drawer_shows_nav_item_labels_and_mini_hides_them()
+    {
+        var (shell, drawer, _, _) = Build();
+        var w = Show(shell, width: 1200);
+        var item = Assert.IsType<Stack>(drawer.Content).Children.OfType<NavItem>().First();
+        var label = item.Part<TextBlock>("PART_Label");
+        Assert.False(drawer.IsMini);
+        Assert.True(label.IsEffectivelyVisible, "label hidden in a full drawer");
+        Assert.True(label.Bounds.Width > 20, $"label width {label.Bounds.Width}");
+
+        shell.DrawerVariant = DrawerVariant.Mini;
+        Pump(w);
+        Assert.False(label.IsEffectivelyVisible);
+        w.Close();
+    }
+
+    [AvaloniaFact]
     public void Narrow_responsive_shell_is_temporary_and_starts_closed()
     {
         var (shell, drawer, content, _) = Build();
