@@ -41,6 +41,9 @@
         </sl:Drawer.Header>
         <StackPanel x:Name="Nav" Spacing="2">
           <sl:NavItem Tag="components" Label="Components" Icon="layers" Active="True" />
+          <sl:NavItem Tag="inputs" Label="Inputs" Icon="pencil" />
+          <sl:NavItem Tag="navigation" Label="Navigation" Icon="menu" />
+          <sl:NavItem Tag="overlays" Label="Overlays" Icon="copy" />
           <sl:NavItem Tag="layout" Label="Layout" Icon="home" />
           <sl:NavItem Tag="feedback" Label="Feedback" Icon="bell" Trailing="4" />
           <sl:NavItem Tag="dialogs" Label="Dialogs" Icon="copy" />

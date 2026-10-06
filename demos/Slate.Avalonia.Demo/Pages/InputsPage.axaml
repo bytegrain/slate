@@ -1,0 +1,57 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sl="https://slate.dev/avalonia"
+             x:Class="Slate.Avalonia.Demo.Pages.InputsPage">
+  <sl:Container ContainerMaxWidth="Xl" Margin="0,24,0,40">
+    <sl:Stack Spacing="6">
+      <StackPanel Spacing="4">
+        <TextBlock Text="Inputs" Theme="{DynamicResource Sl.Typography.H2}" />
+        <TextBlock Text="Pickers share the field look: label, helper, error, variants and sizes. Every popup is keyboard-first."
+                   Foreground="{DynamicResource Sl.Brush.Text.Secondary}" TextWrapping="Wrap" />
+      </StackPanel>
+
+      <sl:Card Title="Select" Subtitle="Type to jump · ↑↓ Home End · Enter picks · Esc closes · Backspace removes the last chip">
+        <sl:ResponsiveGrid Spacing="3">
+          <sl:Select x:Name="Basic" sl:ResponsiveGrid.Md="4" Label="Region" Placeholder="Choose a region" HelperText="Where builds run" Clearable="True" />
+          <sl:Select x:Name="Searchable" sl:ResponsiveGrid.Md="4" Label="Language" Placeholder="Search languages" Searchable="True" />
+          <sl:Select x:Name="Grouped" sl:ResponsiveGrid.Md="4" Label="Runner (grouped)" Placeholder="Pick a runner" />
+          <sl:Select x:Name="Multi" sl:ResponsiveGrid.Md="6" Label="Labels" Placeholder="Add labels" Multiple="True" Searchable="True" Creatable="True" MaxVisibleChips="3" />
+          <sl:Select x:Name="Invalid" sl:ResponsiveGrid.Md="3" Label="Owner" Placeholder="Required" Required="True" Error="Choose an owner" />
+          <sl:Select x:Name="Loading" sl:ResponsiveGrid.Md="3" Label="Loading" Placeholder="Fetching…" Loading="True" />
+          <sl:Select x:Name="Filled" sl:ResponsiveGrid.Md="4" Label="Filled · small" Variant="Filled" Size="Small" Placeholder="Small" />
+          <sl:Select x:Name="Flushed" sl:ResponsiveGrid.Md="4" Label="Underlined" Variant="Underlined" Placeholder="Underlined" />
+          <sl:Select x:Name="Large" sl:ResponsiveGrid.Md="4" Label="Large · pill" Size="Large" Radius="Full" Placeholder="Large" IsEnabled="False" />
+        </sl:ResponsiveGrid>
+      </sl:Card>
+
+      <sl:Card Title="Date picker" Subtitle="Arrows move by day/week · PageUp/Down month · Shift+Page year · Home/End week · type a date to parse it">
+        <sl:ResponsiveGrid Spacing="3">
+          <sl:DateField x:Name="Due" sl:ResponsiveGrid.Md="4" Label="Due date" Placeholder="yyyy-MM-dd" Format="yyyy-MM-dd" HelperText="Weekends are disabled" Clearable="True" />
+          <sl:DateField x:Name="Window" sl:ResponsiveGrid.Md="4" Label="Release window" Selection="Range" HelperText="Range with presets" />
+          <sl:DateField sl:ResponsiveGrid.Md="4" Label="Filled · small" Variant="Filled" Size="Small" Error="Pick a date" />
+          <sl:DateField x:Name="InlineCal" sl:ResponsiveGrid.Md="6" Inline="True" Selection="Range" />
+          <sl:DateField x:Name="InlineSingle" sl:ResponsiveGrid.Md="6" Inline="True" FirstDayOfWeek="Sunday" />
+        </sl:ResponsiveGrid>
+      </sl:Card>
+
+      <sl:Card Title="Slider" Subtitle="Step-snapped · arrows step · PageUp/Down ×10 · Home/End">
+        <sl:ResponsiveGrid Spacing="4">
+          <Slider sl:ResponsiveGrid.Md="6" Minimum="0" Maximum="100" Value="40" sl:Sl.Label="Volume" sl:Sl.ShowValue="True" />
+          <Slider sl:ResponsiveGrid.Md="6" Minimum="0" Maximum="10" Value="4" sl:Sl.Step="1" sl:Sl.ShowTicks="True" sl:Sl.ShowValue="True" sl:Sl.Label="Ticks" />
+          <Slider sl:ResponsiveGrid.Md="6" Minimum="0" Maximum="1000" Value="200" sl:Sl.RangeEnd="650" sl:Sl.Step="50" sl:Sl.ShowValue="True" sl:Sl.Label="Price range" />
+          <Slider sl:ResponsiveGrid.Md="3" Value="70" sl:Sl.Tone="Success" sl:Sl.Label="Success tone" />
+          <Slider sl:ResponsiveGrid.Md="3" Value="30" IsEnabled="False" sl:Sl.Label="Disabled" />
+        </sl:ResponsiveGrid>
+      </sl:Card>
+
+      <sl:Card Title="Segmented control" Subtitle="←→ move and select, wrapping · Home/End">
+        <sl:Stack Spacing="3">
+          <sl:SegmentedControl x:Name="Range" />
+          <sl:SegmentedControl x:Name="Views" Size="Small" />
+          <sl:SegmentedControl x:Name="Wide" Size="Large" FullWidth="True" />
+          <TextBlock x:Name="SegmentStatus" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
+        </sl:Stack>
+      </sl:Card>
+    </sl:Stack>
+  </sl:Container>
+</UserControl>

@@ -140,14 +140,5 @@
     <Setter Property="Background" Value="{DynamicResource Sl.Brush.Border.ControlHover}" />
   </Style>
 
-  <!-- ToolTip: inverse chip. -->
-  <Style Selector="ToolTip">
-    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Inverse.Background}" />
-    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Inverse.Text}" />
-    <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="CornerRadius" Value="{DynamicResource Sl.CornerRadius.Md}" />
-    <Setter Property="Padding" Value="8,5" />
-    <Setter Property="FontSize" Value="12" />
-    <Setter Property="FontWeight" Value="Medium" />
-  </Style>
+  <!-- ToolTip: see Themes/Controls/Overlays.axaml (ControlTheme with shortcut support). -->
 </Styles>

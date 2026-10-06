@@ -14,6 +14,9 @@ public partial class MainWindow : SlateWindow
     private readonly Dictionary<string, Func<Control>> _pages = new()
     {
         ["components"] = () => new ComponentsPage(),
+        ["inputs"] = () => new InputsPage(),
+        ["navigation"] = () => new NavComponentsPage(),
+        ["overlays"] = () => new OverlaysPage(),
         ["layout"] = () => new LayoutPage(),
         ["feedback"] = () => new FeedbackPage(),
         ["dialogs"] = () => new DialogsPage(),

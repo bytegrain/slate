@@ -69,6 +69,24 @@ public static class Sl
     public static readonly AttachedProperty<Placement> LabelPlacementProperty =
         AvaloniaProperty.RegisterAttached<Control, Placement>("LabelPlacement", typeof(Sl), Placement.End);
 
+    // ---- Slider --------------------------------------------------------------------------------------------
+
+    /// <summary>Snap increment (also the arrow-key step). Sets SmallChange/TickFrequency and enables snapping.</summary>
+    public static readonly AttachedProperty<double> StepProperty =
+        AvaloniaProperty.RegisterAttached<Control, double>("Step", typeof(Sl), 1);
+
+    /// <summary>Shows tick marks at every step (canonical option Ticks; native Slider.Ticks is the tick list).</summary>
+    public static readonly AttachedProperty<bool> ShowTicksProperty =
+        AvaloniaProperty.RegisterAttached<Control, bool>("ShowTicks", typeof(Sl));
+
+    /// <summary>Shows the current value (and range end) next to the slider.</summary>
+    public static readonly AttachedProperty<bool> ShowValueProperty =
+        AvaloniaProperty.RegisterAttached<Control, bool>("ShowValue", typeof(Sl));
+
+    /// <summary>Set to make a two-thumb range slider; Value is the range start. Thumbs never cross.</summary>
+    public static readonly AttachedProperty<double?> RangeEndProperty =
+        AvaloniaProperty.RegisterAttached<Control, double?>("RangeEnd", typeof(Sl), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
+
     // ---- Scoping -------------------------------------------------------------------------------------------
 
     /// <summary>
@@ -136,6 +154,12 @@ public static class Sl
         Control.LoadedEvent.AddClassHandler<RadioButton>((c, _) => Refresh(c));
         Control.LoadedEvent.AddClassHandler<ToggleSwitch>((c, _) => Refresh(c));
         Control.LoadedEvent.AddClassHandler<ProgressBar>((c, _) => Refresh(c));
+        Control.LoadedEvent.AddClassHandler<Slider>((c, _) => Refresh(c));
+        Controls.SliderSupport.Register();
+
+        // Menu items: sl:Sl.StartIcon becomes the item icon; sl:Sl.Tone="Danger" colours destructive items.
+        StartIconProperty.Changed.AddClassHandler<MenuItem>((m, e) =>
+            m.Icon = e.GetNewValue<string?>() is { Length: > 0 } kind ? new Controls.Icon { Kind = kind, Size = 16 } : null);
     }
 
     public static ButtonVariant GetVariant(Control c) => c.GetValue(VariantProperty);
@@ -166,6 +190,14 @@ public static class Sl
     public static void SetDescription(Control c, string? v) => c.SetValue(DescriptionProperty, v);
     public static Placement GetLabelPlacement(Control c) => c.GetValue(LabelPlacementProperty);
     public static void SetLabelPlacement(Control c, Placement v) => c.SetValue(LabelPlacementProperty, v);
+    public static double GetStep(Control c) => c.GetValue(StepProperty);
+    public static void SetStep(Control c, double v) => c.SetValue(StepProperty, v);
+    public static bool GetShowTicks(Control c) => c.GetValue(ShowTicksProperty);
+    public static void SetShowTicks(Control c, bool v) => c.SetValue(ShowTicksProperty, v);
+    public static bool GetShowValue(Control c) => c.GetValue(ShowValueProperty);
+    public static void SetShowValue(Control c, bool v) => c.SetValue(ShowValueProperty, v);
+    public static double? GetRangeEnd(Control c) => c.GetValue(RangeEndProperty);
+    public static void SetRangeEnd(Control c, double? v) => c.SetValue(RangeEndProperty, v);
     public static Density? GetDensity(StyledElement e) => e.GetValue(DensityProperty);
     public static void SetDensity(StyledElement e, Density? v) => e.SetValue(DensityProperty, v);
 

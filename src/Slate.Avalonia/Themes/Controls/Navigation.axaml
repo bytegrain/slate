@@ -1,0 +1,311 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sl="using:Slate.Avalonia.Controls"
+                    xmlns:slate="using:Slate.Avalonia">
+
+  <!-- Tabs: strip (line / pills / enclosed variants, styled in Wave2.axaml by ancestor) + selected panel. -->
+  <ControlTheme x:Key="{x:Type sl:Tabs}" TargetType="sl:Tabs">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <StackPanel Orientation="Horizontal" Spacing="2" />
+      </ItemsPanelTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <DockPanel>
+          <Border Name="PART_Strip" DockPanel.Dock="{TemplateBinding TabStripPlacement}"
+                  BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="0,0,0,1">
+            <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" KeyboardNavigation.TabNavigation="Once" />
+          </Border>
+          <Panel Margin="0,12,0,0" Name="PART_ContentArea">
+            <ContentPresenter Name="PART_SelectedContentHost" Content="{TemplateBinding SelectedContent}"
+                              ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
+          </Panel>
+        </DockPanel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:keep-alive">
+      <Setter Property="Template">
+        <ControlTemplate>
+          <DockPanel>
+            <Border Name="PART_Strip" DockPanel.Dock="{TemplateBinding TabStripPlacement}"
+                    BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="0,0,0,1">
+              <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" KeyboardNavigation.TabNavigation="Once" />
+            </Border>
+            <Panel Margin="0,12,0,0" Name="PART_ContentArea">
+              <!-- Visited panels stay mounted but hidden. No PART_SelectedContentHost here: TabControl would parent the
+                   selected content into it too. -->
+              <Panel Name="PART_KeepAliveHost" />
+            </Panel>
+          </DockPanel>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="^:pills /template/ Border#PART_Strip">
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Background" Value="{DynamicResource Sl.Component.Tabs.PillBackground.Brush}" />
+      <Setter Property="CornerRadius" Value="{DynamicResource Sl.CornerRadius.Md}" />
+      <Setter Property="Padding" Value="2" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+    <Style Selector="^:vertical">
+      <Setter Property="ItemsPanel">
+        <ItemsPanelTemplate>
+          <StackPanel Orientation="Vertical" Spacing="2" />
+        </ItemsPanelTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="^:vertical /template/ Border#PART_Strip">
+      <Setter Property="BorderThickness" Value="0,0,1,0" />
+      <Setter Property="Padding" Value="0,0,8,0" />
+    </Style>
+    <Style Selector="^:vertical /template/ Panel#PART_ContentArea">
+      <Setter Property="Margin" Value="16,0,0,0" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type sl:Tab}" TargetType="sl:Tab">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Secondary}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="FontSize" Value="13.5" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="MinHeight" Value="{DynamicResource Sl.Size.Control.Md}" />
+    <Setter Property="Padding" Value="12,0" />
+    <Setter Property="FocusAdorner" Value="{DynamicResource Sl.FocusAdorner.Tight}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_LayoutRoot" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"
+                  MinHeight="{TemplateBinding MinHeight}" CornerRadius="{DynamicResource Sl.CornerRadius.Md}">
+            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+              <ContentPresenter Name="PART_IconPresenter" Content="{TemplateBinding Icon}" VerticalAlignment="Center"
+                                IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}" />
+              <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Header}"
+                                ContentTemplate="{TemplateBinding HeaderTemplate}" VerticalAlignment="Center" RecognizesAccessKey="True" />
+              <sl:Badge Name="PART_Badge" Content="{TemplateBinding Badge}" Size="Small" IsVisible="False" VerticalAlignment="Center" />
+              <Button Name="PART_Close" Classes="ghost icon-only" slate:Sl.StartIcon="x" slate:Sl.Label="Close tab" slate:Sl.Size="Small"
+                      Focusable="False" IsVisible="False" Margin="0,0,-6,0" Width="20" Height="20" MinWidth="20" MinHeight="20" Padding="0" />
+            </StackPanel>
+          </Border>
+          <Border Name="PART_Indicator" Height="{DynamicResource Sl.Component.Tabs.IndicatorHeight}" VerticalAlignment="Bottom"
+                  Background="{DynamicResource Sl.Component.Tabs.Indicator.Brush}" CornerRadius="1" IsVisible="False" Margin="8,0" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover">
+      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    </Style>
+    <Style Selector="^:selected">
+      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    </Style>
+    <Style Selector="^:has-badge /template/ sl|Badge#PART_Badge">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:closable /template/ Button#PART_Close">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type sl:Breadcrumbs}" TargetType="sl:Breadcrumbs">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel Name="PART_Items" Orientation="Horizontal" Spacing="2" />
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type sl:Pagination}" TargetType="sl:Pagination">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <TextBlock Name="PART_Summary" VerticalAlignment="Center" FontSize="13"
+                     Foreground="{DynamicResource Sl.Brush.Text.Secondary}" IsVisible="False" />
+          <StackPanel Name="PART_Pages" Orientation="Horizontal" Spacing="2" />
+          <ComboBox Name="PART_PageSize" MinWidth="76" IsVisible="False" VerticalAlignment="Center"
+                    AutomationProperties.Name="Rows per page" />
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:has-summary /template/ TextBlock#PART_Summary">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:has-page-size /template/ ComboBox#PART_PageSize">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+  </ControlTheme>
+
+  <!-- TreeList (Sl.Component.Tree.*): virtualised rows with indent, expander, optional checkbox, icon and label. -->
+  <ControlTheme x:Key="{x:Type sl:TreeList}" TargetType="sl:TreeList">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="FontSize" Value="13.5" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+          <ItemsControl Name="PART_Items">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <VirtualizingStackPanel />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+          </ItemsControl>
+        </ScrollViewer>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type sl:TreeListRow}" TargetType="sl:TreeListRow">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Height" Value="{DynamicResource Sl.Component.Tree.ItemHeight}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+        <Border Name="PART_Root" Background="{TemplateBinding Background}" CornerRadius="{DynamicResource Sl.CornerRadius.Md}"
+                BorderThickness="2" BorderBrush="Transparent" Padding="2,0,6,0">
+          <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*" VerticalAlignment="Center">
+            <Border Width="{TemplateBinding Indent}" />
+            <Panel Grid.Column="1" Width="20" Height="20">
+              <Button Name="PART_Expander" Classes="ghost icon-only" slate:Sl.StartIcon="chevron-right" slate:Sl.Label="Expand"
+                      slate:Sl.Size="Small" Focusable="False" Width="20" Height="20" MinWidth="20" MinHeight="20" Padding="0" />
+              <sl:LoadingSpinner Name="PART_Spinner" Size="Small" IsVisible="False" />
+            </Panel>
+            <CheckBox Name="PART_Check" Grid.Column="2" IsThreeState="True" IsChecked="{TemplateBinding Checked}" Focusable="False"
+                      IsVisible="False" Margin="2,0,4,0" MinHeight="0" />
+            <sl:Icon Grid.Column="3" Kind="{TemplateBinding Icon}" Size="16" Margin="2,0,8,0" VerticalAlignment="Center"
+                     Foreground="{DynamicResource Sl.Brush.Text.Tertiary}"
+                     IsVisible="{TemplateBinding Icon, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+            <ContentPresenter Grid.Column="4" Content="{TemplateBinding Label}" VerticalAlignment="Center" />
+          </Grid>
+        </Border>
+        <Border Name="PART_Bar" Width="2" HorizontalAlignment="Left" Margin="0,5" CornerRadius="1" IsVisible="False"
+                Background="{DynamicResource Sl.Brush.Selection.Indicator}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Hover}" />
+    </Style>
+    <Style Selector="^:selected">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Selection.Background}" />
+    </Style>
+    <Style Selector="^:selected /template/ Border#PART_Bar">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:focused-row /template/ Border#PART_Root">
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Focus.Ring}" />
+    </Style>
+    <Style Selector="^:expanded /template/ Button#PART_Expander">
+      <Setter Property="RenderTransform" Value="rotate(90deg)" />
+    </Style>
+    <Style Selector="^:leaf /template/ Button#PART_Expander">
+      <Setter Property="Opacity" Value="0" />
+      <Setter Property="IsHitTestVisible" Value="False" />
+    </Style>
+    <Style Selector="^:loading /template/ Button#PART_Expander">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:loading /template/ sl|LoadingSpinner#PART_Spinner">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:checkbox /template/ CheckBox#PART_Check">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+  </ControlTheme>
+
+  <!-- Avatar (Sl.Component.Avatar.*): tone tint + initials, or image; presence dot. -->
+  <ControlTheme x:Key="{x:Type sl:Avatar}" TargetType="sl:Avatar">
+    <Setter Property="Width" Value="32" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Sl.Component.Avatar.Radius.Corner}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Circle" CornerRadius="{TemplateBinding CornerRadius}" ClipToBounds="True"
+                  Background="{TemplateBinding slate:Sl.ToneSubtle}">
+            <Panel>
+              <TextBlock Text="{TemplateBinding Initials}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                         FontWeight="SemiBold" Foreground="{TemplateBinding slate:Sl.ToneText}" />
+              <Image Name="PART_Image" Source="{TemplateBinding ImageSource}" Stretch="UniformToFill" IsVisible="False" />
+            </Panel>
+          </Border>
+          <Ellipse Name="PART_Status" Width="10" Height="10" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                   Margin="0,0,-1,-1" StrokeThickness="2" Stroke="{DynamicResource Sl.Brush.Background.Surface}" IsVisible="False" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:small">
+      <Setter Property="Width" Value="24" />
+      <Setter Property="Height" Value="24" />
+      <Setter Property="FontSize" Value="10" />
+    </Style>
+    <Style Selector="^:large">
+      <Setter Property="Width" Value="40" />
+      <Setter Property="Height" Value="40" />
+      <Setter Property="FontSize" Value="14" />
+    </Style>
+    <Style Selector="^:has-image /template/ Image#PART_Image">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^.has-status /template/ Ellipse#PART_Status">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^.status-online /template/ Ellipse#PART_Status">
+      <Setter Property="Fill" Value="{DynamicResource Sl.Brush.Status.Success.Solid}" />
+    </Style>
+    <Style Selector="^.status-away /template/ Ellipse#PART_Status">
+      <Setter Property="Fill" Value="{DynamicResource Sl.Brush.Status.Warning.Solid}" />
+    </Style>
+    <Style Selector="^.status-busy /template/ Ellipse#PART_Status">
+      <Setter Property="Fill" Value="{DynamicResource Sl.Brush.Status.Danger.Solid}" />
+    </Style>
+    <Style Selector="^.status-offline /template/ Ellipse#PART_Status">
+      <Setter Property="Fill" Value="{DynamicResource Sl.Brush.Border.Control}" />
+    </Style>
+  </ControlTheme>
+
+  <!-- Skeleton (Sl.Component.Skeleton.*): text lines, rect or circle; pulses when :animated. -->
+  <ControlTheme x:Key="{x:Type sl:Skeleton}" TargetType="sl:Skeleton">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel Name="PART_Root">
+          <sl:SkeletonLinesPanel Name="PART_Lines" IsVisible="False" />
+          <Border Name="PART_Rect" IsVisible="False" MinHeight="16" CornerRadius="{DynamicResource Sl.CornerRadius.Md}"
+                  Background="{DynamicResource Sl.Component.Skeleton.Background.Brush}" />
+          <Ellipse Name="PART_Circle" IsVisible="False" MinWidth="16" MinHeight="16"
+                   Fill="{DynamicResource Sl.Component.Skeleton.Background.Brush}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:text /template/ sl|SkeletonLinesPanel#PART_Lines">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:rect /template/ Border#PART_Rect">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:circle /template/ Ellipse#PART_Circle">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:animated /template/ Panel#PART_Root">
+      <Style.Animations>
+        <Animation Duration="0:0:1.4" IterationCount="INFINITE" Easing="SineEaseInOut">
+          <KeyFrame Cue="0%">
+            <Setter Property="Opacity" Value="1" />
+          </KeyFrame>
+          <KeyFrame Cue="50%">
+            <Setter Property="Opacity" Value="0.55" />
+          </KeyFrame>
+          <KeyFrame Cue="100%">
+            <Setter Property="Opacity" Value="1" />
+          </KeyFrame>
+        </Animation>
+      </Style.Animations>
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

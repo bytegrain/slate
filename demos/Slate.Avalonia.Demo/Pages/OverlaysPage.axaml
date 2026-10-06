@@ -1,0 +1,123 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sl="https://slate.dev/avalonia"
+             x:Class="Slate.Avalonia.Demo.Pages.OverlaysPage">
+  <sl:Container ContainerMaxWidth="Xl" Margin="0,24,0,40">
+    <sl:Stack Spacing="6">
+      <StackPanel Spacing="4">
+        <TextBlock Text="Overlays &amp; display" Theme="{DynamicResource Sl.Typography.H2}" />
+        <TextBlock Text="Menus, popovers and tooltips are positioned by Slate (flip, shift, clamp). Esc and outside clicks close them and focus goes back to the trigger."
+                   Foreground="{DynamicResource Sl.Brush.Text.Secondary}" TextWrapping="Wrap" />
+      </StackPanel>
+
+      <sl:Card Title="Menu" Subtitle="↓ or click opens · arrows move · → submenu · Esc closes · right-click the panel for a context menu">
+        <sl:Stack Spacing="3">
+          <sl:Stack Direction="Row" Wrap="True">
+            <sl:DropdownMenu x:Name="Actions">
+              <sl:DropdownMenu.Trigger>
+                <Button Content="Actions" sl:Sl.EndIcon="chevron-down" />
+              </sl:DropdownMenu.Trigger>
+              <MenuItem Header="Rename" sl:Sl.StartIcon="pencil" sl:Sl.Shortcut="F2" />
+              <MenuItem Header="Duplicate" sl:Sl.StartIcon="copy" sl:Sl.Shortcut="⌘D" />
+              <MenuItem Header="Move to">
+                <MenuItem Header="Archive" sl:Sl.StartIcon="folder" />
+                <MenuItem Header="Shared drive" sl:Sl.StartIcon="upload" />
+              </MenuItem>
+              <MenuItem Header="Pin" sl:Sl.StartIcon="pin" ToggleType="CheckBox" IsChecked="True" />
+              <MenuItem Header="Locked (disabled)" IsEnabled="False" />
+              <Separator />
+              <MenuItem Header="Delete" sl:Sl.StartIcon="trash" sl:Sl.Tone="Danger" sl:Sl.Shortcut="⌫" />
+            </sl:DropdownMenu>
+            <sl:DropdownMenu Placement="TopEnd">
+              <sl:DropdownMenu.Trigger>
+                <Button sl:Sl.StartIcon="more-horizontal" sl:Sl.Label="More" sl:Sl.Variant="Ghost" />
+              </sl:DropdownMenu.Trigger>
+              <MenuItem Header="Opens above, end-aligned" />
+              <MenuItem Header="Export" sl:Sl.StartIcon="download" />
+            </sl:DropdownMenu>
+          </sl:Stack>
+          <sl:DropdownMenu AsContextMenu="True">
+            <sl:DropdownMenu.Trigger>
+              <Border Height="72" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource Sl.Brush.Border.Default}"
+                      Background="{DynamicResource Sl.Brush.Background.Subtle}" Focusable="True">
+                <TextBlock Text="Right-click (or Shift+F10) here" HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
+              </Border>
+            </sl:DropdownMenu.Trigger>
+            <MenuItem Header="Cut" sl:Sl.Shortcut="⌘X" />
+            <MenuItem Header="Copy" sl:Sl.StartIcon="copy" sl:Sl.Shortcut="⌘C" />
+            <MenuItem Header="Paste" sl:Sl.Shortcut="⌘V" />
+          </sl:DropdownMenu>
+          <TextBlock x:Name="MenuStatus" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
+        </sl:Stack>
+      </sl:Card>
+
+      <sl:Card Title="Popover" Subtitle="Placement with flip near edges · modal traps focus · Esc returns focus to the anchor">
+        <sl:Stack Direction="Row" Wrap="True">
+          <sl:Popover Placement="Bottom">
+            <sl:Popover.Anchor><Button Content="Filters" sl:Sl.StartIcon="filter" /></sl:Popover.Anchor>
+            <StackPanel Spacing="8" Width="240">
+              <TextBlock Text="Filter results" FontWeight="SemiBold" />
+              <CheckBox Content="Only open" IsChecked="True" />
+              <CheckBox Content="Assigned to me" />
+              <Button Content="Apply" sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" HorizontalAlignment="Right" />
+            </StackPanel>
+          </sl:Popover>
+          <sl:Popover Placement="Top" Modal="True">
+            <sl:Popover.Anchor><Button Content="Modal (top)" /></sl:Popover.Anchor>
+            <StackPanel Spacing="8" Width="220">
+              <TextBlock Text="Tab cycles inside" />
+              <TextBox PlaceholderText="Name" />
+              <TextBox PlaceholderText="Email" />
+            </StackPanel>
+          </sl:Popover>
+          <sl:Popover Placement="Right" CloseOnOutsideClick="False">
+            <sl:Popover.Anchor><Button Content="Right · sticky" /></sl:Popover.Anchor>
+            <TextBlock Text="Outside clicks don't close this one. Press Esc." Width="200" TextWrapping="Wrap" />
+          </sl:Popover>
+          <sl:Popover Placement="BottomStart" MatchAnchorWidth="True">
+            <sl:Popover.Anchor><Button Content="Bottom start · match anchor width" /></sl:Popover.Anchor>
+            <TextBlock Text="Same width as the anchor." />
+          </sl:Popover>
+        </sl:Stack>
+      </sl:Card>
+
+      <sl:Card Title="Tooltip" Subtitle="Hover or focus · shortcut chip · placement · delay">
+        <sl:Stack Direction="Row" Wrap="True">
+          <sl:Tooltip Text="Copy link" Shortcut="⌘C"><Button sl:Sl.StartIcon="copy" sl:Sl.Label="Copy link" /></sl:Tooltip>
+          <sl:Tooltip Text="Opens below" Placement="Bottom"><Button Content="Bottom" /></sl:Tooltip>
+          <sl:Tooltip Text="Right, no delay" Placement="Right" Delay="0"><Button Content="Right · instant" /></sl:Tooltip>
+          <sl:Tooltip Placement="Top">
+            <sl:Tooltip.Content>
+              <StackPanel Spacing="2"><TextBlock Text="Rich content" FontWeight="SemiBold" /><TextBlock Text="Any content works." /></StackPanel>
+            </sl:Tooltip.Content>
+            <Button Content="Rich" />
+          </sl:Tooltip>
+          <sl:Tooltip Text="Never shown" Disabled="True"><Button Content="Disabled tooltip" /></sl:Tooltip>
+        </sl:Stack>
+      </sl:Card>
+
+      <sl:ResponsiveGrid Spacing="4">
+        <sl:Card sl:ResponsiveGrid.Md="6" Title="Avatar" Subtitle="Initials with a stable tone per name · status · sizes">
+          <sl:Stack Spacing="3">
+            <sl:Stack Direction="Row" Align="Center">
+              <sl:Avatar DisplayName="Ada Lovelace" Size="Small" />
+              <sl:Avatar DisplayName="Grace Hopper" Status="Online" />
+              <sl:Avatar DisplayName="Alan Turing" Status="Away" Size="Large" />
+              <sl:Avatar DisplayName="Katherine Johnson" Status="Busy" Tone="Info" />
+              <sl:Avatar DisplayName="Linus" Status="Offline" />
+              <sl:Avatar />
+            </sl:Stack>
+          </sl:Stack>
+        </sl:Card>
+        <sl:Card sl:ResponsiveGrid.Md="6" Title="Skeleton" Subtitle="Pulses unless reduced motion is on">
+          <sl:Stack Direction="Row" Spacing="3">
+            <sl:Skeleton Shape="Circle" Width="40" Height="40" />
+            <sl:Skeleton Lines="3" Width="220" />
+            <sl:Skeleton Shape="Rect" Width="96" Height="64" Animated="False" />
+          </sl:Stack>
+        </sl:Card>
+      </sl:ResponsiveGrid>
+    </sl:Stack>
+  </sl:Container>
+</UserControl>

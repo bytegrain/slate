@@ -1,0 +1,170 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sl="using:Slate.Avalonia.Controls"
+        xmlns:slate="using:Slate.Avalonia">
+  <!--
+    Styles for parts that wave-2 controls create in code (no TemplatedParent, so /template/ selectors can't reach
+    them) and for Tabs variants, which depend on the ancestor Tabs. Kept as plain selectors (no comma lists).
+  -->
+
+  <!-- Select -->
+  <Style Selector="TextBlock.select-group">
+    <Setter Property="FontFamily" Value="{DynamicResource Sl.Font.Family.Mono}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Tertiary}" />
+    <Setter Property="Margin" Value="8,8,8,4" />
+  </Style>
+  <Style Selector="ContentControl.select-empty">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Tertiary}" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Padding" Value="8,8" />
+  </Style>
+  <Style Selector="Border.select-chip">
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Subtle}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.Default}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Sl.Component.Badge.Radius.Corner}" />
+    <Setter Property="Padding" Value="6,0,2,0" />
+    <Setter Property="Margin" Value="0,2,4,2" />
+    <Setter Property="Height" Value="22" />
+  </Style>
+  <Style Selector="Border.select-chip TextBlock">
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="FontWeight" Value="Medium" />
+  </Style>
+  <Style Selector="TextBox.select-search">
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="Padding" Value="0" />
+  </Style>
+  <Style Selector="TextBox.select-search /template/ Border#PART_BorderElement">
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BoxShadow" Value="0 0 0 0 Transparent" />
+  </Style>
+
+  <!-- MonthCalendar weekday header -->
+  <Style Selector="TextBlock.weekday">
+    <Setter Property="FontFamily" Value="{DynamicResource Sl.Font.Family.Mono}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Tertiary}" />
+    <Setter Property="Margin" Value="0,2,0,4" />
+  </Style>
+
+  <!-- Breadcrumbs -->
+  <Style Selector="sl|Icon.breadcrumb-separator">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Tertiary}" />
+  </Style>
+  <Style Selector="TextBlock.breadcrumb-current">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="Margin" Value="8,0,0,0" />
+  </Style>
+  <Style Selector="Button.breadcrumb-link">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Secondary}" />
+  </Style>
+
+  <!-- Pagination -->
+  <Style Selector="Button.pagination-page">
+    <Setter Property="MinWidth" Value="{DynamicResource Sl.Size.Control.Md}" />
+  </Style>
+  <Style Selector="Button.pagination-page.current">
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Subtle}" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Accent.Text}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="TextBlock.pagination-ellipsis">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Tertiary}" />
+    <Setter Property="Margin" Value="6,0" />
+  </Style>
+
+  <!-- Skeleton text lines -->
+  <Style Selector="Border.skeleton-line">
+    <Setter Property="Height" Value="12" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Sl.CornerRadius.Sm}" />
+    <Setter Property="Background" Value="{DynamicResource Sl.Component.Skeleton.Background.Brush}" />
+  </Style>
+
+  <!-- Segmented control segments -->
+  <Style Selector="ToggleButton.segment">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Secondary}" />
+    <Setter Property="MinHeight" Value="{DynamicResource Sl.Size.Control.Sm}" />
+    <Setter Property="Padding" Value="12,0" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="ToggleButton.segment /template/ Border#PART_Border">
+    <Setter Property="BoxShadow" Value="0 0 0 0 Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="ToggleButton.segment:checked">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+  </Style>
+  <Style Selector="ToggleButton.segment:checked /template/ Border#PART_Border">
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Surface}" />
+    <Setter Property="BoxShadow" Value="{DynamicResource Sl.Shadow.Control}" />
+  </Style>
+  <Style Selector="sl|SegmentedControl.small ToggleButton.segment">
+    <Setter Property="MinHeight" Value="22" />
+    <Setter Property="FontSize" Value="12.5" />
+  </Style>
+  <Style Selector="sl|SegmentedControl.large ToggleButton.segment">
+    <Setter Property="MinHeight" Value="{DynamicResource Sl.Size.Control.Md}" />
+  </Style>
+
+  <!-- Menu separators -->
+  <Style Selector="ContextMenu Separator">
+    <Setter Property="Height" Value="1" />
+    <Setter Property="Margin" Value="-4,4" />
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Border.Default}" />
+  </Style>
+  <Style Selector="MenuItem Separator">
+    <Setter Property="Height" Value="1" />
+    <Setter Property="Margin" Value="-4,4" />
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Border.Default}" />
+  </Style>
+
+  <!-- Tabs variants (by ancestor). Line: underline indicator. Pills: raised chip. Enclosed: card tab. -->
+  <Style Selector="sl|Tabs:line sl|Tab:selected /template/ Border#PART_Indicator">
+    <Setter Property="IsVisible" Value="True" />
+  </Style>
+  <Style Selector="sl|Tabs:line sl|Tab:pointerover /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Hover}" />
+  </Style>
+  <Style Selector="sl|Tabs:pills sl|Tab:selected /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Surface}" />
+    <Setter Property="BoxShadow" Value="{DynamicResource Sl.Shadow.Control}" />
+  </Style>
+  <Style Selector="sl|Tabs:pills sl|Tab">
+    <Setter Property="MinHeight" Value="{DynamicResource Sl.Size.Control.Sm}" />
+  </Style>
+  <Style Selector="sl|Tabs:enclosed sl|Tab /template/ Border#PART_LayoutRoot">
+    <Setter Property="CornerRadius" Value="6,6,0,0" />
+    <Setter Property="BorderThickness" Value="1,1,1,0" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+  </Style>
+  <Style Selector="sl|Tabs:enclosed sl|Tab:selected /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Surface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.Default}" />
+  </Style>
+  <Style Selector="sl|Tabs:vertical sl|Tab /template/ Border#PART_Indicator">
+    <Setter Property="Width" Value="{DynamicResource Sl.Component.Tabs.IndicatorHeight}" />
+    <Setter Property="Height" Value="NaN" />
+    <Setter Property="HorizontalAlignment" Value="Right" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="Margin" Value="0,6,-9,6" />
+  </Style>
+  <Style Selector="sl|Tabs.small sl|Tab">
+    <Setter Property="MinHeight" Value="{DynamicResource Sl.Size.Control.Sm}" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Padding" Value="10,0" />
+  </Style>
+  <Style Selector="sl|Tabs.large sl|Tab">
+    <Setter Property="MinHeight" Value="{DynamicResource Sl.Size.Control.Lg}" />
+    <Setter Property="FontSize" Value="14.5" />
+  </Style>
+</Styles>

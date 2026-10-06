@@ -47,6 +47,21 @@ public class ConformanceTests
         ["Stack"] = (typeof(Stack), false),
         ["SnackbarHost"] = (typeof(SnackbarHost), false),
         ["Dialog"] = (typeof(DialogContent), false),
+
+        // Wave 2 (Avalonia spellings for names Avalonia already uses: DropdownMenu, DateField, TreeList).
+        ["Select"] = (typeof(Select), false),
+        ["Menu"] = (typeof(DropdownMenu), false),
+        ["Tabs"] = (typeof(Tabs), false),
+        ["Tooltip"] = (typeof(Tooltip), false),
+        ["Popover"] = (typeof(Popover), false),
+        ["DatePicker"] = (typeof(DateField), false),
+        ["TreeView"] = (typeof(TreeList), false),
+        ["SegmentedControl"] = (typeof(SegmentedControl), false),
+        ["Slider"] = (typeof(global::Avalonia.Controls.Slider), true),
+        ["Avatar"] = (typeof(Avatar), false),
+        ["Breadcrumbs"] = (typeof(Breadcrumbs), false),
+        ["Pagination"] = (typeof(Pagination), false),
+        ["Skeleton"] = (typeof(Skeleton), false),
     };
 
     /// <summary>Canonical options that map onto a framework-native member.</summary>
@@ -55,6 +70,7 @@ public class ConformanceTests
         ["Checked"] = "IsChecked",
         ["Disabled"] = "IsEnabled",
         ["Max"] = "Maximum",
+        ["Min"] = "Minimum",
         ["Indeterminate"] = "IsIndeterminate",
         ["ShowValue"] = "ShowProgressText",
         ["CheckedChanged"] = "IsCheckedChanged",
@@ -66,6 +82,9 @@ public class ConformanceTests
         [("Container", "MaxWidth")] = "ContainerMaxWidth", // Layoutable.MaxWidth (double) already exists
         [("Dialog", "MaxWidth")] = "DialogMaxWidth",    // ditto
         [("Checkbox", "Label")] = "Content",            // native CheckBox label is its content
+        [("Menu", "ContextMenu")] = "AsContextMenu",    // Control.ContextMenu already exists
+        [("Avatar", "Name")] = "DisplayName",           // StyledElement.Name already exists
+        [("Slider", "Ticks")] = "ShowTicks",            // Slider.Ticks (tick values) already exists
     };
 
     public static TheoryData<string, string> Options()

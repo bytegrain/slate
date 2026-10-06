@@ -1,0 +1,71 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sl="https://slate.dev/avalonia"
+             x:Class="Slate.Avalonia.Demo.Pages.NavComponentsPage">
+  <sl:Container ContainerMaxWidth="Xl" Margin="0,24,0,40">
+    <sl:Stack Spacing="6">
+      <StackPanel Spacing="4">
+        <TextBlock Text="Navigation" Theme="{DynamicResource Sl.Typography.H2}" />
+        <TextBlock Text="Tabs, breadcrumbs, pagination and trees. Arrow keys move, Enter activates, typing jumps."
+                   Foreground="{DynamicResource Sl.Brush.Text.Secondary}" TextWrapping="Wrap" />
+      </StackPanel>
+
+      <sl:Card Title="Tabs" Subtitle="Line · pills · enclosed · vertical · closable (Delete) · keep-alive">
+        <sl:Stack Spacing="5">
+          <sl:Tabs x:Name="LineTabs" Value="activity">
+            <sl:Tab Key="overview" Label="Overview" Icon="home"><TextBlock Text="Project overview." /></sl:Tab>
+            <sl:Tab Key="activity" Label="Activity" Badge="12"><TextBlock Text="Recent activity." /></sl:Tab>
+            <sl:Tab Key="settings" Label="Settings" Icon="settings"><TextBlock Text="Project settings." /></sl:Tab>
+            <sl:Tab Key="archived" Label="Archived" IsEnabled="False"><TextBlock Text="Archived." /></sl:Tab>
+          </sl:Tabs>
+          <sl:Tabs Variant="Pills" Size="Small">
+            <sl:Tab Key="all" Label="All"><TextBlock Text="Everything, small pills." /></sl:Tab>
+            <sl:Tab Key="open" Label="Open" Badge="4"><TextBlock Text="Open items." /></sl:Tab>
+            <sl:Tab Key="closed" Label="Closed"><TextBlock Text="Closed items." /></sl:Tab>
+          </sl:Tabs>
+          <sl:Tabs x:Name="Editors" Variant="Enclosed" KeepAlive="True">
+            <sl:Tab Key="a" Label="Button.axaml" Closable="True"><TextBox Text="Type here, switch tabs — keep-alive keeps it." /></sl:Tab>
+            <sl:Tab Key="b" Label="Select.cs" Closable="True"><TextBox Text="Second editor" /></sl:Tab>
+            <sl:Tab Key="c" Label="README.md" Closable="True"><TextBox Text="Third editor" /></sl:Tab>
+          </sl:Tabs>
+          <sl:Tabs Direction="Column" Size="Large" Height="160">
+            <sl:Tab Key="general" Label="General"><TextBlock Text="Vertical tabs, large." /></sl:Tab>
+            <sl:Tab Key="members" Label="Members" Icon="user"><TextBlock Text="Members." /></sl:Tab>
+            <sl:Tab Key="billing" Label="Billing"><TextBlock Text="Billing." /></sl:Tab>
+          </sl:Tabs>
+        </sl:Stack>
+      </sl:Card>
+
+      <sl:ResponsiveGrid Spacing="4">
+        <sl:Card sl:ResponsiveGrid.Md="6" Title="Breadcrumbs" Subtitle="The last item is the current page; long trails collapse into a menu">
+          <sl:Stack Spacing="3">
+            <sl:Breadcrumbs x:Name="Short" />
+            <sl:Breadcrumbs x:Name="Long" MaxItems="4" />
+            <sl:Breadcrumbs x:Name="Slashed" Separator="minus" />
+            <TextBlock x:Name="CrumbStatus" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
+          </sl:Stack>
+        </sl:Card>
+        <sl:Card sl:ResponsiveGrid.Md="6" Title="Pagination" Subtitle="Ellipses keep the first, last and siblings visible">
+          <sl:Stack Spacing="3">
+            <sl:Pagination PageCount="20" Page="10" />
+            <sl:Pagination PageCount="5" Page="2" Size="Small" />
+            <sl:Pagination x:Name="Sized" TotalCount="1240" PageSize="50" Siblings="2" />
+          </sl:Stack>
+        </sl:Card>
+      </sl:ResponsiveGrid>
+
+      <sl:ResponsiveGrid Spacing="4">
+        <sl:Card sl:ResponsiveGrid.Md="6" Title="Tree" Subtitle="→ expand / child · ← collapse / parent · Enter activates · type to jump · lazy folder">
+          <sl:Stack Spacing="3">
+            <TextBox x:Name="TreeFilter" PlaceholderText="Filter files" sl:Sl.StartIcon="search" />
+            <sl:TreeList x:Name="Files" Height="280" />
+            <TextBlock x:Name="TreeStatus" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
+          </sl:Stack>
+        </sl:Card>
+        <sl:Card sl:ResponsiveGrid.Md="6" Title="Tree · checkboxes" Subtitle="Space toggles · parents show mixed state · dense rows">
+          <sl:TreeList x:Name="Checks" Height="320" SelectionMode="Checkbox" Dense="True" />
+        </sl:Card>
+      </sl:ResponsiveGrid>
+    </sl:Stack>
+  </sl:Container>
+</UserControl>

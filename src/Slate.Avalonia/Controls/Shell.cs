@@ -273,15 +273,22 @@ public class NavItem : Button
         });
         // Driven by the inherited Drawer.IsMini rather than an ancestor selector: nested ancestor selectors with
         // comma lists inside ControlThemes don't scope reliably in Avalonia 12 (labels were hidden in full drawers).
-        Drawer.IsMiniProperty.Changed.AddClassHandler<NavItem>((n, e) => n.PseudoClasses.Set(":mini", e.GetNewValue<bool>()));
+        Drawer.IsMiniProperty.Changed.AddClassHandler<NavItem>((n, e) =>
+        {
+            n.PseudoClasses.Set(":mini", e.GetNewValue<bool>());
+            n.UpdateTip();
+        });
         LabelProperty.Changed.AddClassHandler<NavItem>((n, e) =>
         {
             AutomationProperties.SetName(n, e.GetNewValue<string?>());
-            ToolTip.SetTip(n, e.GetNewValue<string?>());
+            n.UpdateTip();
         });
     }
 
     protected override Type StyleKeyOverride => typeof(NavItem);
+
+    /// <summary>The label is only repeated as a tooltip in a mini (icon-only) drawer, where it isn't visible.</summary>
+    private void UpdateTip() => ToolTip.SetTip(this, GetValue(Drawer.IsMiniProperty) ? Label : null);
 
     public string? Icon { get => GetValue(IconProperty); set => SetValue(IconProperty, value); }
     public string? Label { get => GetValue(LabelProperty); set => SetValue(LabelProperty, value); }

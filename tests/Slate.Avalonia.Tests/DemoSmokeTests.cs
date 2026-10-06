@@ -22,7 +22,7 @@ public class DemoSmokeTests
         try
         {
             var nav = window.GetVisualDescendants().OfType<NavItem>().ToList();
-            Assert.Equal(6, nav.Count); // components, layout, feedback, dialogs, theming, sample
+            Assert.Equal(9, nav.Count); // components, inputs, navigation, overlays, layout, feedback, dialogs, theming, sample
             foreach (var item in nav)
             {
                 window.Click(item);

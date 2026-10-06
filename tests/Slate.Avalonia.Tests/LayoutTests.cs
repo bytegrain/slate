@@ -195,6 +195,20 @@ public class AppShellTests
     }
 
     [AvaloniaFact]
+    public void Nav_item_tooltips_only_appear_in_a_mini_drawer()
+    {
+        var (shell, drawer, _, _) = Build();
+        var w = Show(shell, width: 1200);
+        var item = Assert.IsType<Stack>(drawer.Content).Children.OfType<NavItem>().First();
+        Assert.Null(ToolTip.GetTip(item)); // the label is visible: no redundant tooltip
+
+        shell.DrawerVariant = DrawerVariant.Mini;
+        Pump(w);
+        Assert.Equal("Overview", ToolTip.GetTip(item));
+        w.Close();
+    }
+
+    [AvaloniaFact]
     public void Full_drawer_shows_nav_item_labels_and_mini_hides_them()
     {
         var (shell, drawer, _, _) = Build();
@@ -272,10 +286,10 @@ public class AppShellTests
         Assert.Equal(expected, AppShell.ResolveMode(variant, width, Breakpoint.Md));
 
     [AvaloniaFact]
-    public void Nav_item_label_is_its_accessible_name_and_tooltip()
+    public void Nav_item_label_is_its_accessible_name()
     {
         var item = new NavItem { Label = "Deployments", Icon = "layers" };
         Assert.Equal("Deployments", global::Avalonia.Automation.AutomationProperties.GetName(item));
-        Assert.Equal("Deployments", ToolTip.GetTip(item));
+        Assert.Null(ToolTip.GetTip(item)); // tooltip only in a mini drawer (see Nav_item_tooltips_only_appear_in_a_mini_drawer)
     }
 }

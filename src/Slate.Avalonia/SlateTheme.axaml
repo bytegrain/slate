@@ -15,10 +15,14 @@
         <ResourceInclude Source="avares://Slate.Avalonia/Themes/Controls/Fields.axaml" />
         <ResourceInclude Source="avares://Slate.Avalonia/Themes/Controls/Shell.axaml" />
         <ResourceInclude Source="avares://Slate.Avalonia/Themes/Controls/Systems.axaml" />
+        <ResourceInclude Source="avares://Slate.Avalonia/Themes/Controls/Overlays.axaml" />
+        <ResourceInclude Source="avares://Slate.Avalonia/Themes/Controls/Pickers.axaml" />
+        <ResourceInclude Source="avares://Slate.Avalonia/Themes/Controls/Navigation.axaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>
 
   <StyleInclude Source="avares://Slate.Avalonia/Themes/Configuration.axaml" />
   <StyleInclude Source="avares://Slate.Avalonia/Themes/NativeOverrides.axaml" />
+  <StyleInclude Source="avares://Slate.Avalonia/Themes/Wave2.axaml" />
 </Styles>

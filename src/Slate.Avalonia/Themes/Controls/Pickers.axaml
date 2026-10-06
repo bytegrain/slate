@@ -1,0 +1,398 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sl="using:Slate.Avalonia.Controls"
+                    xmlns:slate="using:Slate.Avalonia">
+
+  <!-- Select / combobox: a field (Sl.Component.Field.*) with a popover listbox (Sl.Component.Popover/Menu.*). -->
+  <ControlTheme x:Key="{x:Type sl:Select}" TargetType="sl:Select">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="Background" Value="{DynamicResource Sl.Component.Field.Background.Brush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Component.Field.Border.Brush}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Sl.Component.Field.Radius.Corner}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="MinWidth" Value="160" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusAdorner" Value="{DynamicResource Sl.FocusAdorner.Tight}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel Spacing="5">
+          <StackPanel Orientation="Horizontal" Spacing="3"
+                      IsVisible="{TemplateBinding Label, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <TextBlock Text="{TemplateBinding Label}" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource Sl.Brush.Text.Primary}" />
+            <TextBlock Name="PART_Required" Text="*" FontSize="13" FontWeight="SemiBold" IsVisible="False"
+                       Foreground="{DynamicResource Sl.Brush.Status.Danger.Fg}" AutomationProperties.AccessibilityView="Raw" />
+          </StackPanel>
+          <Border Name="PART_Control" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}"
+                  BoxShadow="{DynamicResource Sl.Component.Field.Shadow}"
+                  MinHeight="{DynamicResource Sl.Size.Control.Md}" Padding="10,0,6,0">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+              <Panel VerticalAlignment="Center" Margin="0,3">
+                <TextBlock Name="PART_Value" Text="{TemplateBinding DisplayText}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                <TextBlock Name="PART_Placeholder" Text="{TemplateBinding Placeholder}" Foreground="{DynamicResource Sl.Brush.Text.Placeholder}"
+                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                <WrapPanel Name="PART_Chips" VerticalAlignment="Center" />
+                <TextBox Name="PART_Search" Classes="select-search" Text="{TemplateBinding SearchText, Mode=TwoWay}"
+                         PlaceholderText="Search…" IsVisible="False" />
+              </Panel>
+              <sl:LoadingSpinner Name="PART_Spinner" Grid.Column="1" Size="Small" Margin="6,0" IsVisible="False" />
+              <Button Name="PART_Clear" Grid.Column="2" Classes="ghost icon-only" slate:Sl.StartIcon="x" slate:Sl.Label="Clear"
+                      slate:Sl.Size="Small" Focusable="False" IsVisible="False" Margin="2,0" />
+              <sl:Icon Name="PART_Chevron" Grid.Column="3" Kind="chevron-down" Size="16" Margin="4,0" VerticalAlignment="Center"
+                       Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+            </Grid>
+          </Border>
+          <Popup Name="PART_Popup" WindowManagerAddShadowHint="True">
+            <Border Name="PART_Panel" Background="{DynamicResource Sl.Component.Popover.Background.Brush}"
+                    BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="1"
+                    CornerRadius="{DynamicResource Sl.Component.Popover.Radius.Corner}"
+                    BoxShadow="{DynamicResource Sl.Component.Popover.Shadow}"
+                    Padding="{DynamicResource Sl.Component.Popover.Padding.Thickness}" MaxHeight="320">
+              <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <StackPanel Name="PART_Options" />
+              </ScrollViewer>
+            </Border>
+          </Popup>
+          <Panel>
+            <TextBlock Name="PART_Helper" Text="{TemplateBinding HelperText}" FontSize="12" TextWrapping="Wrap"
+                       Foreground="{DynamicResource Sl.Brush.Text.Tertiary}"
+                       IsVisible="{TemplateBinding HelperText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+            <StackPanel Name="PART_ErrorRow" Orientation="Horizontal" Spacing="6" IsVisible="False">
+              <sl:Icon Kind="alert-circle" Size="14" Foreground="{DynamicResource Sl.Brush.Status.Danger.Fg}" VerticalAlignment="Center" />
+              <TextBlock Text="{TemplateBinding Error}" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
+            </StackPanel>
+          </Panel>
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover /template/ Border#PART_Control">
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Component.Field.BorderHover.Brush}" />
+    </Style>
+    <Style Selector="^:focus-within /template/ Border#PART_Control">
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Component.Field.BorderFocus.Brush}" />
+    </Style>
+    <Style Selector="^:open /template/ Border#PART_Control">
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Component.Field.BorderFocus.Brush}" />
+    </Style>
+    <Style Selector="^:open /template/ sl|Icon#PART_Chevron">
+      <Setter Property="RenderTransform" Value="rotate(180deg)" />
+    </Style>
+    <Style Selector="^:has-value /template/ TextBlock#PART_Placeholder">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:multiple /template/ TextBlock#PART_Value">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:searchable:open /template/ TextBox#PART_Search">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:searchable:open /template/ TextBlock#PART_Value">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:searchable:open /template/ TextBlock#PART_Placeholder">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:searchable:open /template/ WrapPanel#PART_Chips">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:loading /template/ sl|LoadingSpinner#PART_Spinner">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:required /template/ TextBlock#PART_Required">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:invalid /template/ Border#PART_Control">
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
+    </Style>
+    <Style Selector="^:invalid /template/ TextBlock#PART_Helper">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:invalid /template/ StackPanel#PART_ErrorRow">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^.filled">
+      <Setter Property="Background" Value="{DynamicResource Sl.Component.Field.FilledBackground.Brush}" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+    <Style Selector="^.underlined">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+      <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="^.underlined /template/ Border#PART_Control">
+      <Setter Property="BoxShadow" Value="0 0 0 0 Transparent" />
+      <Setter Property="Padding" Value="0,0,6,0" />
+    </Style>
+    <Style Selector="^.small /template/ Border#PART_Control">
+      <Setter Property="MinHeight" Value="{DynamicResource Sl.Size.Control.Sm}" />
+    </Style>
+    <Style Selector="^.small">
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="^.large /template/ Border#PART_Control">
+      <Setter Property="MinHeight" Value="{DynamicResource Sl.Size.Control.Lg}" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type sl:SelectOption}" TargetType="sl:SelectOption">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FontSize" Value="13.5" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="PART_Root" Background="{TemplateBinding Background}" Padding="8,0"
+                MinHeight="{DynamicResource Sl.Component.Menu.ItemHeight}"
+                CornerRadius="{DynamicResource Sl.Component.Menu.ItemRadius.Corner}">
+          <Grid ColumnDefinitions="*,Auto">
+            <ContentPresenter Content="{TemplateBinding Content}" VerticalAlignment="Center" />
+            <sl:Icon Name="PART_Check" Grid.Column="1" Kind="check" Size="14" Margin="8,0,0,0" IsVisible="False"
+                     Foreground="{DynamicResource Sl.Brush.Accent.Text}" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover">
+      <Setter Property="Background" Value="{DynamicResource Sl.Component.Menu.ItemHover.Brush}" />
+    </Style>
+    <Style Selector="^:highlighted">
+      <Setter Property="Background" Value="{DynamicResource Sl.Component.Menu.ItemHover.Brush}" />
+    </Style>
+    <Style Selector="^:selected /template/ sl|Icon#PART_Check">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:selected">
+      <Setter Property="FontWeight" Value="Medium" />
+    </Style>
+  </ControlTheme>
+
+  <!-- Calendar day cell (Sl.Component.Calendar.*). -->
+  <ControlTheme x:Key="{x:Type sl:DayButton}" TargetType="sl:DayButton">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Width" Value="{DynamicResource Sl.Component.Calendar.DaySize}" />
+    <Setter Property="Height" Value="{DynamicResource Sl.Component.Calendar.DaySize}" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="0,1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Sl.CornerRadius.Md}" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusAdorner" Value="{DynamicResource Sl.FocusAdorner.Tight}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="PART_Border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
+          <ContentPresenter Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                            />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Muted}" />
+    </Style>
+    <Style Selector="^:today">
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Component.Calendar.Today.Brush}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="^:outside">
+      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Tertiary}" />
+    </Style>
+    <Style Selector="^:in-range">
+      <Setter Property="Background" Value="{DynamicResource Sl.Component.Calendar.Range.Brush}" />
+      <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="^:preview">
+      <Setter Property="Background" Value="{DynamicResource Sl.Component.Calendar.Range.Brush}" />
+      <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="^:selected">
+      <Setter Property="Background" Value="{DynamicResource Sl.Component.Calendar.Selected.Brush}" />
+      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.OnAccent}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="0.35" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type sl:MonthCalendar}" TargetType="sl:MonthCalendar">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <DockPanel>
+          <Border Name="PART_PresetsColumn" DockPanel.Dock="Left" BorderThickness="0,0,1,0" BorderBrush="{DynamicResource Sl.Brush.Border.Default}"
+                  Padding="0,0,8,0" Margin="0,0,10,0" IsVisible="False">
+            <StackPanel Name="PART_Presets" Spacing="1" MinWidth="120" />
+          </Border>
+          <StackPanel Spacing="6">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <Button Name="PART_Previous" Classes="ghost icon-only" slate:Sl.StartIcon="chevron-left" slate:Sl.Label="Previous month" slate:Sl.Size="Small" />
+              <TextBlock Name="PART_Title" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="13.5" />
+              <Button Name="PART_Next" Grid.Column="2" Classes="ghost icon-only" slate:Sl.StartIcon="chevron-right" slate:Sl.Label="Next month" slate:Sl.Size="Small" />
+            </Grid>
+            <Grid Name="PART_Grid" />
+          </StackPanel>
+        </DockPanel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:has-presets /template/ Border#PART_PresetsColumn">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+  </ControlTheme>
+
+  <!-- DateField: a TextField with a calendar toggle and a popover calendar (or an inline calendar). -->
+  <ControlTheme x:Key="{x:Type sl:DateField}" TargetType="sl:DateField">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <sl:TextField Name="PART_Field" Value="{TemplateBinding Text, Mode=TwoWay}"
+                        Label="{TemplateBinding Label}" Placeholder="{TemplateBinding Placeholder}"
+                        HelperText="{TemplateBinding HelperText}" Error="{TemplateBinding DisplayError}"
+                        Variant="{TemplateBinding Variant}" Size="{TemplateBinding Size}" Clearable="{TemplateBinding Clearable}">
+            <sl:TextField.EndContent>
+              <Button Name="PART_Toggle" Classes="ghost icon-only" slate:Sl.StartIcon="calendar" slate:Sl.Label="Open calendar"
+                      slate:Sl.Size="Small" Focusable="False" />
+            </sl:TextField.EndContent>
+          </sl:TextField>
+          <Popup Name="PART_Popup" WindowManagerAddShadowHint="True">
+            <Border Background="{DynamicResource Sl.Component.Popover.Background.Brush}"
+                    BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="1"
+                    CornerRadius="{DynamicResource Sl.Component.Popover.Radius.Corner}"
+                    BoxShadow="{DynamicResource Sl.Component.Popover.Shadow}" Padding="{DynamicResource Sl.Thickness.3}">
+              <sl:MonthCalendar Name="PART_Calendar" Value="{TemplateBinding Value, Mode=TwoWay}" Range="{TemplateBinding Range, Mode=TwoWay}"
+                                Selection="{TemplateBinding Selection}" Min="{TemplateBinding Min}" Max="{TemplateBinding Max}"
+                                DisabledDates="{TemplateBinding DisabledDates}" FirstDayOfWeek="{TemplateBinding FirstDayOfWeek}"
+                                Presets="{TemplateBinding Presets}" Today="{TemplateBinding Today}" />
+            </Border>
+          </Popup>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:inline">
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Background="{DynamicResource Sl.Brush.Background.Surface}" BorderBrush="{DynamicResource Sl.Brush.Border.Default}"
+                  BorderThickness="1" CornerRadius="{DynamicResource Sl.CornerRadius.Lg}" Padding="{DynamicResource Sl.Thickness.3}"
+                  HorizontalAlignment="Left">
+            <sl:MonthCalendar Name="PART_Calendar" Value="{TemplateBinding Value, Mode=TwoWay}" Range="{TemplateBinding Range, Mode=TwoWay}"
+                              Selection="{TemplateBinding Selection}" Min="{TemplateBinding Min}" Max="{TemplateBinding Max}"
+                              DisabledDates="{TemplateBinding DisabledDates}" FirstDayOfWeek="{TemplateBinding FirstDayOfWeek}"
+                              Presets="{TemplateBinding Presets}" Today="{TemplateBinding Today}" />
+          </Border>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+  </ControlTheme>
+
+  <!-- Slider (native) with sl:Sl.Step/Ticks/ShowValue/Label/Tone/RangeEnd. -->
+  <ControlTheme x:Key="Sl.SliderThumb" TargetType="Thumb">
+    <Setter Property="Width" Value="18" />
+    <Setter Property="Height" Value="18" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="PART_Knob" CornerRadius="9" Background="{DynamicResource Sl.Brush.Control.Thumb}"
+                BorderThickness="4" BorderBrush="{Binding $parent[Slider].(slate:Sl.ToneFill)}"
+                BoxShadow="{DynamicResource Sl.Shadow.E1}" />
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type Slider}" TargetType="Slider">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="MinWidth" Value="120" />
+    <Setter Property="Focusable" Value="True" />
+    <Setter Property="FocusAdorner" Value="{DynamicResource Sl.FocusAdorner}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto">
+          <TextBlock Name="PART_Label" Text="{TemplateBinding slate:Sl.Label}" FontSize="13" FontWeight="Medium" Margin="0,0,0,4"
+                     IsVisible="{TemplateBinding slate:Sl.Label, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          <TextBlock Name="PART_ValueText" Grid.Column="1" FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="12"
+                     Foreground="{DynamicResource Sl.Brush.Text.Secondary}" Margin="12,0,0,4" IsVisible="False" VerticalAlignment="Center" />
+          <Grid Grid.Row="1" Grid.ColumnSpan="2" Height="24">
+            <Border Name="PART_TrackBackground" Height="4" VerticalAlignment="Center" CornerRadius="2"
+                    Background="{DynamicResource Sl.Brush.Control.Track}" Margin="9,0" />
+            <TickBar Name="PART_TickBar" Fill="{DynamicResource Sl.Brush.Border.Strong}" Height="4" VerticalAlignment="Bottom" Margin="9,0"
+                     Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}" TickFrequency="{TemplateBinding TickFrequency}"
+                     Placement="Bottom" IsVisible="False" />
+            <Track Name="PART_Track" Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                   Value="{TemplateBinding Value, Mode=TwoWay}" Orientation="Horizontal" IsDirectionReversed="False">
+              <Track.DecreaseButton>
+                <RepeatButton Name="PART_DecreaseButton" Focusable="False" Background="Transparent">
+                  <RepeatButton.Template>
+                    <ControlTemplate>
+                      <Border Background="Transparent">
+                        <Border Name="PART_Fill" Height="4" CornerRadius="2" VerticalAlignment="Center" Margin="9,0,-9,0"
+                                Background="{Binding $parent[Slider].(slate:Sl.ToneFill)}" />
+                      </Border>
+                    </ControlTemplate>
+                  </RepeatButton.Template>
+                </RepeatButton>
+              </Track.DecreaseButton>
+              <Track.IncreaseButton>
+                <RepeatButton Name="PART_IncreaseButton" Focusable="False" Background="Transparent">
+                  <RepeatButton.Template>
+                    <ControlTemplate>
+                      <Border Background="Transparent" />
+                    </ControlTemplate>
+                  </RepeatButton.Template>
+                </RepeatButton>
+              </Track.IncreaseButton>
+              <Thumb Name="thumb" Theme="{StaticResource Sl.SliderThumb}" />
+            </Track>
+            <Canvas Name="PART_RangeCanvas" IsVisible="False">
+              <Border Name="PART_RangeFill" Height="4" Canvas.Top="10" CornerRadius="2"
+                      Background="{Binding $parent[Slider].(slate:Sl.ToneFill)}" IsHitTestVisible="False" />
+              <Thumb Name="PART_EndThumb" Canvas.Top="3" Focusable="True" Theme="{StaticResource Sl.SliderThumb}"
+                     FocusAdorner="{DynamicResource Sl.FocusAdorner.Pill}" />
+            </Canvas>
+          </Grid>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^.show-value /template/ TextBlock#PART_ValueText">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^.ticks /template/ TickBar#PART_TickBar">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^.range /template/ Canvas#PART_RangeCanvas">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^.range /template/ RepeatButton#PART_DecreaseButton">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />
+    </Style>
+  </ControlTheme>
+
+  <!-- Segmented control: a recessed track with raised, milled segments for the selected value. -->
+  <ControlTheme x:Key="{x:Type sl:SegmentedControl}" TargetType="sl:SegmentedControl">
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="PART_Track" Background="{DynamicResource Sl.Brush.Background.Muted}" CornerRadius="{DynamicResource Sl.CornerRadius.Md}"
+                Padding="2" BoxShadow="{DynamicResource Sl.Shadow.Inset}">
+          <Grid Name="PART_Segments" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:full-width">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>
