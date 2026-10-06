@@ -86,3 +86,42 @@ selected `selection.background` with a 2px `selection.indicator` inset bar on th
 2px `focus.ring` outline (keyboard only). Numbers in `font.family.mono` tabular. Pinned columns cast
 `shadow.e1` on their scrolling edge. Group rows `background.subtle`, `bodyStrong`. Footer aggregates in mono.
 All of it via `component.grid.*` tokens.
+
+## Engine API
+
+C# lives in `src/Slate.Core/Data` (namespace `Slate.Data`); the TypeScript port in `packages/web/src/core/grid`
+(exported as the `grid` namespace from `@slate/web`, plus `DataPipeline`, `GridRowCache`, `createGridState`, … at top
+level). Contract enums (`GridColumnType`, `SortDirection`, `GridPin`, `GridAggregate`, `GridSelectionMode`,
+`GridPagination`) are in the root `Slate` namespace; engine enums (`GridEditMode`, `FilterOperator`, `GridAlign`,
+`GridRowKind`, `GridKey`, `GridNavAction`, `SelectAllState`) in `Slate.Data`. TS uses the camelCase string values.
+
+| Piece | C# | TS | Renderer use |
+|---|---|---|---|
+| Column definition | `GridColumn<T>` | `GridColumn<T>` + `col.*` defaults, `cellValue`, `displayText`, `parseCell` | header, cell text, editors |
+| Values | `GridValues` (Normalize, Compare, Format, Parse, ParseIsoDate) | `normalize`, `compareNormalized`, `formatValue`, `parseValue`, `parseIsoDate` | portable formats: numbers `0`, `0.00`, `#,##0.0`, `0%`; dates `yyyy MMM MM dd HH mm ss` (UTC) |
+| View state | `GridState` record + transitions, `ToJson/FromJson` | `GridState` object + `toggleSort`, `setFilter`, … `gridStateToJson/FromJson` | every header/menu/toolbar action is a pure transition; persist the JSON |
+| Pipeline | `DataPipeline<T>.Run(items, state)` → `GridPipelineResult<T>` | `new DataPipeline(cols, opts).run(items, state)` | `Rows` (data/group/detail, depth, aggregates, expanded), `Items`/`ItemKeys` (export, select-all), `VisibleKeys` (range order), `Totals` (footer), paging |
+| Layout | `GridLayout.Resolve(cols, state, width)` → `GridColumnLayout<T>` | `resolveColumns` | widths (flex), order, pinned sections, `Left`/`StickyOffset`, `ScrollingRange` (column virtualisation), `EstimateWidth` (double-click auto-fit) |
+| Virtualisation | `GridViewport.Compute / ScrollToReveal / PageRows` | `computeViewport`, `scrollToReveal`, `pageRows` | render only `[First, First+Count)` at `OffsetTop` |
+| Selection | `SelectionModel<TKey>` | `SelectionModel<K>` | `Click(key, VisibleKeys, ctrl, shift)`, `Toggle`, `ExtendTo`, `SelectAll(ItemKeys)`, `SelectAllMatching(total)`, `HeaderState` |
+| Keyboard | `GridNavigator.Move(cell, key, ctx)` | `moveCell`, `gridKeyFromEvent` | returns the new active cell + expand/collapse action |
+| Editing | `EditSession<T>` | `EditSession<T>` | `Begin` → `SetDraftText` (parse + validate) → `Commit` (false while invalid); batch `Pending`, `CommitAll`, `DiscardAll`; `MoveAfterCommit` |
+| Server data | `IGridDataSource<T>`, `GridQuery`, `GridResult<T>`, `InMemoryGridDataSource<T>`, `GridRowCache<T>` | `GridDataSource<T>`, `queryFromState`, `InMemoryGridDataSource`, `GridRowCache` | `SetQuery` on state change, `EnsureRange(first, count)` per viewport, `TryGet`/`get` per row, skeleton when missing |
+| Export | `GridExport.ToCsv / ToTsv` | `toCsv`, `toTsv` | CSV download, Ctrl+C TSV (pass `valueOf` to include pending edits) |
+
+Decisions worth knowing:
+- **Text ordering** is case-insensitive ordinal with an ordinal tie-break (identical in .NET and JS; no culture
+  collation). **Nulls sort last in both directions.** Ties keep source order.
+- **Grouping** buckets by display text; group order follows the column's sort direction if that column is sorted,
+  else ascending; the empty group is last. Group ids are `field=text` joined by `|` (escaped). Tree nodes use
+  `row:{key}`; both share `GroupsCollapsedByDefault` + `ToggledGroups`. Tree data ignores `GroupBy`; filtering a tree
+  keeps (and force-expands) ancestors of matches.
+- **Quick filter**: whitespace-separated terms, each must appear in some visible searchable column's display text.
+- **Filters**: `Contains/StartsWith/EndsWith/AnyOf` use display text; comparisons are typed for number/progress/
+  date/boolean columns (filter values are coerced: ISO strings for dates) and text-based otherwise; a filter
+  without a value is ignored; `Between` is inclusive in either order.
+- **Paging** slices the flattened view rows (groups included). **Aggregates**: `count` = non-null values,
+  `sum`/`avg` over numeric values, `min`/`max` by the column ordering (raw value).
+- Parity is enforced by `tests/fixtures/data-grid.json` (C# writes it; `SLATE_UPDATE_FIXTURES=1 dotnet test` to
+  regenerate) and `packages/web/test/grid-engine.test.ts`. Perf budgets: 100k rows sort+filter+quick filter
+  < 150 ms, grouping < 200 ms (`SLATE_PERF_FACTOR` relaxes on slow CI).

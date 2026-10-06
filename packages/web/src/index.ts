@@ -170,6 +170,34 @@ export {
   type PaginationItem, type AvatarTone, type SliderKey,
 } from './core/collections/widgets';
 
+// Data grid engine (platform-free; identical to Slate.Core Slate.Data — tests/fixtures/data-grid.json).
+// Everything is available under the `grid` namespace; the most used types are also exported directly.
+export * as grid from './core/grid/index';
+export {
+  DataPipeline,
+  GridRowCache,
+  InMemoryGridDataSource,
+  SelectionModel as GridSelectionModel,
+  EditSession as GridEditSession,
+  createGridState,
+  gridStateFromJson,
+  serializeGridState,
+  resolveColumns,
+  computeViewport,
+  moveCell,
+  toCsv,
+  toTsv,
+  type GridColumn,
+  type GridState,
+  type GridSort,
+  type GridFilter,
+  type GridViewRow,
+  type GridPipelineResult,
+  type GridQuery,
+  type GridResult,
+  type GridDataSource,
+} from './core/grid/index';
+
 declare global {
   interface HTMLElementTagNameMap {
     'sl-provider': SlProvider;
