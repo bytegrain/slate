@@ -6,13 +6,13 @@ namespace Slate.Avalonia.Demo.Pages;
 
 public partial class MigrationPage : UserControl
 {
-    private static readonly (string Path, string Size, double Progress, string Speed, string State, BadgeTone Tone)[] Rows =
+    private static readonly (string Path, string Size, double Progress, string Speed, string State, Tone Tone)[] Rows =
     [
-        (@"textures\env\cliffs_4k\albedo.png", "88.2 MB", 0.74, "112 MB/s", "Copying", BadgeTone.Info),
-        (@"builds\2026-10-03\Rust_Client.zip", "14.1 GB", 0.31, "406 MB/s", "Copying", BadgeTone.Info),
-        (@"audio\ambience\forest_night.wav", "1.2 GB", 1.0, "—", "Verified", BadgeTone.Success),
-        (@"models\vehicles\minicopter.fbx", "312 MB", 0.12, "38 MB/s", "Retrying", BadgeTone.Warning),
-        (@"source\Slate.Wpf\Slate.Wpf.csproj", "6 KB", 0, "—", "Queued", BadgeTone.Neutral),
+        (@"textures\env\cliffs_4k\albedo.png", "88.2 MB", 0.74, "112 MB/s", "Copying", Tone.Info),
+        (@"builds\2026-10-03\Rust_Client.zip", "14.1 GB", 0.31, "406 MB/s", "Copying", Tone.Info),
+        (@"audio\ambience\forest_night.wav", "1.2 GB", 1.0, "—", "Verified", Tone.Success),
+        (@"models\vehicles\minicopter.fbx", "312 MB", 0.12, "38 MB/s", "Retrying", Tone.Warning),
+        (@"source\Slate.Wpf\Slate.Wpf.csproj", "6 KB", 0, "—", "Queued", Tone.Neutral),
     ];
 
     public MigrationPage()
@@ -36,7 +36,7 @@ public partial class MigrationPage : UserControl
             grid.Children.Add(Column(Text(size, mono: true), 1));
             grid.Children.Add(Column(new ProgressBar { Value = progress * 100, MinWidth = 60, Margin = new global::Avalonia.Thickness(0, 0, 12, 0) }, 2));
             grid.Children.Add(Column(Text(speed, mono: true), 3));
-            grid.Children.Add(Column(new Badge { Text = state, Tone = tone }, 4));
+            grid.Children.Add(Column(new Badge { Content = state, Tone = tone }, 4));
             row.Child = grid;
             Transfers.Children.Add(row);
         }

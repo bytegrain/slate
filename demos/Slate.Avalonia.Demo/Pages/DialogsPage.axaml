@@ -2,19 +2,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:sl="https://slate.dev/avalonia"
              x:Class="Slate.Avalonia.Demo.Pages.DialogsPage">
-  <sl:Container Size="Xl" Margin="0,24,0,40">
+  <sl:Container ContainerMaxWidth="Xl" Margin="0,24,0,40">
     <sl:Stack Spacing="6">
       <StackPanel Spacing="4">
         <TextBlock Text="Dialogs" Theme="{DynamicResource Sl.Typography.H2}" />
         <TextBlock Text="IDialogService on DialogStack: focus moves in and is trapped, Escape and the scrim cancel (when allowed), focus returns on close."
                    Foreground="{DynamicResource Sl.Brush.Text.Secondary}" TextWrapping="Wrap" />
       </StackPanel>
-      <sl:Card Header="Try them">
+      <sl:Card Title="Try them">
         <sl:Stack Spacing="4">
-          <sl:Stack Orientation="Horizontal" Wrap="True">
-            <Button x:Name="Form" Content="Form dialog" Classes="primary" sl:Sl.Icon="pencil" />
+          <sl:Stack Direction="Row" Wrap="True">
+            <Button x:Name="Form" Content="Form dialog" sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" sl:Sl.StartIcon="pencil" />
             <Button x:Name="Confirm" Content="Confirm" />
-            <Button x:Name="Destructive" Content="Destructive confirm" Classes="danger" sl:Sl.Icon="trash" />
+            <Button x:Name="Destructive" Content="Destructive confirm" sl:Sl.Tone="Danger" sl:Sl.StartIcon="trash" />
             <Button x:Name="Alert" Content="Acknowledge" />
             <Button x:Name="Stacked" Content="Stacked dialogs" />
           </sl:Stack>

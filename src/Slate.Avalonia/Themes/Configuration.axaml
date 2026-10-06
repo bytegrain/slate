@@ -1,0 +1,82 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:slate="using:Slate.Avalonia">
+  <!--
+    Shared configuration classes (docs/design/configurability.md).
+    tone-*   : publishes the tone's brushes on the control (sl:Sl.ToneFill, ToneOn, ToneText …);
+               variant styles and templates read those, so every Variant × Tone combination works.
+    radius-* : per-instance corner radius override. Styles outrank ControlTheme setters, so these win
+               over component tokens and size-specific radii.
+  -->
+
+  <Style Selector=":is(Control).tone-neutral">
+    <Setter Property="(slate:Sl.ToneFill)" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="(slate:Sl.ToneFillHover)" Value="{DynamicResource Sl.Brush.Text.Secondary}" />
+    <Setter Property="(slate:Sl.ToneFillPressed)" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="(slate:Sl.ToneOn)" Value="{DynamicResource Sl.Brush.Background.Surface}" />
+    <Setter Property="(slate:Sl.ToneText)" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="(slate:Sl.ToneSubtle)" Value="{DynamicResource Sl.Brush.Background.Muted}" />
+    <Setter Property="(slate:Sl.ToneBorder)" Value="{DynamicResource Sl.Brush.Border.Strong}" />
+  </Style>
+  <Style Selector=":is(Control).tone-accent">
+    <Setter Property="(slate:Sl.ToneFill)" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+    <Setter Property="(slate:Sl.ToneFillHover)" Value="{DynamicResource Sl.Brush.Accent.Hover}" />
+    <Setter Property="(slate:Sl.ToneFillPressed)" Value="{DynamicResource Sl.Brush.Accent.Pressed}" />
+    <Setter Property="(slate:Sl.ToneOn)" Value="{DynamicResource Sl.Brush.Text.OnAccent}" />
+    <Setter Property="(slate:Sl.ToneText)" Value="{DynamicResource Sl.Brush.Accent.Text}" />
+    <Setter Property="(slate:Sl.ToneSubtle)" Value="{DynamicResource Sl.Brush.Accent.Subtle}" />
+    <Setter Property="(slate:Sl.ToneBorder)" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+  </Style>
+  <Style Selector=":is(Control).tone-success">
+    <Setter Property="(slate:Sl.ToneFill)" Value="{DynamicResource Sl.Brush.Status.Success.Solid}" />
+    <Setter Property="(slate:Sl.ToneFillHover)" Value="{DynamicResource Sl.Brush.Status.Success.Solid}" />
+    <Setter Property="(slate:Sl.ToneFillPressed)" Value="{DynamicResource Sl.Brush.Status.Success.Solid}" />
+    <Setter Property="(slate:Sl.ToneOn)" Value="{DynamicResource Sl.Brush.Status.Success.OnSolid}" />
+    <Setter Property="(slate:Sl.ToneText)" Value="{DynamicResource Sl.Brush.Status.Success.Fg}" />
+    <Setter Property="(slate:Sl.ToneSubtle)" Value="{DynamicResource Sl.Brush.Status.Success.Bg}" />
+    <Setter Property="(slate:Sl.ToneBorder)" Value="{DynamicResource Sl.Brush.Status.Success.Border}" />
+  </Style>
+  <Style Selector=":is(Control).tone-warning">
+    <Setter Property="(slate:Sl.ToneFill)" Value="{DynamicResource Sl.Brush.Status.Warning.Solid}" />
+    <Setter Property="(slate:Sl.ToneFillHover)" Value="{DynamicResource Sl.Brush.Status.Warning.Solid}" />
+    <Setter Property="(slate:Sl.ToneFillPressed)" Value="{DynamicResource Sl.Brush.Status.Warning.Solid}" />
+    <Setter Property="(slate:Sl.ToneOn)" Value="{DynamicResource Sl.Brush.Status.Warning.OnSolid}" />
+    <Setter Property="(slate:Sl.ToneText)" Value="{DynamicResource Sl.Brush.Status.Warning.Fg}" />
+    <Setter Property="(slate:Sl.ToneSubtle)" Value="{DynamicResource Sl.Brush.Status.Warning.Bg}" />
+    <Setter Property="(slate:Sl.ToneBorder)" Value="{DynamicResource Sl.Brush.Status.Warning.Border}" />
+  </Style>
+  <Style Selector=":is(Control).tone-danger">
+    <Setter Property="(slate:Sl.ToneFill)" Value="{DynamicResource Sl.Brush.Status.Danger.Solid}" />
+    <Setter Property="(slate:Sl.ToneFillHover)" Value="{DynamicResource Sl.Brush.Status.Danger.Solid}" />
+    <Setter Property="(slate:Sl.ToneFillPressed)" Value="{DynamicResource Sl.Brush.Status.Danger.Solid}" />
+    <Setter Property="(slate:Sl.ToneOn)" Value="{DynamicResource Sl.Brush.Status.Danger.OnSolid}" />
+    <Setter Property="(slate:Sl.ToneText)" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
+    <Setter Property="(slate:Sl.ToneSubtle)" Value="{DynamicResource Sl.Brush.Status.Danger.Bg}" />
+    <Setter Property="(slate:Sl.ToneBorder)" Value="{DynamicResource Sl.Brush.Status.Danger.Border}" />
+  </Style>
+  <Style Selector=":is(Control).tone-info">
+    <Setter Property="(slate:Sl.ToneFill)" Value="{DynamicResource Sl.Brush.Status.Info.Solid}" />
+    <Setter Property="(slate:Sl.ToneFillHover)" Value="{DynamicResource Sl.Brush.Status.Info.Solid}" />
+    <Setter Property="(slate:Sl.ToneFillPressed)" Value="{DynamicResource Sl.Brush.Status.Info.Solid}" />
+    <Setter Property="(slate:Sl.ToneOn)" Value="{DynamicResource Sl.Brush.Status.Info.OnSolid}" />
+    <Setter Property="(slate:Sl.ToneText)" Value="{DynamicResource Sl.Brush.Status.Info.Fg}" />
+    <Setter Property="(slate:Sl.ToneSubtle)" Value="{DynamicResource Sl.Brush.Status.Info.Bg}" />
+    <Setter Property="(slate:Sl.ToneBorder)" Value="{DynamicResource Sl.Brush.Status.Info.Border}" />
+  </Style>
+
+  <Style Selector=":is(TemplatedControl).radius-none">
+    <Setter Property="CornerRadius" Value="0" />
+  </Style>
+  <Style Selector=":is(TemplatedControl).radius-small">
+    <Setter Property="CornerRadius" Value="{DynamicResource Sl.CornerRadius.Sm}" />
+  </Style>
+  <Style Selector=":is(TemplatedControl).radius-medium">
+    <Setter Property="CornerRadius" Value="{DynamicResource Sl.CornerRadius.Md}" />
+  </Style>
+  <Style Selector=":is(TemplatedControl).radius-large">
+    <Setter Property="CornerRadius" Value="{DynamicResource Sl.CornerRadius.Lg}" />
+  </Style>
+  <Style Selector=":is(TemplatedControl).radius-full">
+    <Setter Property="CornerRadius" Value="999" />
+  </Style>
+</Styles>

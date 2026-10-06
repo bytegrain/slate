@@ -260,7 +260,8 @@ public class DialogHostTests
         Assert.True(dialog.IsDestructive);
         Assert.True(dialog.Part<Border>("PART_IconTile").IsVisible);
         Assert.Equal("alert-triangle", dialog.IconKind);
-        Assert.Contains("danger-solid", dialog.ConfirmButton!.Classes);
+        Assert.Contains("solid", dialog.ConfirmButton!.Classes);
+        Assert.Contains("tone-danger", dialog.ConfirmButton!.Classes);
         Assert.Same(dialog.CancelButton, w.Focused()); // destructive: cancel is the safe default
 
         // A destructive confirmation can't be dismissed by clicking outside it.
@@ -279,7 +280,8 @@ public class DialogHostTests
         var confirm = service.ConfirmAsync(new MessageBoxOptions { Message = "Continue?" });
         Pump(w);
         var dialog = host.Dialogs.Single();
-        Assert.Contains("primary", dialog.ConfirmButton!.Classes);
+        Assert.Contains("solid", dialog.ConfirmButton!.Classes);
+        Assert.Contains("tone-accent", dialog.ConfirmButton!.Classes);
         w.Click(dialog.CancelButton!);
         Assert.False(await confirm);
 
@@ -317,7 +319,7 @@ public class DialogHostTests
     public async Task Dialog_content_footer_and_close_with_buttons()
     {
         var (service, host, _, w) = Create();
-        var save = new Button { Content = "Save", Classes = { "primary" } };
+        var save = new Button { Content = "Save", Classes = { "solid", "tone-accent" } };
         DialogHost.SetCloseWith(save, DialogCloseAction.Ok);
         DialogHost.SetResultData(save, 7);
         var content = new DialogContent { Description = "Pick a name.", Content = new TextBox(), Footer = new StackPanel { Children = { save } } };

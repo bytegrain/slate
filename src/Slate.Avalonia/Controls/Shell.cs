@@ -14,18 +14,6 @@ using Slate.Layout;
 
 namespace Slate.Avalonia.Controls;
 
-public enum DrawerVariant
-{
-    /// <summary>Persistent from <see cref="AppShell.ResponsiveBreakpoint"/> up, temporary below it.</summary>
-    Responsive,
-    /// <summary>Docked beside the content, pushing it.</summary>
-    Persistent,
-    /// <summary>Overlays the content with a scrim; closes on scrim click or Escape.</summary>
-    Temporary,
-    /// <summary>A 56px icon rail; labels become tooltips.</summary>
-    Mini,
-}
-
 /// <summary>The drawer mode in effect after resolving <see cref="DrawerVariant.Responsive"/>.</summary>
 public enum DrawerMode
 {
@@ -47,8 +35,12 @@ public class AppShell : ContentControl
     public static readonly StyledProperty<object?> AppBarProperty = AvaloniaProperty.Register<AppShell, object?>(nameof(AppBar));
     public static readonly StyledProperty<object?> DrawerProperty = AvaloniaProperty.Register<AppShell, object?>(nameof(Drawer));
     public static readonly StyledProperty<DrawerVariant> DrawerVariantProperty = AvaloniaProperty.Register<AppShell, DrawerVariant>(nameof(DrawerVariant));
-    public static readonly StyledProperty<bool> IsDrawerOpenProperty =
-        AvaloniaProperty.Register<AppShell, bool>(nameof(IsDrawerOpen), true, defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
+    public static readonly StyledProperty<bool> DrawerOpenProperty =
+        AvaloniaProperty.Register<AppShell, bool>(nameof(DrawerOpen), true, defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
+
+    /// <summary>Stretch to fill the hosting window/area (the default for desktop shells).</summary>
+    public static readonly StyledProperty<bool> FillViewportProperty =
+        AvaloniaProperty.Register<AppShell, bool>(nameof(FillViewport), true);
     public static readonly StyledProperty<Breakpoint> ResponsiveBreakpointProperty =
         AvaloniaProperty.Register<AppShell, Breakpoint>(nameof(ResponsiveBreakpoint), Breakpoint.Md);
 
@@ -70,7 +62,12 @@ public class AppShell : ContentControl
     {
         DrawerVariantProperty.Changed.AddClassHandler<AppShell>((s, _) => s.UpdateMode());
         ResponsiveBreakpointProperty.Changed.AddClassHandler<AppShell>((s, _) => s.UpdateMode());
-        IsDrawerOpenProperty.Changed.AddClassHandler<AppShell>((s, _) => s.UpdateState());
+        DrawerOpenProperty.Changed.AddClassHandler<AppShell>((s, _) =>
+        {
+            s.UpdateState();
+            s.DrawerOpenChanged?.Invoke(s, EventArgs.Empty);
+        });
+        FillViewportProperty.Changed.AddClassHandler<AppShell>((s, e) => s.UpdateFill(e.GetNewValue<bool>()));
         DrawerProperty.Changed.AddClassHandler<AppShell>((s, _) => s.UpdateState());
         ToggleDrawerRequestedEvent.AddClassHandler<AppShell>((s, e) => { s.ToggleDrawer(e.Source as IInputElement); e.Handled = true; });
     }
@@ -78,7 +75,19 @@ public class AppShell : ContentControl
     public object? AppBar { get => GetValue(AppBarProperty); set => SetValue(AppBarProperty, value); }
     public object? Drawer { get => GetValue(DrawerProperty); set => SetValue(DrawerProperty, value); }
     public DrawerVariant DrawerVariant { get => GetValue(DrawerVariantProperty); set => SetValue(DrawerVariantProperty, value); }
-    public bool IsDrawerOpen { get => GetValue(IsDrawerOpenProperty); set => SetValue(IsDrawerOpenProperty, value); }
+    public bool DrawerOpen { get => GetValue(DrawerOpenProperty); set => SetValue(DrawerOpenProperty, value); }
+    public bool FillViewport { get => GetValue(FillViewportProperty); set => SetValue(FillViewportProperty, value); }
+
+    /// <summary>Raised when <see cref="DrawerOpen"/> changes (toggle button, scrim click, Escape or width change).</summary>
+    public event EventHandler? DrawerOpenChanged;
+
+    public AppShell() => UpdateFill(true);
+
+    private void UpdateFill(bool fill)
+    {
+        HorizontalAlignment = fill ? HorizontalAlignment.Stretch : HorizontalAlignment.Left;
+        VerticalAlignment = fill ? VerticalAlignment.Stretch : VerticalAlignment.Top;
+    }
     public Breakpoint ResponsiveBreakpoint { get => GetValue(ResponsiveBreakpointProperty); set => SetValue(ResponsiveBreakpointProperty, value); }
 
     public DrawerMode DrawerMode
@@ -90,9 +99,9 @@ public class AppShell : ContentControl
     /// <summary>Opens or closes the drawer. When a temporary drawer closes, focus returns to <paramref name="toggle"/>.</summary>
     public void ToggleDrawer(IInputElement? toggle = null)
     {
-        if (!IsDrawerOpen)
+        if (!DrawerOpen)
             _focusBeforeOpen = toggle ?? TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement();
-        IsDrawerOpen = !IsDrawerOpen;
+        DrawerOpen = !DrawerOpen;
     }
 
     /// <summary>Resolves the drawer mode for a given width — the rule documented for Responsive drawers.</summary>
@@ -126,9 +135,9 @@ public class AppShell : ContentControl
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
-        if (!e.Handled && e.Key == Key.Escape && DrawerMode == DrawerMode.Temporary && IsDrawerOpen)
+        if (!e.Handled && e.Key == Key.Escape && DrawerMode == DrawerMode.Temporary && DrawerOpen)
         {
-            IsDrawerOpen = false;
+            DrawerOpen = false;
             e.Handled = true;
         }
     }
@@ -137,7 +146,7 @@ public class AppShell : ContentControl
     {
         if (DrawerMode == DrawerMode.Temporary)
         {
-            IsDrawerOpen = false;
+            DrawerOpen = false;
             e.Handled = true;
         }
     }
@@ -148,16 +157,16 @@ public class AppShell : ContentControl
         DrawerMode = ResolveMode(DrawerVariant, Bounds.Width, ResponsiveBreakpoint);
         // Switching to temporary (window narrowed) should not suddenly cover the content.
         if (previous != DrawerMode && DrawerMode == DrawerMode.Temporary)
-            IsDrawerOpen = false;
+            DrawerOpen = false;
         else if (previous == DrawerMode.Temporary && DrawerMode == DrawerMode.Persistent)
-            IsDrawerOpen = true;
+            DrawerOpen = true;
         UpdateState();
     }
 
     private void UpdateState()
     {
         var mode = DrawerMode;
-        var open = IsDrawerOpen || mode == DrawerMode.Mini;
+        var open = DrawerOpen || mode == DrawerMode.Mini;
         PseudoClasses.Set(":persistent", mode == DrawerMode.Persistent);
         PseudoClasses.Set(":temporary", mode == DrawerMode.Temporary);
         PseudoClasses.Set(":mini", mode == DrawerMode.Mini);
@@ -201,8 +210,16 @@ public class AppBar : ContentControl
     public static readonly StyledProperty<object?> ActionsProperty = AvaloniaProperty.Register<AppBar, object?>(nameof(Actions));
     public static readonly StyledProperty<bool> ShowMenuButtonProperty = AvaloniaProperty.Register<AppBar, bool>(nameof(ShowMenuButton), true);
 
+    /// <summary>Content before the title (e.g. a logo or back button).</summary>
+    public static readonly StyledProperty<object?> LeadingProperty = AvaloniaProperty.Register<AppBar, object?>(nameof(Leading));
+
+    /// <summary>Content in the middle (e.g. search). <see cref="ContentControl.Content"/> is shown here too.</summary>
+    public static readonly StyledProperty<object?> CenterProperty = AvaloniaProperty.Register<AppBar, object?>(nameof(Center));
+
     public string? Title { get => GetValue(TitleProperty); set => SetValue(TitleProperty, value); }
     public object? Actions { get => GetValue(ActionsProperty); set => SetValue(ActionsProperty, value); }
+    public object? Leading { get => GetValue(LeadingProperty); set => SetValue(LeadingProperty, value); }
+    public object? Center { get => GetValue(CenterProperty); set => SetValue(CenterProperty, value); }
     public bool ShowMenuButton { get => GetValue(ShowMenuButtonProperty); set => SetValue(ShowMenuButtonProperty, value); }
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
@@ -238,18 +255,22 @@ public class Drawer : ContentControl
     public static void SetIsMini(Control control, bool value) => control.SetValue(IsMiniProperty, value);
 }
 
-/// <summary>A drawer navigation entry: icon, label, optional count and an active state.</summary>
+/// <summary>A drawer navigation entry: icon, label, optional trailing count/status and an active state.</summary>
 [PseudoClasses(":active", ":mini")]
 public class NavItem : Button
 {
     public static readonly StyledProperty<string?> IconProperty = AvaloniaProperty.Register<NavItem, string?>(nameof(Icon));
     public static readonly StyledProperty<string?> LabelProperty = AvaloniaProperty.Register<NavItem, string?>(nameof(Label));
-    public static readonly StyledProperty<string?> CountProperty = AvaloniaProperty.Register<NavItem, string?>(nameof(Count));
-    public static readonly StyledProperty<bool> IsActiveProperty = AvaloniaProperty.Register<NavItem, bool>(nameof(IsActive));
+    public static readonly StyledProperty<string?> TrailingProperty = AvaloniaProperty.Register<NavItem, string?>(nameof(Trailing));
+    public static readonly StyledProperty<bool> ActiveProperty = AvaloniaProperty.Register<NavItem, bool>(nameof(Active));
 
     static NavItem()
     {
-        IsActiveProperty.Changed.AddClassHandler<NavItem>((n, e) => n.PseudoClasses.Set(":active", e.GetNewValue<bool>()));
+        ActiveProperty.Changed.AddClassHandler<NavItem>((n, e) =>
+        {
+            n.PseudoClasses.Set(":active", e.GetNewValue<bool>());
+            AutomationProperties.SetItemStatus(n, e.GetNewValue<bool>() ? "Current" : null);
+        });
         // Driven by the inherited Drawer.IsMini rather than an ancestor selector: nested ancestor selectors with
         // comma lists inside ControlThemes don't scope reliably in Avalonia 12 (labels were hidden in full drawers).
         Drawer.IsMiniProperty.Changed.AddClassHandler<NavItem>((n, e) => n.PseudoClasses.Set(":mini", e.GetNewValue<bool>()));
@@ -264,8 +285,8 @@ public class NavItem : Button
 
     public string? Icon { get => GetValue(IconProperty); set => SetValue(IconProperty, value); }
     public string? Label { get => GetValue(LabelProperty); set => SetValue(LabelProperty, value); }
-    public string? Count { get => GetValue(CountProperty); set => SetValue(CountProperty, value); }
-    public bool IsActive { get => GetValue(IsActiveProperty); set => SetValue(IsActiveProperty, value); }
+    public string? Trailing { get => GetValue(TrailingProperty); set => SetValue(TrailingProperty, value); }
+    public bool Active { get => GetValue(ActiveProperty); set => SetValue(ActiveProperty, value); }
 }
 
 /// <summary>

@@ -26,6 +26,10 @@ public class SnackbarHost : ContentControl
     public static readonly StyledProperty<SnackbarPosition?> PositionProperty =
         AvaloniaProperty.Register<SnackbarHost, SnackbarPosition?>(nameof(Position));
 
+    /// <summary>Accessible name of the notification region.</summary>
+    public static readonly StyledProperty<string> LabelProperty =
+        AvaloniaProperty.Register<SnackbarHost, string>(nameof(Label), "Notifications");
+
     private StackPanel? _items;
     private readonly Dictionary<long, SnackbarItem> _views = new();
     private DispatcherTimer? _progressTimer;
@@ -34,10 +38,16 @@ public class SnackbarHost : ContentControl
     {
         ServiceProperty.Changed.AddClassHandler<SnackbarHost>((h, e) => h.OnServiceChanged(e.GetOldValue<ISnackbarService?>(), e.GetNewValue<ISnackbarService?>()));
         PositionProperty.Changed.AddClassHandler<SnackbarHost>((h, _) => h.ApplyPosition());
+        LabelProperty.Changed.AddClassHandler<SnackbarHost>((h, e) =>
+        {
+            if (h._items is not null)
+                AutomationProperties.SetName(h._items, e.GetNewValue<string>());
+        });
     }
 
     public ISnackbarService? Service { get => GetValue(ServiceProperty); set => SetValue(ServiceProperty, value); }
     public SnackbarPosition? Position { get => GetValue(PositionProperty); set => SetValue(PositionProperty, value); }
+    public string Label { get => GetValue(LabelProperty); set => SetValue(LabelProperty, value); }
 
     /// <summary>The snackbar views currently shown, in display order.</summary>
     public IReadOnlyList<SnackbarItem> Items => _items?.Children.OfType<SnackbarItem>().ToList() ?? [];
@@ -49,7 +59,7 @@ public class SnackbarHost : ContentControl
         base.OnApplyTemplate(e);
         _items = e.NameScope.Find<StackPanel>("PART_Items");
         if (_items is not null)
-            AutomationProperties.SetName(_items, "Notifications");
+            AutomationProperties.SetName(_items, Label);
         _views.Clear();
         ApplyPosition();
         Sync();

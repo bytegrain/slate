@@ -14,10 +14,12 @@ public partial class DialogsPage : UserControl
 
         Form.Click += async (_, _) =>
         {
-            var name = new TextField { Label = "Package name", Text = "Slate.Wpf", HelperText = "Shown on NuGet." };
+            var name = new TextField { Label = "Package name", Value = "Slate.Wpf", HelperText = "Shown on NuGet." };
             DialogHost.SetAutoFocus(name, true);
-            var save = new Button { Content = "Rename", Classes = { "primary" }, IsDefault = true };
-            save.Click += (_, _) => DialogHost.Close(save, DialogResult.Ok(name.Text));
+            var save = new Button { Content = "Rename", IsDefault = true };
+            Sl.SetVariant(save, ButtonVariant.Solid);
+            Sl.SetTone(save, Tone.Accent);
+            save.Click += (_, _) => DialogHost.Close(save, DialogResult.Ok(name.Value));
             var cancel = new Button { Content = "Cancel" };
             DialogHost.SetCloseWith(cancel, DialogCloseAction.Cancel);
 

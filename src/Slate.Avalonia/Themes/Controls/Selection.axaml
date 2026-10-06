@@ -1,8 +1,14 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:sl="using:Slate.Avalonia.Controls">
+                    xmlns:sl="using:Slate.Avalonia.Controls"
+                    xmlns:slate="using:Slate.Avalonia">
+  <!--
+    Selection controls (docs/design/components.md). Options via sl:Sl.* (or the Switch/RadioGroup properties):
+    Tone (checked fill, default accent), Size (small/large), LabelPlacement (label-start), Description.
+    Geometry and colours come from Sl.Component.Selection.* so overriding those restyles every control in scope.
+  -->
 
-  <!-- CheckBox (docs/design/components.md#checkbox): 16px box, accent fill when checked or indeterminate. -->
+  <!-- CheckBox: box + label (+ description). Accent fill when checked or indeterminate. -->
   <ControlTheme x:Key="{x:Type CheckBox}" TargetType="CheckBox">
     <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
     <Setter Property="Background" Value="Transparent" />
@@ -14,49 +20,76 @@
     <Setter Property="FocusAdorner" Value="{DynamicResource Sl.FocusAdorner.Tight}" />
     <Setter Property="Template">
       <ControlTemplate>
-        <Grid ColumnDefinitions="Auto,*" Background="{TemplateBinding Background}">
+        <DockPanel Background="{TemplateBinding Background}">
           <Border Name="PART_Box"
-                  Width="16" Height="16"
-                  VerticalAlignment="Center"
-                  CornerRadius="{DynamicResource Sl.CornerRadius.Sm}"
+                  DockPanel.Dock="Left"
+                  Width="{DynamicResource Sl.Component.Selection.BoxSize}"
+                  Height="{DynamicResource Sl.Component.Selection.BoxSize}"
+                  VerticalAlignment="Top" Margin="0,4,0,0"
+                  CornerRadius="{DynamicResource Sl.Component.Selection.BoxRadius.Corner}"
                   BorderThickness="1"
-                  BorderBrush="{DynamicResource Sl.Brush.Border.Control}"
+                  BorderBrush="{DynamicResource Sl.Component.Selection.Border.Brush}"
                   Background="{DynamicResource Sl.Brush.Background.Sunken}"
                   BoxShadow="{DynamicResource Sl.Shadow.Inset}">
             <Panel>
-              <sl:Icon Name="PART_Check" Kind="check" Size="12" StrokeThickness="3.5" Foreground="{DynamicResource Sl.Brush.Text.OnAccent}"
+              <sl:Icon Name="PART_Check" Kind="check" Size="12" StrokeThickness="3.5" Foreground="{TemplateBinding (slate:Sl.ToneOn)}"
                        HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False" />
-              <sl:Icon Name="PART_Indeterminate" Kind="minus" Size="12" StrokeThickness="3.5" Foreground="{DynamicResource Sl.Brush.Text.OnAccent}"
+              <sl:Icon Name="PART_Indeterminate" Kind="minus" Size="12" StrokeThickness="3.5" Foreground="{TemplateBinding (slate:Sl.ToneOn)}"
                        HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False" />
             </Panel>
           </Border>
-          <ContentPresenter Name="PART_ContentPresenter"
-                            Grid.Column="1"
-                            Margin="8,0,0,0"
-                            VerticalAlignment="Center"
-                            Content="{TemplateBinding Content}"
-                            ContentTemplate="{TemplateBinding ContentTemplate}"
-                            RecognizesAccessKey="True"
-                            TextWrapping="Wrap" />
-        </Grid>
+          <StackPanel Name="PART_Text" Margin="8,0,0,0" VerticalAlignment="Center" Spacing="1">
+            <ContentPresenter Name="PART_ContentPresenter"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              RecognizesAccessKey="True"
+                              TextWrapping="Wrap" />
+            <TextBlock Name="PART_Description" Text="{TemplateBinding (slate:Sl.Description)}" FontSize="12" TextWrapping="Wrap"
+                       Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" IsVisible="False" />
+          </StackPanel>
+        </DockPanel>
       </ControlTemplate>
     </Setter>
     <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter:empty">
-      <Setter Property="Margin" Value="0" />
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^.has-description /template/ TextBlock#PART_Description">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^.label-start">
+      <Style Selector="^ /template/ Border#PART_Box">
+        <Setter Property="DockPanel.Dock" Value="Right" />
+      </Style>
+      <Style Selector="^ /template/ StackPanel#PART_Text">
+        <Setter Property="Margin" Value="0,0,8,0" />
+      </Style>
+    </Style>
+    <Style Selector="^.small /template/ Border#PART_Box">
+      <Setter Property="Width" Value="14" />
+      <Setter Property="Height" Value="14" />
+      <Setter Property="Margin" Value="0,5,0,0" />
+    </Style>
+    <Style Selector="^.large /template/ Border#PART_Box">
+      <Setter Property="Width" Value="20" />
+      <Setter Property="Height" Value="20" />
+      <Setter Property="Margin" Value="0,2,0,0" />
     </Style>
     <Style Selector="^:pointerover /template/ Border#PART_Box">
       <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.ControlHover}" />
     </Style>
-    <Style Selector="^:checked, ^:indeterminate">
-      <Style Selector="^ /template/ Border#PART_Box">
-        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Default}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Default}" />
-        <Setter Property="BoxShadow" Value="none" />
-      </Style>
+    <Style Selector="^:checked /template/ Border#PART_Box">
+      <Setter Property="Background" Value="{Binding $parent[CheckBox].(slate:Sl.ToneFill)}" />
+      <Setter Property="BorderBrush" Value="{Binding $parent[CheckBox].(slate:Sl.ToneFill)}" />
+      <Setter Property="BoxShadow" Value="none" />
     </Style>
-    <Style Selector="^:checked:pointerover /template/ Border#PART_Box, ^:indeterminate:pointerover /template/ Border#PART_Box">
-      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Hover}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Hover}" />
+    <Style Selector="^:indeterminate /template/ Border#PART_Box">
+      <Setter Property="Background" Value="{Binding $parent[CheckBox].(slate:Sl.ToneFill)}" />
+      <Setter Property="BorderBrush" Value="{Binding $parent[CheckBox].(slate:Sl.ToneFill)}" />
+      <Setter Property="BoxShadow" Value="none" />
+    </Style>
+    <Style Selector="^:checked:pointerover /template/ Border#PART_Box">
+      <Setter Property="Background" Value="{Binding $parent[CheckBox].(slate:Sl.ToneFillHover)}" />
+      <Setter Property="BorderBrush" Value="{Binding $parent[CheckBox].(slate:Sl.ToneFillHover)}" />
     </Style>
     <Style Selector="^:checked /template/ sl|Icon#PART_Check">
       <Setter Property="IsVisible" Value="True" />
@@ -69,7 +102,7 @@
     </Style>
   </ControlTheme>
 
-  <!-- RadioButton: 16px circle; checked = accent fill with a 6px dot. Arrow keys move within a group. -->
+  <!-- RadioButton: circle; checked = tone fill with an on-tone dot. Arrow keys move within a group. -->
   <ControlTheme x:Key="{x:Type RadioButton}" TargetType="RadioButton">
     <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
     <Setter Property="Background" Value="Transparent" />
@@ -81,38 +114,62 @@
     <Setter Property="FocusAdorner" Value="{DynamicResource Sl.FocusAdorner.Tight}" />
     <Setter Property="Template">
       <ControlTemplate>
-        <Grid ColumnDefinitions="Auto,*" Background="{TemplateBinding Background}">
+        <DockPanel Background="{TemplateBinding Background}">
           <Border Name="PART_Ring"
-                  Width="16" Height="16"
-                  VerticalAlignment="Center"
-                  CornerRadius="8"
+                  DockPanel.Dock="Left"
+                  Width="{DynamicResource Sl.Component.Selection.BoxSize}"
+                  Height="{DynamicResource Sl.Component.Selection.BoxSize}"
+                  VerticalAlignment="Top" Margin="0,4,0,0"
+                  CornerRadius="999"
                   BorderThickness="1"
-                  BorderBrush="{DynamicResource Sl.Brush.Border.Control}"
+                  BorderBrush="{DynamicResource Sl.Component.Selection.Border.Brush}"
                   Background="{DynamicResource Sl.Brush.Background.Sunken}"
                   BoxShadow="{DynamicResource Sl.Shadow.Inset}">
-            <Ellipse Name="PART_Dot" Width="6" Height="6" Fill="{DynamicResource Sl.Brush.Text.OnAccent}" IsVisible="False" />
+            <Ellipse Name="PART_Dot" Width="6" Height="6" Fill="{TemplateBinding (slate:Sl.ToneOn)}" IsVisible="False" />
           </Border>
-          <ContentPresenter Name="PART_ContentPresenter"
-                            Grid.Column="1"
-                            Margin="8,0,0,0"
-                            VerticalAlignment="Center"
-                            Content="{TemplateBinding Content}"
-                            ContentTemplate="{TemplateBinding ContentTemplate}"
-                            RecognizesAccessKey="True"
-                            TextWrapping="Wrap" />
-        </Grid>
+          <StackPanel Name="PART_Text" Margin="8,0,0,0" VerticalAlignment="Center" Spacing="1">
+            <ContentPresenter Name="PART_ContentPresenter"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              RecognizesAccessKey="True"
+                              TextWrapping="Wrap" />
+            <TextBlock Name="PART_Description" Text="{TemplateBinding (slate:Sl.Description)}" FontSize="12" TextWrapping="Wrap"
+                       Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" IsVisible="False" />
+          </StackPanel>
+        </DockPanel>
       </ControlTemplate>
     </Setter>
     <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter:empty">
-      <Setter Property="Margin" Value="0" />
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^.has-description /template/ TextBlock#PART_Description">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^.label-start">
+      <Style Selector="^ /template/ Border#PART_Ring">
+        <Setter Property="DockPanel.Dock" Value="Right" />
+      </Style>
+      <Style Selector="^ /template/ StackPanel#PART_Text">
+        <Setter Property="Margin" Value="0,0,8,0" />
+      </Style>
+    </Style>
+    <Style Selector="^.small /template/ Border#PART_Ring">
+      <Setter Property="Width" Value="14" />
+      <Setter Property="Height" Value="14" />
+      <Setter Property="Margin" Value="0,5,0,0" />
+    </Style>
+    <Style Selector="^.large /template/ Border#PART_Ring">
+      <Setter Property="Width" Value="20" />
+      <Setter Property="Height" Value="20" />
+      <Setter Property="Margin" Value="0,2,0,0" />
     </Style>
     <Style Selector="^:pointerover /template/ Border#PART_Ring">
       <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.ControlHover}" />
     </Style>
     <Style Selector="^:checked">
       <Style Selector="^ /template/ Border#PART_Ring">
-        <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Default}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+        <Setter Property="Background" Value="{Binding $parent[RadioButton].(slate:Sl.ToneFill)}" />
+        <Setter Property="BorderBrush" Value="{Binding $parent[RadioButton].(slate:Sl.ToneFill)}" />
         <Setter Property="BoxShadow" Value="none" />
       </Style>
       <Style Selector="^ /template/ Ellipse#PART_Dot">
@@ -124,8 +181,34 @@
     </Style>
   </ControlTheme>
 
+  <!-- RadioGroup: optional label above a vertical (or row) list of radios. -->
+  <ControlTheme x:Key="{x:Type sl:RadioGroup}" TargetType="sl:RadioGroup">
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <StackPanel Spacing="6" />
+      </ItemsPanelTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel Spacing="6">
+          <TextBlock Name="PART_Label" Text="{TemplateBinding Label}" FontSize="13" FontWeight="Medium"
+                     Foreground="{DynamicResource Sl.Brush.Text.Primary}"
+                     IsVisible="{TemplateBinding Label, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:row">
+      <Setter Property="ItemsPanel">
+        <ItemsPanelTemplate>
+          <StackPanel Orientation="Horizontal" Spacing="16" />
+        </ItemsPanelTemplate>
+      </Setter>
+    </Style>
+  </ControlTheme>
+
   <!--
-    ToggleSwitch (docs/design/components.md#switch). Label (Content) before the track.
+    ToggleSwitch (and sl:Switch). Label (Content) after the track by default; label-start puts it before.
     PART_SwitchKnob's width is the knob's travel; ToggleSwitch moves PART_MovingKnobs along it.
   -->
   <ControlTheme x:Key="{x:Type ToggleSwitch}" TargetType="ToggleSwitch">
@@ -150,22 +233,17 @@
     </Setter>
     <Setter Property="Template">
       <ControlTemplate>
-        <Grid ColumnDefinitions="*,Auto" Background="{TemplateBinding Background}">
-          <ContentPresenter Name="PART_ContentPresenter"
-                            Margin="0,0,12,0"
-                            VerticalAlignment="Center"
-                            Content="{TemplateBinding Content}"
-                            ContentTemplate="{TemplateBinding ContentTemplate}"
-                            RecognizesAccessKey="True" />
-          <Grid Name="PART_TrackArea" Grid.Column="1"
+        <DockPanel Background="{TemplateBinding Background}">
+          <Grid Name="PART_TrackArea"
+                DockPanel.Dock="Left"
                 Width="{DynamicResource Sl.Switch.TrackWidth}"
                 Height="{DynamicResource Sl.Switch.TrackHeight}"
-                VerticalAlignment="Center">
+                VerticalAlignment="Top" Margin="0,2,0,0">
             <!-- Off: track + a border.control outline (>= 3:1, docs/design/color.md). -->
             <Border Name="PART_Track"
                     CornerRadius="999"
                     BorderThickness="1"
-                    BorderBrush="{DynamicResource Sl.Brush.Border.Control}"
+                    BorderBrush="{DynamicResource Sl.Component.Selection.Border.Brush}"
                     Background="{DynamicResource Sl.Brush.Control.Track}"
                     BoxShadow="{DynamicResource Sl.Shadow.Inset}" />
             <Canvas Name="PART_SwitchKnob"
@@ -192,11 +270,72 @@
               </Panel>
             </Canvas>
           </Grid>
-        </Grid>
+          <StackPanel Name="PART_Text" Margin="10,0,0,0" VerticalAlignment="Center" Spacing="1">
+            <ContentPresenter Name="PART_ContentPresenter"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              RecognizesAccessKey="True" />
+            <TextBlock Name="PART_Description" Text="{TemplateBinding (slate:Sl.Description)}" FontSize="12" TextWrapping="Wrap"
+                       Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" IsVisible="False" />
+          </StackPanel>
+        </DockPanel>
       </ControlTemplate>
     </Setter>
     <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter:empty">
-      <Setter Property="Margin" Value="0" />
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^.has-description /template/ TextBlock#PART_Description">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^.label-start">
+      <Style Selector="^ /template/ Grid#PART_TrackArea">
+        <Setter Property="DockPanel.Dock" Value="Right" />
+      </Style>
+      <Style Selector="^ /template/ StackPanel#PART_Text">
+        <Setter Property="Margin" Value="0,0,12,0" />
+      </Style>
+    </Style>
+    <Style Selector="^.spread">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="^.spread:not(.label-start) /template/ StackPanel#PART_Text">
+      <Setter Property="HorizontalAlignment" Value="Right" />
+    </Style>
+    <Style Selector="^.small">
+      <Style Selector="^ /template/ Grid#PART_TrackArea">
+        <Setter Property="Width" Value="28" />
+        <Setter Property="Height" Value="16" />
+        <Setter Property="Margin" Value="0,4,0,0" />
+      </Style>
+      <Style Selector="^ /template/ Canvas#PART_SwitchKnob">
+        <Setter Property="Width" Value="12" />
+      </Style>
+      <Style Selector="^ /template/ Panel#PART_MovingKnobs">
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
+      </Style>
+      <Style Selector="^ /template/ Border#PART_Knob">
+        <Setter Property="Width" Value="12" />
+        <Setter Property="Height" Value="12" />
+      </Style>
+    </Style>
+    <Style Selector="^.large">
+      <Style Selector="^ /template/ Grid#PART_TrackArea">
+        <Setter Property="Width" Value="44" />
+        <Setter Property="Height" Value="24" />
+        <Setter Property="Margin" Value="0,0,0,0" />
+      </Style>
+      <Style Selector="^ /template/ Canvas#PART_SwitchKnob">
+        <Setter Property="Width" Value="20" />
+      </Style>
+      <Style Selector="^ /template/ Panel#PART_MovingKnobs">
+        <Setter Property="Width" Value="24" />
+        <Setter Property="Height" Value="24" />
+      </Style>
+      <Style Selector="^ /template/ Border#PART_Knob">
+        <Setter Property="Width" Value="20" />
+        <Setter Property="Height" Value="20" />
+      </Style>
     </Style>
     <Style Selector="^ /template/ Border#PART_Track">
       <Setter Property="Transitions">
@@ -206,16 +345,16 @@
       </Setter>
     </Style>
     <Style Selector="^:checked /template/ Border#PART_Track">
-      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Default}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Default}" />
+      <Setter Property="Background" Value="{Binding $parent[ToggleSwitch].(slate:Sl.ToneFill)}" />
+      <Setter Property="BorderBrush" Value="{Binding $parent[ToggleSwitch].(slate:Sl.ToneFill)}" />
       <Setter Property="BoxShadow" Value="none" />
     </Style>
     <Style Selector="^:pointerover /template/ Border#PART_Track">
       <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.ControlHover}" />
     </Style>
     <Style Selector="^:checked:pointerover /template/ Border#PART_Track">
-      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Hover}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Accent.Hover}" />
+      <Setter Property="Background" Value="{Binding $parent[ToggleSwitch].(slate:Sl.ToneFillHover)}" />
+      <Setter Property="BorderBrush" Value="{Binding $parent[ToggleSwitch].(slate:Sl.ToneFillHover)}" />
     </Style>
     <Style Selector="^:disabled">
       <Setter Property="Opacity" Value="{DynamicResource Sl.Opacity.Disabled}" />

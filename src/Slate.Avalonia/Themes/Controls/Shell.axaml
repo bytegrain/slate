@@ -30,21 +30,26 @@
 
   <!-- AppBar: 56px surface with bottom hairline. -->
   <ControlTheme x:Key="{x:Type sl:AppBar}" TargetType="sl:AppBar">
-    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Surface}" />
+    <Setter Property="Background" Value="{DynamicResource Sl.Component.AppBar.Background.Brush}" />
     <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
-    <Setter Property="Height" Value="{DynamicResource Sl.Size.Appbar}" />
+    <Setter Property="Height" Value="{DynamicResource Sl.Component.AppBar.Height}" />
     <Setter Property="Padding" Value="12,0,16,0" />
     <Setter Property="Template">
       <ControlTemplate>
         <Border Background="{TemplateBinding Background}" BorderThickness="0,0,0,1"
-                BorderBrush="{DynamicResource Sl.Brush.Border.Default}" Padding="{TemplateBinding Padding}">
-          <Grid ColumnDefinitions="Auto,Auto,*,Auto">
-            <Button Name="PART_MenuButton" Classes="ghost" slate:Sl.Icon="menu" Margin="0,0,8,0"
-                    AutomationProperties.Name="Toggle navigation" IsVisible="{TemplateBinding ShowMenuButton}" />
-            <TextBlock Grid.Column="1" Text="{TemplateBinding Title}" VerticalAlignment="Center"
+                BorderBrush="{DynamicResource Sl.Component.AppBar.Border.Brush}" Padding="{TemplateBinding Padding}">
+          <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto">
+            <Button Name="PART_MenuButton" Classes="ghost" slate:Sl.StartIcon="menu" Margin="0,0,8,0"
+                    slate:Sl.Label="Toggle navigation" IsVisible="{TemplateBinding ShowMenuButton}" />
+            <ContentPresenter Name="PART_Leading" Grid.Column="1" Content="{TemplateBinding Leading}" VerticalAlignment="Center" Margin="0,0,8,0"
+                              IsVisible="{TemplateBinding Leading, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            <TextBlock Grid.Column="2" Text="{TemplateBinding Title}" VerticalAlignment="Center"
                        FontSize="16" FontWeight="SemiBold" Margin="0,0,16,0" />
-            <ContentPresenter Grid.Column="2" Content="{TemplateBinding Content}" VerticalAlignment="Center" />
-            <ContentPresenter Grid.Column="3" Content="{TemplateBinding Actions}" VerticalAlignment="Center" />
+            <Panel Grid.Column="3" VerticalAlignment="Center">
+              <ContentPresenter Name="PART_Center" Content="{TemplateBinding Center}" />
+              <ContentPresenter Content="{TemplateBinding Content}" />
+            </Panel>
+            <ContentPresenter Grid.Column="4" Content="{TemplateBinding Actions}" VerticalAlignment="Center" />
           </Grid>
         </Border>
       </ControlTemplate>
@@ -53,7 +58,7 @@
 
   <!-- Drawer: subtle panel with a right hairline. -->
   <ControlTheme x:Key="{x:Type sl:Drawer}" TargetType="sl:Drawer">
-    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Subtle}" />
+    <Setter Property="Background" Value="{DynamicResource Sl.Component.Drawer.Background.Brush}" />
     <Setter Property="Padding" Value="10,12" />
     <Setter Property="Template">
       <ControlTemplate>
@@ -87,12 +92,12 @@
     <Setter Property="FocusAdorner" Value="{DynamicResource Sl.FocusAdorner.Tight}" />
     <Setter Property="Template">
       <ControlTemplate>
-        <Border Name="PART_Border" Background="{TemplateBinding Background}" CornerRadius="{DynamicResource Sl.CornerRadius.Md}"
+        <Border Name="PART_Border" Background="{TemplateBinding Background}" CornerRadius="{DynamicResource Sl.Component.Drawer.ItemRadius.Corner}"
                 Padding="{TemplateBinding Padding}">
           <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
             <sl:Icon Kind="{TemplateBinding Icon}" Margin="0,0,10,0" />
             <TextBlock Name="PART_Label" Grid.Column="1" Text="{TemplateBinding Label}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-            <TextBlock Name="PART_Count" Grid.Column="2" Text="{TemplateBinding Count}" VerticalAlignment="Center"
+            <TextBlock Name="PART_Count" Grid.Column="2" Text="{TemplateBinding Trailing}" VerticalAlignment="Center"
                        FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="11" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
           </Grid>
         </Border>
@@ -103,7 +108,7 @@
       <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
     </Style>
     <Style Selector="^:active">
-      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Surface}" />
+      <Setter Property="Background" Value="{DynamicResource Sl.Component.Drawer.ActiveItem.Brush}" />
       <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
       <Setter Property="FontWeight" Value="Medium" />
       <Style Selector="^ /template/ Border#PART_Border">
@@ -167,9 +172,9 @@
                   <ContentPresenter Grid.Column="2" Content="{TemplateBinding TitleBarActions}" VerticalAlignment="Center"
                                     Margin="0,0,8,0" WindowDecorationProperties.ElementRole="User" />
                   <StackPanel Grid.Column="3" Orientation="Horizontal" WindowDecorationProperties.ElementRole="User">
-                    <Button Name="PART_Minimize" Classes="ghost caption" slate:Sl.Icon="minus" AutomationProperties.Name="Minimise" />
-                    <Button Name="PART_Maximize" Classes="ghost caption" slate:Sl.Icon="copy" AutomationProperties.Name="Maximise" />
-                    <Button Name="PART_Close" Classes="ghost caption close" slate:Sl.Icon="x" AutomationProperties.Name="Close" />
+                    <Button Name="PART_Minimize" Classes="ghost caption" slate:Sl.StartIcon="minus" AutomationProperties.Name="Minimise" />
+                    <Button Name="PART_Maximize" Classes="ghost caption" slate:Sl.StartIcon="copy" AutomationProperties.Name="Maximise" />
+                    <Button Name="PART_Close" Classes="ghost caption close" slate:Sl.StartIcon="x" AutomationProperties.Name="Close" />
                   </StackPanel>
                 </Grid>
               </Border>

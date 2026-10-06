@@ -3,11 +3,11 @@
                     xmlns:sl="using:Slate.Avalonia.Controls"
                     xmlns:slate="using:Slate.Avalonia">
 
-  <!-- LoadingSpinner: 2px ring, 0.8s linear rotation (removed by ReduceMotion). -->
+  <!-- LoadingSpinner: 2px ring, 0.8s linear rotation (removed by ReduceMotion). Tone colours it; neutral = foreground. -->
   <ControlTheme x:Key="{x:Type sl:LoadingSpinner}" TargetType="sl:LoadingSpinner">
     <Setter Property="Template">
       <ControlTemplate>
-        <Panel Width="{TemplateBinding Size}" Height="{TemplateBinding Size}">
+        <Panel Width="{TemplateBinding ActualDiameter}" Height="{TemplateBinding ActualDiameter}">
           <Ellipse Name="PART_Track" Stroke="{TemplateBinding Foreground}" StrokeThickness="2" Opacity="0.25" />
           <Arc Name="PART_Arc" Stroke="{TemplateBinding Foreground}" StrokeThickness="2" StrokeLineCap="Round"
                StartAngle="-90" SweepAngle="100" RenderTransformOrigin="50%,50%">
@@ -18,6 +18,9 @@
         </Panel>
       </ControlTemplate>
     </Setter>
+    <Style Selector="^.tone-accent, ^.tone-success, ^.tone-warning, ^.tone-danger, ^.tone-info">
+      <Setter Property="Foreground" Value="{Binding $self.(slate:Sl.ToneText)}" />
+    </Style>
     <Style Selector="^ /template/ Arc#PART_Arc">
       <Style.Animations>
         <Animation Duration="0:0:0.8" IterationCount="Infinite">
@@ -50,88 +53,98 @@
     </Setter>
   </ControlTheme>
 
-  <!-- Badge: 20px, tone tints. -->
+  <!-- Badge: Tone × Variant (soft / solid / outlined), 20px (18px small). -->
   <ControlTheme x:Key="{x:Type sl:Badge}" TargetType="sl:Badge">
-    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Subtle}" />
-    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Secondary}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.Default}" />
+    <Setter Property="Background" Value="{Binding $self.(slate:Sl.ToneSubtle)}" />
+    <Setter Property="Foreground" Value="{Binding $self.(slate:Sl.ToneText)}" />
+    <Setter Property="BorderBrush" Value="{Binding $self.(slate:Sl.ToneBorder)}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Sl.Component.Badge.Radius.Corner}" />
+    <Setter Property="Height" Value="{DynamicResource Sl.Component.Badge.Height}" />
+    <Setter Property="Padding" Value="7,0" />
     <Setter Property="FontSize" Value="12" />
     <Setter Property="FontWeight" Value="SemiBold" />
     <Setter Property="HorizontalAlignment" Value="Left" />
     <Setter Property="VerticalAlignment" Value="Center" />
     <Setter Property="Template">
       <ControlTemplate>
-        <Border Name="PART_Root" Height="20" Padding="7,0"
+        <Border Name="PART_Root" Padding="{TemplateBinding Padding}"
                 Background="{TemplateBinding Background}"
                 BorderBrush="{TemplateBinding BorderBrush}"
                 BorderThickness="1"
-                CornerRadius="{DynamicResource Sl.CornerRadius.Sm}">
+                CornerRadius="{TemplateBinding CornerRadius}">
           <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-            <Ellipse Name="PART_Dot" Width="6" Height="6" Fill="{TemplateBinding Foreground}" IsVisible="{TemplateBinding ShowDot}" />
-            <TextBlock Text="{TemplateBinding Text}" VerticalAlignment="Center" />
+            <Ellipse Name="PART_Dot" Width="6" Height="6" Fill="{TemplateBinding Foreground}" IsVisible="{TemplateBinding Dot}" />
+            <sl:Icon Name="PART_Icon" Kind="{TemplateBinding Icon}" Size="12" StrokeThickness="2.4" />
+            <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" VerticalAlignment="Center" />
           </StackPanel>
         </Border>
       </ControlTemplate>
     </Setter>
-    <Style Selector="^:info">
-      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Info.Bg}" />
-      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Info.Fg}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Info.Border}" />
+    <!-- Neutral soft keeps Alloy's quiet grey chip. -->
+    <Style Selector="^.tone-neutral">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Subtle}" />
+      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Secondary}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.Default}" />
     </Style>
-    <Style Selector="^:success">
-      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Success.Bg}" />
-      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Success.Fg}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Success.Border}" />
-    </Style>
-    <Style Selector="^:warning">
-      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Warning.Bg}" />
-      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Warning.Fg}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Warning.Border}" />
-    </Style>
-    <Style Selector="^:danger">
-      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Danger.Bg}" />
-      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Danger.Border}" />
-    </Style>
-    <Style Selector="^:accent">
-      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Default}" />
-      <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.OnAccent}" />
+    <Style Selector="^:solid">
+      <Setter Property="Background" Value="{Binding $self.(slate:Sl.ToneFill)}" />
+      <Setter Property="Foreground" Value="{Binding $self.(slate:Sl.ToneOn)}" />
       <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+    <Style Selector="^:outlined">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{Binding $self.(slate:Sl.ToneText)}" />
+      <Setter Property="BorderBrush" Value="{Binding $self.(slate:Sl.ToneBorder)}" />
+    </Style>
+    <Style Selector="^:small">
+      <Setter Property="Height" Value="18" />
+      <Setter Property="Padding" Value="5,0" />
+      <Setter Property="FontSize" Value="11" />
     </Style>
   </ControlTheme>
 
-  <!-- Alert (docs/design/components.md#alert) -->
+  <!-- Alert (docs/design/components.md#alert): soft (default), outlined or solid; tone follows severity. -->
   <ControlTheme x:Key="{x:Type sl:Alert}" TargetType="sl:Alert">
-    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Info.Bg}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Info.Border}" />
+    <Setter Property="Background" Value="{Binding $self.(slate:Sl.ToneSubtle)}" />
+    <Setter Property="BorderBrush" Value="{Binding $self.(slate:Sl.ToneBorder)}" />
     <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Secondary}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Sl.Component.Alert.Radius.Corner}" />
     <Setter Property="FontSize" Value="13.5" />
     <Setter Property="Padding" Value="14,11" />
     <Setter Property="Template">
       <ControlTemplate>
-        <Border Background="{TemplateBinding Background}"
+        <Border Name="PART_Root"
+                Background="{TemplateBinding Background}"
                 BorderBrush="{TemplateBinding BorderBrush}"
                 BorderThickness="1"
-                CornerRadius="{DynamicResource Sl.CornerRadius.Lg}"
+                CornerRadius="{TemplateBinding CornerRadius}"
                 Padding="{TemplateBinding Padding}">
           <Grid ColumnDefinitions="Auto,*,Auto,Auto">
-            <sl:Icon Name="PART_Icon" Kind="info" Size="18" Margin="0,1,10,0" VerticalAlignment="Top"
-                     Foreground="{DynamicResource Sl.Brush.Status.Info.Fg}" />
+            <sl:Icon Name="PART_Icon" Kind="{TemplateBinding IconKind}" Size="18" Margin="0,1,10,0" VerticalAlignment="Top"
+                     Foreground="{Binding $parent[sl:Alert].(slate:Sl.ToneText)}" />
             <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
               <TextBlock Name="PART_Title" Text="{TemplateBinding Title}" FontWeight="SemiBold"
                          Foreground="{DynamicResource Sl.Brush.Text.Primary}" TextWrapping="Wrap"
                          IsVisible="{TemplateBinding Title, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-              <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" TextWrapping="Wrap" />
+              <ContentPresenter Name="PART_Message" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" TextWrapping="Wrap" />
             </StackPanel>
-            <ContentPresenter Grid.Column="2" Content="{TemplateBinding Actions}" Margin="12,0,0,0" VerticalAlignment="Center" />
+            <ContentPresenter Name="PART_Actions" Grid.Column="2" Content="{TemplateBinding Actions}" Margin="12,0,0,0" VerticalAlignment="Center" />
             <Button Name="PART_Close" Grid.Column="3" Classes="ghost small icon-only" Margin="8,-3,-6,-3"
-                    VerticalAlignment="Top" IsVisible="False" AutomationProperties.Name="Dismiss" slate:Sl.Icon="x" />
+                    VerticalAlignment="Top" IsVisible="False" AutomationProperties.Name="Dismiss" slate:Sl.StartIcon="x" />
           </Grid>
         </Border>
       </ControlTemplate>
     </Setter>
     <Style Selector="^:dismissible /template/ Button#PART_Close">
       <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:dense">
+      <Setter Property="Padding" Value="10,6" />
+      <Setter Property="FontSize" Value="13" />
+      <Style Selector="^ /template/ sl|Icon#PART_Icon">
+        <Setter Property="Size" Value="16" />
+        <Setter Property="Margin" Value="0,1,8,0" />
+      </Style>
     </Style>
     <Style Selector="^:normal">
       <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Subtle}" />
@@ -140,53 +153,54 @@
         <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Secondary}" />
       </Style>
     </Style>
-    <Style Selector="^:success">
-      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Success.Bg}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Success.Border}" />
-      <Style Selector="^ /template/ sl|Icon#PART_Icon">
-        <Setter Property="Kind" Value="check-circle" />
-        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Success.Fg}" />
-      </Style>
+    <Style Selector="^:outlined">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Surface}" />
     </Style>
-    <Style Selector="^:warning">
-      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Warning.Bg}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Warning.Border}" />
-      <Style Selector="^ /template/ sl|Icon#PART_Icon">
-        <Setter Property="Kind" Value="alert-triangle" />
-        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Warning.Fg}" />
+    <Style Selector="^:solid">
+      <Setter Property="Background" Value="{Binding $self.(slate:Sl.ToneFill)}" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="Foreground" Value="{Binding $self.(slate:Sl.ToneOn)}" />
+      <Style Selector="^ /template/ TextBlock#PART_Title">
+        <Setter Property="Foreground" Value="{Binding $parent[sl:Alert].(slate:Sl.ToneOn)}" />
       </Style>
-    </Style>
-    <Style Selector="^:error">
-      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Danger.Bg}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Danger.Border}" />
       <Style Selector="^ /template/ sl|Icon#PART_Icon">
-        <Setter Property="Kind" Value="alert-circle" />
-        <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
+        <Setter Property="Foreground" Value="{Binding $parent[sl:Alert].(slate:Sl.ToneOn)}" />
+      </Style>
+      <Style Selector="^ /template/ Button#PART_Close">
+        <Setter Property="Foreground" Value="{Binding $parent[sl:Alert].(slate:Sl.ToneOn)}" />
       </Style>
     </Style>
   </ControlTheme>
 
-  <!-- Card (docs/design/layout.md#card) -->
+  <!-- Card (docs/design/layout.md#card): elevated (default), outlined or flat. Styled from Sl.Component.Card.*. -->
   <ControlTheme x:Key="{x:Type sl:Card}" TargetType="sl:Card">
-    <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Surface}" />
+    <Setter Property="Background" Value="{DynamicResource Sl.Component.Card.Background.Brush}" />
     <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
-    <Setter Property="Padding" Value="20" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Sl.Component.Card.Radius.Corner}" />
+    <Setter Property="Padding" Value="{DynamicResource Sl.Component.Card.Padding.Thickness}" />
+    <Setter Property="FocusAdorner" Value="{DynamicResource Sl.FocusAdorner}" />
     <Setter Property="Template">
       <ControlTemplate>
         <Border Name="PART_Root"
                 Background="{TemplateBinding Background}"
-                CornerRadius="{DynamicResource Sl.CornerRadius.Xl}"
-                BoxShadow="{DynamicResource Sl.Shadow.E1}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                BorderBrush="{DynamicResource Sl.Component.Card.Border.Brush}"
+                BoxShadow="{DynamicResource Sl.Component.Card.Shadow}"
                 ClipToBounds="True">
           <DockPanel>
             <Border Name="PART_Header" DockPanel.Dock="Top" Padding="16,10" IsVisible="False"
                     BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Sl.Brush.Border.Default}">
               <Grid ColumnDefinitions="*,Auto">
-                <StackPanel VerticalAlignment="Center" Spacing="1">
-                  <ContentPresenter Content="{TemplateBinding Header}" FontWeight="SemiBold" FontSize="14" />
-                  <TextBlock Text="{TemplateBinding Subtitle}" FontSize="12" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}"
-                             IsVisible="{TemplateBinding Subtitle, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                </StackPanel>
+                <Panel>
+                  <StackPanel Name="PART_TitleBlock" VerticalAlignment="Center" Spacing="1"
+                              IsVisible="{TemplateBinding Header, Converter={x:Static ObjectConverters.IsNull}}">
+                    <TextBlock Name="PART_Title" Text="{TemplateBinding Title}" FontWeight="SemiBold" FontSize="14" />
+                    <TextBlock Name="PART_Subtitle" Text="{TemplateBinding Subtitle}" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}"
+                               IsVisible="{TemplateBinding Subtitle, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                  </StackPanel>
+                  <ContentPresenter Name="PART_CustomHeader" Content="{TemplateBinding Header}" VerticalAlignment="Center"
+                                    IsVisible="{TemplateBinding Header, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                </Panel>
                 <ContentPresenter Grid.Column="1" Content="{TemplateBinding HeaderActions}" VerticalAlignment="Center" />
               </Grid>
             </Border>
@@ -211,16 +225,24 @@
     <Style Selector="^:has-footer /template/ Border#PART_Footer">
       <Setter Property="IsVisible" Value="True" />
     </Style>
+    <Style Selector="^:flush">
+      <Setter Property="Padding" Value="0" />
+    </Style>
     <Style Selector="^:outlined /template/ Border#PART_Root">
       <Setter Property="BoxShadow" Value="none" />
       <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.Default}" />
+    </Style>
+    <Style Selector="^:flat">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Subtle}" />
+      <Style Selector="^ /template/ Border#PART_Root">
+        <Setter Property="BoxShadow" Value="none" />
+      </Style>
     </Style>
     <Style Selector="^:interactive">
       <Setter Property="Cursor" Value="Hand" />
     </Style>
     <Style Selector="^:interactive:pointerover /template/ Border#PART_Root">
-      <Setter Property="BoxShadow" Value="{DynamicResource Sl.Shadow.E2}" />
+      <Setter Property="BoxShadow" Value="{DynamicResource Sl.Component.Card.HoverShadow}" />
     </Style>
   </ControlTheme>
 

@@ -29,7 +29,7 @@ public class StackTests
     public void Spacer_pushes_siblings_to_the_ends()
     {
         Border a = Box(40, 20), b = Box(60, 20);
-        var stack = new Stack { Orientation = Orientation.Horizontal, Width = 400, Spacing = 0, Children = { a, new Spacer(), b } };
+        var stack = new Stack { Direction = Direction.Row, Width = 400, Spacing = 0, Children = { a, new Spacer(), b } };
         var w = Show(stack);
         Assert.Equal(0, a.Bounds.X);
         Assert.Equal(340, b.Bounds.X);
@@ -43,7 +43,7 @@ public class StackTests
     public void Justify_positions_children_on_the_main_axis(StackJustify justify, double firstX)
     {
         Border a = Box(50, 20), b = Box(50, 20);
-        var stack = new Stack { Orientation = Orientation.Horizontal, Width = 400, Spacing = 0, Justify = justify, Children = { a, b } };
+        var stack = new Stack { Direction = Direction.Row, Width = 400, Spacing = 0, Justify = justify, Children = { a, b } };
         var w = Show(stack);
         Assert.Equal(firstX, a.Bounds.X);
         w.Close();
@@ -53,7 +53,7 @@ public class StackTests
     public void Space_between_spreads_the_free_space()
     {
         Border a = Box(50, 20), b = Box(50, 20), c = Box(50, 20);
-        var stack = new Stack { Orientation = Orientation.Horizontal, Width = 350, Spacing = 0, Justify = StackJustify.SpaceBetween, Children = { a, b, c } };
+        var stack = new Stack { Direction = Direction.Row, Width = 350, Spacing = 0, Justify = StackJustify.Between, Children = { a, b, c } };
         var w = Show(stack);
         Assert.Equal([0, 150, 300], new[] { a, b, c }.Select(x => x.Bounds.X));
         w.Close();
@@ -63,7 +63,7 @@ public class StackTests
     public void Align_items_centers_on_the_cross_axis()
     {
         Border small = Box(50, 10), tall = Box(50, 40);
-        var stack = new Stack { Orientation = Orientation.Horizontal, AlignItems = StackAlign.Center, VerticalAlignment = VerticalAlignment.Top, Children = { small, tall } };
+        var stack = new Stack { Direction = Direction.Row, Align = StackAlign.Center, VerticalAlignment = VerticalAlignment.Top, Children = { small, tall } };
         var w = Show(stack);
         Assert.Equal(15, small.Bounds.Y);
         w.Close();
@@ -73,7 +73,7 @@ public class StackTests
     public void Wrap_flows_onto_new_lines()
     {
         var items = Enumerable.Range(0, 5).Select(_ => Box(100, 20)).ToList();
-        var stack = new Stack { Orientation = Orientation.Horizontal, Wrap = true, Width = 330, Spacing = 2 };
+        var stack = new Stack { Direction = Direction.Row, Wrap = true, Width = 330, Spacing = 2 };
         foreach (var i in items) stack.Children.Add(i);
         var w = Show(stack);
         // 3 per line at 100 + 8 gap = 316 ≤ 330
@@ -155,15 +155,15 @@ public class ResponsiveGridTests
 public class ContainerTests
 {
     [AvaloniaTheory]
-    [InlineData(1600, ContainerSize.Lg, 1200)]
-    [InlineData(1000, ContainerSize.Lg, 952)] // 1000 - 2 × 24
-    [InlineData(500, ContainerSize.Lg, 468)]  // phone gutter 16
-    [InlineData(1600, ContainerSize.Sm, 600)]
-    [InlineData(2000, ContainerSize.Fluid, 1952)]
-    public void Max_width_and_gutters_follow_tokens(double windowWidth, ContainerSize size, double expected)
+    [InlineData(1600, ContainerWidth.Lg, 1200)]
+    [InlineData(1000, ContainerWidth.Lg, 952)] // 1000 - 2 × 24
+    [InlineData(500, ContainerWidth.Lg, 468)]  // phone gutter 16
+    [InlineData(1600, ContainerWidth.Sm, 600)]
+    [InlineData(2000, ContainerWidth.Fluid, 1952)]
+    public void Max_width_and_gutters_follow_tokens(double windowWidth, ContainerWidth size, double expected)
     {
         var child = new Border { Height = 10 };
-        var container = new Container { Size = size, Child = child };
+        var container = new Container { ContainerMaxWidth = size, Child = child };
         var w = Show(container, width: windowWidth);
         Assert.Equal(expected, child.Bounds.Width);
         Assert.Equal((windowWidth - expected) / 2, child.Bounds.X);
@@ -175,7 +175,7 @@ public class AppShellTests
 {
     private static (AppShell Shell, Drawer Drawer, Border Content, AppBar Bar) Build(DrawerVariant variant = DrawerVariant.Responsive)
     {
-        var drawer = new Drawer { Content = new Stack { Children = { new NavItem { Label = "Overview", Icon = "home", IsActive = true }, new NavItem { Label = "Files", Icon = "folder" } } } };
+        var drawer = new Drawer { Content = new Stack { Children = { new NavItem { Label = "Overview", Icon = "home", Active = true }, new NavItem { Label = "Files", Icon = "folder" } } } };
         var content = new Border();
         var bar = new AppBar { Title = "Slate" };
         return (new AppShell { AppBar = bar, Drawer = drawer, Content = content, DrawerVariant = variant }, drawer, content, bar);
@@ -217,7 +217,7 @@ public class AppShellTests
         var (shell, drawer, content, _) = Build();
         var w = Show(shell, width: 700);
         Assert.Equal(DrawerMode.Temporary, shell.DrawerMode);
-        Assert.False(shell.IsDrawerOpen);
+        Assert.False(shell.DrawerOpen);
         Assert.False(drawer.IsEffectivelyVisible);
         Assert.Equal(0, content.TranslatePoint(default, shell)!.Value.X);
         w.Close();
@@ -232,21 +232,21 @@ public class AppShellTests
 
         var menu = bar.Part<Button>("PART_MenuButton");
         w.Click(menu);
-        Assert.True(shell.IsDrawerOpen);
+        Assert.True(shell.DrawerOpen);
         Assert.True(scrim.IsVisible);
         Assert.True(drawer.IsEffectivelyVisible);
         Assert.Equal(0, content.TranslatePoint(default, shell)!.Value.X); // overlay, no push
         Assert.True(drawer.IsKeyboardFocusWithin); // focus moved into the drawer
 
         w.Press(Key.Escape);
-        Assert.False(shell.IsDrawerOpen);
+        Assert.False(shell.DrawerOpen);
         Assert.Same(menu, w.Focused()); // focus returns to the toggle
 
         w.Click(menu);
-        Assert.True(shell.IsDrawerOpen);
+        Assert.True(shell.DrawerOpen);
         w.MoveTo(new Point(1000, 300));
         w.ClickAt(new Point(1000, 300));
-        Assert.False(shell.IsDrawerOpen);
+        Assert.False(shell.DrawerOpen);
         w.Close();
     }
 

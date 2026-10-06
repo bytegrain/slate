@@ -3,6 +3,7 @@ using Avalonia.Automation;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
+using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -83,18 +84,58 @@ public class Icon : Control
     }
 }
 
-/// <summary>Indeterminate busy indicator: a 2px ring in the current foreground, rotating unless motion is reduced.</summary>
+/// <summary>
+/// Indeterminate busy indicator: a 2px ring rotating unless motion is reduced. <see cref="Size"/> picks
+/// 12/16/24px (or set <see cref="Diameter"/>); <see cref="Tone"/> colours it (Neutral = current foreground).
+/// </summary>
 public class LoadingSpinner : TemplatedControl
 {
-    public static readonly StyledProperty<double> SizeProperty =
-        AvaloniaProperty.Register<LoadingSpinner, double>(nameof(Size), 16);
+    public static readonly StyledProperty<ControlSize> SizeProperty =
+        AvaloniaProperty.Register<LoadingSpinner, ControlSize>(nameof(Size), ControlSize.Medium);
 
-    public double Size { get => GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
+    /// <summary>Exact diameter in px; overrides <see cref="Size"/> when set.</summary>
+    public static readonly StyledProperty<double> DiameterProperty =
+        AvaloniaProperty.Register<LoadingSpinner, double>(nameof(Diameter), double.NaN);
+
+    public static readonly StyledProperty<Tone> ToneProperty =
+        AvaloniaProperty.Register<LoadingSpinner, Tone>(nameof(Tone));
+
+    /// <summary>Accessible name (default "Loading").</summary>
+    public static readonly StyledProperty<string?> LabelProperty =
+        AvaloniaProperty.Register<LoadingSpinner, string?>(nameof(Label), "Loading");
+
+    public static readonly DirectProperty<LoadingSpinner, double> ActualDiameterProperty =
+        AvaloniaProperty.RegisterDirect<LoadingSpinner, double>(nameof(ActualDiameter), s => s.ActualDiameter);
+
+    private double _actual = 16;
+
+    public ControlSize Size { get => GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
+    public double Diameter { get => GetValue(DiameterProperty); set => SetValue(DiameterProperty, value); }
+    public Tone Tone { get => GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
+    public string? Label { get => GetValue(LabelProperty); set => SetValue(LabelProperty, value); }
+
+    /// <summary>The diameter actually used: <see cref="Diameter"/> if set, else 12/16/24 for <see cref="Size"/>.</summary>
+    public double ActualDiameter { get => _actual; private set => SetAndRaise(ActualDiameterProperty, ref _actual, value); }
 
     static LoadingSpinner()
     {
         FocusableProperty.OverrideDefaultValue<LoadingSpinner>(false);
-        AutomationProperties.NameProperty.OverrideDefaultValue<LoadingSpinner>("Loading");
+        SizeProperty.Changed.AddClassHandler<LoadingSpinner>((s, _) => s.Update());
+        DiameterProperty.Changed.AddClassHandler<LoadingSpinner>((s, _) => s.Update());
+        ToneProperty.Changed.AddClassHandler<LoadingSpinner>((s, _) => s.Update());
+        LabelProperty.Changed.AddClassHandler<LoadingSpinner>((s, e) => AutomationProperties.SetName(s, e.GetNewValue<string?>()));
+    }
+
+    public LoadingSpinner()
+    {
+        AutomationProperties.SetName(this, Label);
+        Update();
+    }
+
+    private void Update()
+    {
+        ActualDiameter = !double.IsNaN(Diameter) ? Diameter : Size switch { ControlSize.Small => 12, ControlSize.Large => 24, _ => 16 };
+        Slate.Avalonia.Sl.SetOne(this, Slate.Avalonia.Sl.ToneClasses, Tone == Tone.Neutral ? null : Slate.Avalonia.Sl.ClassFor(Tone));
     }
 
     protected override AutomationPeer OnCreateAutomationPeer() => new LoadingSpinnerPeer(this);
@@ -113,38 +154,43 @@ public class Kbd : TemplatedControl
     public string? Text { get => GetValue(TextProperty); set => SetValue(TextProperty, value); }
 }
 
-public enum BadgeTone
+/// <summary>
+/// Small status label (docs/design/components.md#badge). <see cref="Tone"/> × <see cref="Variant"/> (soft tint,
+/// solid fill or outlined), <see cref="Dot"/> adds a leading dot, <see cref="Icon"/> a leading icon.
+/// </summary>
+[PseudoClasses(":solid", ":outlined", ":small")]
+public class Badge : ContentControl
 {
-    Neutral,
-    Info,
-    Success,
-    Warning,
-    Danger,
-    Accent,
-}
-
-/// <summary>Small status label. Tone maps to status tints; <see cref="ShowDot"/> adds a leading dot.</summary>
-public class Badge : TemplatedControl
-{
-    public static readonly StyledProperty<string?> TextProperty = AvaloniaProperty.Register<Badge, string?>(nameof(Text));
-    public static readonly StyledProperty<BadgeTone> ToneProperty = AvaloniaProperty.Register<Badge, BadgeTone>(nameof(Tone));
-    public static readonly StyledProperty<bool> ShowDotProperty = AvaloniaProperty.Register<Badge, bool>(nameof(ShowDot));
+    public static readonly StyledProperty<Tone> ToneProperty = AvaloniaProperty.Register<Badge, Tone>(nameof(Tone));
+    public static readonly StyledProperty<BadgeVariant> VariantProperty = AvaloniaProperty.Register<Badge, BadgeVariant>(nameof(Variant));
+    public static readonly StyledProperty<ControlSize> SizeProperty = AvaloniaProperty.Register<Badge, ControlSize>(nameof(Size), ControlSize.Medium);
+    public static readonly StyledProperty<bool> DotProperty = AvaloniaProperty.Register<Badge, bool>(nameof(Dot));
+    public static readonly StyledProperty<string?> IconProperty = AvaloniaProperty.Register<Badge, string?>(nameof(Icon));
 
     static Badge()
     {
-        ToneProperty.Changed.AddClassHandler<Badge>((b, _) => b.UpdateTone());
+        ToneProperty.Changed.AddClassHandler<Badge>((b, _) => b.Update());
+        VariantProperty.Changed.AddClassHandler<Badge>((b, _) => b.Update());
+        SizeProperty.Changed.AddClassHandler<Badge>((b, _) => b.Update());
     }
 
-    public Badge() => UpdateTone();
+    public Badge() => Update();
 
-    public string? Text { get => GetValue(TextProperty); set => SetValue(TextProperty, value); }
-    public BadgeTone Tone { get => GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
-    public bool ShowDot { get => GetValue(ShowDotProperty); set => SetValue(ShowDotProperty, value); }
+    public Tone Tone { get => GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
+    public BadgeVariant Variant { get => GetValue(VariantProperty); set => SetValue(VariantProperty, value); }
 
-    private void UpdateTone()
+    /// <summary>Small (18px) or Medium (20px). Large renders as Medium.</summary>
+    public ControlSize Size { get => GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
+
+    public bool Dot { get => GetValue(DotProperty); set => SetValue(DotProperty, value); }
+    public string? Icon { get => GetValue(IconProperty); set => SetValue(IconProperty, value); }
+
+    private void Update()
     {
-        foreach (var t in Enum.GetValues<BadgeTone>())
-            PseudoClasses.Set(":" + t.ToString().ToLowerInvariant(), t == Tone);
+        Slate.Avalonia.Sl.SetOne(this, Slate.Avalonia.Sl.ToneClasses, Slate.Avalonia.Sl.ClassFor(Tone));
+        PseudoClasses.Set(":solid", Variant == BadgeVariant.Solid);
+        PseudoClasses.Set(":outlined", Variant == BadgeVariant.Outlined);
+        PseudoClasses.Set(":small", Size == ControlSize.Small);
     }
 }
 

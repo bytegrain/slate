@@ -95,6 +95,10 @@ public sealed class DialogService : IDialogService
     public async Task<DialogResult> ShowAsync(object content, DialogOptions? options = null)
     {
         Dispatcher.UIThread.VerifyAccess();
+        // App-wide defaults first, then options set on DialogContent itself (so Escape/backdrop rules see them).
+        options ??= SlateTheme.Defaults.Dialog;
+        if (content is Controls.DialogContent dc)
+            options = dc.MergeInto(options);
         return await Stack.Push(content, options).Result;
     }
 
@@ -109,7 +113,7 @@ public sealed class DialogService : IDialogService
     public async Task<bool> ConfirmAsync(MessageBoxOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
-        var result = await ShowAsync(options, new DialogOptions
+        var result = await ShowAsync(options, SlateTheme.Defaults.Dialog with
         {
             Title = options.Title,
             MaxWidth = DialogWidth.Xs,
@@ -136,20 +140,44 @@ public static class SlateServices
     public static IDialogService Dialogs { get; set; } = new DialogService();
 }
 
+/// <summary>What <see cref="SlateServiceCollectionExtensions.AddSlate(IServiceCollection, Action{SlateOptions})"/> configures.</summary>
+public sealed class SlateOptions
+{
+    /// <summary>App-wide component defaults (the same object as <see cref="SlateTheme.Defaults"/>).</summary>
+    public SlateDefaults Defaults => SlateTheme.Defaults;
+
+    /// <summary>A custom theme applied when the app's <see cref="SlateTheme"/> is created (or immediately if it exists).</summary>
+    public Slate.Theming.SlateThemeOptions? Theme { get; set; }
+
+    /// <summary>Clock for snackbar timers (tests inject a fake).</summary>
+    public TimeProvider? TimeProvider { get; set; }
+}
+
 public static class SlateServiceCollectionExtensions
 {
     /// <summary>
     /// Registers <see cref="ISnackbarService"/> and <see cref="IDialogService"/> as singletons and makes them the
     /// <see cref="SlateServices"/> defaults, so SlateWindow and the hosts pick them up automatically.
     /// </summary>
-    public static IServiceCollection AddSlate(this IServiceCollection services, SnackbarConfiguration? snackbars = null)
+    public static IServiceCollection AddSlate(this IServiceCollection services, Action<SlateOptions>? configure = null)
     {
-        var snackbarService = new SnackbarService(snackbars);
+        var options = new SlateOptions();
+        configure?.Invoke(options);
+
+        var snackbarService = new SnackbarService(SlateTheme.Defaults.Snackbar, options.TimeProvider);
         var dialogService = new DialogService();
         SlateServices.Snackbars = snackbarService;
         SlateServices.Dialogs = dialogService;
         services.AddSingleton<ISnackbarService>(snackbarService);
         services.AddSingleton<IDialogService>(dialogService);
+        services.AddSingleton(options);
+
+        if (options.Theme is { } theme)
+            SlateTheme.PendingOptions = theme;
         return services;
     }
+
+    /// <summary>Shorthand for configuring only the snackbar host.</summary>
+    public static IServiceCollection AddSlate(this IServiceCollection services, SnackbarConfiguration snackbars) =>
+        services.AddSlate(o => o.Defaults.Snackbar = snackbars);
 }

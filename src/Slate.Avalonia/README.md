@@ -14,14 +14,37 @@ The Alloy design system for Avalonia 12. Follows `docs/design/*` (tokens come fr
 ```
 
 ```csharp
-services.AddSlate();                 // ISnackbarService + IDialogService (also sets SlateServices defaults)
-// or without DI: SlateServices.Snackbars / SlateServices.Dialogs
+services.AddSlate(o =>               // ISnackbarService + IDialogService (also sets SlateServices defaults)
+{
+    o.Defaults.Button.Size = ControlSize.Small;      // app-wide defaults (SlateTheme.Defaults)
+    o.Defaults.Field.Variant = FieldVariant.Filled;
+    o.Defaults.Snackbar = new SnackbarConfiguration { Position = SnackbarPosition.TopRight };
+    o.Theme = new SlateThemeOptions { Accent = "#5B3DF5", RadiusScale = 1.5 };  // custom theme
+});
+// or without DI: SlateServices.Snackbars / SlateServices.Dialogs, SlateTheme.Defaults, SlateTheme.Current.Options
 ```
 
 Use `sl:SlateWindow` for the 36px Alloy title bar with built-in dialog and snackbar hosts, or place
 `sl:DialogHost` / `sl:SnackbarHost` yourself and bind `Service`.
 
-Runtime switches: `SlateTheme.Current.Mode` (Light/Dark/System), `.Density`, `.ReduceMotion`.
+Runtime switches: `SlateTheme.Current.Mode` (Light/Dark/System), `.Density`, `.ReduceMotion`, `.Options` (custom theme).
+
+## Configuration (docs/design/configurability.md)
+
+| Level | How |
+|---|---|
+| Theme | `SlateTheme.Current.Options = new SlateThemeOptions { Accent, Base, RadiusScale, FontFamily, Overrides }` (or `Apply(ThemeBuilder.Build(…))`), `ResetTheme()`. Scope to a subtree with `SlateTheme.ApplyTo(element, theme)` (use a `ThemeVariantScope` to force its variant). |
+| Component tokens | Override any `Sl.Component.*` resource in any `Resources` scope, e.g. `Sl.Component.Button.Radius.Corner`, `Sl.Component.Card.Background.Brush`, `Sl.Component.Field.Border.Brush`. |
+| Defaults | `SlateTheme.Defaults` (`SlateDefaults`): button variant/tone/size/radius, field variant/size/radius, card variant/radius, selection label placement, dialog and snackbar options. Read when a control loads and has no local value. |
+| Per instance | Slate control properties, or `sl:Sl.*` on native controls: `Variant`, `Tone`, `Size`, `Radius`, `StartIcon`, `EndIcon`, `IconOnly`, `Label`, `Loading`, `FullWidth`, `Pressed`, `Shortcut`, `Description`, `LabelPlacement`. Scoped density: `sl:Sl.Density="Comfortable"` on any element. |
+
+Buttons combine `Variant` (Outlined, Solid, Soft, Ghost, Link) × `Tone` (Neutral, Accent, Success, Warning, Danger, Info):
+the primary action is `sl:Sl.Variant="Solid" sl:Sl.Tone="Accent"`. Plain classes still work (`Classes="solid tone-accent"`).
+
+Avalonia spellings that differ from the canonical API (design/api/components.json): `Container.ContainerMaxWidth` and
+`DialogContent.DialogMaxWidth` (canonical `MaxWidth` clashes with `Layoutable.MaxWidth`); native controls keep their own
+`IsChecked`, `IsEnabled`, `Maximum`, `IsIndeterminate`, `ShowProgressText`. `tests/Slate.Avalonia.Tests/ConformanceTests.cs`
+checks every option against the contract.
 
 ## How the theme is built
 
@@ -35,8 +58,9 @@ styles on top (`Themes/NativeOverrides.axaml`).
 
 | Native (styled) | Slate controls |
 |---|---|
-| Button (`sl:Sl.Variant`, `Size`, `Icon`, `IsLoading`, `Shortcut`; or classes `primary ghost danger danger-solid link small large`) | `TextField`, `Icon`, `LoadingSpinner`, `Kbd`, `Badge`, `Alert`, `Card`, `Divider` |
-| ToggleButton, CheckBox (incl. indeterminate), RadioButton, ToggleSwitch | Layout: `Container`, `Stack` + `Spacer`, `ResponsiveGrid`, `Toolbar` |
+| Button (`sl:Sl.*`; or classes `outlined solid soft ghost link`, `tone-*`, `small large`, `radius-*`) | `TextField`, `Icon`, `LoadingSpinner`, `Kbd`, `Badge`, `Alert`, `Card`, `Divider` |
+| ToggleButton, CheckBox (incl. indeterminate), RadioButton, ToggleSwitch | Selection: `Switch` (ToggleSwitch with the canonical options), `RadioGroup` |
+| | Layout: `Container`, `Stack` + `Spacer`, `ResponsiveGrid`, `Toolbar` |
 | TextBox, ProgressBar, ScrollBar, ToolTip, Window | Shell: `AppShell`, `AppBar`, `Drawer`, `NavItem`, `SlateWindow` |
 | | Systems: `SnackbarHost`, `DialogHost`, `DialogContent` |
 

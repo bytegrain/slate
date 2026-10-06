@@ -22,16 +22,52 @@ public enum DialogCloseAction
 }
 
 /// <summary>
-/// Structured dialog content: a body (<see cref="ContentControl.Content"/>), an optional description under the
-/// title, and a <see cref="Footer"/> for actions (right-aligned, primary last).
+/// Structured dialog content (design/api/components.json "Dialog"): a body (<see cref="ContentControl.Content"/>),
+/// title, description, icon tile and a <see cref="Footer"/> for actions (right-aligned, primary last).
+/// Options set here override the <see cref="DialogOptions"/> passed to the dialog service.
 /// </summary>
+/// <remarks>The canonical <c>MaxWidth</c> option is spelled <see cref="DialogMaxWidth"/> here because
+/// <c>Layoutable.MaxWidth</c> (a double) already exists on every Avalonia control.</remarks>
 public class DialogContent : ContentControl
 {
+    public static readonly StyledProperty<string?> TitleProperty = AvaloniaProperty.Register<DialogContent, string?>(nameof(Title));
     public static readonly StyledProperty<string?> DescriptionProperty = AvaloniaProperty.Register<DialogContent, string?>(nameof(Description));
+    public static readonly StyledProperty<string?> IconProperty = AvaloniaProperty.Register<DialogContent, string?>(nameof(Icon));
+    public static readonly StyledProperty<Tone> ToneProperty = AvaloniaProperty.Register<DialogContent, Tone>(nameof(Tone));
+    public static readonly StyledProperty<DialogWidth> DialogMaxWidthProperty = AvaloniaProperty.Register<DialogContent, DialogWidth>(nameof(DialogMaxWidth), DialogWidth.Sm);
+    public static readonly StyledProperty<bool> FullWidthProperty = AvaloniaProperty.Register<DialogContent, bool>(nameof(FullWidth));
+    public static readonly StyledProperty<bool> FullScreenProperty = AvaloniaProperty.Register<DialogContent, bool>(nameof(FullScreen));
+    public static readonly StyledProperty<bool> CloseOnEscapeProperty = AvaloniaProperty.Register<DialogContent, bool>(nameof(CloseOnEscape), true);
+    public static readonly StyledProperty<bool> CloseOnBackdropClickProperty = AvaloniaProperty.Register<DialogContent, bool>(nameof(CloseOnBackdropClick), true);
+    public static readonly StyledProperty<bool> ShowCloseButtonProperty = AvaloniaProperty.Register<DialogContent, bool>(nameof(ShowCloseButton), true);
     public static readonly StyledProperty<object?> FooterProperty = AvaloniaProperty.Register<DialogContent, object?>(nameof(Footer));
 
+    public string? Title { get => GetValue(TitleProperty); set => SetValue(TitleProperty, value); }
     public string? Description { get => GetValue(DescriptionProperty); set => SetValue(DescriptionProperty, value); }
+    public string? Icon { get => GetValue(IconProperty); set => SetValue(IconProperty, value); }
+    public Tone Tone { get => GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
+    public DialogWidth DialogMaxWidth { get => GetValue(DialogMaxWidthProperty); set => SetValue(DialogMaxWidthProperty, value); }
+    public bool FullWidth { get => GetValue(FullWidthProperty); set => SetValue(FullWidthProperty, value); }
+    public bool FullScreen { get => GetValue(FullScreenProperty); set => SetValue(FullScreenProperty, value); }
+    public bool CloseOnEscape { get => GetValue(CloseOnEscapeProperty); set => SetValue(CloseOnEscapeProperty, value); }
+    public bool CloseOnBackdropClick { get => GetValue(CloseOnBackdropClickProperty); set => SetValue(CloseOnBackdropClickProperty, value); }
+    public bool ShowCloseButton { get => GetValue(ShowCloseButtonProperty); set => SetValue(ShowCloseButtonProperty, value); }
     public object? Footer { get => GetValue(FooterProperty); set => SetValue(FooterProperty, value); }
+
+    /// <summary>The service's options with every option set locally on this content applied on top.</summary>
+    public DialogOptions MergeInto(DialogOptions options) => options with
+    {
+        Title = IsSet(TitleProperty) ? Title : options.Title,
+        Description = IsSet(DescriptionProperty) ? Description : options.Description,
+        Icon = IsSet(IconProperty) ? Icon : options.Icon,
+        Tone = IsSet(ToneProperty) ? Tone : options.Tone,
+        MaxWidth = IsSet(DialogMaxWidthProperty) ? DialogMaxWidth : options.MaxWidth,
+        FullWidth = IsSet(FullWidthProperty) ? FullWidth : options.FullWidth,
+        FullScreen = IsSet(FullScreenProperty) ? FullScreen : options.FullScreen,
+        CloseOnEscape = IsSet(CloseOnEscapeProperty) ? CloseOnEscape : options.CloseOnEscape,
+        CloseOnBackdropClick = IsSet(CloseOnBackdropClickProperty) ? CloseOnBackdropClick : options.CloseOnBackdropClick,
+        ShowCloseButton = IsSet(ShowCloseButtonProperty) ? ShowCloseButton : options.ShowCloseButton,
+    };
 }
 
 /// <summary>
@@ -199,8 +235,12 @@ public class DialogContainer : TemplatedControl
     {
         Dialog = dialog;
         Host = host;
-        var o = dialog.Options;
+        var o = dialog.Content is DialogContent dc ? dc.MergeInto(dialog.Options) : dialog.Options;
+        Options = o;
         Title = o.Title;
+        Description = o.Description;
+        IconKind = o.Icon;
+        Tone = o.Tone;
         PanelMaxWidth = o.FullScreen ? double.PositiveInfinity : DialogOptions.WidthPixels(o.MaxWidth);
 
         switch (dialog.Content)
@@ -216,9 +256,9 @@ public class DialogContainer : TemplatedControl
                     var s => Alert.IconFor(s),
                 };
                 IsDestructive = box.Destructive;
+                Tone = box.Destructive ? Tone.Danger : box.Severity.ToTone();
                 break;
             case DialogContent content:
-                Description = content.Description;
                 Footer = content.Footer;
                 Body = content;
                 break;
@@ -227,7 +267,8 @@ public class DialogContainer : TemplatedControl
                 break;
         }
 
-        PseudoClasses.Set(":destructive", IsDestructive);
+        PseudoClasses.Set(":destructive", IsDestructive || Tone == Tone.Danger);
+        Slate.Avalonia.Sl.SetOne(this, Slate.Avalonia.Sl.ToneClasses, Slate.Avalonia.Sl.ClassFor(Tone));
         PseudoClasses.Set(":has-icon", IconKind is not null);
         PseudoClasses.Set(":has-footer", Footer is not null);
         PseudoClasses.Set(":has-title", !string.IsNullOrEmpty(Title));
@@ -246,18 +287,23 @@ public class DialogContainer : TemplatedControl
     }
 
     public DialogReference Dialog { get; }
+
+    /// <summary>Effective options: the service's options with <see cref="DialogContent"/> overrides applied.</summary>
+    public DialogOptions Options { get; }
+
+    public Tone Tone { get; }
     public DialogHost? Host { get; }
     public string? Title { get; }
-    public string? Description { get; }
+    public string? Description { get; private set; }
     public object? Body { get; }
     public object? Footer { get; }
-    public string? IconKind { get; }
+    public string? IconKind { get; private set; }
     public bool IsDestructive { get; }
     public bool ShowCloseButton { get; }
     public double PanelMaxWidth { get; }
 
     /// <summary>The panel stretches to <see cref="PanelMaxWidth"/> instead of sizing to content.</summary>
-    public bool FullWidth => Dialog.Options.FullWidth || Dialog.Options.FullScreen;
+    public bool FullWidth => Options.FullWidth || Options.FullScreen;
 
     public double PanelMaxHeight { get => GetValue(PanelMaxHeightProperty); set => SetValue(PanelMaxHeightProperty, value); }
 
@@ -321,7 +367,7 @@ public class DialogContainer : TemplatedControl
 
     private Control BuildMessageBoxFooter(MessageBoxOptions box)
     {
-        var row = new Stack { Orientation = Orientation.Horizontal, Spacing = 2, Justify = StackJustify.End };
+        var row = new Stack { Direction = Direction.Row, Spacing = 2, Justify = StackJustify.End };
         if (box.CancelText is { } cancelText)
         {
             CancelButton = new Button { Content = cancelText };
@@ -329,7 +375,8 @@ public class DialogContainer : TemplatedControl
             row.Children.Add(CancelButton);
         }
         ConfirmButton = new Button { Content = box.ConfirmText, IsDefault = !box.Destructive };
-        Sl.SetVariant(ConfirmButton, box.Destructive ? ButtonVariant.DangerSolid : ButtonVariant.Primary);
+        Sl.SetVariant(ConfirmButton, ButtonVariant.Solid);
+        Sl.SetTone(ConfirmButton, box.Destructive ? Tone.Danger : Tone.Accent);
         DialogHost.SetCloseWith(ConfirmButton, DialogCloseAction.Ok);
         DialogHost.SetResultData(ConfirmButton, true);
         row.Children.Add(ConfirmButton);

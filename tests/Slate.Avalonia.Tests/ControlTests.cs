@@ -30,11 +30,11 @@ public class ButtonTests
     }
 
     [AvaloniaTheory]
-    [InlineData(ButtonVariant.Primary, "primary")]
+    [InlineData(ButtonVariant.Solid, "solid")]
+    [InlineData(ButtonVariant.Soft, "soft")]
     [InlineData(ButtonVariant.Ghost, "ghost")]
-    [InlineData(ButtonVariant.Danger, "danger")]
-    [InlineData(ButtonVariant.DangerSolid, "danger-solid")]
     [InlineData(ButtonVariant.Link, "link")]
+    [InlineData(ButtonVariant.Outlined, "outlined")]
     public void Variant_attached_property_sets_exactly_one_class(ButtonVariant variant, string cls)
     {
         var b = new Button { Content = "x" };
@@ -42,28 +42,31 @@ public class ButtonTests
         Sl.SetVariant(b, variant);
         Assert.Contains(cls, b.Classes);
         Assert.Single(b.Classes, c => Sl.VariantClasses.Contains(c));
-
-        Sl.SetVariant(b, ButtonVariant.Secondary);
-        Assert.DoesNotContain(b.Classes, c => Sl.VariantClasses.Contains(c));
     }
 
     [AvaloniaFact]
-    public void Primary_uses_accent_fill_and_on_accent_text()
+    public void Primary_action_is_solid_accent_with_on_accent_text()
     {
-        var b = new Button { Content = "Deploy", Classes = { "primary" } };
+        var b = new Button { Content = "Deploy" };
+        Sl.SetVariant(b, ButtonVariant.Solid);
+        Sl.SetTone(b, Tone.Accent);
         var w = Show(b);
         Assert.Equal(Token(L.Accent.Default), ColorOf(b.Background));
         Assert.Equal(Token(L.Text.OnAccent), ColorOf(b.Foreground));
-        Assert.Equal(Resource("Sl.Shadow.Primary"), Chrome(b).BoxShadow);
+        Assert.Equal(Resource("Sl.Component.Button.SolidShadow"), Chrome(b).BoxShadow);
         w.Close();
     }
 
     [AvaloniaFact]
     public void Ghost_has_no_chrome_and_danger_uses_danger_text()
     {
-        var ghost = new Button { Content = "g", Classes = { "ghost" } };
-        var danger = new Button { Content = "d", Classes = { "danger" } };
-        var solid = new Button { Content = "s", Classes = { "danger-solid" } };
+        var ghost = new Button { Content = "g" };
+        Sl.SetVariant(ghost, ButtonVariant.Ghost);
+        var danger = new Button { Content = "d" };
+        Sl.SetTone(danger, Tone.Danger);
+        var solid = new Button { Content = "s" };
+        Sl.SetVariant(solid, ButtonVariant.Solid);
+        Sl.SetTone(solid, Tone.Danger);
         var w = Show(new StackPanel { Children = { ghost, danger, solid } });
         Assert.Equal(Colors.Transparent, ColorOf(ghost.Background));
         Assert.Equal(0, Chrome(ghost).BoxShadow.Count);
@@ -90,7 +93,7 @@ public class ButtonTests
     public void Icon_only_buttons_are_square()
     {
         var b = new Button();
-        Sl.SetIcon(b, "plus");
+        Sl.SetStartIcon(b, "plus");
         AutomationProperties.SetName(b, "Add");
         var w = Show(b);
         Assert.Contains("icon-only", b.Classes);
@@ -110,14 +113,14 @@ public class ButtonTests
         b.Click += (_, _) => clicks++;
         var w = Show(b);
 
-        Sl.SetIsLoading(b, true);
+        Sl.SetLoading(b, true);
         Pump(w);
         Assert.True(b.Part<LoadingSpinner>("PART_Spinner").IsVisible);
         Assert.Equal("Busy", AutomationProperties.GetItemStatus(b));
         b.RaiseEvent(new global::Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
         Assert.Equal(0, clicks);
 
-        Sl.SetIsLoading(b, false);
+        Sl.SetLoading(b, false);
         Pump(w);
         Assert.False(b.Part<LoadingSpinner>("PART_Spinner").IsVisible);
         b.RaiseEvent(new global::Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
@@ -231,14 +234,14 @@ public class TextFieldTests
     [AvaloniaFact]
     public void Label_names_the_input_and_text_binds_both_ways()
     {
-        var f = new TextField { Label = "Project name", Text = "slate" };
+        var f = new TextField { Label = "Project name", Value = "slate" };
         var w = Show(f);
         Assert.Equal("Project name", f.Part<TextBlock>("PART_Label").Text);
         Assert.Equal("Project name", AutomationProperties.GetName(f.Input!));
         Assert.Equal("slate", f.Input!.Text);
 
         f.Input.Text = "slate-web";
-        Assert.Equal("slate-web", f.Text);
+        Assert.Equal("slate-web", f.Value);
         w.Close();
     }
 
@@ -270,7 +273,7 @@ public class TextFieldTests
     [AvaloniaFact]
     public void Required_prefix_and_suffix_render()
     {
-        var f = new TextField { Label = "Domain", IsRequired = true, Prefix = "https://", Suffix = ".dev" };
+        var f = new TextField { Label = "Domain", Required = true, Prefix = "https://", Suffix = ".dev" };
         var w = Show(f);
         Assert.True(f.Part<TextBlock>("PART_Required").IsVisible);
         Assert.True(f.Part<Border>("PART_Prefix").IsVisible);
@@ -294,12 +297,13 @@ public class TextFieldTests
 public class DisplayControlTests
 {
     [AvaloniaTheory]
-    [InlineData(BadgeTone.Success, L.Status.Success.Bg, L.Status.Success.Fg)]
-    [InlineData(BadgeTone.Danger, L.Status.Danger.Bg, L.Status.Danger.Fg)]
-    [InlineData(BadgeTone.Accent, L.Accent.Default, L.Text.OnAccent)]
-    public void Badge_tones_map_to_status_tokens(BadgeTone tone, string bg, string fg)
+    [InlineData(Tone.Success, BadgeVariant.Soft, L.Status.Success.Bg, L.Status.Success.Fg)]
+    [InlineData(Tone.Danger, BadgeVariant.Soft, L.Status.Danger.Bg, L.Status.Danger.Fg)]
+    [InlineData(Tone.Accent, BadgeVariant.Solid, L.Accent.Default, L.Text.OnAccent)]
+    [InlineData(Tone.Info, BadgeVariant.Solid, L.Status.Info.Solid, L.Status.Info.OnSolid)]
+    public void Badge_tone_and_variant_map_to_status_tokens(Tone tone, BadgeVariant variant, string bg, string fg)
     {
-        var badge = new Badge { Text = "Ready", Tone = tone, ShowDot = true };
+        var badge = new Badge { Content = "Ready", Tone = tone, Variant = variant, Dot = true };
         var w = Show(badge);
         Assert.Equal(Token(bg), ColorOf(badge.Background));
         Assert.Equal(Token(fg), ColorOf(badge.Foreground));
@@ -327,7 +331,7 @@ public class DisplayControlTests
     public void Dismissible_alert_closes_and_raises_dismissed()
     {
         var dismissed = 0;
-        var alert = new Alert { Content = "x", IsDismissible = true };
+        var alert = new Alert { Content = "x", Dismissible = true };
         alert.Dismissed += (_, _) => dismissed++;
         var w = Show(alert);
         var close = alert.Part<Button>("PART_Close");
@@ -349,7 +353,7 @@ public class DisplayControlTests
 
         card.Header = "Deployments";
         card.Footer = new Button { Content = "View all" };
-        card.IsOutlined = true;
+        card.Variant = CardVariant.Outlined;
         Pump(w);
         Assert.True(card.Part<Border>("PART_Header").IsVisible);
         Assert.True(card.Part<Border>("PART_Footer").IsVisible);

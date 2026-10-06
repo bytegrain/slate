@@ -19,5 +19,6 @@
     </ResourceDictionary>
   </Styles.Resources>
 
+  <StyleInclude Source="avares://Slate.Avalonia/Themes/Configuration.axaml" />
   <StyleInclude Source="avares://Slate.Avalonia/Themes/NativeOverrides.axaml" />
 </Styles>

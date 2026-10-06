@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:sl="https://slate.dev/avalonia"
              x:Class="Slate.Avalonia.Demo.Pages.ComponentsPage">
-  <sl:Container Size="Xl" Margin="0,24,0,40">
+  <sl:Container ContainerMaxWidth="Xl" Margin="0,24,0,40">
     <sl:Stack Spacing="6">
       <StackPanel Spacing="4">
         <TextBlock Text="STYLE 09 — ALLOY" FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="11"
@@ -12,46 +12,46 @@
                    Foreground="{DynamicResource Sl.Brush.Text.Secondary}" TextWrapping="Wrap" />
       </StackPanel>
 
-      <sl:Card Header="Buttons" Subtitle="Six variants, three sizes. Primary appears once per view.">
+      <sl:Card Title="Buttons" Subtitle="Variant × Tone, three sizes. The primary action (Solid + Accent) appears once per view.">
         <sl:Stack Spacing="5">
-          <sl:Stack Orientation="Horizontal" Wrap="True">
-            <Button Content="Deploy" sl:Sl.Variant="Primary" sl:Sl.Shortcut="⌘↵" />
+          <sl:Stack Direction="Row" Wrap="True">
+            <Button Content="Deploy" sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" sl:Sl.Shortcut="⌘↵" />
             <Button Content="Secondary" />
-            <Button Content="Ghost" Classes="ghost" />
-            <Button Content="Delete" Classes="danger" sl:Sl.Icon="trash" />
-            <Button Content="Delete package" Classes="danger-solid" />
+            <Button Content="Ghost" sl:Sl.Variant="Ghost" />
+            <Button Content="Delete" sl:Sl.Tone="Danger" sl:Sl.StartIcon="trash" />
+            <Button Content="Delete package" sl:Sl.Variant="Solid" sl:Sl.Tone="Danger" />
             <Button Content="Learn more" Classes="link" />
           </sl:Stack>
-          <sl:Stack Orientation="Horizontal" Wrap="True" AlignItems="Center">
-            <Button Content="Small" sl:Sl.Size="Small" Classes="primary" />
-            <Button Content="Medium" Classes="primary" />
-            <Button Content="Large" sl:Sl.Size="Large" Classes="primary" sl:Sl.Icon="arrow-right" />
-            <Button Content="Export" sl:Sl.Icon="download" />
-            <Button sl:Sl.Icon="plus" AutomationProperties.Name="Add" ToolTip.Tip="Add" />
-            <Button sl:Sl.Icon="more-horizontal" Classes="ghost" AutomationProperties.Name="More" />
+          <sl:Stack Direction="Row" Wrap="True" Align="Center">
+            <Button Content="Small" sl:Sl.Size="Small" sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" />
+            <Button Content="Medium" sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" />
+            <Button Content="Large" sl:Sl.Size="Large" sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" sl:Sl.StartIcon="arrow-right" />
+            <Button Content="Export" sl:Sl.StartIcon="download" />
+            <Button sl:Sl.StartIcon="plus" AutomationProperties.Name="Add" ToolTip.Tip="Add" />
+            <Button sl:Sl.StartIcon="more-horizontal" sl:Sl.Variant="Ghost" AutomationProperties.Name="More" />
           </sl:Stack>
-          <sl:Stack Orientation="Horizontal" Wrap="True" AlignItems="Center">
-            <Button x:Name="LoadingButton" Content="Deploying…" Classes="primary" sl:Sl.IsLoading="True" />
-            <Button Content="Disabled" Classes="primary" IsEnabled="False" />
+          <sl:Stack Direction="Row" Wrap="True" Align="Center">
+            <Button x:Name="LoadingButton" Content="Deploying…" sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" sl:Sl.Loading="True" />
+            <Button Content="Disabled" sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" IsEnabled="False" />
             <Button Content="Disabled" IsEnabled="False" />
             <ToggleButton Content="Toggle" IsChecked="True" />
-            <Button x:Name="ToggleLoading" Content="Toggle loading" Classes="ghost" />
+            <Button x:Name="ToggleLoading" Content="Toggle loading" sl:Sl.Variant="Ghost" />
           </sl:Stack>
         </sl:Stack>
       </sl:Card>
 
       <sl:ResponsiveGrid>
-        <sl:Card sl:ResponsiveGrid.Md="6" Header="Text fields">
+        <sl:Card sl:ResponsiveGrid.Md="6" Title="Text fields">
           <sl:Stack Spacing="4">
-            <sl:TextField Label="Project name" Text="slate-dashboard" HelperText="Lowercase, numbers and dashes." />
-            <sl:TextField x:Name="EmailField" Label="Owner email" Text="aaron@" IsRequired="True" Error="Enter a complete email address." />
-            <sl:TextField Label="Domain" Prefix="https://" Suffix=".dev" Text="slate" />
+            <sl:TextField Label="Project name" Value="slate-dashboard" HelperText="Lowercase, numbers and dashes." />
+            <sl:TextField x:Name="EmailField" Label="Owner email" Value="aaron@" Required="True" Error="Enter a complete email address." />
+            <sl:TextField Label="Domain" Prefix="https://" Suffix=".dev" Value="slate" />
             <sl:TextField Label="Search" StartIcon="search" Placeholder="Search packages" />
-            <sl:TextField Label="Notes" IsMultiline="True" Placeholder="Anything reviewers should know" />
+            <sl:TextField Label="Notes" Multiline="True" Placeholder="Anything reviewers should know" />
           </sl:Stack>
         </sl:Card>
         <sl:Stack sl:ResponsiveGrid.Md="6" Spacing="4">
-          <sl:Card Header="Checkbox &amp; radio">
+          <sl:Card Title="Checkbox &amp; radio">
             <sl:Stack Spacing="3">
               <CheckBox Content="Run tests before deploy" IsChecked="True" />
               <CheckBox Content="Notify on failure" IsThreeState="True" IsChecked="{x:Null}" />
@@ -62,12 +62,12 @@
               <RadioButton GroupName="plan" Content="Solo — three projects" />
             </sl:Stack>
           </sl:Card>
-          <sl:Card Header="Switches &amp; progress">
+          <sl:Card Title="Switches &amp; progress">
             <sl:Stack Spacing="4">
               <ToggleSwitch Content="Preview deployments" IsChecked="True" />
               <ToggleSwitch Content="Compact density" />
               <sl:Stack Spacing="1">
-                <sl:Stack Orientation="Horizontal">
+                <sl:Stack Direction="Row">
                   <TextBlock Text="Uploading assets" FontSize="13" />
                   <sl:Spacer />
                   <TextBlock Text="64%" FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="12" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
@@ -75,7 +75,7 @@
                 <ProgressBar Value="64" />
               </sl:Stack>
               <ProgressBar IsIndeterminate="True" />
-              <sl:Stack Orientation="Horizontal" AlignItems="Center">
+              <sl:Stack Direction="Row" Align="Center">
                 <sl:LoadingSpinner />
                 <TextBlock Text="Indexing…" FontSize="13" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
               </sl:Stack>
@@ -85,17 +85,17 @@
       </sl:ResponsiveGrid>
 
       <sl:ResponsiveGrid>
-        <sl:Card sl:ResponsiveGrid.Md="6" Header="Badges &amp; keys">
+        <sl:Card sl:ResponsiveGrid.Md="6" Title="Badges &amp; keys">
           <sl:Stack Spacing="4">
-            <sl:Stack Orientation="Horizontal" Wrap="True">
-              <sl:Badge Text="Ready" Tone="Success" ShowDot="True" />
-              <sl:Badge Text="Building" Tone="Warning" ShowDot="True" />
-              <sl:Badge Text="Failed" Tone="Danger" ShowDot="True" />
-              <sl:Badge Text="In progress" Tone="Info" />
-              <sl:Badge Text="New" Tone="Accent" />
-              <sl:Badge Text="Draft" />
+            <sl:Stack Direction="Row" Wrap="True">
+              <sl:Badge Content="Ready" Tone="Success" Dot="True" />
+              <sl:Badge Content="Building" Tone="Warning" Dot="True" />
+              <sl:Badge Content="Failed" Tone="Danger" Dot="True" />
+              <sl:Badge Content="In progress" Tone="Info" />
+              <sl:Badge Content="New" Tone="Accent" />
+              <sl:Badge Content="Draft" />
             </sl:Stack>
-            <sl:Stack Orientation="Horizontal" AlignItems="Center">
+            <sl:Stack Direction="Row" Align="Center">
               <TextBlock Text="Command palette" FontSize="13" />
               <sl:Kbd Text="⌘K" />
               <TextBlock Text="Commit" FontSize="13" Margin="12,0,0,0" />
@@ -103,7 +103,7 @@
             </sl:Stack>
           </sl:Stack>
         </sl:Card>
-        <sl:Card sl:ResponsiveGrid.Md="6" Header="Typography">
+        <sl:Card sl:ResponsiveGrid.Md="6" Title="Typography">
           <sl:Stack Spacing="2">
             <TextBlock Text="Heading" Theme="{DynamicResource Sl.Typography.H3}" />
             <TextBlock Text="Title — dialog and panel headers" Theme="{DynamicResource Sl.Typography.Title}" />

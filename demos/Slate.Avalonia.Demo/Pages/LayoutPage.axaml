@@ -18,7 +18,7 @@
       <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Accent.Text}" />
     </Style>
   </UserControl.Styles>
-  <sl:Container Size="Xl" Margin="0,24,0,40">
+  <sl:Container ContainerMaxWidth="Xl" Margin="0,24,0,40">
     <sl:Stack Spacing="6">
       <StackPanel Spacing="4">
         <TextBlock Text="Layout framework" Theme="{DynamicResource Sl.Typography.H2}" />
@@ -26,7 +26,7 @@
                    Foreground="{DynamicResource Sl.Brush.Text.Secondary}" TextWrapping="Wrap" />
       </StackPanel>
 
-      <sl:Card Header="ResponsiveGrid" Subtitle="Xs=12 · Sm=6 · Md=4 · Lg=3 — spans inherit upwards">
+      <sl:Card Title="ResponsiveGrid" Subtitle="Xs=12 · Sm=6 · Md=4 · Lg=3 — spans inherit upwards">
         <sl:ResponsiveGrid Spacing="3">
           <Border Classes="cell" sl:ResponsiveGrid.Sm="6" sl:ResponsiveGrid.Md="4" sl:ResponsiveGrid.Lg="3"><TextBlock Text="1" /></Border>
           <Border Classes="cell" sl:ResponsiveGrid.Sm="6" sl:ResponsiveGrid.Md="4" sl:ResponsiveGrid.Lg="3"><TextBlock Text="2" /></Border>
@@ -37,57 +37,57 @@
         </sl:ResponsiveGrid>
       </sl:Card>
 
-      <sl:Card Header="Stack" Subtitle="Spacing in token steps; Spacer takes the free space; Justify and AlignItems like flexbox">
+      <sl:Card Title="Stack" Subtitle="Spacing in token steps; Spacer takes the free space; Justify and AlignItems like flexbox">
         <sl:Stack Spacing="4">
-          <sl:Stack Orientation="Horizontal" AlignItems="Center">
-            <Button Content="Back" Classes="ghost" sl:Sl.Icon="arrow-left" />
+          <sl:Stack Direction="Row" Align="Center">
+            <Button Content="Back" sl:Sl.Variant="Ghost" sl:Sl.StartIcon="arrow-left" />
             <TextBlock Text="Release 0.1.4" FontWeight="SemiBold" VerticalAlignment="Center" />
             <sl:Spacer />
             <Button Content="Discard" />
-            <Button Content="Publish" Classes="primary" />
+            <Button Content="Publish" sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" />
           </sl:Stack>
           <sl:Divider />
-          <sl:Stack Orientation="Horizontal" Justify="SpaceBetween">
+          <sl:Stack Direction="Row" Justify="Between">
             <Border Classes="cell" Width="120"><TextBlock Text="between" /></Border>
             <Border Classes="cell" Width="120"><TextBlock Text="between" /></Border>
             <Border Classes="cell" Width="120"><TextBlock Text="between" /></Border>
           </sl:Stack>
-          <sl:Stack Orientation="Horizontal" Wrap="True" Spacing="2">
-            <sl:Badge Text="avalonia" /><sl:Badge Text="blazor" /><sl:Badge Text="wpf" /><sl:Badge Text="web" />
-            <sl:Badge Text="tokens" /><sl:Badge Text="a11y" /><sl:Badge Text="dark-mode" /><sl:Badge Text="density" />
+          <sl:Stack Direction="Row" Wrap="True" Spacing="2">
+            <sl:Badge Content="avalonia" /><sl:Badge Content="blazor" /><sl:Badge Content="wpf" /><sl:Badge Content="web" />
+            <sl:Badge Content="tokens" /><sl:Badge Content="a11y" /><sl:Badge Content="dark-mode" /><sl:Badge Content="density" />
           </sl:Stack>
         </sl:Stack>
       </sl:Card>
 
       <sl:ResponsiveGrid>
-        <sl:Card sl:ResponsiveGrid.Md="4" Header="Plain card">
+        <sl:Card sl:ResponsiveGrid.Md="4" Title="Plain card">
           <TextBlock Text="Surface, e1 shadow, 10px radius." TextWrapping="Wrap" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
         </sl:Card>
-        <sl:Card sl:ResponsiveGrid.Md="4" Header="Outlined" IsOutlined="True">
+        <sl:Card sl:ResponsiveGrid.Md="4" Title="Outlined" Variant="Outlined">
           <TextBlock Text="Hairline instead of shadow, for dense dashboards." TextWrapping="Wrap" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
         </sl:Card>
-        <sl:Card sl:ResponsiveGrid.Md="4" Header="Interactive" Subtitle="Lifts on hover" IsInteractive="True">
+        <sl:Card sl:ResponsiveGrid.Md="4" Title="Interactive" Subtitle="Lifts on hover" Interactive="True">
           <sl:Card.HeaderActions>
-            <Button Classes="ghost" sl:Sl.Size="Small" sl:Sl.Icon="more-horizontal" AutomationProperties.Name="More" />
+            <Button sl:Sl.Variant="Ghost" sl:Sl.Size="Small" sl:Sl.StartIcon="more-horizontal" AutomationProperties.Name="More" />
           </sl:Card.HeaderActions>
           <TextBlock Text="With header actions and a footer." TextWrapping="Wrap" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
           <sl:Card.Footer>
             <StackPanel Orientation="Horizontal" Spacing="8">
               <Button Content="Cancel" sl:Sl.Size="Small" />
-              <Button Content="Open" sl:Sl.Size="Small" Classes="primary" />
+              <Button Content="Open" sl:Sl.Size="Small" sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" />
             </StackPanel>
           </sl:Card.Footer>
         </sl:Card>
       </sl:ResponsiveGrid>
 
-      <sl:Card Header="Toolbar">
+      <sl:Card Title="Toolbar">
         <sl:Toolbar>
-          <Button Classes="ghost" sl:Sl.Icon="arrow-left" AutomationProperties.Name="Back" />
-          <Button Classes="ghost" sl:Sl.Icon="arrow-right" AutomationProperties.Name="Forward" />
+          <Button sl:Sl.Variant="Ghost" sl:Sl.StartIcon="arrow-left" AutomationProperties.Name="Back" />
+          <Button sl:Sl.Variant="Ghost" sl:Sl.StartIcon="arrow-right" AutomationProperties.Name="Forward" />
           <sl:Divider Orientation="Vertical" Height="18" Margin="4,0" />
-          <Button Classes="ghost" sl:Sl.Icon="copy" Content="Duplicate" />
-          <Button Classes="ghost" sl:Sl.Icon="pencil" Content="Rename" />
-          <Button Classes="ghost danger" sl:Sl.Icon="trash" Content="Delete" />
+          <Button sl:Sl.Variant="Ghost" sl:Sl.StartIcon="copy" Content="Duplicate" />
+          <Button sl:Sl.Variant="Ghost" sl:Sl.StartIcon="pencil" Content="Rename" />
+          <Button sl:Sl.Variant="Ghost" sl:Sl.Tone="Danger" sl:Sl.StartIcon="trash" Content="Delete" />
         </sl:Toolbar>
       </sl:Card>
     </sl:Stack>

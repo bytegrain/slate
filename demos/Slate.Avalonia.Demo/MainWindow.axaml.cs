@@ -18,6 +18,7 @@ public partial class MainWindow : SlateWindow
         ["feedback"] = () => new FeedbackPage(),
         ["dialogs"] = () => new DialogsPage(),
         ["sample"] = () => new MigrationPage(),
+        ["theming"] = () => new ThemingPage(),
     };
 
     public MainWindow()
@@ -52,11 +53,11 @@ public partial class MainWindow : SlateWindow
     private void Navigate(NavItem item)
     {
         foreach (var n in Nav.Children.OfType<NavItem>())
-            n.IsActive = n == item;
+            n.Active = n == item;
         Bar.Title = item.Label;
         Page.Content = new ScrollViewer { Content = _pages[(string)item.Tag!]() };
         if (Shell.DrawerMode == DrawerMode.Temporary)
-            Shell.IsDrawerOpen = false;
+            Shell.DrawerOpen = false;
     }
 
     /// <summary>Renders each page in each theme to {dir}/{page}-{theme}.png (used by `--screenshot`).</summary>

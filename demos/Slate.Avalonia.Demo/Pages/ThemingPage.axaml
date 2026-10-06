@@ -1,0 +1,83 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sl="https://slate.dev/avalonia"
+             x:Class="Slate.Avalonia.Demo.Pages.ThemingPage">
+  <sl:Container ContainerMaxWidth="Xl" Margin="0,24,0,40">
+    <sl:Stack Spacing="6">
+      <StackPanel Spacing="4">
+        <TextBlock Text="Theming &amp; configuration" Theme="{DynamicResource Sl.Typography.H2}" />
+        <TextBlock Text="Four levels, highest wins: per-instance options › app-wide defaults › component tokens › theme. Every change below is live."
+                   Foreground="{DynamicResource Sl.Brush.Text.Secondary}" TextWrapping="Wrap" />
+      </StackPanel>
+
+      <sl:ResponsiveGrid Spacing="4">
+        <!-- Theme builder -->
+        <sl:Card sl:ResponsiveGrid.Md="5" Title="Theme" Subtitle="ThemeBuilder: accent, base, radius and font — contrast is guaranteed for any brand colour">
+          <sl:Stack Spacing="5">
+            <StackPanel Spacing="6">
+              <TextBlock Text="Accent" FontSize="13" FontWeight="Medium" />
+              <WrapPanel x:Name="Swatches" ItemSpacing="6" LineSpacing="6" />
+              <sl:Stack Direction="Row" Align="End" Spacing="2">
+                <sl:TextField x:Name="HexField" Label="Custom hex" Value="#5B3DF5" Width="160" Prefix="#" />
+                <Button x:Name="ApplyHex" Content="Apply" />
+              </sl:Stack>
+            </StackPanel>
+            <StackPanel Spacing="6">
+              <TextBlock Text="Base" FontSize="13" FontWeight="Medium" />
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <ToggleButton x:Name="BaseLight" Content="Light" sl:Sl.Size="Small" IsChecked="True" />
+                <ToggleButton x:Name="BaseDark" Content="Dark" sl:Sl.Size="Small" />
+              </StackPanel>
+            </StackPanel>
+            <StackPanel Spacing="4">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Radius scale" FontSize="13" FontWeight="Medium" />
+                <TextBlock x:Name="RadiusValue" Grid.Column="1" Text="1.00×" FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="12" />
+              </Grid>
+              <Slider x:Name="RadiusSlider" Minimum="0" Maximum="2.5" Value="1" TickFrequency="0.25" IsSnapToTickEnabled="True" />
+            </StackPanel>
+            <StackPanel Spacing="6">
+              <TextBlock Text="Font" FontSize="13" FontWeight="Medium" />
+              <ComboBox x:Name="FontBox" SelectedIndex="0" HorizontalAlignment="Stretch" />
+            </StackPanel>
+            <sl:Switch x:Name="Comfortable" Label="Comfortable density (playground only)" Description="sl:Sl.Density scopes sizes to a subtree" />
+            <TextBlock x:Name="ThemeSummary" FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="11.5" TextWrapping="Wrap"
+                       Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+            <Button x:Name="ResetTheme" Content="Reset to Alloy" sl:Sl.Variant="Ghost" sl:Sl.StartIcon="x" HorizontalAlignment="Left" />
+          </sl:Stack>
+        </sl:Card>
+
+        <!-- Playground -->
+        <sl:Card x:Name="Playground" sl:ResponsiveGrid.Md="7" Title="Component playground" Subtitle="Every option from design/api/components.json, as a control">
+          <sl:Stack Spacing="6">
+            <sl:Stack Spacing="3">
+              <TextBlock Text="BUTTON" FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="11" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+              <WrapPanel x:Name="ButtonOptions" ItemSpacing="8" LineSpacing="8" />
+              <Border Padding="16" CornerRadius="8" Background="{DynamicResource Sl.Brush.Background.Subtle}">
+                <Button x:Name="PreviewButton" Content="Deploy" />
+              </Border>
+            </sl:Stack>
+            <sl:Divider />
+            <sl:Stack Spacing="3">
+              <TextBlock Text="TEXT FIELD" FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="11" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+              <WrapPanel x:Name="FieldOptions" ItemSpacing="8" LineSpacing="8" />
+              <sl:TextField x:Name="PreviewField" Label="Package name" Value="Slate.Avalonia" HelperText="Shown on NuGet." MaxLength="40" />
+            </sl:Stack>
+            <sl:Divider />
+            <sl:Stack Spacing="3">
+              <TextBlock Text="ALERT · BADGE · CARD" FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="11" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+              <WrapPanel x:Name="DisplayOptions" ItemSpacing="8" LineSpacing="8" />
+              <sl:Alert x:Name="PreviewAlert" Title="Deployed to production" Content="slate-web is live in 3 regions." Dismissible="True" />
+              <sl:Stack Direction="Row" Align="Center" Spacing="3">
+                <sl:Badge x:Name="PreviewBadge" Content="Ready" Dot="True" />
+                <sl:Card x:Name="PreviewCard" Title="Card" Subtitle="Variant and radius" Width="220">
+                  <TextBlock Text="Body content" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
+                </sl:Card>
+              </sl:Stack>
+            </sl:Stack>
+          </sl:Stack>
+        </sl:Card>
+      </sl:ResponsiveGrid>
+    </sl:Stack>
+  </sl:Container>
+</UserControl>

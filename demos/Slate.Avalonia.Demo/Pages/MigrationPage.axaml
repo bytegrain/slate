@@ -61,7 +61,7 @@
     <sl:Stack Grid.Column="1" Spacing="4" Margin="20,16,20,24">
       <!-- source → destination -->
       <Grid ColumnDefinitions="*,Auto,*">
-        <sl:Card IsOutlined="True" Padding="14">
+        <sl:Card Variant="Outlined" Padding="14">
           <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
             <Border Width="36" Height="36" CornerRadius="8" Background="{DynamicResource Sl.Brush.Background.Muted}">
               <sl:Icon Kind="folder" Size="18" />
@@ -70,11 +70,11 @@
               <TextBlock Text="\\fs01\projects" Classes="mono" FontSize="13" TextTrimming="CharacterEllipsis" />
               <TextBlock Text="SMB · 184,302 files" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
             </StackPanel>
-            <sl:Badge Grid.Column="2" VerticalAlignment="Center" Text="Connected" Tone="Success" ShowDot="True" />
+            <sl:Badge Grid.Column="2" VerticalAlignment="Center" Content="Connected" Tone="Success" Dot="True" />
           </Grid>
         </sl:Card>
         <sl:Icon Grid.Column="1" Kind="arrow-right" Size="20" Margin="12,0" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
-        <sl:Card Grid.Column="2" IsOutlined="True" Padding="14">
+        <sl:Card Grid.Column="2" Variant="Outlined" Padding="14">
           <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
             <Border Width="36" Height="36" CornerRadius="8" Background="{DynamicResource Sl.Brush.Accent.Subtle}">
               <sl:Icon Kind="upload" Size="18" Foreground="{DynamicResource Sl.Brush.Accent.Text}" />
@@ -83,21 +83,21 @@
               <TextBlock Text="s3://studio-archive/projects" Classes="mono" FontSize="13" TextTrimming="CharacterEllipsis" />
               <TextBlock Text="eu-west-2 · Glacier IR" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
             </StackPanel>
-            <sl:Badge Grid.Column="2" VerticalAlignment="Center" Text="Writable" Tone="Info" />
+            <sl:Badge Grid.Column="2" VerticalAlignment="Center" Content="Writable" Tone="Info" />
           </Grid>
         </sl:Card>
       </Grid>
 
       <!-- overall progress -->
-      <sl:Card Header="Transfer" Subtitle="Step 3 of 4">
+      <sl:Card Title="Transfer" Subtitle="Step 3 of 4">
         <sl:Card.HeaderActions>
           <StackPanel Orientation="Horizontal" Spacing="8">
-            <Button Content="Pause" sl:Sl.Icon="pause" sl:Sl.Size="Small" />
-            <Button Content="Cancel job" Classes="danger" sl:Sl.Size="Small" />
+            <Button Content="Pause" sl:Sl.StartIcon="pause" sl:Sl.Size="Small" />
+            <Button Content="Cancel job" sl:Sl.Tone="Danger" sl:Sl.Size="Small" />
           </StackPanel>
         </sl:Card.HeaderActions>
         <sl:Stack Spacing="4">
-          <sl:Stack Orientation="Horizontal" AlignItems="End" Spacing="4">
+          <sl:Stack Direction="Row" Align="End" Spacing="4">
             <TextBlock Text="62%" FontSize="40" FontWeight="SemiBold" LetterSpacing="-1" />
             <StackPanel Margin="0,0,0,6">
               <TextBlock Classes="mono" Text="1.49 TB of 2.41 TB" />
@@ -125,9 +125,9 @@
 
       <sl:ResponsiveGrid Spacing="4">
         <!-- active transfers -->
-        <sl:Card sl:ResponsiveGrid.Lg="7" Header="Active transfers" Padding="0">
+        <sl:Card sl:ResponsiveGrid.Lg="7" Title="Active transfers" Padding="0">
           <sl:Card.HeaderActions>
-            <sl:Badge Text="8 workers" />
+            <sl:Badge Content="8 workers" />
           </sl:Card.HeaderActions>
           <StackPanel x:Name="Transfers" />
         </sl:Card>
@@ -139,7 +139,7 @@
               <Button Content="Fix permissions…" sl:Sl.Size="Small" />
             </sl:Alert.Actions>
           </sl:Alert>
-          <sl:Card Header="On conflict" IsOutlined="True" Padding="14">
+          <sl:Card Title="On conflict" Variant="Outlined" Padding="14">
             <StackPanel Orientation="Horizontal" Spacing="4">
               <ToggleButton Content="Skip" sl:Sl.Size="Small" />
               <ToggleButton Content="Overwrite" sl:Sl.Size="Small" />
@@ -150,7 +150,7 @@
       </sl:ResponsiveGrid>
 
       <!-- log -->
-      <sl:Card Header="Log" IsOutlined="True" Padding="0">
+      <sl:Card Title="Log" Variant="Outlined" Padding="0">
         <Border Background="{DynamicResource Sl.Brush.Background.Sunken}" Padding="14,10">
           <SelectableTextBlock x:Name="Log" FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="12" LineHeight="19"
                                Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />

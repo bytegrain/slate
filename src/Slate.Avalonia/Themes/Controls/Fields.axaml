@@ -1,8 +1,12 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:sl="using:Slate.Avalonia.Controls">
+                    xmlns:sl="using:Slate.Avalonia.Controls"
+                    xmlns:slate="using:Slate.Avalonia">
 
-  <!-- TextField (docs/design/components.md#text-field): label above, helper or error below. -->
+  <!--
+    TextField (docs/design/components.md#text-field): label above; helper or error (and counter) below.
+    The inner TextBox carries the variant/size/radius classes (filled, underlined, small, large, radius-*) — see NativeOverrides.
+  -->
   <ControlTheme x:Key="{x:Type sl:TextField}" TargetType="sl:TextField">
     <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
     <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -17,48 +21,69 @@
                        Foreground="{DynamicResource Sl.Brush.Status.Danger.Fg}" AutomationProperties.AccessibilityView="Raw" />
           </StackPanel>
           <TextBox Name="PART_Input"
-                   Text="{TemplateBinding Text, Mode=TwoWay}"
+                   Text="{TemplateBinding Value, Mode=TwoWay}"
                    PlaceholderText="{TemplateBinding Placeholder}"
-                   IsReadOnly="{TemplateBinding IsReadOnly}"
-                   PasswordChar="{TemplateBinding PasswordChar}"
-                   AcceptsReturn="{TemplateBinding IsMultiline}">
+                   IsReadOnly="{TemplateBinding ReadOnly}"
+                   AcceptsReturn="{TemplateBinding Multiline}">
             <!-- Inner content is presented by the TextBox, so it binds to the field by ancestor, not TemplateBinding. -->
             <TextBox.InnerLeftContent>
               <StackPanel Orientation="Horizontal">
-                <Border Name="PART_Prefix" IsVisible="{Binding $parent[sl:TextField].Prefix, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" Padding="10,0" Margin="0,0,0,0"
+                <Border Name="PART_Prefix" IsVisible="{Binding $parent[sl:TextField].Prefix, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" Padding="10,0"
                         Background="{DynamicResource Sl.Brush.Background.Subtle}"
                         BorderThickness="0,0,1,0" BorderBrush="{DynamicResource Sl.Brush.Border.Default}"
                         CornerRadius="5,0,0,5">
                   <TextBlock Text="{Binding $parent[sl:TextField].Prefix}" VerticalAlignment="Center" FontSize="12"
                              FontFamily="{DynamicResource Sl.Font.Family.Mono}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
                 </Border>
+                <ContentPresenter Name="PART_StartContent" Content="{Binding $parent[sl:TextField].StartContent}" Margin="8,0,0,0" VerticalAlignment="Center"
+                                  IsVisible="{Binding $parent[sl:TextField].StartContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
                 <sl:Icon Name="PART_StartIcon" Kind="{Binding $parent[sl:TextField].StartIcon}" Margin="10,0,0,0" VerticalAlignment="Center"
-                         Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+                         Foreground="{DynamicResource Sl.Brush.Text.Tertiary}"
+                         IsVisible="{Binding $parent[sl:TextField].StartContent, Converter={x:Static ObjectConverters.IsNull}}" />
               </StackPanel>
             </TextBox.InnerLeftContent>
             <TextBox.InnerRightContent>
-              <Border Name="PART_Suffix" IsVisible="{Binding $parent[sl:TextField].Suffix, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" Padding="10,0"
-                      Background="{DynamicResource Sl.Brush.Background.Subtle}"
-                      BorderThickness="1,0,0,0" BorderBrush="{DynamicResource Sl.Brush.Border.Default}"
-                      CornerRadius="0,5,5,0">
-                <TextBlock Text="{Binding $parent[sl:TextField].Suffix}" VerticalAlignment="Center" FontSize="12"
-                           FontFamily="{DynamicResource Sl.Font.Family.Mono}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
-              </Border>
+              <StackPanel Orientation="Horizontal">
+                <Button Name="PART_Clear" Classes="ghost small icon-only" slate:Sl.StartIcon="x" slate:Sl.Label="Clear"
+                        Margin="0,0,4,0" Focusable="False" IsVisible="False" />
+                <ContentPresenter Name="PART_EndContent" Content="{Binding $parent[sl:TextField].EndContent}" Margin="0,0,8,0" VerticalAlignment="Center"
+                                  IsVisible="{Binding $parent[sl:TextField].EndContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <sl:Icon Name="PART_EndIcon" Kind="{Binding $parent[sl:TextField].EndIcon}" Margin="0,0,10,0" VerticalAlignment="Center"
+                         Foreground="{DynamicResource Sl.Brush.Text.Tertiary}"
+                         IsVisible="{Binding $parent[sl:TextField].EndContent, Converter={x:Static ObjectConverters.IsNull}}" />
+                <Border Name="PART_Suffix" IsVisible="{Binding $parent[sl:TextField].Suffix, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" Padding="10,0"
+                        Background="{DynamicResource Sl.Brush.Background.Subtle}"
+                        BorderThickness="1,0,0,0" BorderBrush="{DynamicResource Sl.Brush.Border.Default}"
+                        CornerRadius="0,5,5,0">
+                  <TextBlock Text="{Binding $parent[sl:TextField].Suffix}" VerticalAlignment="Center" FontSize="12"
+                             FontFamily="{DynamicResource Sl.Font.Family.Mono}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+                </Border>
+              </StackPanel>
             </TextBox.InnerRightContent>
           </TextBox>
-          <StackPanel Name="PART_DescriptionRow" Orientation="Horizontal" Spacing="6">
-            <sl:Icon Name="PART_ErrorIcon" Kind="alert-circle" Size="14" IsVisible="False" VerticalAlignment="Center"
-                     Foreground="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
-            <TextBlock Name="PART_Helper" Text="{TemplateBinding HelperText}" FontSize="12" TextWrapping="Wrap"
-                       Foreground="{DynamicResource Sl.Brush.Text.Tertiary}"
-                       IsVisible="{TemplateBinding HelperText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-            <TextBlock Name="PART_Error" Text="{TemplateBinding Error}" FontSize="12" TextWrapping="Wrap" IsVisible="False"
+          <Grid Name="PART_DescriptionRow" ColumnDefinitions="*,Auto">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <sl:Icon Name="PART_ErrorIcon" Kind="alert-circle" Size="14" IsVisible="False" VerticalAlignment="Center"
                        Foreground="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
-          </StackPanel>
+              <TextBlock Name="PART_Helper" Text="{TemplateBinding HelperText}" FontSize="12" TextWrapping="Wrap"
+                         Foreground="{DynamicResource Sl.Brush.Text.Tertiary}"
+                         IsVisible="{TemplateBinding HelperText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+              <TextBlock Name="PART_Error" Text="{TemplateBinding Error}" FontSize="12" TextWrapping="Wrap" IsVisible="False"
+                         Foreground="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
+            </StackPanel>
+            <TextBlock Name="PART_Counter" Grid.Column="1" Text="{TemplateBinding CounterText}" FontSize="12" IsVisible="False"
+                       FontFamily="{DynamicResource Sl.Font.Family.Mono}" Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+          </Grid>
         </StackPanel>
       </ControlTemplate>
     </Setter>
+    <Style Selector="^[Multiline=True] /template/ TextBox#PART_Input">
+      <Setter Property="MinHeight" Value="{Binding $parent[sl:TextField].MultilineHeight}" />
+    </Style>
     <Style Selector="^:required /template/ TextBlock#PART_Required">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:counter /template/ TextBlock#PART_Counter">
       <Setter Property="IsVisible" Value="True" />
     </Style>
     <Style Selector="^:invalid">

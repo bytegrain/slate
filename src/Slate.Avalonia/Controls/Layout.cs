@@ -13,22 +13,6 @@ public static class SpaceScale
     public static double ToPixels(double steps) => steps * Step;
 }
 
-public enum StackAlign
-{
-    Stretch,
-    Start,
-    Center,
-    End,
-}
-
-public enum StackJustify
-{
-    Start,
-    Center,
-    End,
-    SpaceBetween,
-}
-
 /// <summary>
 /// One-dimensional flex layout (docs/design/layout.md#stack). <see cref="Spacing"/> is in space-token steps
 /// (default 2 = 8px). <see cref="Spacer"/> children share leftover main-axis space; with <see cref="Wrap"/>,
@@ -36,14 +20,15 @@ public enum StackJustify
 /// </summary>
 public class Stack : Panel
 {
-    public static readonly StyledProperty<Orientation> OrientationProperty =
-        AvaloniaProperty.Register<Stack, Orientation>(nameof(Orientation), Orientation.Vertical);
+    public static readonly StyledProperty<Direction> DirectionProperty =
+        AvaloniaProperty.Register<Stack, Direction>(nameof(Direction), Direction.Column);
 
     public static readonly StyledProperty<double> SpacingProperty =
         AvaloniaProperty.Register<Stack, double>(nameof(Spacing), 2);
 
-    public static readonly StyledProperty<StackAlign> AlignItemsProperty =
-        AvaloniaProperty.Register<Stack, StackAlign>(nameof(AlignItems));
+    /// <summary>Cross-axis alignment. Baseline aligns like Start (Avalonia panels have no shared baseline).</summary>
+    public static readonly StyledProperty<StackAlign> AlignProperty =
+        AvaloniaProperty.Register<Stack, StackAlign>(nameof(Align));
 
     public static readonly StyledProperty<StackJustify> JustifyProperty =
         AvaloniaProperty.Register<Stack, StackJustify>(nameof(Justify));
@@ -53,20 +38,20 @@ public class Stack : Panel
 
     static Stack()
     {
-        AffectsMeasure<Stack>(OrientationProperty, SpacingProperty, WrapProperty);
-        AffectsArrange<Stack>(AlignItemsProperty, JustifyProperty);
+        AffectsMeasure<Stack>(DirectionProperty, SpacingProperty, WrapProperty);
+        AffectsArrange<Stack>(AlignProperty, JustifyProperty);
     }
 
-    public Orientation Orientation { get => GetValue(OrientationProperty); set => SetValue(OrientationProperty, value); }
+    public Direction Direction { get => GetValue(DirectionProperty); set => SetValue(DirectionProperty, value); }
 
     /// <summary>Gap between children in space-token steps (×4px).</summary>
     public double Spacing { get => GetValue(SpacingProperty); set => SetValue(SpacingProperty, value); }
 
-    public StackAlign AlignItems { get => GetValue(AlignItemsProperty); set => SetValue(AlignItemsProperty, value); }
+    public StackAlign Align { get => GetValue(AlignProperty); set => SetValue(AlignProperty, value); }
     public StackJustify Justify { get => GetValue(JustifyProperty); set => SetValue(JustifyProperty, value); }
     public bool Wrap { get => GetValue(WrapProperty); set => SetValue(WrapProperty, value); }
 
-    private bool Horizontal => Orientation == Orientation.Horizontal;
+    private bool Horizontal => Direction == Direction.Row;
     private double Gap => SpaceScale.ToPixels(Spacing);
 
     private IEnumerable<Control> Visible => Children.Where(c => c.IsVisible);
@@ -137,7 +122,7 @@ public class Stack : Panel
             {
                 case StackJustify.Center: pos = free / 2; break;
                 case StackJustify.End: pos = free; break;
-                case StackJustify.SpaceBetween when items.Count > 1: extraGap = free / (items.Count - 1); break;
+                case StackJustify.Between when items.Count > 1: extraGap = free / (items.Count - 1); break;
             }
         }
 
@@ -145,9 +130,9 @@ public class Stack : Panel
         {
             var len = c is Spacer ? spacerSize : Main(c.DesiredSize);
             var childCross = Cross(c.DesiredSize);
-            var (cpos, clen) = AlignItems switch
+            var (cpos, clen) = Align switch
             {
-                StackAlign.Start => (crossPos, childCross),
+                StackAlign.Start or StackAlign.Baseline => (crossPos, childCross),
                 StackAlign.Center => (crossPos + (lineCross - childCross) / 2, childCross),
                 StackAlign.End => (crossPos + lineCross - childCross, childCross),
                 _ => (crossPos, lineCross),
@@ -191,41 +176,37 @@ public class Toolbar : Stack
 {
     static Toolbar()
     {
-        OrientationProperty.OverrideDefaultValue<Toolbar>(Orientation.Horizontal);
+        DirectionProperty.OverrideDefaultValue<Toolbar>(Direction.Row);
         SpacingProperty.OverrideDefaultValue<Toolbar>(1);
-        AlignItemsProperty.OverrideDefaultValue<Toolbar>(StackAlign.Center);
+        AlignProperty.OverrideDefaultValue<Toolbar>(StackAlign.Center);
     }
-}
-
-public enum ContainerSize
-{
-    Sm,
-    Md,
-    Lg,
-    Xl,
-    /// <summary>No max width.</summary>
-    Fluid,
 }
 
 /// <summary>
 /// Centres its child with a max width from the container tokens (default Lg = 1200px) and responsive
-/// side padding: 16px, or 24px from the Sm breakpoint.
+/// side padding (<see cref="Gutters"/>): 16px, or 24px from the Sm breakpoint.
 /// </summary>
+/// <remarks>The canonical <c>MaxWidth</c> option is spelled <see cref="ContainerMaxWidth"/> here because
+/// <c>Layoutable.MaxWidth</c> (a double) already exists on every Avalonia control.</remarks>
 public class Container : Decorator
 {
-    public static readonly StyledProperty<ContainerSize> SizeProperty =
-        AvaloniaProperty.Register<Container, ContainerSize>(nameof(Size), ContainerSize.Lg);
+    public static readonly StyledProperty<ContainerWidth> ContainerMaxWidthProperty =
+        AvaloniaProperty.Register<Container, ContainerWidth>(nameof(ContainerMaxWidth), Slate.ContainerWidth.Lg);
 
-    static Container() => AffectsMeasure<Container>(SizeProperty);
+    public static readonly StyledProperty<bool> GuttersProperty =
+        AvaloniaProperty.Register<Container, bool>(nameof(Gutters), true);
 
-    public ContainerSize Size { get => GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
+    static Container() => AffectsMeasure<Container>(ContainerMaxWidthProperty, GuttersProperty);
 
-    public double MaxContentWidth => Size switch
+    public ContainerWidth ContainerMaxWidth { get => GetValue(ContainerMaxWidthProperty); set => SetValue(ContainerMaxWidthProperty, value); }
+    public bool Gutters { get => GetValue(GuttersProperty); set => SetValue(GuttersProperty, value); }
+
+    public double MaxContentWidth => ContainerMaxWidth switch
     {
-        ContainerSize.Sm => SlateTokens.Container.Sm,
-        ContainerSize.Md => SlateTokens.Container.Md,
-        ContainerSize.Lg => SlateTokens.Container.Lg,
-        ContainerSize.Xl => SlateTokens.Container.Xl,
+        Slate.ContainerWidth.Sm => SlateTokens.Container.Sm,
+        Slate.ContainerWidth.Md => SlateTokens.Container.Md,
+        Slate.ContainerWidth.Lg => SlateTokens.Container.Lg,
+        Slate.ContainerWidth.Xl => SlateTokens.Container.Xl,
         _ => double.PositiveInfinity,
     };
 
@@ -234,7 +215,7 @@ public class Container : Decorator
 
     private (double Width, double Gutter) Layout(double available)
     {
-        var gutter = double.IsInfinity(available) ? SlateTokens.Space._6 : GutterFor(available);
+        var gutter = !Gutters ? 0 : double.IsInfinity(available) ? SlateTokens.Space._6 : GutterFor(available);
         var width = Math.Min(MaxContentWidth, Math.Max(0, available - 2 * gutter));
         return (width, gutter);
     }
