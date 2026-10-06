@@ -71,7 +71,7 @@ public class ConformanceTests
     public static TheoryData<string, string> Options()
     {
         var data = new TheoryData<string, string>();
-        foreach (var component in Api.GetProperty("components").EnumerateObject())
+        foreach (var component in Api.GetProperty("components").EnumerateObject().Where(c => !(c.Value.TryGetProperty("status", out var st) && st.GetString() == "planned")))
         foreach (var option in component.Value.GetProperty("options").EnumerateObject())
         {
             if (option.Value.TryGetProperty("platforms", out var platforms)
@@ -84,7 +84,7 @@ public class ConformanceTests
 
     [Fact]
     public void Every_component_in_the_contract_has_an_avalonia_target() =>
-        Assert.All(Api.GetProperty("components").EnumerateObject(), c => Assert.True(Targets.ContainsKey(c.Name), $"No Avalonia target for {c.Name}"));
+        Assert.All(Api.GetProperty("components").EnumerateObject().Where(c => !(c.Value.TryGetProperty("status", out var st) && st.GetString() == "planned")), c => Assert.True(Targets.ContainsKey(c.Name), $"No Avalonia target for {c.Name}"));
 
     [Theory, MemberData(nameof(Options))]
     public void Option_exists_with_the_canonical_type(string component, string option)

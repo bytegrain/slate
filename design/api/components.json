@@ -1,5 +1,5 @@
 {
-  "$description": "Canonical component API. Every platform must expose each option under its canonical name (spelled per docs/design/configurability.md#spelling) with these values. Platform conformance tests read this file. 'kind': param = value option, bool = flag, slot = content region, event = notification. 'platforms' limits an option to some platforms (default: all).",
+  "$description": "Canonical component API. Every platform must expose each option under its canonical name (spelled per docs/design/configurability.md#spelling) with these values. Platform conformance tests read this file. 'kind': param = value option, bool = flag, slot = content region, event = notification. 'platforms' limits an option to some platforms (default: all). Components with \"status\": \"planned\" are specified but not yet required by conformance tests.",
   "common": {
     "$description": "Applies to every component below unless it says otherwise.",
     "styling": "Blazor: Class, Style, AdditionalAttributes. Web: host class/style, ::part(name) for every part listed, component CSS variables. XAML: native Classes/Style/Theme, named PART_* template parts, Sl.Component.* resources."
@@ -117,6 +117,77 @@
       "center",
       "end",
       "between"
+    ],
+    "GridSelectionMode": [
+      "none",
+      "single",
+      "multi"
+    ],
+    "GridColumnType": [
+      "text",
+      "number",
+      "date",
+      "boolean",
+      "enum",
+      "progress",
+      "sparkline",
+      "actions",
+      "custom"
+    ],
+    "SortDirection": [
+      "ascending",
+      "descending"
+    ],
+    "GridPin": [
+      "none",
+      "start",
+      "end"
+    ],
+    "GridAggregate": [
+      "none",
+      "sum",
+      "avg",
+      "min",
+      "max",
+      "count"
+    ],
+    "GridPagination": [
+      "none",
+      "pages",
+      "infinite"
+    ],
+    "PopoverPlacement": [
+      "top",
+      "top-start",
+      "top-end",
+      "bottom",
+      "bottom-start",
+      "bottom-end",
+      "left",
+      "left-start",
+      "left-end",
+      "right",
+      "right-start",
+      "right-end"
+    ],
+    "TabsVariant": [
+      "line",
+      "pills",
+      "enclosed"
+    ],
+    "SelectionKind": [
+      "single",
+      "multiple"
+    ],
+    "DateSelection": [
+      "single",
+      "range"
+    ],
+    "TreeSelectionMode": [
+      "none",
+      "single",
+      "multi",
+      "checkbox"
     ]
   },
   "components": {
@@ -882,6 +953,831 @@
         "footer",
         "close"
       ]
+    },
+    "DataGrid": {
+      "web": "sl-data-grid",
+      "blazor": "SlDataGrid<T>",
+      "xaml": "DataGrid",
+      "options": {
+        "Items": {
+          "kind": "param",
+          "type": "IEnumerable<T>",
+          "note": "Client mode."
+        },
+        "DataSource": {
+          "kind": "param",
+          "type": "IGridDataSource<T>",
+          "note": "Server mode; overrides Items."
+        },
+        "Columns": {
+          "kind": "slot",
+          "note": "Column definitions (GridColumn: Field, Title, Type, Width, MinWidth, MaxWidth, Flex, Sortable, Filterable, Resizable, Reorderable, Hideable, Pinned, Hidden, Align, Format, Aggregate, Editable, Validate, Template, Tone)."
+        },
+        "RowKey": {
+          "kind": "param",
+          "type": "Func<T,object>",
+          "note": "Stable identity for selection/updates."
+        },
+        "SelectionMode": {
+          "kind": "param",
+          "type": "GridSelectionMode",
+          "default": "none"
+        },
+        "SelectedItems": {
+          "kind": "param",
+          "type": "IReadOnlyCollection<T>",
+          "note": "Two-way."
+        },
+        "Pagination": {
+          "kind": "param",
+          "type": "GridPagination",
+          "default": "none"
+        },
+        "PageSize": {
+          "kind": "param",
+          "type": "int",
+          "default": 50
+        },
+        "Density": {
+          "kind": "param",
+          "type": "Density?",
+          "note": "Null = inherit."
+        },
+        "Striped": {
+          "kind": "bool"
+        },
+        "Bordered": {
+          "kind": "bool",
+          "note": "Vertical cell borders."
+        },
+        "QuickFilter": {
+          "kind": "param",
+          "type": "string",
+          "note": "Two-way."
+        },
+        "ShowToolbar": {
+          "kind": "bool"
+        },
+        "ShowFooter": {
+          "kind": "bool",
+          "note": "Aggregate footer row."
+        },
+        "Groupable": {
+          "kind": "bool",
+          "note": "Shows the group-by bar."
+        },
+        "GroupBy": {
+          "kind": "param",
+          "type": "string[]",
+          "note": "Column fields, two-way."
+        },
+        "ChildrenSelector": {
+          "kind": "param",
+          "type": "Func<T,IEnumerable<T>>",
+          "note": "Tree data."
+        },
+        "RowDetail": {
+          "kind": "slot",
+          "note": "Expandable detail template."
+        },
+        "RowTone": {
+          "kind": "param",
+          "type": "Func<T,Tone?>"
+        },
+        "EditMode": {
+          "kind": "param",
+          "type": "none|cell|batch",
+          "default": "none"
+        },
+        "Loading": {
+          "kind": "bool"
+        },
+        "EmptyContent": {
+          "kind": "slot"
+        },
+        "ToolbarContent": {
+          "kind": "slot",
+          "note": "Extra toolbar items."
+        },
+        "State": {
+          "kind": "param",
+          "type": "GridState",
+          "note": "Two-way; serialisable layout/sort/filter/group."
+        },
+        "SelectionChanged": {
+          "kind": "event"
+        },
+        "StateChanged": {
+          "kind": "event"
+        },
+        "RowActivated": {
+          "kind": "event",
+          "note": "Enter or double-click."
+        },
+        "CellEditCommitted": {
+          "kind": "event"
+        }
+      },
+      "parts": [
+        "base",
+        "toolbar",
+        "header",
+        "header-cell",
+        "body",
+        "row",
+        "cell",
+        "group-row",
+        "footer",
+        "empty",
+        "pager"
+      ],
+      "status": "planned"
+    },
+    "Select": {
+      "web": "sl-select",
+      "blazor": "SlSelect<T>",
+      "xaml": "Select",
+      "options": {
+        "Items": {
+          "kind": "param",
+          "type": "IEnumerable<T>"
+        },
+        "Value": {
+          "kind": "param",
+          "type": "T"
+        },
+        "Values": {
+          "kind": "param",
+          "type": "IReadOnlyList<T>",
+          "note": "Multiple mode."
+        },
+        "Multiple": {
+          "kind": "bool"
+        },
+        "Searchable": {
+          "kind": "bool",
+          "note": "Combobox: type to filter."
+        },
+        "Creatable": {
+          "kind": "bool",
+          "note": "Allow values not in Items."
+        },
+        "ItemText": {
+          "kind": "param",
+          "type": "Func<T,string>"
+        },
+        "ItemTemplate": {
+          "kind": "slot"
+        },
+        "GroupBy": {
+          "kind": "param",
+          "type": "Func<T,string>"
+        },
+        "Label": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Placeholder": {
+          "kind": "param",
+          "type": "string"
+        },
+        "HelperText": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Error": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Variant": {
+          "kind": "param",
+          "type": "FieldVariant",
+          "default": "outlined"
+        },
+        "Size": {
+          "kind": "param",
+          "type": "ControlSize",
+          "default": "medium"
+        },
+        "Radius": {
+          "kind": "param",
+          "type": "Radius",
+          "default": "default"
+        },
+        "Clearable": {
+          "kind": "bool"
+        },
+        "Disabled": {
+          "kind": "bool"
+        },
+        "Required": {
+          "kind": "bool"
+        },
+        "Loading": {
+          "kind": "bool"
+        },
+        "MaxVisibleChips": {
+          "kind": "param",
+          "type": "int?"
+        },
+        "EmptyContent": {
+          "kind": "slot"
+        },
+        "ValueChanged": {
+          "kind": "event"
+        },
+        "ValuesChanged": {
+          "kind": "event"
+        },
+        "SearchChanged": {
+          "kind": "event",
+          "note": "For server-side search."
+        }
+      },
+      "parts": [
+        "base",
+        "label",
+        "control",
+        "value",
+        "chip",
+        "listbox",
+        "option",
+        "group",
+        "empty"
+      ],
+      "status": "planned"
+    },
+    "Menu": {
+      "web": "sl-menu + sl-menu-item",
+      "blazor": "SlMenu / SlMenuItem",
+      "xaml": "Menu/ContextMenu styles + MenuItem sl:Sl.*",
+      "options": {
+        "Trigger": {
+          "kind": "slot",
+          "note": "Element that opens the menu (click, Enter/Space/ArrowDown)."
+        },
+        "Items": {
+          "kind": "slot"
+        },
+        "Placement": {
+          "kind": "param",
+          "type": "PopoverPlacement",
+          "default": "bottom-start"
+        },
+        "Open": {
+          "kind": "param",
+          "type": "bool",
+          "note": "Two-way."
+        },
+        "ContextMenu": {
+          "kind": "bool",
+          "note": "Open on right-click / Shift+F10 at pointer."
+        },
+        "OpenChanged": {
+          "kind": "event"
+        }
+      },
+      "item": {
+        "Label": "string",
+        "Icon": "icon",
+        "Shortcut": "string",
+        "Tone": "Tone",
+        "Disabled": "bool",
+        "Checked": "bool?",
+        "Submenu": "slot",
+        "Href": "string",
+        "Click": "event",
+        "Separator": "bool"
+      },
+      "parts": [
+        "panel",
+        "item",
+        "separator",
+        "shortcut"
+      ],
+      "status": "planned"
+    },
+    "Tabs": {
+      "web": "sl-tabs + sl-tab + sl-tab-panel",
+      "blazor": "SlTabs / SlTab",
+      "xaml": "TabControl + TabItem sl:Sl.*",
+      "options": {
+        "Value": {
+          "kind": "param",
+          "type": "string",
+          "note": "Active tab key, two-way."
+        },
+        "Variant": {
+          "kind": "param",
+          "type": "TabsVariant",
+          "default": "line"
+        },
+        "Size": {
+          "kind": "param",
+          "type": "ControlSize",
+          "default": "medium"
+        },
+        "Direction": {
+          "kind": "param",
+          "type": "Direction",
+          "default": "row"
+        },
+        "KeepAlive": {
+          "kind": "bool",
+          "note": "Keep inactive panels mounted."
+        },
+        "ValueChanged": {
+          "kind": "event"
+        }
+      },
+      "item": {
+        "Key": "string",
+        "Label": "string",
+        "Icon": "icon",
+        "Badge": "string",
+        "Closable": "bool",
+        "Disabled": "bool",
+        "Closed": "event"
+      },
+      "parts": [
+        "list",
+        "tab",
+        "indicator",
+        "panel",
+        "overflow"
+      ],
+      "status": "planned"
+    },
+    "Tooltip": {
+      "web": "sl-tooltip",
+      "blazor": "SlTooltip",
+      "xaml": "ToolTip style + sl:Sl.Shortcut",
+      "options": {
+        "Text": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Content": {
+          "kind": "slot"
+        },
+        "Shortcut": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Placement": {
+          "kind": "param",
+          "type": "PopoverPlacement",
+          "default": "top"
+        },
+        "Delay": {
+          "kind": "param",
+          "type": "int",
+          "default": 500,
+          "note": "ms before showing; 0 when moving between tooltips."
+        },
+        "Disabled": {
+          "kind": "bool"
+        }
+      },
+      "status": "planned"
+    },
+    "Popover": {
+      "web": "sl-popover",
+      "blazor": "SlPopover",
+      "xaml": "Popover",
+      "options": {
+        "Anchor": {
+          "kind": "slot"
+        },
+        "Content": {
+          "kind": "slot"
+        },
+        "Open": {
+          "kind": "param",
+          "type": "bool",
+          "note": "Two-way."
+        },
+        "Placement": {
+          "kind": "param",
+          "type": "PopoverPlacement",
+          "default": "bottom"
+        },
+        "Offset": {
+          "kind": "param",
+          "type": "double",
+          "default": 6
+        },
+        "Modal": {
+          "kind": "bool",
+          "note": "Trap focus."
+        },
+        "CloseOnOutsideClick": {
+          "kind": "bool",
+          "default": true
+        },
+        "MatchAnchorWidth": {
+          "kind": "bool"
+        },
+        "OpenChanged": {
+          "kind": "event"
+        }
+      },
+      "parts": [
+        "panel",
+        "arrow"
+      ],
+      "status": "planned"
+    },
+    "DatePicker": {
+      "web": "sl-date-picker",
+      "blazor": "SlDatePicker",
+      "xaml": "DatePicker (Slate)",
+      "options": {
+        "Value": {
+          "kind": "param",
+          "type": "DateOnly?"
+        },
+        "Range": {
+          "kind": "param",
+          "type": "DateRange?",
+          "note": "Range mode."
+        },
+        "Selection": {
+          "kind": "param",
+          "type": "DateSelection",
+          "default": "single"
+        },
+        "Min": {
+          "kind": "param",
+          "type": "DateOnly?"
+        },
+        "Max": {
+          "kind": "param",
+          "type": "DateOnly?"
+        },
+        "DisabledDates": {
+          "kind": "param",
+          "type": "Func<DateOnly,bool>"
+        },
+        "FirstDayOfWeek": {
+          "kind": "param",
+          "type": "DayOfWeek?",
+          "note": "Null = culture."
+        },
+        "Format": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Presets": {
+          "kind": "param",
+          "type": "IEnumerable<DatePreset>",
+          "note": "Today, Last 7 days\u2026"
+        },
+        "Label": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Placeholder": {
+          "kind": "param",
+          "type": "string"
+        },
+        "HelperText": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Error": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Variant": {
+          "kind": "param",
+          "type": "FieldVariant",
+          "default": "outlined"
+        },
+        "Size": {
+          "kind": "param",
+          "type": "ControlSize",
+          "default": "medium"
+        },
+        "Clearable": {
+          "kind": "bool"
+        },
+        "Disabled": {
+          "kind": "bool"
+        },
+        "Inline": {
+          "kind": "bool",
+          "note": "Render the calendar without a field."
+        },
+        "ValueChanged": {
+          "kind": "event"
+        },
+        "RangeChanged": {
+          "kind": "event"
+        }
+      },
+      "parts": [
+        "field",
+        "panel",
+        "header",
+        "grid",
+        "day",
+        "presets"
+      ],
+      "status": "planned"
+    },
+    "TreeView": {
+      "web": "sl-tree-view",
+      "blazor": "SlTreeView<T>",
+      "xaml": "TreeView style + Slate TreeView features",
+      "options": {
+        "Items": {
+          "kind": "param",
+          "type": "IEnumerable<T>"
+        },
+        "ChildrenSelector": {
+          "kind": "param",
+          "type": "Func<T,IEnumerable<T>>"
+        },
+        "HasChildren": {
+          "kind": "param",
+          "type": "Func<T,bool>",
+          "note": "Lazy loading."
+        },
+        "LoadChildren": {
+          "kind": "param",
+          "type": "Func<T,Task<IEnumerable<T>>>"
+        },
+        "ItemText": {
+          "kind": "param",
+          "type": "Func<T,string>"
+        },
+        "ItemIcon": {
+          "kind": "param",
+          "type": "Func<T,string?>"
+        },
+        "ItemTemplate": {
+          "kind": "slot"
+        },
+        "SelectionMode": {
+          "kind": "param",
+          "type": "TreeSelectionMode",
+          "default": "single"
+        },
+        "SelectedItems": {
+          "kind": "param",
+          "type": "IReadOnlyCollection<T>"
+        },
+        "Expanded": {
+          "kind": "param",
+          "type": "IReadOnlyCollection<T>",
+          "note": "Two-way."
+        },
+        "Filter": {
+          "kind": "param",
+          "type": "string",
+          "note": "Keeps ancestors of matches."
+        },
+        "Dense": {
+          "kind": "bool"
+        },
+        "SelectionChanged": {
+          "kind": "event"
+        },
+        "ItemActivated": {
+          "kind": "event"
+        }
+      },
+      "parts": [
+        "item",
+        "expander",
+        "icon",
+        "label",
+        "checkbox",
+        "children"
+      ],
+      "status": "planned"
+    },
+    "SegmentedControl": {
+      "web": "sl-segmented",
+      "blazor": "SlSegmented<T>",
+      "xaml": "SegmentedControl",
+      "options": {
+        "Items": {
+          "kind": "param",
+          "type": "IEnumerable<T>"
+        },
+        "Value": {
+          "kind": "param",
+          "type": "T"
+        },
+        "ItemText": {
+          "kind": "param",
+          "type": "Func<T,string>"
+        },
+        "ItemIcon": {
+          "kind": "param",
+          "type": "Func<T,string?>"
+        },
+        "Size": {
+          "kind": "param",
+          "type": "ControlSize",
+          "default": "medium"
+        },
+        "FullWidth": {
+          "kind": "bool"
+        },
+        "Disabled": {
+          "kind": "bool"
+        },
+        "ValueChanged": {
+          "kind": "event"
+        }
+      },
+      "status": "planned"
+    },
+    "Slider": {
+      "web": "sl-slider",
+      "blazor": "SlSlider",
+      "xaml": "Slider + sl:Sl.*",
+      "options": {
+        "Value": {
+          "kind": "param",
+          "type": "double"
+        },
+        "RangeEnd": {
+          "kind": "param",
+          "type": "double?",
+          "note": "Set for a two-thumb range."
+        },
+        "Min": {
+          "kind": "param",
+          "type": "double",
+          "default": 0
+        },
+        "Max": {
+          "kind": "param",
+          "type": "double",
+          "default": 100
+        },
+        "Step": {
+          "kind": "param",
+          "type": "double",
+          "default": 1
+        },
+        "Ticks": {
+          "kind": "bool"
+        },
+        "ShowValue": {
+          "kind": "bool"
+        },
+        "Label": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Tone": {
+          "kind": "param",
+          "type": "Tone",
+          "default": "accent"
+        },
+        "Disabled": {
+          "kind": "bool"
+        },
+        "ValueChanged": {
+          "kind": "event"
+        }
+      },
+      "status": "planned"
+    },
+    "Avatar": {
+      "web": "sl-avatar",
+      "blazor": "SlAvatar",
+      "xaml": "Avatar",
+      "options": {
+        "Name": {
+          "kind": "param",
+          "type": "string",
+          "note": "Initials + deterministic tone."
+        },
+        "Image": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Size": {
+          "kind": "param",
+          "type": "ControlSize",
+          "default": "medium"
+        },
+        "Tone": {
+          "kind": "param",
+          "type": "Tone?"
+        },
+        "Status": {
+          "kind": "param",
+          "type": "online|away|busy|offline|null"
+        }
+      },
+      "status": "planned"
+    },
+    "Breadcrumbs": {
+      "web": "sl-breadcrumbs",
+      "blazor": "SlBreadcrumbs",
+      "xaml": "Breadcrumbs",
+      "options": {
+        "Items": {
+          "kind": "param",
+          "type": "IEnumerable<BreadcrumbItem>"
+        },
+        "MaxItems": {
+          "kind": "param",
+          "type": "int?",
+          "note": "Collapses the middle into a menu."
+        },
+        "Separator": {
+          "kind": "param",
+          "type": "icon",
+          "default": "chevron-right"
+        },
+        "ItemClick": {
+          "kind": "event"
+        }
+      },
+      "status": "planned"
+    },
+    "Pagination": {
+      "web": "sl-pagination",
+      "blazor": "SlPagination",
+      "xaml": "Pagination",
+      "options": {
+        "Page": {
+          "kind": "param",
+          "type": "int",
+          "note": "1-based, two-way."
+        },
+        "PageCount": {
+          "kind": "param",
+          "type": "int"
+        },
+        "Siblings": {
+          "kind": "param",
+          "type": "int",
+          "default": 1
+        },
+        "PageSize": {
+          "kind": "param",
+          "type": "int?"
+        },
+        "PageSizes": {
+          "kind": "param",
+          "type": "int[]"
+        },
+        "TotalCount": {
+          "kind": "param",
+          "type": "int?"
+        },
+        "Size": {
+          "kind": "param",
+          "type": "ControlSize",
+          "default": "medium"
+        },
+        "PageChanged": {
+          "kind": "event"
+        },
+        "PageSizeChanged": {
+          "kind": "event"
+        }
+      },
+      "status": "planned"
+    },
+    "Skeleton": {
+      "web": "sl-skeleton",
+      "blazor": "SlSkeleton",
+      "xaml": "Skeleton",
+      "options": {
+        "Shape": {
+          "kind": "param",
+          "type": "text|rect|circle",
+          "default": "text"
+        },
+        "Width": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Height": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Lines": {
+          "kind": "param",
+          "type": "int",
+          "default": 1
+        },
+        "Animated": {
+          "kind": "bool",
+          "default": true
+        }
+      },
+      "status": "planned"
     }
   }
 }

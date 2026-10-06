@@ -213,4 +213,65 @@
   <CornerRadius x:Key="Sl.Component.Drawer.ItemRadius.Corner">6</CornerRadius>
   <Color x:Key="Sl.Component.Drawer.ActiveItem">#FF151A20</Color>
   <SolidColorBrush x:Key="Sl.Component.Drawer.ActiveItem.Brush" Color="#FF151A20" />
+  <sys:Double x:Key="Sl.Component.Grid.RowHeight">32</sys:Double>
+  <sys:Double x:Key="Sl.Component.Grid.HeaderHeight">40</sys:Double>
+  <sys:Double x:Key="Sl.Component.Grid.CellPaddingX">12</sys:Double>
+  <Thickness x:Key="Sl.Component.Grid.CellPaddingX.Thickness">12</Thickness>
+  <Color x:Key="Sl.Component.Grid.Background">#FF151A20</Color>
+  <SolidColorBrush x:Key="Sl.Component.Grid.Background.Brush" Color="#FF151A20" />
+  <Color x:Key="Sl.Component.Grid.HeaderBackground">#FF1B2128</Color>
+  <SolidColorBrush x:Key="Sl.Component.Grid.HeaderBackground.Brush" Color="#FF1B2128" />
+  <Color x:Key="Sl.Component.Grid.HeaderText">#FFAEB7C2</Color>
+  <SolidColorBrush x:Key="Sl.Component.Grid.HeaderText.Brush" Color="#FFAEB7C2" />
+  <Color x:Key="Sl.Component.Grid.Border">#FF262E38</Color>
+  <SolidColorBrush x:Key="Sl.Component.Grid.Border.Brush" Color="#FF262E38" />
+  <Color x:Key="Sl.Component.Grid.RowHover">#FF1B2128</Color>
+  <SolidColorBrush x:Key="Sl.Component.Grid.RowHover.Brush" Color="#FF1B2128" />
+  <Color x:Key="Sl.Component.Grid.RowSelected">#1F2BD4A4</Color>
+  <SolidColorBrush x:Key="Sl.Component.Grid.RowSelected.Brush" Color="#1F2BD4A4" />
+  <Color x:Key="Sl.Component.Grid.SelectionIndicator">#FF2BD4A4</Color>
+  <SolidColorBrush x:Key="Sl.Component.Grid.SelectionIndicator.Brush" Color="#FF2BD4A4" />
+  <Color x:Key="Sl.Component.Grid.ActiveCell">#FF2BD4A4</Color>
+  <SolidColorBrush x:Key="Sl.Component.Grid.ActiveCell.Brush" Color="#FF2BD4A4" />
+  <Color x:Key="Sl.Component.Grid.GroupBackground">#FF1B2128</Color>
+  <SolidColorBrush x:Key="Sl.Component.Grid.GroupBackground.Brush" Color="#FF1B2128" />
+  <DropShadowEffect x:Key="Sl.Component.Grid.PinnedShadow.Effect" Direction="270" ShadowDepth="1" BlurRadius="2" Color="#FF000000" Opacity="0.451" RenderingBias="Performance" />
+  <sys:Double x:Key="Sl.Component.Grid.Radius">10</sys:Double>
+  <CornerRadius x:Key="Sl.Component.Grid.Radius.Corner">10</CornerRadius>
+  <sys:Double x:Key="Sl.Component.Popover.Radius">8</sys:Double>
+  <CornerRadius x:Key="Sl.Component.Popover.Radius.Corner">8</CornerRadius>
+  <Color x:Key="Sl.Component.Popover.Background">#FF1B2128</Color>
+  <SolidColorBrush x:Key="Sl.Component.Popover.Background.Brush" Color="#FF1B2128" />
+  <DropShadowEffect x:Key="Sl.Component.Popover.Shadow.Effect" Direction="270" ShadowDepth="8" BlurRadius="24" Color="#FF000000" Opacity="0.6" RenderingBias="Performance" />
+  <sys:Double x:Key="Sl.Component.Popover.Padding">4</sys:Double>
+  <Thickness x:Key="Sl.Component.Popover.Padding.Thickness">4</Thickness>
+  <sys:Double x:Key="Sl.Component.Menu.ItemRadius">4</sys:Double>
+  <CornerRadius x:Key="Sl.Component.Menu.ItemRadius.Corner">4</CornerRadius>
+  <sys:Double x:Key="Sl.Component.Menu.ItemHeight">32</sys:Double>
+  <Color x:Key="Sl.Component.Menu.ItemHover">#FF1B2128</Color>
+  <SolidColorBrush x:Key="Sl.Component.Menu.ItemHover.Brush" Color="#FF1B2128" />
+  <Color x:Key="Sl.Component.Tooltip.Background">#FF262E38</Color>
+  <SolidColorBrush x:Key="Sl.Component.Tooltip.Background.Brush" Color="#FF262E38" />
+  <Color x:Key="Sl.Component.Tooltip.Foreground">#FFE9ECF0</Color>
+  <SolidColorBrush x:Key="Sl.Component.Tooltip.Foreground.Brush" Color="#FFE9ECF0" />
+  <sys:Double x:Key="Sl.Component.Tooltip.Radius">4</sys:Double>
+  <CornerRadius x:Key="Sl.Component.Tooltip.Radius.Corner">4</CornerRadius>
+  <Color x:Key="Sl.Component.Tabs.Indicator">#FF3FB3C6</Color>
+  <SolidColorBrush x:Key="Sl.Component.Tabs.Indicator.Brush" Color="#FF3FB3C6" />
+  <sys:Double x:Key="Sl.Component.Tabs.IndicatorHeight">2</sys:Double>
+  <Color x:Key="Sl.Component.Tabs.PillBackground">#FF232A33</Color>
+  <SolidColorBrush x:Key="Sl.Component.Tabs.PillBackground.Brush" Color="#FF232A33" />
+  <sys:Double x:Key="Sl.Component.Calendar.DaySize">32</sys:Double>
+  <Color x:Key="Sl.Component.Calendar.Selected">#FF3FB3C6</Color>
+  <SolidColorBrush x:Key="Sl.Component.Calendar.Selected.Brush" Color="#FF3FB3C6" />
+  <Color x:Key="Sl.Component.Calendar.Range">#1F3FB3C6</Color>
+  <SolidColorBrush x:Key="Sl.Component.Calendar.Range.Brush" Color="#1F3FB3C6" />
+  <Color x:Key="Sl.Component.Calendar.Today">#FF36404C</Color>
+  <SolidColorBrush x:Key="Sl.Component.Calendar.Today.Brush" Color="#FF36404C" />
+  <sys:Double x:Key="Sl.Component.Tree.Indent">20</sys:Double>
+  <sys:Double x:Key="Sl.Component.Tree.ItemHeight">26</sys:Double>
+  <sys:Double x:Key="Sl.Component.Avatar.Radius">9999</sys:Double>
+  <CornerRadius x:Key="Sl.Component.Avatar.Radius.Corner">9999</CornerRadius>
+  <Color x:Key="Sl.Component.Skeleton.Background">#FF232A33</Color>
+  <SolidColorBrush x:Key="Sl.Component.Skeleton.Background.Brush" Color="#FF232A33" />
 </ResourceDictionary>

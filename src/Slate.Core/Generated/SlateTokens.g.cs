@@ -570,6 +570,10 @@ public static partial class SlateTokens
           public const string Background = "#FFFFFF";
           public const string Border = "#E1E5EA";
         }
+        public static class Avatar
+        {
+          public const double Radius = 9999;
+        }
         public static class Badge
         {
           public const double Radius = 4;
@@ -586,6 +590,13 @@ public static partial class SlateTokens
           public const double IconSize = 16;
           public const string Shadow = "inset 0px 1px 0px 0px #FFFFFFF2, 0px 1px 0px 0px #12161C0D, 0px 1px 2px 0px #12161C0F"; // CSS box-shadow syntax
           public const string SolidShadow = "inset 0px 1px 0px 0px #FFFFFF2E, inset 0px -1px 0px 0px #00000038, 0px 1px 2px 0px #12161C38"; // CSS box-shadow syntax
+        }
+        public static class Calendar
+        {
+          public const double DaySize = 32;
+          public const string Selected = "#0E5E6F";
+          public const string Range = "#E6F4F6";
+          public const string Today = "#CBD1D9";
         }
         public static class Card
         {
@@ -624,6 +635,37 @@ public static partial class SlateTokens
           public const string BorderFocus = "#0E5E6F";
           public const string Shadow = "inset 0px 1px 2px 0px #12161C0D"; // CSS box-shadow syntax
         }
+        public static class Grid
+        {
+          /// <summary>Row height; follows density via the platform&apos;s size.control alias.</summary>
+          public const double RowHeight = 32;
+          public const double HeaderHeight = 40;
+          public const double CellPaddingX = 12;
+          public const string Background = "#FFFFFF";
+          public const string HeaderBackground = "#F0F2F5";
+          public const string HeaderText = "#46505C";
+          public const string Border = "#E1E5EA";
+          public const string RowHover = "#F6F7F9";
+          public const string RowSelected = "#2BD4A424";
+          public const string SelectionIndicator = "#2BD4A4";
+          public const string ActiveCell = "#0B8F6C";
+          public const string GroupBackground = "#F0F2F5";
+          public const string PinnedShadow = "0px 1px 2px 0px #12161C0F, 0px 0px 0px 1px #E1E5EA"; // CSS box-shadow syntax
+          public const double Radius = 10;
+        }
+        public static class Menu
+        {
+          public const double ItemRadius = 4;
+          public const double ItemHeight = 32;
+          public const string ItemHover = "#F0F2F5";
+        }
+        public static class Popover
+        {
+          public const double Radius = 8;
+          public const string Background = "#FFFFFF";
+          public const string Shadow = "0px 2px 4px 0px #12161C0A, 0px 8px 24px -6px #12161C24, 0px 0px 0px 1px #E1E5EA"; // CSS box-shadow syntax
+          public const double Padding = 4;
+        }
         public static class Progress
         {
           public const double Height = 6;
@@ -640,6 +682,10 @@ public static partial class SlateTokens
           public const double SwitchHeight = 20;
           public const double ThumbSize = 16;
         }
+        public static class Skeleton
+        {
+          public const string Background = "#E7EAEE";
+        }
         public static class Snackbar
         {
           public const double Radius = 8;
@@ -648,6 +694,23 @@ public static partial class SlateTokens
           public const string Muted = "#A9B1BC";
           public const string Shadow = "0px 4px 8px 0px #12161C0D, 0px 24px 56px -12px #12161C3D, 0px 0px 0px 1px #12161C14"; // CSS box-shadow syntax
           public const string Timer = "#0B8F6C";
+        }
+        public static class Tabs
+        {
+          public const string Indicator = "#0E5E6F";
+          public const double IndicatorHeight = 2;
+          public const string PillBackground = "#E7EAEE";
+        }
+        public static class Tooltip
+        {
+          public const string Background = "#12161C";
+          public const string Foreground = "#E9ECF0";
+          public const double Radius = 4;
+        }
+        public static class Tree
+        {
+          public const double Indent = 20;
+          public const double ItemHeight = 26;
         }
       }
       public static class Shadow
@@ -784,6 +847,41 @@ public static partial class SlateTokens
         ["component.drawer.background"] = "#F0F2F5",
         ["component.drawer.itemRadius"] = "6px",
         ["component.drawer.activeItem"] = "#FFFFFF",
+        ["component.grid.rowHeight"] = "32px",
+        ["component.grid.headerHeight"] = "40px",
+        ["component.grid.cellPaddingX"] = "12px",
+        ["component.grid.background"] = "#FFFFFF",
+        ["component.grid.headerBackground"] = "#F0F2F5",
+        ["component.grid.headerText"] = "#46505C",
+        ["component.grid.border"] = "#E1E5EA",
+        ["component.grid.rowHover"] = "#F6F7F9",
+        ["component.grid.rowSelected"] = "#2BD4A424",
+        ["component.grid.selectionIndicator"] = "#2BD4A4",
+        ["component.grid.activeCell"] = "#0B8F6C",
+        ["component.grid.groupBackground"] = "#F0F2F5",
+        ["component.grid.pinnedShadow"] = "0px 1px 2px 0px #12161C0F, 0px 0px 0px 1px #E1E5EA",
+        ["component.grid.radius"] = "10px",
+        ["component.popover.radius"] = "8px",
+        ["component.popover.background"] = "#FFFFFF",
+        ["component.popover.shadow"] = "0px 2px 4px 0px #12161C0A, 0px 8px 24px -6px #12161C24, 0px 0px 0px 1px #E1E5EA",
+        ["component.popover.padding"] = "4px",
+        ["component.menu.itemRadius"] = "4px",
+        ["component.menu.itemHeight"] = "32px",
+        ["component.menu.itemHover"] = "#F0F2F5",
+        ["component.tooltip.background"] = "#12161C",
+        ["component.tooltip.foreground"] = "#E9ECF0",
+        ["component.tooltip.radius"] = "4px",
+        ["component.tabs.indicator"] = "#0E5E6F",
+        ["component.tabs.indicatorHeight"] = "2px",
+        ["component.tabs.pillBackground"] = "#E7EAEE",
+        ["component.calendar.daySize"] = "32px",
+        ["component.calendar.selected"] = "#0E5E6F",
+        ["component.calendar.range"] = "#E6F4F6",
+        ["component.calendar.today"] = "#CBD1D9",
+        ["component.tree.indent"] = "20px",
+        ["component.tree.itemHeight"] = "26px",
+        ["component.avatar.radius"] = "9999px",
+        ["component.skeleton.background"] = "#E7EAEE",
       };
 
       /// <summary>Token path → the token it aliases (component tokens), so runtime themes can propagate changes.</summary>
@@ -891,6 +989,40 @@ public static partial class SlateTokens
         ["component.drawer.background"] = "color.background.subtle",
         ["component.drawer.itemRadius"] = "radius.md",
         ["component.drawer.activeItem"] = "color.background.surface",
+        ["component.grid.rowHeight"] = "size.control.compact.md",
+        ["component.grid.headerHeight"] = "size.control.compact.lg",
+        ["component.grid.cellPaddingX"] = "space.3",
+        ["component.grid.background"] = "color.background.surface",
+        ["component.grid.headerBackground"] = "color.background.subtle",
+        ["component.grid.headerText"] = "color.text.secondary",
+        ["component.grid.border"] = "color.border.default",
+        ["component.grid.rowHover"] = "color.background.hover",
+        ["component.grid.rowSelected"] = "color.selection.background",
+        ["component.grid.selectionIndicator"] = "color.selection.indicator",
+        ["component.grid.activeCell"] = "color.focus.ring",
+        ["component.grid.groupBackground"] = "color.background.subtle",
+        ["component.grid.pinnedShadow"] = "shadow.e1",
+        ["component.grid.radius"] = "radius.xl",
+        ["component.popover.radius"] = "radius.lg",
+        ["component.popover.background"] = "color.background.raised",
+        ["component.popover.shadow"] = "shadow.e2",
+        ["component.popover.padding"] = "space.1",
+        ["component.menu.itemRadius"] = "radius.sm",
+        ["component.menu.itemHeight"] = "size.control.compact.md",
+        ["component.menu.itemHover"] = "color.background.subtle",
+        ["component.tooltip.background"] = "color.inverse.background",
+        ["component.tooltip.foreground"] = "color.inverse.text",
+        ["component.tooltip.radius"] = "radius.sm",
+        ["component.tabs.indicator"] = "color.accent.default",
+        ["component.tabs.pillBackground"] = "color.background.muted",
+        ["component.calendar.daySize"] = "size.control.compact.md",
+        ["component.calendar.selected"] = "color.accent.default",
+        ["component.calendar.range"] = "color.accent.subtle",
+        ["component.calendar.today"] = "color.border.strong",
+        ["component.tree.indent"] = "space.5",
+        ["component.tree.itemHeight"] = "size.control.compact.sm",
+        ["component.avatar.radius"] = "radius.full",
+        ["component.skeleton.background"] = "color.background.muted",
       };
     }
     public static class Dark
@@ -1010,6 +1142,10 @@ public static partial class SlateTokens
           public const string Background = "#151A20";
           public const string Border = "#262E38";
         }
+        public static class Avatar
+        {
+          public const double Radius = 9999;
+        }
         public static class Badge
         {
           public const double Radius = 4;
@@ -1026,6 +1162,13 @@ public static partial class SlateTokens
           public const double IconSize = 16;
           public const string Shadow = "inset 0px 1px 0px 0px #FFFFFF12, 0px 1px 0px 0px #00000073, 0px 1px 2px 0px #00000059"; // CSS box-shadow syntax
           public const string SolidShadow = "inset 0px 1px 0px 0px #FFFFFF66, inset 0px -1px 0px 0px #00000040, 0px 1px 2px 0px #00000080"; // CSS box-shadow syntax
+        }
+        public static class Calendar
+        {
+          public const double DaySize = 32;
+          public const string Selected = "#3FB3C6";
+          public const string Range = "#3FB3C61F";
+          public const string Today = "#36404C";
         }
         public static class Card
         {
@@ -1064,6 +1207,37 @@ public static partial class SlateTokens
           public const string BorderFocus = "#3FB3C6";
           public const string Shadow = "inset 0px 1px 2px 0px #00000059"; // CSS box-shadow syntax
         }
+        public static class Grid
+        {
+          /// <summary>Row height; follows density via the platform&apos;s size.control alias.</summary>
+          public const double RowHeight = 32;
+          public const double HeaderHeight = 40;
+          public const double CellPaddingX = 12;
+          public const string Background = "#151A20";
+          public const string HeaderBackground = "#1B2128";
+          public const string HeaderText = "#AEB7C2";
+          public const string Border = "#262E38";
+          public const string RowHover = "#1B2128";
+          public const string RowSelected = "#2BD4A41F";
+          public const string SelectionIndicator = "#2BD4A4";
+          public const string ActiveCell = "#2BD4A4";
+          public const string GroupBackground = "#1B2128";
+          public const string PinnedShadow = "inset 0px 1px 0px 0px #FFFFFF09, 0px 1px 2px 0px #00000073, 0px 0px 0px 1px #262E38"; // CSS box-shadow syntax
+          public const double Radius = 10;
+        }
+        public static class Menu
+        {
+          public const double ItemRadius = 4;
+          public const double ItemHeight = 32;
+          public const string ItemHover = "#1B2128";
+        }
+        public static class Popover
+        {
+          public const double Radius = 8;
+          public const string Background = "#1B2128";
+          public const string Shadow = "inset 0px 1px 0px 0px #FFFFFF0D, 0px 8px 24px -6px #00000099, 0px 0px 0px 1px #36404C"; // CSS box-shadow syntax
+          public const double Padding = 4;
+        }
         public static class Progress
         {
           public const double Height = 6;
@@ -1080,6 +1254,10 @@ public static partial class SlateTokens
           public const double SwitchHeight = 20;
           public const double ThumbSize = 16;
         }
+        public static class Skeleton
+        {
+          public const string Background = "#232A33";
+        }
         public static class Snackbar
         {
           public const double Radius = 8;
@@ -1088,6 +1266,23 @@ public static partial class SlateTokens
           public const string Muted = "#AEB7C2";
           public const string Shadow = "inset 0px 1px 0px 0px #FFFFFF0F, 0px 24px 56px -12px #000000BF, 0px 0px 0px 1px #36404C"; // CSS box-shadow syntax
           public const string Timer = "#2BD4A4";
+        }
+        public static class Tabs
+        {
+          public const string Indicator = "#3FB3C6";
+          public const double IndicatorHeight = 2;
+          public const string PillBackground = "#232A33";
+        }
+        public static class Tooltip
+        {
+          public const string Background = "#262E38";
+          public const string Foreground = "#E9ECF0";
+          public const double Radius = 4;
+        }
+        public static class Tree
+        {
+          public const double Indent = 20;
+          public const double ItemHeight = 26;
         }
       }
       public static class Shadow
@@ -1224,6 +1419,41 @@ public static partial class SlateTokens
         ["component.drawer.background"] = "#1B2128",
         ["component.drawer.itemRadius"] = "6px",
         ["component.drawer.activeItem"] = "#151A20",
+        ["component.grid.rowHeight"] = "32px",
+        ["component.grid.headerHeight"] = "40px",
+        ["component.grid.cellPaddingX"] = "12px",
+        ["component.grid.background"] = "#151A20",
+        ["component.grid.headerBackground"] = "#1B2128",
+        ["component.grid.headerText"] = "#AEB7C2",
+        ["component.grid.border"] = "#262E38",
+        ["component.grid.rowHover"] = "#1B2128",
+        ["component.grid.rowSelected"] = "#2BD4A41F",
+        ["component.grid.selectionIndicator"] = "#2BD4A4",
+        ["component.grid.activeCell"] = "#2BD4A4",
+        ["component.grid.groupBackground"] = "#1B2128",
+        ["component.grid.pinnedShadow"] = "inset 0px 1px 0px 0px #FFFFFF09, 0px 1px 2px 0px #00000073, 0px 0px 0px 1px #262E38",
+        ["component.grid.radius"] = "10px",
+        ["component.popover.radius"] = "8px",
+        ["component.popover.background"] = "#1B2128",
+        ["component.popover.shadow"] = "inset 0px 1px 0px 0px #FFFFFF0D, 0px 8px 24px -6px #00000099, 0px 0px 0px 1px #36404C",
+        ["component.popover.padding"] = "4px",
+        ["component.menu.itemRadius"] = "4px",
+        ["component.menu.itemHeight"] = "32px",
+        ["component.menu.itemHover"] = "#1B2128",
+        ["component.tooltip.background"] = "#262E38",
+        ["component.tooltip.foreground"] = "#E9ECF0",
+        ["component.tooltip.radius"] = "4px",
+        ["component.tabs.indicator"] = "#3FB3C6",
+        ["component.tabs.indicatorHeight"] = "2px",
+        ["component.tabs.pillBackground"] = "#232A33",
+        ["component.calendar.daySize"] = "32px",
+        ["component.calendar.selected"] = "#3FB3C6",
+        ["component.calendar.range"] = "#3FB3C61F",
+        ["component.calendar.today"] = "#36404C",
+        ["component.tree.indent"] = "20px",
+        ["component.tree.itemHeight"] = "26px",
+        ["component.avatar.radius"] = "9999px",
+        ["component.skeleton.background"] = "#232A33",
       };
 
       /// <summary>Token path → the token it aliases (component tokens), so runtime themes can propagate changes.</summary>
@@ -1322,6 +1552,40 @@ public static partial class SlateTokens
         ["component.drawer.background"] = "color.background.subtle",
         ["component.drawer.itemRadius"] = "radius.md",
         ["component.drawer.activeItem"] = "color.background.surface",
+        ["component.grid.rowHeight"] = "size.control.compact.md",
+        ["component.grid.headerHeight"] = "size.control.compact.lg",
+        ["component.grid.cellPaddingX"] = "space.3",
+        ["component.grid.background"] = "color.background.surface",
+        ["component.grid.headerBackground"] = "color.background.subtle",
+        ["component.grid.headerText"] = "color.text.secondary",
+        ["component.grid.border"] = "color.border.default",
+        ["component.grid.rowHover"] = "color.background.hover",
+        ["component.grid.rowSelected"] = "color.selection.background",
+        ["component.grid.selectionIndicator"] = "color.selection.indicator",
+        ["component.grid.activeCell"] = "color.focus.ring",
+        ["component.grid.groupBackground"] = "color.background.subtle",
+        ["component.grid.pinnedShadow"] = "shadow.e1",
+        ["component.grid.radius"] = "radius.xl",
+        ["component.popover.radius"] = "radius.lg",
+        ["component.popover.background"] = "color.background.raised",
+        ["component.popover.shadow"] = "shadow.e2",
+        ["component.popover.padding"] = "space.1",
+        ["component.menu.itemRadius"] = "radius.sm",
+        ["component.menu.itemHeight"] = "size.control.compact.md",
+        ["component.menu.itemHover"] = "color.background.subtle",
+        ["component.tooltip.background"] = "color.inverse.background",
+        ["component.tooltip.foreground"] = "color.inverse.text",
+        ["component.tooltip.radius"] = "radius.sm",
+        ["component.tabs.indicator"] = "color.accent.default",
+        ["component.tabs.pillBackground"] = "color.background.muted",
+        ["component.calendar.daySize"] = "size.control.compact.md",
+        ["component.calendar.selected"] = "color.accent.default",
+        ["component.calendar.range"] = "color.accent.subtle",
+        ["component.calendar.today"] = "color.border.strong",
+        ["component.tree.indent"] = "space.5",
+        ["component.tree.itemHeight"] = "size.control.compact.sm",
+        ["component.avatar.radius"] = "radius.full",
+        ["component.skeleton.background"] = "color.background.muted",
       };
     }
   }

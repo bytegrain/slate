@@ -79,7 +79,7 @@ function renderedMarkup(el: Element): string {
 afterEach(cleanup);
 
 describe('canonical component API (design/api/components.json)', () => {
-  for (const [name, spec] of Object.entries(api.components)) {
+  for (const [name, spec] of Object.entries(api.components).filter(([, s]) => (s as { status?: string }).status !== 'planned')) {
     const tag = spec.web;
 
     describe(`${name} → <${tag}>`, () => {

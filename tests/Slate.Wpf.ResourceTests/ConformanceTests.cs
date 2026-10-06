@@ -77,7 +77,7 @@ public partial class ConformanceTests
     [Fact]
     public void Every_contract_component_has_a_wpf_implementation()
     {
-        var contract = Api.GetProperty("components").EnumerateObject().Select(c => c.Name).ToHashSet();
+        var contract = Api.GetProperty("components").EnumerateObject().Where(c => !(c.Value.TryGetProperty("status", out var st) && st.GetString() == "planned")).Select(c => c.Name).ToHashSet();
         Assert.Empty(contract.Except(Implementations.Keys));
         foreach (var (component, (type, _)) in Implementations)
             Assert.True(WpfMetadata.Find(type) is not null, $"{component}: type {type} not found");

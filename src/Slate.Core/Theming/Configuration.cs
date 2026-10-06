@@ -214,3 +214,35 @@ public enum StackJustify
     End,
     Between,
 }
+
+// ---- Data grid (docs/design/data-grid.md) ----
+
+public enum GridSelectionMode { None, Single, Multi }
+
+public enum GridColumnType { Text, Number, Date, Boolean, Enum, Progress, Sparkline, Actions, Custom }
+
+public enum SortDirection { Ascending, Descending }
+
+public enum GridPin { None, Start, End }
+
+public enum GridAggregate { None, Sum, Avg, Min, Max, Count }
+
+public enum GridPagination { None, Pages, Infinite }
+
+// ---- Overlays & wave-2 components ----
+
+public enum PopoverPlacement
+{
+    Top, TopStart, TopEnd,
+    Bottom, BottomStart, BottomEnd,
+    Left, LeftStart, LeftEnd,
+    Right, RightStart, RightEnd,
+}
+
+public enum TabsVariant { Line, Pills, Enclosed }
+
+public enum SelectionKind { Single, Multiple }
+
+public enum DateSelection { Single, Range }
+
+public enum TreeSelectionMode { None, Single, Multi, Checkbox }

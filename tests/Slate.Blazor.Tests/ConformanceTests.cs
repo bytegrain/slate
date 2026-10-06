@@ -44,7 +44,7 @@ public class ConformanceTests
         ["Dialog"] = typeof(SlDialog),
     };
 
-    public static TheoryData<string> ComponentNames => new(Api["components"]!.AsObject().Select(kv => kv.Key));
+    public static TheoryData<string> ComponentNames => new(Api["components"]!.AsObject().Where(kv => kv.Value?["status"]?.GetValue<string>() != "planned").Select(kv => kv.Key));
 
     /// <summary>Blazor's one fixed spelling: the default content region is ChildContent (Razor needs it for inline content).</summary>
     private static string BlazorName(string canonical) => canonical == "Content" ? "ChildContent" : canonical;

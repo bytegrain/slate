@@ -1883,6 +1883,251 @@
         "xamlKey": "Sl.Component.Drawer.ActiveItem",
         "value": "#FFFFFF",
         "aliasOf": "color.background.surface"
+      },
+      "component.grid.rowHeight": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-grid-row-height",
+        "xamlKey": "Sl.Component.Grid.RowHeight",
+        "value": "32px",
+        "description": "Row height; follows density via the platform's size.control alias.",
+        "aliasOf": "size.control.compact.md"
+      },
+      "component.grid.headerHeight": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-grid-header-height",
+        "xamlKey": "Sl.Component.Grid.HeaderHeight",
+        "value": "40px",
+        "aliasOf": "size.control.compact.lg"
+      },
+      "component.grid.cellPaddingX": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-grid-cell-padding-x",
+        "xamlKey": "Sl.Component.Grid.CellPaddingX",
+        "value": "12px",
+        "aliasOf": "space.3"
+      },
+      "component.grid.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-background",
+        "xamlKey": "Sl.Component.Grid.Background",
+        "value": "#FFFFFF",
+        "aliasOf": "color.background.surface"
+      },
+      "component.grid.headerBackground": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-header-background",
+        "xamlKey": "Sl.Component.Grid.HeaderBackground",
+        "value": "#F0F2F5",
+        "aliasOf": "color.background.subtle"
+      },
+      "component.grid.headerText": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-header-text",
+        "xamlKey": "Sl.Component.Grid.HeaderText",
+        "value": "#46505C",
+        "aliasOf": "color.text.secondary"
+      },
+      "component.grid.border": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-border",
+        "xamlKey": "Sl.Component.Grid.Border",
+        "value": "#E1E5EA",
+        "aliasOf": "color.border.default"
+      },
+      "component.grid.rowHover": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-row-hover",
+        "xamlKey": "Sl.Component.Grid.RowHover",
+        "value": "#F6F7F9",
+        "aliasOf": "color.background.hover"
+      },
+      "component.grid.rowSelected": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-row-selected",
+        "xamlKey": "Sl.Component.Grid.RowSelected",
+        "value": "#2BD4A424",
+        "aliasOf": "color.selection.background"
+      },
+      "component.grid.selectionIndicator": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-selection-indicator",
+        "xamlKey": "Sl.Component.Grid.SelectionIndicator",
+        "value": "#2BD4A4",
+        "aliasOf": "color.selection.indicator"
+      },
+      "component.grid.activeCell": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-active-cell",
+        "xamlKey": "Sl.Component.Grid.ActiveCell",
+        "value": "#0B8F6C",
+        "aliasOf": "color.focus.ring"
+      },
+      "component.grid.groupBackground": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-group-background",
+        "xamlKey": "Sl.Component.Grid.GroupBackground",
+        "value": "#F0F2F5",
+        "aliasOf": "color.background.subtle"
+      },
+      "component.grid.pinnedShadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-grid-pinned-shadow",
+        "xamlKey": "Sl.Component.Grid.PinnedShadow",
+        "value": "0px 1px 2px 0px #12161C0F, 0px 0px 0px 1px #E1E5EA",
+        "aliasOf": "shadow.e1"
+      },
+      "component.grid.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-grid-radius",
+        "xamlKey": "Sl.Component.Grid.Radius",
+        "value": "10px",
+        "aliasOf": "radius.xl"
+      },
+      "component.popover.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-popover-radius",
+        "xamlKey": "Sl.Component.Popover.Radius",
+        "value": "8px",
+        "aliasOf": "radius.lg"
+      },
+      "component.popover.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-popover-background",
+        "xamlKey": "Sl.Component.Popover.Background",
+        "value": "#FFFFFF",
+        "aliasOf": "color.background.raised"
+      },
+      "component.popover.shadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-popover-shadow",
+        "xamlKey": "Sl.Component.Popover.Shadow",
+        "value": "0px 2px 4px 0px #12161C0A, 0px 8px 24px -6px #12161C24, 0px 0px 0px 1px #E1E5EA",
+        "aliasOf": "shadow.e2"
+      },
+      "component.popover.padding": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-popover-padding",
+        "xamlKey": "Sl.Component.Popover.Padding",
+        "value": "4px",
+        "aliasOf": "space.1"
+      },
+      "component.menu.itemRadius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-menu-item-radius",
+        "xamlKey": "Sl.Component.Menu.ItemRadius",
+        "value": "4px",
+        "aliasOf": "radius.sm"
+      },
+      "component.menu.itemHeight": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-menu-item-height",
+        "xamlKey": "Sl.Component.Menu.ItemHeight",
+        "value": "32px",
+        "aliasOf": "size.control.compact.md"
+      },
+      "component.menu.itemHover": {
+        "type": "Color",
+        "cssVar": "--sl-component-menu-item-hover",
+        "xamlKey": "Sl.Component.Menu.ItemHover",
+        "value": "#F0F2F5",
+        "aliasOf": "color.background.subtle"
+      },
+      "component.tooltip.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-tooltip-background",
+        "xamlKey": "Sl.Component.Tooltip.Background",
+        "value": "#12161C",
+        "aliasOf": "color.inverse.background"
+      },
+      "component.tooltip.foreground": {
+        "type": "Color",
+        "cssVar": "--sl-component-tooltip-foreground",
+        "xamlKey": "Sl.Component.Tooltip.Foreground",
+        "value": "#E9ECF0",
+        "aliasOf": "color.inverse.text"
+      },
+      "component.tooltip.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-tooltip-radius",
+        "xamlKey": "Sl.Component.Tooltip.Radius",
+        "value": "4px",
+        "aliasOf": "radius.sm"
+      },
+      "component.tabs.indicator": {
+        "type": "Color",
+        "cssVar": "--sl-component-tabs-indicator",
+        "xamlKey": "Sl.Component.Tabs.Indicator",
+        "value": "#0E5E6F",
+        "aliasOf": "color.accent.default"
+      },
+      "component.tabs.indicatorHeight": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-tabs-indicator-height",
+        "xamlKey": "Sl.Component.Tabs.IndicatorHeight",
+        "value": "2px"
+      },
+      "component.tabs.pillBackground": {
+        "type": "Color",
+        "cssVar": "--sl-component-tabs-pill-background",
+        "xamlKey": "Sl.Component.Tabs.PillBackground",
+        "value": "#E7EAEE",
+        "aliasOf": "color.background.muted"
+      },
+      "component.calendar.daySize": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-calendar-day-size",
+        "xamlKey": "Sl.Component.Calendar.DaySize",
+        "value": "32px",
+        "aliasOf": "size.control.compact.md"
+      },
+      "component.calendar.selected": {
+        "type": "Color",
+        "cssVar": "--sl-component-calendar-selected",
+        "xamlKey": "Sl.Component.Calendar.Selected",
+        "value": "#0E5E6F",
+        "aliasOf": "color.accent.default"
+      },
+      "component.calendar.range": {
+        "type": "Color",
+        "cssVar": "--sl-component-calendar-range",
+        "xamlKey": "Sl.Component.Calendar.Range",
+        "value": "#E6F4F6",
+        "aliasOf": "color.accent.subtle"
+      },
+      "component.calendar.today": {
+        "type": "Color",
+        "cssVar": "--sl-component-calendar-today",
+        "xamlKey": "Sl.Component.Calendar.Today",
+        "value": "#CBD1D9",
+        "aliasOf": "color.border.strong"
+      },
+      "component.tree.indent": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-tree-indent",
+        "xamlKey": "Sl.Component.Tree.Indent",
+        "value": "20px",
+        "aliasOf": "space.5"
+      },
+      "component.tree.itemHeight": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-tree-item-height",
+        "xamlKey": "Sl.Component.Tree.ItemHeight",
+        "value": "26px",
+        "aliasOf": "size.control.compact.sm"
+      },
+      "component.avatar.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-avatar-radius",
+        "xamlKey": "Sl.Component.Avatar.Radius",
+        "value": "9999px",
+        "aliasOf": "radius.full"
+      },
+      "component.skeleton.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-skeleton-background",
+        "xamlKey": "Sl.Component.Skeleton.Background",
+        "value": "#E7EAEE",
+        "aliasOf": "color.background.muted"
       }
     },
     "dark": {
@@ -2699,6 +2944,251 @@
         "xamlKey": "Sl.Component.Drawer.ActiveItem",
         "value": "#151A20",
         "aliasOf": "color.background.surface"
+      },
+      "component.grid.rowHeight": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-grid-row-height",
+        "xamlKey": "Sl.Component.Grid.RowHeight",
+        "value": "32px",
+        "description": "Row height; follows density via the platform's size.control alias.",
+        "aliasOf": "size.control.compact.md"
+      },
+      "component.grid.headerHeight": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-grid-header-height",
+        "xamlKey": "Sl.Component.Grid.HeaderHeight",
+        "value": "40px",
+        "aliasOf": "size.control.compact.lg"
+      },
+      "component.grid.cellPaddingX": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-grid-cell-padding-x",
+        "xamlKey": "Sl.Component.Grid.CellPaddingX",
+        "value": "12px",
+        "aliasOf": "space.3"
+      },
+      "component.grid.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-background",
+        "xamlKey": "Sl.Component.Grid.Background",
+        "value": "#151A20",
+        "aliasOf": "color.background.surface"
+      },
+      "component.grid.headerBackground": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-header-background",
+        "xamlKey": "Sl.Component.Grid.HeaderBackground",
+        "value": "#1B2128",
+        "aliasOf": "color.background.subtle"
+      },
+      "component.grid.headerText": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-header-text",
+        "xamlKey": "Sl.Component.Grid.HeaderText",
+        "value": "#AEB7C2",
+        "aliasOf": "color.text.secondary"
+      },
+      "component.grid.border": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-border",
+        "xamlKey": "Sl.Component.Grid.Border",
+        "value": "#262E38",
+        "aliasOf": "color.border.default"
+      },
+      "component.grid.rowHover": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-row-hover",
+        "xamlKey": "Sl.Component.Grid.RowHover",
+        "value": "#1B2128",
+        "aliasOf": "color.background.hover"
+      },
+      "component.grid.rowSelected": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-row-selected",
+        "xamlKey": "Sl.Component.Grid.RowSelected",
+        "value": "#2BD4A41F",
+        "aliasOf": "color.selection.background"
+      },
+      "component.grid.selectionIndicator": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-selection-indicator",
+        "xamlKey": "Sl.Component.Grid.SelectionIndicator",
+        "value": "#2BD4A4",
+        "aliasOf": "color.selection.indicator"
+      },
+      "component.grid.activeCell": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-active-cell",
+        "xamlKey": "Sl.Component.Grid.ActiveCell",
+        "value": "#2BD4A4",
+        "aliasOf": "color.focus.ring"
+      },
+      "component.grid.groupBackground": {
+        "type": "Color",
+        "cssVar": "--sl-component-grid-group-background",
+        "xamlKey": "Sl.Component.Grid.GroupBackground",
+        "value": "#1B2128",
+        "aliasOf": "color.background.subtle"
+      },
+      "component.grid.pinnedShadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-grid-pinned-shadow",
+        "xamlKey": "Sl.Component.Grid.PinnedShadow",
+        "value": "inset 0px 1px 0px 0px #FFFFFF09, 0px 1px 2px 0px #00000073, 0px 0px 0px 1px #262E38",
+        "aliasOf": "shadow.e1"
+      },
+      "component.grid.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-grid-radius",
+        "xamlKey": "Sl.Component.Grid.Radius",
+        "value": "10px",
+        "aliasOf": "radius.xl"
+      },
+      "component.popover.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-popover-radius",
+        "xamlKey": "Sl.Component.Popover.Radius",
+        "value": "8px",
+        "aliasOf": "radius.lg"
+      },
+      "component.popover.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-popover-background",
+        "xamlKey": "Sl.Component.Popover.Background",
+        "value": "#1B2128",
+        "aliasOf": "color.background.raised"
+      },
+      "component.popover.shadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-popover-shadow",
+        "xamlKey": "Sl.Component.Popover.Shadow",
+        "value": "inset 0px 1px 0px 0px #FFFFFF0D, 0px 8px 24px -6px #00000099, 0px 0px 0px 1px #36404C",
+        "aliasOf": "shadow.e2"
+      },
+      "component.popover.padding": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-popover-padding",
+        "xamlKey": "Sl.Component.Popover.Padding",
+        "value": "4px",
+        "aliasOf": "space.1"
+      },
+      "component.menu.itemRadius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-menu-item-radius",
+        "xamlKey": "Sl.Component.Menu.ItemRadius",
+        "value": "4px",
+        "aliasOf": "radius.sm"
+      },
+      "component.menu.itemHeight": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-menu-item-height",
+        "xamlKey": "Sl.Component.Menu.ItemHeight",
+        "value": "32px",
+        "aliasOf": "size.control.compact.md"
+      },
+      "component.menu.itemHover": {
+        "type": "Color",
+        "cssVar": "--sl-component-menu-item-hover",
+        "xamlKey": "Sl.Component.Menu.ItemHover",
+        "value": "#1B2128",
+        "aliasOf": "color.background.subtle"
+      },
+      "component.tooltip.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-tooltip-background",
+        "xamlKey": "Sl.Component.Tooltip.Background",
+        "value": "#262E38",
+        "aliasOf": "color.inverse.background"
+      },
+      "component.tooltip.foreground": {
+        "type": "Color",
+        "cssVar": "--sl-component-tooltip-foreground",
+        "xamlKey": "Sl.Component.Tooltip.Foreground",
+        "value": "#E9ECF0",
+        "aliasOf": "color.inverse.text"
+      },
+      "component.tooltip.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-tooltip-radius",
+        "xamlKey": "Sl.Component.Tooltip.Radius",
+        "value": "4px",
+        "aliasOf": "radius.sm"
+      },
+      "component.tabs.indicator": {
+        "type": "Color",
+        "cssVar": "--sl-component-tabs-indicator",
+        "xamlKey": "Sl.Component.Tabs.Indicator",
+        "value": "#3FB3C6",
+        "aliasOf": "color.accent.default"
+      },
+      "component.tabs.indicatorHeight": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-tabs-indicator-height",
+        "xamlKey": "Sl.Component.Tabs.IndicatorHeight",
+        "value": "2px"
+      },
+      "component.tabs.pillBackground": {
+        "type": "Color",
+        "cssVar": "--sl-component-tabs-pill-background",
+        "xamlKey": "Sl.Component.Tabs.PillBackground",
+        "value": "#232A33",
+        "aliasOf": "color.background.muted"
+      },
+      "component.calendar.daySize": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-calendar-day-size",
+        "xamlKey": "Sl.Component.Calendar.DaySize",
+        "value": "32px",
+        "aliasOf": "size.control.compact.md"
+      },
+      "component.calendar.selected": {
+        "type": "Color",
+        "cssVar": "--sl-component-calendar-selected",
+        "xamlKey": "Sl.Component.Calendar.Selected",
+        "value": "#3FB3C6",
+        "aliasOf": "color.accent.default"
+      },
+      "component.calendar.range": {
+        "type": "Color",
+        "cssVar": "--sl-component-calendar-range",
+        "xamlKey": "Sl.Component.Calendar.Range",
+        "value": "#3FB3C61F",
+        "aliasOf": "color.accent.subtle"
+      },
+      "component.calendar.today": {
+        "type": "Color",
+        "cssVar": "--sl-component-calendar-today",
+        "xamlKey": "Sl.Component.Calendar.Today",
+        "value": "#36404C",
+        "aliasOf": "color.border.strong"
+      },
+      "component.tree.indent": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-tree-indent",
+        "xamlKey": "Sl.Component.Tree.Indent",
+        "value": "20px",
+        "aliasOf": "space.5"
+      },
+      "component.tree.itemHeight": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-tree-item-height",
+        "xamlKey": "Sl.Component.Tree.ItemHeight",
+        "value": "26px",
+        "aliasOf": "size.control.compact.sm"
+      },
+      "component.avatar.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-avatar-radius",
+        "xamlKey": "Sl.Component.Avatar.Radius",
+        "value": "9999px",
+        "aliasOf": "radius.full"
+      },
+      "component.skeleton.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-skeleton-background",
+        "xamlKey": "Sl.Component.Skeleton.Background",
+        "value": "#232A33",
+        "aliasOf": "color.background.muted"
       }
     }
   }
