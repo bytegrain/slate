@@ -94,6 +94,14 @@ public sealed class CssEmitter : IEmitter
             return;
         }
 
+        // Component tokens stay linked to what they alias, so overriding e.g. --sl-radius-md at runtime
+        // also restyles every component that uses it.
+        if (token.AliasOf is { } alias && token.Path.StartsWith("component.", StringComparison.Ordinal))
+        {
+            w.Line($"{name}: var({Naming.CssVariable(prefix, alias)});");
+            return;
+        }
+
         w.Line($"{name}: {Value(token)};");
     }
 

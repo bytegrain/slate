@@ -10,8 +10,8 @@ public sealed class TokenException(string message, string? path = null)
 /// <summary>A token as written in a source file, before references are resolved.</summary>
 public sealed record RawToken(string Path, TokenType Type, System.Text.Json.Nodes.JsonNode Value, string? Description, string SourceFile);
 
-/// <summary>A fully resolved token. <see cref="Value"/> is one of the value types in Values.cs, a double, or a FontFamilyValue.</summary>
-public sealed record Token(string Path, TokenType Type, object Value, string? Description)
+/// <summary>A fully resolved token. <see cref="AliasOf"/> is set when its value is exactly another token (e.g. "{radius.md}"). <see cref="Value"/> is one of the value types in Values.cs, a double, or a FontFamilyValue.</summary>
+public sealed record Token(string Path, TokenType Type, object Value, string? Description, string? AliasOf = null)
 {
     public string[] Segments { get; } = Path.Split('.');
 

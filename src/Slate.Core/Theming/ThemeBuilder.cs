@@ -130,6 +130,23 @@ public static class ThemeBuilder
             values[path] = value;
         }
 
+        // Component tokens alias foundation/semantic tokens: carry every change through to them
+        // (e.g. a new accent restyles component.selection.checked; RadiusScale reaches component.button.radius).
+        var aliases = options.Base == ThemeNames.Dark ? SlateTokens.Themes.Dark.Aliases : SlateTokens.Themes.Light.Aliases;
+        var explicitlySet = new HashSet<string>(options.Overrides.Keys, StringComparer.Ordinal);
+        for (var pass = 0; pass < 8; pass++)
+        {
+            var moved = false;
+            foreach (var (path, target) in aliases)
+            {
+                if (explicitlySet.Contains(path) || !values.TryGetValue(target, out var targetValue) || values.GetValueOrDefault(path) == targetValue)
+                    continue;
+                values[path] = targetValue;
+                moved = true;
+            }
+            if (!moved) break;
+        }
+
         var changed = values
             .Where(kv => !(baseValues.TryGetValue(kv.Key, out var b) ? b == kv.Value : SlateTokens.Values.TryGetValue(kv.Key, out var s) && s == kv.Value))
             .Select(kv => kv.Key)

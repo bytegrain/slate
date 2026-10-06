@@ -165,3 +165,77 @@ public class ThemeBuilderTests
         Assert.Throws<ArgumentException>(() => ThemeBuilder.Build(new SlateThemeOptions { Overrides = new Dictionary<string, string> { ["color.background.canvas"] = "blue" } }));
     }
 }
+
+public class ThemeAliasPropagationTests
+{
+    [Fact]
+    public void Accent_change_reaches_component_tokens()
+    {
+        var t = ThemeBuilder.Build(new SlateThemeOptions { Accent = "#5B3DF5" });
+        Assert.Equal(t.Values["color.accent.default"], t.Values["component.selection.checked"]);
+        Assert.Equal(t.Values["color.accent.default"], t.Values["component.progress.fill"]);
+        Assert.Contains("component.selection.checked", t.ChangedPaths);
+    }
+
+    [Fact]
+    public void Radius_scale_reaches_component_radii()
+    {
+        var t = ThemeBuilder.Build(new SlateThemeOptions { RadiusScale = 2 });
+        Assert.Equal("12px", t.Values["component.button.radius"]);
+        Assert.Equal("20px", t.Values["component.card.radius"]);
+    }
+
+    [Fact]
+    public void Explicit_component_override_wins_over_propagation()
+    {
+        var t = ThemeBuilder.Build(new SlateThemeOptions
+        {
+            RadiusScale = 2,
+            Overrides = new Dictionary<string, string> { ["component.button.radius"] = "999px" },
+        });
+        Assert.Equal("999px", t.Values["component.button.radius"]);
+        Assert.Equal("20px", t.Values["component.card.radius"]);
+    }
+
+    [Fact]
+    public void Semantic_override_cascades_to_aliasing_components()
+    {
+        var t = ThemeBuilder.Build(new SlateThemeOptions
+        {
+            Overrides = new Dictionary<string, string> { ["color.background.surface"] = "#FCFCFD" },
+        });
+        Assert.Equal("#FCFCFD", t.Values["component.card.background"]);
+    }
+}
+
+public class ConfigurationVocabularyTests
+{
+    [Theory]
+    [InlineData(Severity.Normal, Tone.Neutral)]
+    [InlineData(Severity.Info, Tone.Info)]
+    [InlineData(Severity.Success, Tone.Success)]
+    [InlineData(Severity.Warning, Tone.Warning)]
+    [InlineData(Severity.Error, Tone.Danger)]
+    public void Severity_maps_to_tone(Severity severity, Tone tone) => Assert.Equal(tone, severity.ToTone());
+
+    [Fact]
+    public void Radius_overrides_resolve_to_tokens()
+    {
+        Assert.Null(Radius.Default.Pixels());
+        Assert.Equal(0, Radius.None.Pixels());
+        Assert.Equal(SlateTokens.Radius.Md, Radius.Medium.Pixels());
+        Assert.Equal("radius.full", Radius.Full.TokenPath());
+    }
+
+    [Fact]
+    public void Defaults_match_the_alloy_rules()
+    {
+        var d = new SlateDefaults();
+        Assert.Equal(ButtonVariant.Outlined, d.Button.Variant);
+        Assert.Equal(Tone.Neutral, d.Button.Tone);
+        Assert.Equal(FieldVariant.Outlined, d.Field.Variant);
+        Assert.Equal(CardVariant.Elevated, d.Card.Variant);
+        Assert.Equal(Placement.End, d.Selection.LabelPlacement);
+        Assert.Equal(3, d.Snackbar.MaxVisible);
+    }
+}

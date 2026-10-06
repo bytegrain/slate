@@ -557,6 +557,99 @@ public static partial class SlateTokens
           public const string LinkHover = "#08404C";
         }
       }
+      public static class Component
+      {
+        public static class Alert
+        {
+          public const double Radius = 8;
+          public const double Padding = 12;
+        }
+        public static class AppBar
+        {
+          public const double Height = 56;
+          public const string Background = "#FFFFFF";
+          public const string Border = "#E1E5EA";
+        }
+        public static class Badge
+        {
+          public const double Radius = 4;
+          public const double Height = 20;
+        }
+        public static class Button
+        {
+          public const double Radius = 6;
+          public const double Gap = 6;
+          public const double PaddingSm = 8;
+          public const double PaddingMd = 12;
+          public const double PaddingLg = 16;
+          public const double FontWeight = 500;
+          public const double IconSize = 16;
+          public const string Shadow = "inset 0px 1px 0px 0px #FFFFFFF2, 0px 1px 0px 0px #12161C0D, 0px 1px 2px 0px #12161C0F"; // CSS box-shadow syntax
+          public const string SolidShadow = "inset 0px 1px 0px 0px #FFFFFF2E, inset 0px -1px 0px 0px #00000038, 0px 1px 2px 0px #12161C38"; // CSS box-shadow syntax
+        }
+        public static class Card
+        {
+          public const double Radius = 10;
+          public const double Padding = 20;
+          public const string Background = "#FFFFFF";
+          public const string Border = "#E1E5EA";
+          public const string Shadow = "0px 1px 2px 0px #12161C0F, 0px 0px 0px 1px #E1E5EA"; // CSS box-shadow syntax
+          public const string HoverShadow = "0px 2px 4px 0px #12161C0A, 0px 8px 24px -6px #12161C24, 0px 0px 0px 1px #E1E5EA"; // CSS box-shadow syntax
+        }
+        public static class Dialog
+        {
+          public const double Radius = 12;
+          public const double Padding = 20;
+          public const string Background = "#FFFFFF";
+          public const string Footer = "#F0F2F5";
+          public const string Shadow = "0px 4px 8px 0px #12161C0D, 0px 24px 56px -12px #12161C3D, 0px 0px 0px 1px #12161C14"; // CSS box-shadow syntax
+          public const string Scrim = "#12161C7A";
+        }
+        public static class Drawer
+        {
+          public const double Width = 248;
+          public const double MiniWidth = 56;
+          public const string Background = "#F0F2F5";
+          public const double ItemRadius = 6;
+          public const string ActiveItem = "#FFFFFF";
+        }
+        public static class Field
+        {
+          public const double Radius = 6;
+          public const double PaddingX = 10;
+          public const string Background = "#FFFFFF";
+          public const string FilledBackground = "#E7EAEE";
+          public const string Border = "#CBD1D9";
+          public const string BorderHover = "#646E7B";
+          public const string BorderFocus = "#0E5E6F";
+          public const string Shadow = "inset 0px 1px 2px 0px #12161C0D"; // CSS box-shadow syntax
+        }
+        public static class Progress
+        {
+          public const double Height = 6;
+          public const string Track = "#E7EAEE";
+          public const string Fill = "#0E5E6F";
+        }
+        public static class Selection
+        {
+          public const double BoxSize = 16;
+          public const double BoxRadius = 4;
+          public const string Border = "#7F8895";
+          public const string Checked = "#0E5E6F";
+          public const double SwitchWidth = 36;
+          public const double SwitchHeight = 20;
+          public const double ThumbSize = 16;
+        }
+        public static class Snackbar
+        {
+          public const double Radius = 8;
+          public const string Background = "#12161C";
+          public const string Foreground = "#E9ECF0";
+          public const string Muted = "#A9B1BC";
+          public const string Shadow = "0px 4px 8px 0px #12161C0D, 0px 24px 56px -12px #12161C3D, 0px 0px 0px 1px #12161C14"; // CSS box-shadow syntax
+          public const string Timer = "#0B8F6C";
+        }
+      }
       public static class Shadow
       {
         public const string Control = "inset 0px 1px 0px 0px #FFFFFFF2, 0px 1px 0px 0px #12161C0D, 0px 1px 2px 0px #12161C0F"; // CSS box-shadow syntax
@@ -634,6 +727,170 @@ public static partial class SlateTokens
         ["shadow.e1"] = "0px 1px 2px 0px #12161C0F, 0px 0px 0px 1px #E1E5EA",
         ["shadow.e2"] = "0px 2px 4px 0px #12161C0A, 0px 8px 24px -6px #12161C24, 0px 0px 0px 1px #E1E5EA",
         ["shadow.e3"] = "0px 4px 8px 0px #12161C0D, 0px 24px 56px -12px #12161C3D, 0px 0px 0px 1px #12161C14",
+        ["component.button.radius"] = "6px",
+        ["component.button.gap"] = "6px",
+        ["component.button.paddingSm"] = "8px",
+        ["component.button.paddingMd"] = "12px",
+        ["component.button.paddingLg"] = "16px",
+        ["component.button.fontWeight"] = "500",
+        ["component.button.iconSize"] = "16px",
+        ["component.button.shadow"] = "inset 0px 1px 0px 0px #FFFFFFF2, 0px 1px 0px 0px #12161C0D, 0px 1px 2px 0px #12161C0F",
+        ["component.button.solidShadow"] = "inset 0px 1px 0px 0px #FFFFFF2E, inset 0px -1px 0px 0px #00000038, 0px 1px 2px 0px #12161C38",
+        ["component.field.radius"] = "6px",
+        ["component.field.paddingX"] = "10px",
+        ["component.field.background"] = "#FFFFFF",
+        ["component.field.filledBackground"] = "#E7EAEE",
+        ["component.field.border"] = "#CBD1D9",
+        ["component.field.borderHover"] = "#646E7B",
+        ["component.field.borderFocus"] = "#0E5E6F",
+        ["component.field.shadow"] = "inset 0px 1px 2px 0px #12161C0D",
+        ["component.selection.boxSize"] = "16px",
+        ["component.selection.boxRadius"] = "4px",
+        ["component.selection.border"] = "#7F8895",
+        ["component.selection.checked"] = "#0E5E6F",
+        ["component.selection.switchWidth"] = "36px",
+        ["component.selection.switchHeight"] = "20px",
+        ["component.selection.thumbSize"] = "16px",
+        ["component.card.radius"] = "10px",
+        ["component.card.padding"] = "20px",
+        ["component.card.background"] = "#FFFFFF",
+        ["component.card.border"] = "#E1E5EA",
+        ["component.card.shadow"] = "0px 1px 2px 0px #12161C0F, 0px 0px 0px 1px #E1E5EA",
+        ["component.card.hoverShadow"] = "0px 2px 4px 0px #12161C0A, 0px 8px 24px -6px #12161C24, 0px 0px 0px 1px #E1E5EA",
+        ["component.badge.radius"] = "4px",
+        ["component.badge.height"] = "20px",
+        ["component.alert.radius"] = "8px",
+        ["component.alert.padding"] = "12px",
+        ["component.progress.height"] = "6px",
+        ["component.progress.track"] = "#E7EAEE",
+        ["component.progress.fill"] = "#0E5E6F",
+        ["component.dialog.radius"] = "12px",
+        ["component.dialog.padding"] = "20px",
+        ["component.dialog.background"] = "#FFFFFF",
+        ["component.dialog.footer"] = "#F0F2F5",
+        ["component.dialog.shadow"] = "0px 4px 8px 0px #12161C0D, 0px 24px 56px -12px #12161C3D, 0px 0px 0px 1px #12161C14",
+        ["component.dialog.scrim"] = "#12161C7A",
+        ["component.snackbar.radius"] = "8px",
+        ["component.snackbar.background"] = "#12161C",
+        ["component.snackbar.foreground"] = "#E9ECF0",
+        ["component.snackbar.muted"] = "#A9B1BC",
+        ["component.snackbar.shadow"] = "0px 4px 8px 0px #12161C0D, 0px 24px 56px -12px #12161C3D, 0px 0px 0px 1px #12161C14",
+        ["component.snackbar.timer"] = "#0B8F6C",
+        ["component.appBar.height"] = "56px",
+        ["component.appBar.background"] = "#FFFFFF",
+        ["component.appBar.border"] = "#E1E5EA",
+        ["component.drawer.width"] = "248px",
+        ["component.drawer.miniWidth"] = "56px",
+        ["component.drawer.background"] = "#F0F2F5",
+        ["component.drawer.itemRadius"] = "6px",
+        ["component.drawer.activeItem"] = "#FFFFFF",
+      };
+
+      /// <summary>Token path → the token it aliases (component tokens), so runtime themes can propagate changes.</summary>
+      public static readonly IReadOnlyDictionary<string, string> Aliases = new Dictionary<string, string>
+      {
+        ["color.background.canvas"] = "palette.gray.25",
+        ["color.background.surface"] = "palette.white",
+        ["color.background.sunken"] = "palette.white",
+        ["color.background.raised"] = "palette.white",
+        ["color.background.subtle"] = "palette.gray.50",
+        ["color.background.muted"] = "palette.gray.100",
+        ["color.background.hover"] = "palette.gray.25",
+        ["color.background.pressed"] = "palette.gray.50",
+        ["color.border.default"] = "palette.gray.150",
+        ["color.border.strong"] = "palette.gray.200",
+        ["color.border.control"] = "palette.gray.425",
+        ["color.border.controlHover"] = "palette.gray.500",
+        ["color.text.primary"] = "palette.gray.925",
+        ["color.text.secondary"] = "palette.gray.600",
+        ["color.text.tertiary"] = "palette.gray.500",
+        ["color.text.placeholder"] = "palette.gray.500",
+        ["color.text.onAccent"] = "palette.white",
+        ["color.text.link"] = "palette.teal.700",
+        ["color.text.linkHover"] = "palette.teal.800",
+        ["color.accent.default"] = "palette.teal.700",
+        ["color.accent.hover"] = "palette.teal.600",
+        ["color.accent.pressed"] = "palette.teal.800",
+        ["color.accent.subtle"] = "palette.teal.50",
+        ["color.accent.text"] = "palette.teal.700",
+        ["color.focus.ring"] = "palette.mint.600",
+        ["color.selection.indicator"] = "palette.mint.400",
+        ["color.status.success.fg"] = "palette.green.700",
+        ["color.status.success.bg"] = "palette.green.50",
+        ["color.status.success.border"] = "palette.green.200",
+        ["color.status.success.solid"] = "palette.green.700",
+        ["color.status.success.onSolid"] = "palette.white",
+        ["color.status.warning.fg"] = "palette.amber.700",
+        ["color.status.warning.bg"] = "palette.amber.50",
+        ["color.status.warning.border"] = "palette.amber.200",
+        ["color.status.warning.solid"] = "palette.amber.700",
+        ["color.status.warning.onSolid"] = "palette.white",
+        ["color.status.danger.fg"] = "palette.red.700",
+        ["color.status.danger.bg"] = "palette.red.50",
+        ["color.status.danger.border"] = "palette.red.200",
+        ["color.status.danger.solid"] = "palette.red.700",
+        ["color.status.danger.onSolid"] = "palette.white",
+        ["color.status.info.fg"] = "palette.blue.700",
+        ["color.status.info.bg"] = "palette.blue.50",
+        ["color.status.info.border"] = "palette.blue.200",
+        ["color.status.info.solid"] = "palette.blue.700",
+        ["color.status.info.onSolid"] = "palette.white",
+        ["color.inverse.background"] = "palette.gray.925",
+        ["color.inverse.text"] = "palette.gray.75",
+        ["color.inverse.textMuted"] = "palette.gray.300",
+        ["color.control.track"] = "palette.gray.200",
+        ["color.control.thumb"] = "palette.white",
+        ["color.control.thumbShade"] = "palette.gray.50",
+        ["component.button.radius"] = "radius.md",
+        ["component.button.gap"] = "space.1_5",
+        ["component.button.paddingSm"] = "space.2",
+        ["component.button.paddingMd"] = "space.3",
+        ["component.button.paddingLg"] = "space.4",
+        ["component.button.fontWeight"] = "font.weight.medium",
+        ["component.button.iconSize"] = "size.icon.md",
+        ["component.button.shadow"] = "shadow.control",
+        ["component.button.solidShadow"] = "shadow.primary",
+        ["component.field.radius"] = "radius.md",
+        ["component.field.background"] = "color.background.sunken",
+        ["component.field.filledBackground"] = "color.background.muted",
+        ["component.field.border"] = "color.border.strong",
+        ["component.field.borderHover"] = "color.border.controlHover",
+        ["component.field.borderFocus"] = "color.accent.default",
+        ["component.field.shadow"] = "shadow.inset",
+        ["component.selection.boxRadius"] = "radius.sm",
+        ["component.selection.border"] = "color.border.control",
+        ["component.selection.checked"] = "color.accent.default",
+        ["component.card.radius"] = "radius.xl",
+        ["component.card.padding"] = "space.5",
+        ["component.card.background"] = "color.background.surface",
+        ["component.card.border"] = "color.border.default",
+        ["component.card.shadow"] = "shadow.e1",
+        ["component.card.hoverShadow"] = "shadow.e2",
+        ["component.badge.radius"] = "radius.sm",
+        ["component.alert.radius"] = "radius.lg",
+        ["component.alert.padding"] = "space.3",
+        ["component.progress.track"] = "color.background.muted",
+        ["component.progress.fill"] = "color.accent.default",
+        ["component.dialog.radius"] = "radius.2xl",
+        ["component.dialog.padding"] = "space.5",
+        ["component.dialog.background"] = "color.background.raised",
+        ["component.dialog.footer"] = "color.background.subtle",
+        ["component.dialog.shadow"] = "shadow.e3",
+        ["component.dialog.scrim"] = "color.scrim",
+        ["component.snackbar.radius"] = "radius.lg",
+        ["component.snackbar.background"] = "color.inverse.background",
+        ["component.snackbar.foreground"] = "color.inverse.text",
+        ["component.snackbar.muted"] = "color.inverse.textMuted",
+        ["component.snackbar.shadow"] = "shadow.e3",
+        ["component.snackbar.timer"] = "color.focus.ring",
+        ["component.appBar.height"] = "size.appbar",
+        ["component.appBar.background"] = "color.background.surface",
+        ["component.appBar.border"] = "color.border.default",
+        ["component.drawer.width"] = "size.drawer.full",
+        ["component.drawer.miniWidth"] = "size.drawer.mini",
+        ["component.drawer.background"] = "color.background.subtle",
+        ["component.drawer.itemRadius"] = "radius.md",
+        ["component.drawer.activeItem"] = "color.background.surface",
       };
     }
     public static class Dark
@@ -740,6 +997,99 @@ public static partial class SlateTokens
           public const string LinkHover = "#9BE0EA";
         }
       }
+      public static class Component
+      {
+        public static class Alert
+        {
+          public const double Radius = 8;
+          public const double Padding = 12;
+        }
+        public static class AppBar
+        {
+          public const double Height = 56;
+          public const string Background = "#151A20";
+          public const string Border = "#262E38";
+        }
+        public static class Badge
+        {
+          public const double Radius = 4;
+          public const double Height = 20;
+        }
+        public static class Button
+        {
+          public const double Radius = 6;
+          public const double Gap = 6;
+          public const double PaddingSm = 8;
+          public const double PaddingMd = 12;
+          public const double PaddingLg = 16;
+          public const double FontWeight = 500;
+          public const double IconSize = 16;
+          public const string Shadow = "inset 0px 1px 0px 0px #FFFFFF12, 0px 1px 0px 0px #00000073, 0px 1px 2px 0px #00000059"; // CSS box-shadow syntax
+          public const string SolidShadow = "inset 0px 1px 0px 0px #FFFFFF66, inset 0px -1px 0px 0px #00000040, 0px 1px 2px 0px #00000080"; // CSS box-shadow syntax
+        }
+        public static class Card
+        {
+          public const double Radius = 10;
+          public const double Padding = 20;
+          public const string Background = "#151A20";
+          public const string Border = "#262E38";
+          public const string Shadow = "inset 0px 1px 0px 0px #FFFFFF09, 0px 1px 2px 0px #00000073, 0px 0px 0px 1px #262E38"; // CSS box-shadow syntax
+          public const string HoverShadow = "inset 0px 1px 0px 0px #FFFFFF0D, 0px 8px 24px -6px #00000099, 0px 0px 0px 1px #36404C"; // CSS box-shadow syntax
+        }
+        public static class Dialog
+        {
+          public const double Radius = 12;
+          public const double Padding = 20;
+          public const string Background = "#1B2128";
+          public const string Footer = "#1B2128";
+          public const string Shadow = "inset 0px 1px 0px 0px #FFFFFF0F, 0px 24px 56px -12px #000000BF, 0px 0px 0px 1px #36404C"; // CSS box-shadow syntax
+          public const string Scrim = "#000000A3";
+        }
+        public static class Drawer
+        {
+          public const double Width = 248;
+          public const double MiniWidth = 56;
+          public const string Background = "#1B2128";
+          public const double ItemRadius = 6;
+          public const string ActiveItem = "#151A20";
+        }
+        public static class Field
+        {
+          public const double Radius = 6;
+          public const double PaddingX = 10;
+          public const string Background = "#10141A";
+          public const string FilledBackground = "#232A33";
+          public const string Border = "#36404C";
+          public const string BorderHover = "#8792A1";
+          public const string BorderFocus = "#3FB3C6";
+          public const string Shadow = "inset 0px 1px 2px 0px #00000059"; // CSS box-shadow syntax
+        }
+        public static class Progress
+        {
+          public const double Height = 6;
+          public const string Track = "#232A33";
+          public const string Fill = "#3FB3C6";
+        }
+        public static class Selection
+        {
+          public const double BoxSize = 16;
+          public const double BoxRadius = 4;
+          public const string Border = "#677282";
+          public const string Checked = "#3FB3C6";
+          public const double SwitchWidth = 36;
+          public const double SwitchHeight = 20;
+          public const double ThumbSize = 16;
+        }
+        public static class Snackbar
+        {
+          public const double Radius = 8;
+          public const string Background = "#262E38";
+          public const string Foreground = "#E9ECF0";
+          public const string Muted = "#AEB7C2";
+          public const string Shadow = "inset 0px 1px 0px 0px #FFFFFF0F, 0px 24px 56px -12px #000000BF, 0px 0px 0px 1px #36404C"; // CSS box-shadow syntax
+          public const string Timer = "#2BD4A4";
+        }
+      }
       public static class Shadow
       {
         public const string Control = "inset 0px 1px 0px 0px #FFFFFF12, 0px 1px 0px 0px #00000073, 0px 1px 2px 0px #00000059"; // CSS box-shadow syntax
@@ -817,6 +1167,161 @@ public static partial class SlateTokens
         ["shadow.e1"] = "inset 0px 1px 0px 0px #FFFFFF09, 0px 1px 2px 0px #00000073, 0px 0px 0px 1px #262E38",
         ["shadow.e2"] = "inset 0px 1px 0px 0px #FFFFFF0D, 0px 8px 24px -6px #00000099, 0px 0px 0px 1px #36404C",
         ["shadow.e3"] = "inset 0px 1px 0px 0px #FFFFFF0F, 0px 24px 56px -12px #000000BF, 0px 0px 0px 1px #36404C",
+        ["component.button.radius"] = "6px",
+        ["component.button.gap"] = "6px",
+        ["component.button.paddingSm"] = "8px",
+        ["component.button.paddingMd"] = "12px",
+        ["component.button.paddingLg"] = "16px",
+        ["component.button.fontWeight"] = "500",
+        ["component.button.iconSize"] = "16px",
+        ["component.button.shadow"] = "inset 0px 1px 0px 0px #FFFFFF12, 0px 1px 0px 0px #00000073, 0px 1px 2px 0px #00000059",
+        ["component.button.solidShadow"] = "inset 0px 1px 0px 0px #FFFFFF66, inset 0px -1px 0px 0px #00000040, 0px 1px 2px 0px #00000080",
+        ["component.field.radius"] = "6px",
+        ["component.field.paddingX"] = "10px",
+        ["component.field.background"] = "#10141A",
+        ["component.field.filledBackground"] = "#232A33",
+        ["component.field.border"] = "#36404C",
+        ["component.field.borderHover"] = "#8792A1",
+        ["component.field.borderFocus"] = "#3FB3C6",
+        ["component.field.shadow"] = "inset 0px 1px 2px 0px #00000059",
+        ["component.selection.boxSize"] = "16px",
+        ["component.selection.boxRadius"] = "4px",
+        ["component.selection.border"] = "#677282",
+        ["component.selection.checked"] = "#3FB3C6",
+        ["component.selection.switchWidth"] = "36px",
+        ["component.selection.switchHeight"] = "20px",
+        ["component.selection.thumbSize"] = "16px",
+        ["component.card.radius"] = "10px",
+        ["component.card.padding"] = "20px",
+        ["component.card.background"] = "#151A20",
+        ["component.card.border"] = "#262E38",
+        ["component.card.shadow"] = "inset 0px 1px 0px 0px #FFFFFF09, 0px 1px 2px 0px #00000073, 0px 0px 0px 1px #262E38",
+        ["component.card.hoverShadow"] = "inset 0px 1px 0px 0px #FFFFFF0D, 0px 8px 24px -6px #00000099, 0px 0px 0px 1px #36404C",
+        ["component.badge.radius"] = "4px",
+        ["component.badge.height"] = "20px",
+        ["component.alert.radius"] = "8px",
+        ["component.alert.padding"] = "12px",
+        ["component.progress.height"] = "6px",
+        ["component.progress.track"] = "#232A33",
+        ["component.progress.fill"] = "#3FB3C6",
+        ["component.dialog.radius"] = "12px",
+        ["component.dialog.padding"] = "20px",
+        ["component.dialog.background"] = "#1B2128",
+        ["component.dialog.footer"] = "#1B2128",
+        ["component.dialog.shadow"] = "inset 0px 1px 0px 0px #FFFFFF0F, 0px 24px 56px -12px #000000BF, 0px 0px 0px 1px #36404C",
+        ["component.dialog.scrim"] = "#000000A3",
+        ["component.snackbar.radius"] = "8px",
+        ["component.snackbar.background"] = "#262E38",
+        ["component.snackbar.foreground"] = "#E9ECF0",
+        ["component.snackbar.muted"] = "#AEB7C2",
+        ["component.snackbar.shadow"] = "inset 0px 1px 0px 0px #FFFFFF0F, 0px 24px 56px -12px #000000BF, 0px 0px 0px 1px #36404C",
+        ["component.snackbar.timer"] = "#2BD4A4",
+        ["component.appBar.height"] = "56px",
+        ["component.appBar.background"] = "#151A20",
+        ["component.appBar.border"] = "#262E38",
+        ["component.drawer.width"] = "248px",
+        ["component.drawer.miniWidth"] = "56px",
+        ["component.drawer.background"] = "#1B2128",
+        ["component.drawer.itemRadius"] = "6px",
+        ["component.drawer.activeItem"] = "#151A20",
+      };
+
+      /// <summary>Token path → the token it aliases (component tokens), so runtime themes can propagate changes.</summary>
+      public static readonly IReadOnlyDictionary<string, string> Aliases = new Dictionary<string, string>
+      {
+        ["color.background.canvas"] = "palette.gray.950",
+        ["color.background.surface"] = "palette.gray.875",
+        ["color.background.sunken"] = "palette.gray.900",
+        ["color.background.raised"] = "palette.gray.850",
+        ["color.background.subtle"] = "palette.gray.850",
+        ["color.background.muted"] = "palette.gray.825",
+        ["color.background.hover"] = "palette.gray.850",
+        ["color.background.pressed"] = "palette.gray.900",
+        ["color.border.default"] = "palette.gray.800",
+        ["color.border.strong"] = "palette.gray.700",
+        ["color.border.control"] = "palette.gray.550",
+        ["color.border.controlHover"] = "palette.gray.400",
+        ["color.text.primary"] = "palette.gray.75",
+        ["color.text.secondary"] = "palette.gray.350",
+        ["color.text.tertiary"] = "palette.gray.400",
+        ["color.text.placeholder"] = "palette.gray.400",
+        ["color.text.onAccent"] = "palette.teal.900",
+        ["color.text.link"] = "palette.teal.300",
+        ["color.text.linkHover"] = "palette.teal.200",
+        ["color.accent.default"] = "palette.teal.400",
+        ["color.accent.hover"] = "palette.teal.300",
+        ["color.accent.pressed"] = "palette.teal.450",
+        ["color.accent.text"] = "palette.teal.300",
+        ["color.focus.ring"] = "palette.mint.400",
+        ["color.selection.indicator"] = "palette.mint.400",
+        ["color.status.success.fg"] = "palette.green.400",
+        ["color.status.success.solid"] = "palette.green.400",
+        ["color.status.success.onSolid"] = "palette.gray.950",
+        ["color.status.warning.fg"] = "palette.amber.400",
+        ["color.status.warning.solid"] = "palette.amber.400",
+        ["color.status.warning.onSolid"] = "palette.gray.950",
+        ["color.status.danger.fg"] = "palette.red.400",
+        ["color.status.danger.solid"] = "palette.red.400",
+        ["color.status.danger.onSolid"] = "palette.red.900",
+        ["color.status.info.fg"] = "palette.blue.400",
+        ["color.status.info.solid"] = "palette.blue.400",
+        ["color.status.info.onSolid"] = "palette.gray.950",
+        ["color.inverse.background"] = "palette.gray.800",
+        ["color.inverse.text"] = "palette.gray.75",
+        ["color.inverse.textMuted"] = "palette.gray.350",
+        ["color.control.track"] = "palette.gray.750",
+        ["color.control.thumb"] = "palette.gray.75",
+        ["color.control.thumbShade"] = "palette.gray.200",
+        ["component.button.radius"] = "radius.md",
+        ["component.button.gap"] = "space.1_5",
+        ["component.button.paddingSm"] = "space.2",
+        ["component.button.paddingMd"] = "space.3",
+        ["component.button.paddingLg"] = "space.4",
+        ["component.button.fontWeight"] = "font.weight.medium",
+        ["component.button.iconSize"] = "size.icon.md",
+        ["component.button.shadow"] = "shadow.control",
+        ["component.button.solidShadow"] = "shadow.primary",
+        ["component.field.radius"] = "radius.md",
+        ["component.field.background"] = "color.background.sunken",
+        ["component.field.filledBackground"] = "color.background.muted",
+        ["component.field.border"] = "color.border.strong",
+        ["component.field.borderHover"] = "color.border.controlHover",
+        ["component.field.borderFocus"] = "color.accent.default",
+        ["component.field.shadow"] = "shadow.inset",
+        ["component.selection.boxRadius"] = "radius.sm",
+        ["component.selection.border"] = "color.border.control",
+        ["component.selection.checked"] = "color.accent.default",
+        ["component.card.radius"] = "radius.xl",
+        ["component.card.padding"] = "space.5",
+        ["component.card.background"] = "color.background.surface",
+        ["component.card.border"] = "color.border.default",
+        ["component.card.shadow"] = "shadow.e1",
+        ["component.card.hoverShadow"] = "shadow.e2",
+        ["component.badge.radius"] = "radius.sm",
+        ["component.alert.radius"] = "radius.lg",
+        ["component.alert.padding"] = "space.3",
+        ["component.progress.track"] = "color.background.muted",
+        ["component.progress.fill"] = "color.accent.default",
+        ["component.dialog.radius"] = "radius.2xl",
+        ["component.dialog.padding"] = "space.5",
+        ["component.dialog.background"] = "color.background.raised",
+        ["component.dialog.footer"] = "color.background.subtle",
+        ["component.dialog.shadow"] = "shadow.e3",
+        ["component.dialog.scrim"] = "color.scrim",
+        ["component.snackbar.radius"] = "radius.lg",
+        ["component.snackbar.background"] = "color.inverse.background",
+        ["component.snackbar.foreground"] = "color.inverse.text",
+        ["component.snackbar.muted"] = "color.inverse.textMuted",
+        ["component.snackbar.shadow"] = "shadow.e3",
+        ["component.snackbar.timer"] = "color.focus.ring",
+        ["component.appBar.height"] = "size.appbar",
+        ["component.appBar.background"] = "color.background.surface",
+        ["component.appBar.border"] = "color.border.default",
+        ["component.drawer.width"] = "size.drawer.full",
+        ["component.drawer.miniWidth"] = "size.drawer.mini",
+        ["component.drawer.background"] = "color.background.subtle",
+        ["component.drawer.itemRadius"] = "radius.md",
+        ["component.drawer.activeItem"] = "color.background.surface",
       };
     }
   }

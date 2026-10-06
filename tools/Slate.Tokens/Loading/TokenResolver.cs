@@ -51,7 +51,7 @@ public sealed partial class TokenResolver
         try
         {
             var value = ResolveValue(raw.Value, raw.Type, path);
-            var token = new Token(path, raw.Type, value, raw.Description);
+            var token = new Token(path, raw.Type, value, raw.Description, TryReference(raw.Value, out var alias) ? alias : null);
             _resolved[path] = token;
             return token;
         }

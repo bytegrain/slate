@@ -42,6 +42,13 @@ public sealed class CSharpEmitter : IEmitter
             w.Line($"public static class {Naming.CSharpIdentifier(theme.Name)}").Line("{").Indent();
             WriteTree(w, theme.Tokens);
             WriteValues(w, theme.Tokens, $"Every {theme.Name} token by path, as a CSS value.");
+            w.Line()
+             .Line("/// <summary>Token path → the token it aliases (component tokens), so runtime themes can propagate changes.</summary>")
+             .Line("public static readonly IReadOnlyDictionary<string, string> Aliases = new Dictionary<string, string>")
+             .Line("{").Indent();
+            foreach (var t in theme.Tokens.Where(t => t.AliasOf is not null))
+                w.Line($"[{Literal(t.Path)}] = {Literal(t.AliasOf!)},");
+            w.Outdent().Line("};");
             w.Outdent().Line("}");
         }
         w.Outdent().Line("}");
@@ -165,6 +172,8 @@ public sealed class ResolvedJsonEmitter : IEmitter
         };
         if (t.Description is { } d)
             entry["description"] = d;
+        if (t.AliasOf is { } a)
+            entry["aliasOf"] = a;
         return new KeyValuePair<string, JsonNode?>(t.Path, entry);
     }));
 }

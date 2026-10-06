@@ -123,6 +123,101 @@
       <BoxShadows x:Key="Sl.Shadow.E1">0 1 2 0 #0F12161C, 0 0 0 1 #FFE1E5EA</BoxShadows>
       <BoxShadows x:Key="Sl.Shadow.E2">0 2 4 0 #0A12161C, 0 8 24 -6 #2412161C, 0 0 0 1 #FFE1E5EA</BoxShadows>
       <BoxShadows x:Key="Sl.Shadow.E3">0 4 8 0 #0D12161C, 0 24 56 -12 #3D12161C, 0 0 0 1 #1412161C</BoxShadows>
+      <x:Double x:Key="Sl.Component.Button.Radius">6</x:Double>
+      <CornerRadius x:Key="Sl.Component.Button.Radius.Corner">6</CornerRadius>
+      <x:Double x:Key="Sl.Component.Button.Gap">6</x:Double>
+      <x:Double x:Key="Sl.Component.Button.PaddingSm">8</x:Double>
+      <Thickness x:Key="Sl.Component.Button.PaddingSm.Thickness">8</Thickness>
+      <x:Double x:Key="Sl.Component.Button.PaddingMd">12</x:Double>
+      <Thickness x:Key="Sl.Component.Button.PaddingMd.Thickness">12</Thickness>
+      <x:Double x:Key="Sl.Component.Button.PaddingLg">16</x:Double>
+      <Thickness x:Key="Sl.Component.Button.PaddingLg.Thickness">16</Thickness>
+      <FontWeight x:Key="Sl.Component.Button.FontWeight">Medium</FontWeight>
+      <x:Double x:Key="Sl.Component.Button.IconSize">16</x:Double>
+      <BoxShadows x:Key="Sl.Component.Button.Shadow">inset 0 1 0 0 #F2FFFFFF, 0 1 0 0 #0D12161C, 0 1 2 0 #0F12161C</BoxShadows>
+      <BoxShadows x:Key="Sl.Component.Button.SolidShadow">inset 0 1 0 0 #2EFFFFFF, inset 0 -1 0 0 #38000000, 0 1 2 0 #3812161C</BoxShadows>
+      <x:Double x:Key="Sl.Component.Field.Radius">6</x:Double>
+      <CornerRadius x:Key="Sl.Component.Field.Radius.Corner">6</CornerRadius>
+      <x:Double x:Key="Sl.Component.Field.PaddingX">10</x:Double>
+      <Thickness x:Key="Sl.Component.Field.PaddingX.Thickness">10</Thickness>
+      <Color x:Key="Sl.Component.Field.Background">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Sl.Component.Field.Background.Brush" Color="#FFFFFFFF" />
+      <Color x:Key="Sl.Component.Field.FilledBackground">#FFE7EAEE</Color>
+      <SolidColorBrush x:Key="Sl.Component.Field.FilledBackground.Brush" Color="#FFE7EAEE" />
+      <Color x:Key="Sl.Component.Field.Border">#FFCBD1D9</Color>
+      <SolidColorBrush x:Key="Sl.Component.Field.Border.Brush" Color="#FFCBD1D9" />
+      <Color x:Key="Sl.Component.Field.BorderHover">#FF646E7B</Color>
+      <SolidColorBrush x:Key="Sl.Component.Field.BorderHover.Brush" Color="#FF646E7B" />
+      <Color x:Key="Sl.Component.Field.BorderFocus">#FF0E5E6F</Color>
+      <SolidColorBrush x:Key="Sl.Component.Field.BorderFocus.Brush" Color="#FF0E5E6F" />
+      <BoxShadows x:Key="Sl.Component.Field.Shadow">inset 0 1 2 0 #0D12161C</BoxShadows>
+      <x:Double x:Key="Sl.Component.Selection.BoxSize">16</x:Double>
+      <x:Double x:Key="Sl.Component.Selection.BoxRadius">4</x:Double>
+      <CornerRadius x:Key="Sl.Component.Selection.BoxRadius.Corner">4</CornerRadius>
+      <Color x:Key="Sl.Component.Selection.Border">#FF7F8895</Color>
+      <SolidColorBrush x:Key="Sl.Component.Selection.Border.Brush" Color="#FF7F8895" />
+      <Color x:Key="Sl.Component.Selection.Checked">#FF0E5E6F</Color>
+      <SolidColorBrush x:Key="Sl.Component.Selection.Checked.Brush" Color="#FF0E5E6F" />
+      <x:Double x:Key="Sl.Component.Selection.SwitchWidth">36</x:Double>
+      <x:Double x:Key="Sl.Component.Selection.SwitchHeight">20</x:Double>
+      <x:Double x:Key="Sl.Component.Selection.ThumbSize">16</x:Double>
+      <x:Double x:Key="Sl.Component.Card.Radius">10</x:Double>
+      <CornerRadius x:Key="Sl.Component.Card.Radius.Corner">10</CornerRadius>
+      <x:Double x:Key="Sl.Component.Card.Padding">20</x:Double>
+      <Thickness x:Key="Sl.Component.Card.Padding.Thickness">20</Thickness>
+      <Color x:Key="Sl.Component.Card.Background">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Sl.Component.Card.Background.Brush" Color="#FFFFFFFF" />
+      <Color x:Key="Sl.Component.Card.Border">#FFE1E5EA</Color>
+      <SolidColorBrush x:Key="Sl.Component.Card.Border.Brush" Color="#FFE1E5EA" />
+      <BoxShadows x:Key="Sl.Component.Card.Shadow">0 1 2 0 #0F12161C, 0 0 0 1 #FFE1E5EA</BoxShadows>
+      <BoxShadows x:Key="Sl.Component.Card.HoverShadow">0 2 4 0 #0A12161C, 0 8 24 -6 #2412161C, 0 0 0 1 #FFE1E5EA</BoxShadows>
+      <x:Double x:Key="Sl.Component.Badge.Radius">4</x:Double>
+      <CornerRadius x:Key="Sl.Component.Badge.Radius.Corner">4</CornerRadius>
+      <x:Double x:Key="Sl.Component.Badge.Height">20</x:Double>
+      <x:Double x:Key="Sl.Component.Alert.Radius">8</x:Double>
+      <CornerRadius x:Key="Sl.Component.Alert.Radius.Corner">8</CornerRadius>
+      <x:Double x:Key="Sl.Component.Alert.Padding">12</x:Double>
+      <Thickness x:Key="Sl.Component.Alert.Padding.Thickness">12</Thickness>
+      <x:Double x:Key="Sl.Component.Progress.Height">6</x:Double>
+      <Color x:Key="Sl.Component.Progress.Track">#FFE7EAEE</Color>
+      <SolidColorBrush x:Key="Sl.Component.Progress.Track.Brush" Color="#FFE7EAEE" />
+      <Color x:Key="Sl.Component.Progress.Fill">#FF0E5E6F</Color>
+      <SolidColorBrush x:Key="Sl.Component.Progress.Fill.Brush" Color="#FF0E5E6F" />
+      <x:Double x:Key="Sl.Component.Dialog.Radius">12</x:Double>
+      <CornerRadius x:Key="Sl.Component.Dialog.Radius.Corner">12</CornerRadius>
+      <x:Double x:Key="Sl.Component.Dialog.Padding">20</x:Double>
+      <Thickness x:Key="Sl.Component.Dialog.Padding.Thickness">20</Thickness>
+      <Color x:Key="Sl.Component.Dialog.Background">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Sl.Component.Dialog.Background.Brush" Color="#FFFFFFFF" />
+      <Color x:Key="Sl.Component.Dialog.Footer">#FFF0F2F5</Color>
+      <SolidColorBrush x:Key="Sl.Component.Dialog.Footer.Brush" Color="#FFF0F2F5" />
+      <BoxShadows x:Key="Sl.Component.Dialog.Shadow">0 4 8 0 #0D12161C, 0 24 56 -12 #3D12161C, 0 0 0 1 #1412161C</BoxShadows>
+      <Color x:Key="Sl.Component.Dialog.Scrim">#7A12161C</Color>
+      <SolidColorBrush x:Key="Sl.Component.Dialog.Scrim.Brush" Color="#7A12161C" />
+      <x:Double x:Key="Sl.Component.Snackbar.Radius">8</x:Double>
+      <CornerRadius x:Key="Sl.Component.Snackbar.Radius.Corner">8</CornerRadius>
+      <Color x:Key="Sl.Component.Snackbar.Background">#FF12161C</Color>
+      <SolidColorBrush x:Key="Sl.Component.Snackbar.Background.Brush" Color="#FF12161C" />
+      <Color x:Key="Sl.Component.Snackbar.Foreground">#FFE9ECF0</Color>
+      <SolidColorBrush x:Key="Sl.Component.Snackbar.Foreground.Brush" Color="#FFE9ECF0" />
+      <Color x:Key="Sl.Component.Snackbar.Muted">#FFA9B1BC</Color>
+      <SolidColorBrush x:Key="Sl.Component.Snackbar.Muted.Brush" Color="#FFA9B1BC" />
+      <BoxShadows x:Key="Sl.Component.Snackbar.Shadow">0 4 8 0 #0D12161C, 0 24 56 -12 #3D12161C, 0 0 0 1 #1412161C</BoxShadows>
+      <Color x:Key="Sl.Component.Snackbar.Timer">#FF0B8F6C</Color>
+      <SolidColorBrush x:Key="Sl.Component.Snackbar.Timer.Brush" Color="#FF0B8F6C" />
+      <x:Double x:Key="Sl.Component.AppBar.Height">56</x:Double>
+      <Color x:Key="Sl.Component.AppBar.Background">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Sl.Component.AppBar.Background.Brush" Color="#FFFFFFFF" />
+      <Color x:Key="Sl.Component.AppBar.Border">#FFE1E5EA</Color>
+      <SolidColorBrush x:Key="Sl.Component.AppBar.Border.Brush" Color="#FFE1E5EA" />
+      <x:Double x:Key="Sl.Component.Drawer.Width">248</x:Double>
+      <x:Double x:Key="Sl.Component.Drawer.MiniWidth">56</x:Double>
+      <Color x:Key="Sl.Component.Drawer.Background">#FFF0F2F5</Color>
+      <SolidColorBrush x:Key="Sl.Component.Drawer.Background.Brush" Color="#FFF0F2F5" />
+      <x:Double x:Key="Sl.Component.Drawer.ItemRadius">6</x:Double>
+      <CornerRadius x:Key="Sl.Component.Drawer.ItemRadius.Corner">6</CornerRadius>
+      <Color x:Key="Sl.Component.Drawer.ActiveItem">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Sl.Component.Drawer.ActiveItem.Brush" Color="#FFFFFFFF" />
     </ResourceDictionary>
     <ResourceDictionary x:Key="Dark">
       <Color x:Key="Sl.Color.Background.Canvas">#FF0D1014</Color>
@@ -244,6 +339,101 @@
       <BoxShadows x:Key="Sl.Shadow.E1">inset 0 1 0 0 #09FFFFFF, 0 1 2 0 #73000000, 0 0 0 1 #FF262E38</BoxShadows>
       <BoxShadows x:Key="Sl.Shadow.E2">inset 0 1 0 0 #0DFFFFFF, 0 8 24 -6 #99000000, 0 0 0 1 #FF36404C</BoxShadows>
       <BoxShadows x:Key="Sl.Shadow.E3">inset 0 1 0 0 #0FFFFFFF, 0 24 56 -12 #BF000000, 0 0 0 1 #FF36404C</BoxShadows>
+      <x:Double x:Key="Sl.Component.Button.Radius">6</x:Double>
+      <CornerRadius x:Key="Sl.Component.Button.Radius.Corner">6</CornerRadius>
+      <x:Double x:Key="Sl.Component.Button.Gap">6</x:Double>
+      <x:Double x:Key="Sl.Component.Button.PaddingSm">8</x:Double>
+      <Thickness x:Key="Sl.Component.Button.PaddingSm.Thickness">8</Thickness>
+      <x:Double x:Key="Sl.Component.Button.PaddingMd">12</x:Double>
+      <Thickness x:Key="Sl.Component.Button.PaddingMd.Thickness">12</Thickness>
+      <x:Double x:Key="Sl.Component.Button.PaddingLg">16</x:Double>
+      <Thickness x:Key="Sl.Component.Button.PaddingLg.Thickness">16</Thickness>
+      <FontWeight x:Key="Sl.Component.Button.FontWeight">Medium</FontWeight>
+      <x:Double x:Key="Sl.Component.Button.IconSize">16</x:Double>
+      <BoxShadows x:Key="Sl.Component.Button.Shadow">inset 0 1 0 0 #12FFFFFF, 0 1 0 0 #73000000, 0 1 2 0 #59000000</BoxShadows>
+      <BoxShadows x:Key="Sl.Component.Button.SolidShadow">inset 0 1 0 0 #66FFFFFF, inset 0 -1 0 0 #40000000, 0 1 2 0 #80000000</BoxShadows>
+      <x:Double x:Key="Sl.Component.Field.Radius">6</x:Double>
+      <CornerRadius x:Key="Sl.Component.Field.Radius.Corner">6</CornerRadius>
+      <x:Double x:Key="Sl.Component.Field.PaddingX">10</x:Double>
+      <Thickness x:Key="Sl.Component.Field.PaddingX.Thickness">10</Thickness>
+      <Color x:Key="Sl.Component.Field.Background">#FF10141A</Color>
+      <SolidColorBrush x:Key="Sl.Component.Field.Background.Brush" Color="#FF10141A" />
+      <Color x:Key="Sl.Component.Field.FilledBackground">#FF232A33</Color>
+      <SolidColorBrush x:Key="Sl.Component.Field.FilledBackground.Brush" Color="#FF232A33" />
+      <Color x:Key="Sl.Component.Field.Border">#FF36404C</Color>
+      <SolidColorBrush x:Key="Sl.Component.Field.Border.Brush" Color="#FF36404C" />
+      <Color x:Key="Sl.Component.Field.BorderHover">#FF8792A1</Color>
+      <SolidColorBrush x:Key="Sl.Component.Field.BorderHover.Brush" Color="#FF8792A1" />
+      <Color x:Key="Sl.Component.Field.BorderFocus">#FF3FB3C6</Color>
+      <SolidColorBrush x:Key="Sl.Component.Field.BorderFocus.Brush" Color="#FF3FB3C6" />
+      <BoxShadows x:Key="Sl.Component.Field.Shadow">inset 0 1 2 0 #59000000</BoxShadows>
+      <x:Double x:Key="Sl.Component.Selection.BoxSize">16</x:Double>
+      <x:Double x:Key="Sl.Component.Selection.BoxRadius">4</x:Double>
+      <CornerRadius x:Key="Sl.Component.Selection.BoxRadius.Corner">4</CornerRadius>
+      <Color x:Key="Sl.Component.Selection.Border">#FF677282</Color>
+      <SolidColorBrush x:Key="Sl.Component.Selection.Border.Brush" Color="#FF677282" />
+      <Color x:Key="Sl.Component.Selection.Checked">#FF3FB3C6</Color>
+      <SolidColorBrush x:Key="Sl.Component.Selection.Checked.Brush" Color="#FF3FB3C6" />
+      <x:Double x:Key="Sl.Component.Selection.SwitchWidth">36</x:Double>
+      <x:Double x:Key="Sl.Component.Selection.SwitchHeight">20</x:Double>
+      <x:Double x:Key="Sl.Component.Selection.ThumbSize">16</x:Double>
+      <x:Double x:Key="Sl.Component.Card.Radius">10</x:Double>
+      <CornerRadius x:Key="Sl.Component.Card.Radius.Corner">10</CornerRadius>
+      <x:Double x:Key="Sl.Component.Card.Padding">20</x:Double>
+      <Thickness x:Key="Sl.Component.Card.Padding.Thickness">20</Thickness>
+      <Color x:Key="Sl.Component.Card.Background">#FF151A20</Color>
+      <SolidColorBrush x:Key="Sl.Component.Card.Background.Brush" Color="#FF151A20" />
+      <Color x:Key="Sl.Component.Card.Border">#FF262E38</Color>
+      <SolidColorBrush x:Key="Sl.Component.Card.Border.Brush" Color="#FF262E38" />
+      <BoxShadows x:Key="Sl.Component.Card.Shadow">inset 0 1 0 0 #09FFFFFF, 0 1 2 0 #73000000, 0 0 0 1 #FF262E38</BoxShadows>
+      <BoxShadows x:Key="Sl.Component.Card.HoverShadow">inset 0 1 0 0 #0DFFFFFF, 0 8 24 -6 #99000000, 0 0 0 1 #FF36404C</BoxShadows>
+      <x:Double x:Key="Sl.Component.Badge.Radius">4</x:Double>
+      <CornerRadius x:Key="Sl.Component.Badge.Radius.Corner">4</CornerRadius>
+      <x:Double x:Key="Sl.Component.Badge.Height">20</x:Double>
+      <x:Double x:Key="Sl.Component.Alert.Radius">8</x:Double>
+      <CornerRadius x:Key="Sl.Component.Alert.Radius.Corner">8</CornerRadius>
+      <x:Double x:Key="Sl.Component.Alert.Padding">12</x:Double>
+      <Thickness x:Key="Sl.Component.Alert.Padding.Thickness">12</Thickness>
+      <x:Double x:Key="Sl.Component.Progress.Height">6</x:Double>
+      <Color x:Key="Sl.Component.Progress.Track">#FF232A33</Color>
+      <SolidColorBrush x:Key="Sl.Component.Progress.Track.Brush" Color="#FF232A33" />
+      <Color x:Key="Sl.Component.Progress.Fill">#FF3FB3C6</Color>
+      <SolidColorBrush x:Key="Sl.Component.Progress.Fill.Brush" Color="#FF3FB3C6" />
+      <x:Double x:Key="Sl.Component.Dialog.Radius">12</x:Double>
+      <CornerRadius x:Key="Sl.Component.Dialog.Radius.Corner">12</CornerRadius>
+      <x:Double x:Key="Sl.Component.Dialog.Padding">20</x:Double>
+      <Thickness x:Key="Sl.Component.Dialog.Padding.Thickness">20</Thickness>
+      <Color x:Key="Sl.Component.Dialog.Background">#FF1B2128</Color>
+      <SolidColorBrush x:Key="Sl.Component.Dialog.Background.Brush" Color="#FF1B2128" />
+      <Color x:Key="Sl.Component.Dialog.Footer">#FF1B2128</Color>
+      <SolidColorBrush x:Key="Sl.Component.Dialog.Footer.Brush" Color="#FF1B2128" />
+      <BoxShadows x:Key="Sl.Component.Dialog.Shadow">inset 0 1 0 0 #0FFFFFFF, 0 24 56 -12 #BF000000, 0 0 0 1 #FF36404C</BoxShadows>
+      <Color x:Key="Sl.Component.Dialog.Scrim">#A3000000</Color>
+      <SolidColorBrush x:Key="Sl.Component.Dialog.Scrim.Brush" Color="#A3000000" />
+      <x:Double x:Key="Sl.Component.Snackbar.Radius">8</x:Double>
+      <CornerRadius x:Key="Sl.Component.Snackbar.Radius.Corner">8</CornerRadius>
+      <Color x:Key="Sl.Component.Snackbar.Background">#FF262E38</Color>
+      <SolidColorBrush x:Key="Sl.Component.Snackbar.Background.Brush" Color="#FF262E38" />
+      <Color x:Key="Sl.Component.Snackbar.Foreground">#FFE9ECF0</Color>
+      <SolidColorBrush x:Key="Sl.Component.Snackbar.Foreground.Brush" Color="#FFE9ECF0" />
+      <Color x:Key="Sl.Component.Snackbar.Muted">#FFAEB7C2</Color>
+      <SolidColorBrush x:Key="Sl.Component.Snackbar.Muted.Brush" Color="#FFAEB7C2" />
+      <BoxShadows x:Key="Sl.Component.Snackbar.Shadow">inset 0 1 0 0 #0FFFFFFF, 0 24 56 -12 #BF000000, 0 0 0 1 #FF36404C</BoxShadows>
+      <Color x:Key="Sl.Component.Snackbar.Timer">#FF2BD4A4</Color>
+      <SolidColorBrush x:Key="Sl.Component.Snackbar.Timer.Brush" Color="#FF2BD4A4" />
+      <x:Double x:Key="Sl.Component.AppBar.Height">56</x:Double>
+      <Color x:Key="Sl.Component.AppBar.Background">#FF151A20</Color>
+      <SolidColorBrush x:Key="Sl.Component.AppBar.Background.Brush" Color="#FF151A20" />
+      <Color x:Key="Sl.Component.AppBar.Border">#FF262E38</Color>
+      <SolidColorBrush x:Key="Sl.Component.AppBar.Border.Brush" Color="#FF262E38" />
+      <x:Double x:Key="Sl.Component.Drawer.Width">248</x:Double>
+      <x:Double x:Key="Sl.Component.Drawer.MiniWidth">56</x:Double>
+      <Color x:Key="Sl.Component.Drawer.Background">#FF1B2128</Color>
+      <SolidColorBrush x:Key="Sl.Component.Drawer.Background.Brush" Color="#FF1B2128" />
+      <x:Double x:Key="Sl.Component.Drawer.ItemRadius">6</x:Double>
+      <CornerRadius x:Key="Sl.Component.Drawer.ItemRadius.Corner">6</CornerRadius>
+      <Color x:Key="Sl.Component.Drawer.ActiveItem">#FF151A20</Color>
+      <SolidColorBrush x:Key="Sl.Component.Drawer.ActiveItem.Brush" Color="#FF151A20" />
     </ResourceDictionary>
   </ResourceDictionary.ThemeDictionaries>
 

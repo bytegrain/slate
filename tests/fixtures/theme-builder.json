@@ -1,0 +1,191 @@
+{
+  "light-default": {
+    "options": {
+      "base": "light",
+      "accent": null,
+      "radiusScale": 1,
+      "fontFamily": null,
+      "overrides": {}
+    },
+    "changed": {}
+  },
+  "dark-default": {
+    "options": {
+      "base": "dark",
+      "accent": null,
+      "radiusScale": 1,
+      "fontFamily": null,
+      "overrides": {}
+    },
+    "changed": {}
+  },
+  "light-orange": {
+    "options": {
+      "base": "light",
+      "accent": "#FF5A1F",
+      "radiusScale": 1,
+      "fontFamily": null,
+      "overrides": {}
+    },
+    "changed": {
+      "color.accent.default": "#FF4908",
+      "color.accent.hover": "#FF5C21",
+      "color.accent.pressed": "#FF632C",
+      "color.accent.subtle": "#FFEDE6",
+      "color.accent.text": "#CC3600",
+      "color.text.link": "#CC3600",
+      "color.text.linkHover": "#A32B00",
+      "color.text.onAccent": "#05181C",
+      "component.field.borderFocus": "#FF4908",
+      "component.progress.fill": "#FF4908",
+      "component.selection.checked": "#FF4908"
+    }
+  },
+  "dark-orange": {
+    "options": {
+      "base": "dark",
+      "accent": "#FF5A1F",
+      "radiusScale": 1,
+      "fontFamily": null,
+      "overrides": {}
+    },
+    "changed": {
+      "color.accent.default": "#FF5A1F",
+      "color.accent.hover": "#FF713E",
+      "color.accent.pressed": "#FF4300",
+      "color.accent.subtle": "#FF5A1F1F",
+      "color.accent.text": "#FF5A1F",
+      "color.text.link": "#FF5A1F",
+      "color.text.linkHover": "#FF7848",
+      "component.field.borderFocus": "#FF5A1F",
+      "component.progress.fill": "#FF5A1F",
+      "component.selection.checked": "#FF5A1F"
+    }
+  },
+  "light-yellow": {
+    "options": {
+      "base": "light",
+      "accent": "#FFFF00",
+      "radiusScale": 1,
+      "fontFamily": null,
+      "overrides": {}
+    },
+    "changed": {
+      "color.accent.default": "#8F8F00",
+      "color.accent.hover": "#A8A800",
+      "color.accent.pressed": "#B3B300",
+      "color.accent.subtle": "#F4F4E6",
+      "color.accent.text": "#707000",
+      "color.text.link": "#707000",
+      "color.text.linkHover": "#474700",
+      "color.text.onAccent": "#05181C",
+      "component.field.borderFocus": "#8F8F00",
+      "component.progress.fill": "#8F8F00",
+      "component.selection.checked": "#8F8F00"
+    }
+  },
+  "dark-navy": {
+    "options": {
+      "base": "dark",
+      "accent": "#000080",
+      "radiusScale": 1,
+      "fontFamily": null,
+      "overrides": {}
+    },
+    "changed": {
+      "color.accent.default": "#5050FF",
+      "color.accent.hover": "#3131FF",
+      "color.accent.pressed": "#3131FF",
+      "color.accent.subtle": "#5050FF1F",
+      "color.accent.text": "#7878FF",
+      "color.text.link": "#7878FF",
+      "color.text.linkHover": "#A1A1FF",
+      "color.text.onAccent": "#FFFFFF",
+      "component.field.borderFocus": "#5050FF",
+      "component.progress.fill": "#5050FF",
+      "component.selection.checked": "#5050FF"
+    }
+  },
+  "light-violet-soft": {
+    "options": {
+      "base": "light",
+      "accent": "#5B3DF5",
+      "radiusScale": 1.5,
+      "fontFamily": null,
+      "overrides": {}
+    },
+    "changed": {
+      "color.accent.default": "#5B3DF5",
+      "color.accent.hover": "#7055F6",
+      "color.accent.pressed": "#3E1BF3",
+      "color.accent.subtle": "#EFECFE",
+      "color.accent.text": "#5B3DF5",
+      "color.text.link": "#5B3DF5",
+      "color.text.linkHover": "#3A16F3",
+      "component.alert.radius": "12px",
+      "component.badge.radius": "6px",
+      "component.button.radius": "9px",
+      "component.card.radius": "15px",
+      "component.dialog.radius": "18px",
+      "component.drawer.itemRadius": "9px",
+      "component.field.borderFocus": "#5B3DF5",
+      "component.field.radius": "9px",
+      "component.progress.fill": "#5B3DF5",
+      "component.selection.boxRadius": "6px",
+      "component.selection.checked": "#5B3DF5",
+      "component.snackbar.radius": "12px",
+      "radius.2xl": "18px",
+      "radius.lg": "12px",
+      "radius.md": "9px",
+      "radius.sm": "6px",
+      "radius.xl": "15px",
+      "radius.xs": "4.5px"
+    }
+  },
+  "dark-square": {
+    "options": {
+      "base": "dark",
+      "accent": null,
+      "radiusScale": 0,
+      "fontFamily": "Inter, sans-serif",
+      "overrides": {}
+    },
+    "changed": {
+      "component.alert.radius": "0px",
+      "component.badge.radius": "0px",
+      "component.button.radius": "0px",
+      "component.card.radius": "0px",
+      "component.dialog.radius": "0px",
+      "component.drawer.itemRadius": "0px",
+      "component.field.radius": "0px",
+      "component.selection.boxRadius": "0px",
+      "component.snackbar.radius": "0px",
+      "font.family.ui": "Inter, sans-serif",
+      "radius.2xl": "0px",
+      "radius.lg": "0px",
+      "radius.md": "0px",
+      "radius.sm": "0px",
+      "radius.xl": "0px",
+      "radius.xs": "0px"
+    }
+  },
+  "light-overrides": {
+    "options": {
+      "base": "light",
+      "accent": null,
+      "radiusScale": 1,
+      "fontFamily": null,
+      "overrides": {
+        "color.background.surface": "#FCFCFD",
+        "component.button.radius": "999px"
+      }
+    },
+    "changed": {
+      "color.background.surface": "#FCFCFD",
+      "component.appBar.background": "#FCFCFD",
+      "component.button.radius": "999px",
+      "component.card.background": "#FCFCFD",
+      "component.drawer.activeItem": "#FCFCFD"
+    }
+  }
+}

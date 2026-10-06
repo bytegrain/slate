@@ -27,5 +27,8 @@
     "icons-ts": "../../packages/web/src/icons/generated",
     "icons-cs": "../../src/Slate.Core/Generated"
   },
-  "icons": "../icons/icons.json"
+  "icons": "../icons/icons.json",
+  "components": [
+    "components/components.json"
+  ]
 }

@@ -41,23 +41,6 @@ public enum Severity
     Error,
 }
 
-/// <summary>Visual variants shared by buttons on every platform.</summary>
-public enum ButtonVariant
-{
-    /// <summary>Raised, neutral. The default.</summary>
-    Secondary,
-    /// <summary>Filled with the accent colour. One per view.</summary>
-    Primary,
-    /// <summary>No chrome until hovered. For toolbars and dense rows.</summary>
-    Ghost,
-    /// <summary>Neutral chrome with danger-coloured text.</summary>
-    Danger,
-    /// <summary>Filled danger. Only for confirming destructive actions.</summary>
-    DangerSolid,
-    /// <summary>Inline text link styling.</summary>
-    Link,
-}
-
 /// <summary>Component size, mapped to the control height tokens of the active density.</summary>
 public enum ControlSize
 {

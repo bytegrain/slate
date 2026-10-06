@@ -1065,152 +1065,177 @@
         "type": "Color",
         "cssVar": "--sl-color-background-canvas",
         "xamlKey": "Sl.Color.Background.Canvas",
-        "value": "#F6F7F9"
+        "value": "#F6F7F9",
+        "aliasOf": "palette.gray.25"
       },
       "color.background.surface": {
         "type": "Color",
         "cssVar": "--sl-color-background-surface",
         "xamlKey": "Sl.Color.Background.Surface",
-        "value": "#FFFFFF"
+        "value": "#FFFFFF",
+        "aliasOf": "palette.white"
       },
       "color.background.sunken": {
         "type": "Color",
         "cssVar": "--sl-color-background-sunken",
         "xamlKey": "Sl.Color.Background.Sunken",
-        "value": "#FFFFFF"
+        "value": "#FFFFFF",
+        "aliasOf": "palette.white"
       },
       "color.background.raised": {
         "type": "Color",
         "cssVar": "--sl-color-background-raised",
         "xamlKey": "Sl.Color.Background.Raised",
-        "value": "#FFFFFF"
+        "value": "#FFFFFF",
+        "aliasOf": "palette.white"
       },
       "color.background.subtle": {
         "type": "Color",
         "cssVar": "--sl-color-background-subtle",
         "xamlKey": "Sl.Color.Background.Subtle",
-        "value": "#F0F2F5"
+        "value": "#F0F2F5",
+        "aliasOf": "palette.gray.50"
       },
       "color.background.muted": {
         "type": "Color",
         "cssVar": "--sl-color-background-muted",
         "xamlKey": "Sl.Color.Background.Muted",
-        "value": "#E7EAEE"
+        "value": "#E7EAEE",
+        "aliasOf": "palette.gray.100"
       },
       "color.background.hover": {
         "type": "Color",
         "cssVar": "--sl-color-background-hover",
         "xamlKey": "Sl.Color.Background.Hover",
-        "value": "#F6F7F9"
+        "value": "#F6F7F9",
+        "aliasOf": "palette.gray.25"
       },
       "color.background.pressed": {
         "type": "Color",
         "cssVar": "--sl-color-background-pressed",
         "xamlKey": "Sl.Color.Background.Pressed",
-        "value": "#F0F2F5"
+        "value": "#F0F2F5",
+        "aliasOf": "palette.gray.50"
       },
       "color.border.default": {
         "type": "Color",
         "cssVar": "--sl-color-border-default",
         "xamlKey": "Sl.Color.Border.Default",
-        "value": "#E1E5EA"
+        "value": "#E1E5EA",
+        "aliasOf": "palette.gray.150"
       },
       "color.border.strong": {
         "type": "Color",
         "cssVar": "--sl-color-border-strong",
         "xamlKey": "Sl.Color.Border.Strong",
-        "value": "#CBD1D9"
+        "value": "#CBD1D9",
+        "aliasOf": "palette.gray.200"
       },
       "color.border.control": {
         "type": "Color",
         "cssVar": "--sl-color-border-control",
         "xamlKey": "Sl.Color.Border.Control",
         "value": "#7F8895",
-        "description": "Boundaries of checkboxes, radios and unchecked switches. Must stay >= 3:1 against surfaces (WCAG 1.4.11)."
+        "description": "Boundaries of checkboxes, radios and unchecked switches. Must stay >= 3:1 against surfaces (WCAG 1.4.11).",
+        "aliasOf": "palette.gray.425"
       },
       "color.border.controlHover": {
         "type": "Color",
         "cssVar": "--sl-color-border-control-hover",
         "xamlKey": "Sl.Color.Border.ControlHover",
-        "value": "#646E7B"
+        "value": "#646E7B",
+        "aliasOf": "palette.gray.500"
       },
       "color.text.primary": {
         "type": "Color",
         "cssVar": "--sl-color-text-primary",
         "xamlKey": "Sl.Color.Text.Primary",
-        "value": "#12161C"
+        "value": "#12161C",
+        "aliasOf": "palette.gray.925"
       },
       "color.text.secondary": {
         "type": "Color",
         "cssVar": "--sl-color-text-secondary",
         "xamlKey": "Sl.Color.Text.Secondary",
-        "value": "#46505C"
+        "value": "#46505C",
+        "aliasOf": "palette.gray.600"
       },
       "color.text.tertiary": {
         "type": "Color",
         "cssVar": "--sl-color-text-tertiary",
         "xamlKey": "Sl.Color.Text.Tertiary",
-        "value": "#646E7B"
+        "value": "#646E7B",
+        "aliasOf": "palette.gray.500"
       },
       "color.text.placeholder": {
         "type": "Color",
         "cssVar": "--sl-color-text-placeholder",
         "xamlKey": "Sl.Color.Text.Placeholder",
-        "value": "#646E7B"
+        "value": "#646E7B",
+        "aliasOf": "palette.gray.500"
       },
       "color.text.onAccent": {
         "type": "Color",
         "cssVar": "--sl-color-text-on-accent",
         "xamlKey": "Sl.Color.Text.OnAccent",
-        "value": "#FFFFFF"
+        "value": "#FFFFFF",
+        "aliasOf": "palette.white"
       },
       "color.text.link": {
         "type": "Color",
         "cssVar": "--sl-color-text-link",
         "xamlKey": "Sl.Color.Text.Link",
-        "value": "#0E5E6F"
+        "value": "#0E5E6F",
+        "aliasOf": "palette.teal.700"
       },
       "color.text.linkHover": {
         "type": "Color",
         "cssVar": "--sl-color-text-link-hover",
         "xamlKey": "Sl.Color.Text.LinkHover",
-        "value": "#08404C"
+        "value": "#08404C",
+        "aliasOf": "palette.teal.800"
       },
       "color.accent.default": {
         "type": "Color",
         "cssVar": "--sl-color-accent-default",
         "xamlKey": "Sl.Color.Accent.Default",
-        "value": "#0E5E6F"
+        "value": "#0E5E6F",
+        "aliasOf": "palette.teal.700"
       },
       "color.accent.hover": {
         "type": "Color",
         "cssVar": "--sl-color-accent-hover",
         "xamlKey": "Sl.Color.Accent.Hover",
-        "value": "#14707F"
+        "value": "#14707F",
+        "aliasOf": "palette.teal.600"
       },
       "color.accent.pressed": {
         "type": "Color",
         "cssVar": "--sl-color-accent-pressed",
         "xamlKey": "Sl.Color.Accent.Pressed",
-        "value": "#08404C"
+        "value": "#08404C",
+        "aliasOf": "palette.teal.800"
       },
       "color.accent.subtle": {
         "type": "Color",
         "cssVar": "--sl-color-accent-subtle",
         "xamlKey": "Sl.Color.Accent.Subtle",
-        "value": "#E6F4F6"
+        "value": "#E6F4F6",
+        "aliasOf": "palette.teal.50"
       },
       "color.accent.text": {
         "type": "Color",
         "cssVar": "--sl-color-accent-text",
         "xamlKey": "Sl.Color.Accent.Text",
-        "value": "#0E5E6F"
+        "value": "#0E5E6F",
+        "aliasOf": "palette.teal.700"
       },
       "color.focus.ring": {
         "type": "Color",
         "cssVar": "--sl-color-focus-ring",
         "xamlKey": "Sl.Color.Focus.Ring",
-        "value": "#0B8F6C"
+        "value": "#0B8F6C",
+        "aliasOf": "palette.mint.600"
       },
       "color.selection.background": {
         "type": "Color",
@@ -1222,145 +1247,169 @@
         "type": "Color",
         "cssVar": "--sl-color-selection-indicator",
         "xamlKey": "Sl.Color.Selection.Indicator",
-        "value": "#2BD4A4"
+        "value": "#2BD4A4",
+        "aliasOf": "palette.mint.400"
       },
       "color.status.success.fg": {
         "type": "Color",
         "cssVar": "--sl-color-status-success-fg",
         "xamlKey": "Sl.Color.Status.Success.Fg",
-        "value": "#0F7553"
+        "value": "#0F7553",
+        "aliasOf": "palette.green.700"
       },
       "color.status.success.bg": {
         "type": "Color",
         "cssVar": "--sl-color-status-success-bg",
         "xamlKey": "Sl.Color.Status.Success.Bg",
-        "value": "#E3F5EE"
+        "value": "#E3F5EE",
+        "aliasOf": "palette.green.50"
       },
       "color.status.success.border": {
         "type": "Color",
         "cssVar": "--sl-color-status-success-border",
         "xamlKey": "Sl.Color.Status.Success.Border",
-        "value": "#BFE6D6"
+        "value": "#BFE6D6",
+        "aliasOf": "palette.green.200"
       },
       "color.status.success.solid": {
         "type": "Color",
         "cssVar": "--sl-color-status-success-solid",
         "xamlKey": "Sl.Color.Status.Success.Solid",
-        "value": "#0F7553"
+        "value": "#0F7553",
+        "aliasOf": "palette.green.700"
       },
       "color.status.success.onSolid": {
         "type": "Color",
         "cssVar": "--sl-color-status-success-on-solid",
         "xamlKey": "Sl.Color.Status.Success.OnSolid",
-        "value": "#FFFFFF"
+        "value": "#FFFFFF",
+        "aliasOf": "palette.white"
       },
       "color.status.warning.fg": {
         "type": "Color",
         "cssVar": "--sl-color-status-warning-fg",
         "xamlKey": "Sl.Color.Status.Warning.Fg",
-        "value": "#8F5000"
+        "value": "#8F5000",
+        "aliasOf": "palette.amber.700"
       },
       "color.status.warning.bg": {
         "type": "Color",
         "cssVar": "--sl-color-status-warning-bg",
         "xamlKey": "Sl.Color.Status.Warning.Bg",
-        "value": "#FDF1DE"
+        "value": "#FDF1DE",
+        "aliasOf": "palette.amber.50"
       },
       "color.status.warning.border": {
         "type": "Color",
         "cssVar": "--sl-color-status-warning-border",
         "xamlKey": "Sl.Color.Status.Warning.Border",
-        "value": "#F2D9AE"
+        "value": "#F2D9AE",
+        "aliasOf": "palette.amber.200"
       },
       "color.status.warning.solid": {
         "type": "Color",
         "cssVar": "--sl-color-status-warning-solid",
         "xamlKey": "Sl.Color.Status.Warning.Solid",
-        "value": "#8F5000"
+        "value": "#8F5000",
+        "aliasOf": "palette.amber.700"
       },
       "color.status.warning.onSolid": {
         "type": "Color",
         "cssVar": "--sl-color-status-warning-on-solid",
         "xamlKey": "Sl.Color.Status.Warning.OnSolid",
-        "value": "#FFFFFF"
+        "value": "#FFFFFF",
+        "aliasOf": "palette.white"
       },
       "color.status.danger.fg": {
         "type": "Color",
         "cssVar": "--sl-color-status-danger-fg",
         "xamlKey": "Sl.Color.Status.Danger.Fg",
-        "value": "#B3302A"
+        "value": "#B3302A",
+        "aliasOf": "palette.red.700"
       },
       "color.status.danger.bg": {
         "type": "Color",
         "cssVar": "--sl-color-status-danger-bg",
         "xamlKey": "Sl.Color.Status.Danger.Bg",
-        "value": "#FBE7E5"
+        "value": "#FBE7E5",
+        "aliasOf": "palette.red.50"
       },
       "color.status.danger.border": {
         "type": "Color",
         "cssVar": "--sl-color-status-danger-border",
         "xamlKey": "Sl.Color.Status.Danger.Border",
-        "value": "#F2C6C1"
+        "value": "#F2C6C1",
+        "aliasOf": "palette.red.200"
       },
       "color.status.danger.solid": {
         "type": "Color",
         "cssVar": "--sl-color-status-danger-solid",
         "xamlKey": "Sl.Color.Status.Danger.Solid",
-        "value": "#B3302A"
+        "value": "#B3302A",
+        "aliasOf": "palette.red.700"
       },
       "color.status.danger.onSolid": {
         "type": "Color",
         "cssVar": "--sl-color-status-danger-on-solid",
         "xamlKey": "Sl.Color.Status.Danger.OnSolid",
-        "value": "#FFFFFF"
+        "value": "#FFFFFF",
+        "aliasOf": "palette.white"
       },
       "color.status.info.fg": {
         "type": "Color",
         "cssVar": "--sl-color-status-info-fg",
         "xamlKey": "Sl.Color.Status.Info.Fg",
-        "value": "#2F4FD8"
+        "value": "#2F4FD8",
+        "aliasOf": "palette.blue.700"
       },
       "color.status.info.bg": {
         "type": "Color",
         "cssVar": "--sl-color-status-info-bg",
         "xamlKey": "Sl.Color.Status.Info.Bg",
-        "value": "#E8ECFC"
+        "value": "#E8ECFC",
+        "aliasOf": "palette.blue.50"
       },
       "color.status.info.border": {
         "type": "Color",
         "cssVar": "--sl-color-status-info-border",
         "xamlKey": "Sl.Color.Status.Info.Border",
-        "value": "#C9D3F7"
+        "value": "#C9D3F7",
+        "aliasOf": "palette.blue.200"
       },
       "color.status.info.solid": {
         "type": "Color",
         "cssVar": "--sl-color-status-info-solid",
         "xamlKey": "Sl.Color.Status.Info.Solid",
-        "value": "#2F4FD8"
+        "value": "#2F4FD8",
+        "aliasOf": "palette.blue.700"
       },
       "color.status.info.onSolid": {
         "type": "Color",
         "cssVar": "--sl-color-status-info-on-solid",
         "xamlKey": "Sl.Color.Status.Info.OnSolid",
-        "value": "#FFFFFF"
+        "value": "#FFFFFF",
+        "aliasOf": "palette.white"
       },
       "color.inverse.background": {
         "type": "Color",
         "cssVar": "--sl-color-inverse-background",
         "xamlKey": "Sl.Color.Inverse.Background",
-        "value": "#12161C"
+        "value": "#12161C",
+        "aliasOf": "palette.gray.925"
       },
       "color.inverse.text": {
         "type": "Color",
         "cssVar": "--sl-color-inverse-text",
         "xamlKey": "Sl.Color.Inverse.Text",
-        "value": "#E9ECF0"
+        "value": "#E9ECF0",
+        "aliasOf": "palette.gray.75"
       },
       "color.inverse.textMuted": {
         "type": "Color",
         "cssVar": "--sl-color-inverse-text-muted",
         "xamlKey": "Sl.Color.Inverse.TextMuted",
-        "value": "#A9B1BC"
+        "value": "#A9B1BC",
+        "aliasOf": "palette.gray.300"
       },
       "color.scrim": {
         "type": "Color",
@@ -1372,19 +1421,22 @@
         "type": "Color",
         "cssVar": "--sl-color-control-track",
         "xamlKey": "Sl.Color.Control.Track",
-        "value": "#CBD1D9"
+        "value": "#CBD1D9",
+        "aliasOf": "palette.gray.200"
       },
       "color.control.thumb": {
         "type": "Color",
         "cssVar": "--sl-color-control-thumb",
         "xamlKey": "Sl.Color.Control.Thumb",
-        "value": "#FFFFFF"
+        "value": "#FFFFFF",
+        "aliasOf": "palette.white"
       },
       "color.control.thumbShade": {
         "type": "Color",
         "cssVar": "--sl-color-control-thumb-shade",
         "xamlKey": "Sl.Color.Control.ThumbShade",
-        "value": "#F0F2F5"
+        "value": "#F0F2F5",
+        "aliasOf": "palette.gray.50"
       },
       "color.effect.highlight": {
         "type": "Color",
@@ -1439,6 +1491,398 @@
         "cssVar": "--sl-shadow-e3",
         "xamlKey": "Sl.Shadow.E3",
         "value": "0px 4px 8px 0px #12161C0D, 0px 24px 56px -12px #12161C3D, 0px 0px 0px 1px #12161C14"
+      },
+      "component.button.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-button-radius",
+        "xamlKey": "Sl.Component.Button.Radius",
+        "value": "6px",
+        "aliasOf": "radius.md"
+      },
+      "component.button.gap": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-button-gap",
+        "xamlKey": "Sl.Component.Button.Gap",
+        "value": "6px",
+        "aliasOf": "space.1_5"
+      },
+      "component.button.paddingSm": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-button-padding-sm",
+        "xamlKey": "Sl.Component.Button.PaddingSm",
+        "value": "8px",
+        "aliasOf": "space.2"
+      },
+      "component.button.paddingMd": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-button-padding-md",
+        "xamlKey": "Sl.Component.Button.PaddingMd",
+        "value": "12px",
+        "aliasOf": "space.3"
+      },
+      "component.button.paddingLg": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-button-padding-lg",
+        "xamlKey": "Sl.Component.Button.PaddingLg",
+        "value": "16px",
+        "aliasOf": "space.4"
+      },
+      "component.button.fontWeight": {
+        "type": "FontWeight",
+        "cssVar": "--sl-component-button-font-weight",
+        "xamlKey": "Sl.Component.Button.FontWeight",
+        "value": "500",
+        "aliasOf": "font.weight.medium"
+      },
+      "component.button.iconSize": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-button-icon-size",
+        "xamlKey": "Sl.Component.Button.IconSize",
+        "value": "16px",
+        "aliasOf": "size.icon.md"
+      },
+      "component.button.shadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-button-shadow",
+        "xamlKey": "Sl.Component.Button.Shadow",
+        "value": "inset 0px 1px 0px 0px #FFFFFFF2, 0px 1px 0px 0px #12161C0D, 0px 1px 2px 0px #12161C0F",
+        "aliasOf": "shadow.control"
+      },
+      "component.button.solidShadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-button-solid-shadow",
+        "xamlKey": "Sl.Component.Button.SolidShadow",
+        "value": "inset 0px 1px 0px 0px #FFFFFF2E, inset 0px -1px 0px 0px #00000038, 0px 1px 2px 0px #12161C38",
+        "aliasOf": "shadow.primary"
+      },
+      "component.field.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-field-radius",
+        "xamlKey": "Sl.Component.Field.Radius",
+        "value": "6px",
+        "aliasOf": "radius.md"
+      },
+      "component.field.paddingX": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-field-padding-x",
+        "xamlKey": "Sl.Component.Field.PaddingX",
+        "value": "10px"
+      },
+      "component.field.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-field-background",
+        "xamlKey": "Sl.Component.Field.Background",
+        "value": "#FFFFFF",
+        "aliasOf": "color.background.sunken"
+      },
+      "component.field.filledBackground": {
+        "type": "Color",
+        "cssVar": "--sl-component-field-filled-background",
+        "xamlKey": "Sl.Component.Field.FilledBackground",
+        "value": "#E7EAEE",
+        "aliasOf": "color.background.muted"
+      },
+      "component.field.border": {
+        "type": "Color",
+        "cssVar": "--sl-component-field-border",
+        "xamlKey": "Sl.Component.Field.Border",
+        "value": "#CBD1D9",
+        "aliasOf": "color.border.strong"
+      },
+      "component.field.borderHover": {
+        "type": "Color",
+        "cssVar": "--sl-component-field-border-hover",
+        "xamlKey": "Sl.Component.Field.BorderHover",
+        "value": "#646E7B",
+        "aliasOf": "color.border.controlHover"
+      },
+      "component.field.borderFocus": {
+        "type": "Color",
+        "cssVar": "--sl-component-field-border-focus",
+        "xamlKey": "Sl.Component.Field.BorderFocus",
+        "value": "#0E5E6F",
+        "aliasOf": "color.accent.default"
+      },
+      "component.field.shadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-field-shadow",
+        "xamlKey": "Sl.Component.Field.Shadow",
+        "value": "inset 0px 1px 2px 0px #12161C0D",
+        "aliasOf": "shadow.inset"
+      },
+      "component.selection.boxSize": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-selection-box-size",
+        "xamlKey": "Sl.Component.Selection.BoxSize",
+        "value": "16px"
+      },
+      "component.selection.boxRadius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-selection-box-radius",
+        "xamlKey": "Sl.Component.Selection.BoxRadius",
+        "value": "4px",
+        "aliasOf": "radius.sm"
+      },
+      "component.selection.border": {
+        "type": "Color",
+        "cssVar": "--sl-component-selection-border",
+        "xamlKey": "Sl.Component.Selection.Border",
+        "value": "#7F8895",
+        "aliasOf": "color.border.control"
+      },
+      "component.selection.checked": {
+        "type": "Color",
+        "cssVar": "--sl-component-selection-checked",
+        "xamlKey": "Sl.Component.Selection.Checked",
+        "value": "#0E5E6F",
+        "aliasOf": "color.accent.default"
+      },
+      "component.selection.switchWidth": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-selection-switch-width",
+        "xamlKey": "Sl.Component.Selection.SwitchWidth",
+        "value": "36px"
+      },
+      "component.selection.switchHeight": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-selection-switch-height",
+        "xamlKey": "Sl.Component.Selection.SwitchHeight",
+        "value": "20px"
+      },
+      "component.selection.thumbSize": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-selection-thumb-size",
+        "xamlKey": "Sl.Component.Selection.ThumbSize",
+        "value": "16px"
+      },
+      "component.card.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-card-radius",
+        "xamlKey": "Sl.Component.Card.Radius",
+        "value": "10px",
+        "aliasOf": "radius.xl"
+      },
+      "component.card.padding": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-card-padding",
+        "xamlKey": "Sl.Component.Card.Padding",
+        "value": "20px",
+        "aliasOf": "space.5"
+      },
+      "component.card.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-card-background",
+        "xamlKey": "Sl.Component.Card.Background",
+        "value": "#FFFFFF",
+        "aliasOf": "color.background.surface"
+      },
+      "component.card.border": {
+        "type": "Color",
+        "cssVar": "--sl-component-card-border",
+        "xamlKey": "Sl.Component.Card.Border",
+        "value": "#E1E5EA",
+        "aliasOf": "color.border.default"
+      },
+      "component.card.shadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-card-shadow",
+        "xamlKey": "Sl.Component.Card.Shadow",
+        "value": "0px 1px 2px 0px #12161C0F, 0px 0px 0px 1px #E1E5EA",
+        "aliasOf": "shadow.e1"
+      },
+      "component.card.hoverShadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-card-hover-shadow",
+        "xamlKey": "Sl.Component.Card.HoverShadow",
+        "value": "0px 2px 4px 0px #12161C0A, 0px 8px 24px -6px #12161C24, 0px 0px 0px 1px #E1E5EA",
+        "aliasOf": "shadow.e2"
+      },
+      "component.badge.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-badge-radius",
+        "xamlKey": "Sl.Component.Badge.Radius",
+        "value": "4px",
+        "aliasOf": "radius.sm"
+      },
+      "component.badge.height": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-badge-height",
+        "xamlKey": "Sl.Component.Badge.Height",
+        "value": "20px"
+      },
+      "component.alert.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-alert-radius",
+        "xamlKey": "Sl.Component.Alert.Radius",
+        "value": "8px",
+        "aliasOf": "radius.lg"
+      },
+      "component.alert.padding": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-alert-padding",
+        "xamlKey": "Sl.Component.Alert.Padding",
+        "value": "12px",
+        "aliasOf": "space.3"
+      },
+      "component.progress.height": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-progress-height",
+        "xamlKey": "Sl.Component.Progress.Height",
+        "value": "6px"
+      },
+      "component.progress.track": {
+        "type": "Color",
+        "cssVar": "--sl-component-progress-track",
+        "xamlKey": "Sl.Component.Progress.Track",
+        "value": "#E7EAEE",
+        "aliasOf": "color.background.muted"
+      },
+      "component.progress.fill": {
+        "type": "Color",
+        "cssVar": "--sl-component-progress-fill",
+        "xamlKey": "Sl.Component.Progress.Fill",
+        "value": "#0E5E6F",
+        "aliasOf": "color.accent.default"
+      },
+      "component.dialog.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-dialog-radius",
+        "xamlKey": "Sl.Component.Dialog.Radius",
+        "value": "12px",
+        "aliasOf": "radius.2xl"
+      },
+      "component.dialog.padding": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-dialog-padding",
+        "xamlKey": "Sl.Component.Dialog.Padding",
+        "value": "20px",
+        "aliasOf": "space.5"
+      },
+      "component.dialog.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-dialog-background",
+        "xamlKey": "Sl.Component.Dialog.Background",
+        "value": "#FFFFFF",
+        "aliasOf": "color.background.raised"
+      },
+      "component.dialog.footer": {
+        "type": "Color",
+        "cssVar": "--sl-component-dialog-footer",
+        "xamlKey": "Sl.Component.Dialog.Footer",
+        "value": "#F0F2F5",
+        "aliasOf": "color.background.subtle"
+      },
+      "component.dialog.shadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-dialog-shadow",
+        "xamlKey": "Sl.Component.Dialog.Shadow",
+        "value": "0px 4px 8px 0px #12161C0D, 0px 24px 56px -12px #12161C3D, 0px 0px 0px 1px #12161C14",
+        "aliasOf": "shadow.e3"
+      },
+      "component.dialog.scrim": {
+        "type": "Color",
+        "cssVar": "--sl-component-dialog-scrim",
+        "xamlKey": "Sl.Component.Dialog.Scrim",
+        "value": "#12161C7A",
+        "aliasOf": "color.scrim"
+      },
+      "component.snackbar.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-snackbar-radius",
+        "xamlKey": "Sl.Component.Snackbar.Radius",
+        "value": "8px",
+        "aliasOf": "radius.lg"
+      },
+      "component.snackbar.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-snackbar-background",
+        "xamlKey": "Sl.Component.Snackbar.Background",
+        "value": "#12161C",
+        "aliasOf": "color.inverse.background"
+      },
+      "component.snackbar.foreground": {
+        "type": "Color",
+        "cssVar": "--sl-component-snackbar-foreground",
+        "xamlKey": "Sl.Component.Snackbar.Foreground",
+        "value": "#E9ECF0",
+        "aliasOf": "color.inverse.text"
+      },
+      "component.snackbar.muted": {
+        "type": "Color",
+        "cssVar": "--sl-component-snackbar-muted",
+        "xamlKey": "Sl.Component.Snackbar.Muted",
+        "value": "#A9B1BC",
+        "aliasOf": "color.inverse.textMuted"
+      },
+      "component.snackbar.shadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-snackbar-shadow",
+        "xamlKey": "Sl.Component.Snackbar.Shadow",
+        "value": "0px 4px 8px 0px #12161C0D, 0px 24px 56px -12px #12161C3D, 0px 0px 0px 1px #12161C14",
+        "aliasOf": "shadow.e3"
+      },
+      "component.snackbar.timer": {
+        "type": "Color",
+        "cssVar": "--sl-component-snackbar-timer",
+        "xamlKey": "Sl.Component.Snackbar.Timer",
+        "value": "#0B8F6C",
+        "aliasOf": "color.focus.ring"
+      },
+      "component.appBar.height": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-app-bar-height",
+        "xamlKey": "Sl.Component.AppBar.Height",
+        "value": "56px",
+        "aliasOf": "size.appbar"
+      },
+      "component.appBar.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-app-bar-background",
+        "xamlKey": "Sl.Component.AppBar.Background",
+        "value": "#FFFFFF",
+        "aliasOf": "color.background.surface"
+      },
+      "component.appBar.border": {
+        "type": "Color",
+        "cssVar": "--sl-component-app-bar-border",
+        "xamlKey": "Sl.Component.AppBar.Border",
+        "value": "#E1E5EA",
+        "aliasOf": "color.border.default"
+      },
+      "component.drawer.width": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-drawer-width",
+        "xamlKey": "Sl.Component.Drawer.Width",
+        "value": "248px",
+        "aliasOf": "size.drawer.full"
+      },
+      "component.drawer.miniWidth": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-drawer-mini-width",
+        "xamlKey": "Sl.Component.Drawer.MiniWidth",
+        "value": "56px",
+        "aliasOf": "size.drawer.mini"
+      },
+      "component.drawer.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-drawer-background",
+        "xamlKey": "Sl.Component.Drawer.Background",
+        "value": "#F0F2F5",
+        "aliasOf": "color.background.subtle"
+      },
+      "component.drawer.itemRadius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-drawer-item-radius",
+        "xamlKey": "Sl.Component.Drawer.ItemRadius",
+        "value": "6px",
+        "aliasOf": "radius.md"
+      },
+      "component.drawer.activeItem": {
+        "type": "Color",
+        "cssVar": "--sl-component-drawer-active-item",
+        "xamlKey": "Sl.Component.Drawer.ActiveItem",
+        "value": "#FFFFFF",
+        "aliasOf": "color.background.surface"
       }
     },
     "dark": {
@@ -1446,134 +1890,156 @@
         "type": "Color",
         "cssVar": "--sl-color-background-canvas",
         "xamlKey": "Sl.Color.Background.Canvas",
-        "value": "#0D1014"
+        "value": "#0D1014",
+        "aliasOf": "palette.gray.950"
       },
       "color.background.surface": {
         "type": "Color",
         "cssVar": "--sl-color-background-surface",
         "xamlKey": "Sl.Color.Background.Surface",
-        "value": "#151A20"
+        "value": "#151A20",
+        "aliasOf": "palette.gray.875"
       },
       "color.background.sunken": {
         "type": "Color",
         "cssVar": "--sl-color-background-sunken",
         "xamlKey": "Sl.Color.Background.Sunken",
-        "value": "#10141A"
+        "value": "#10141A",
+        "aliasOf": "palette.gray.900"
       },
       "color.background.raised": {
         "type": "Color",
         "cssVar": "--sl-color-background-raised",
         "xamlKey": "Sl.Color.Background.Raised",
-        "value": "#1B2128"
+        "value": "#1B2128",
+        "aliasOf": "palette.gray.850"
       },
       "color.background.subtle": {
         "type": "Color",
         "cssVar": "--sl-color-background-subtle",
         "xamlKey": "Sl.Color.Background.Subtle",
-        "value": "#1B2128"
+        "value": "#1B2128",
+        "aliasOf": "palette.gray.850"
       },
       "color.background.muted": {
         "type": "Color",
         "cssVar": "--sl-color-background-muted",
         "xamlKey": "Sl.Color.Background.Muted",
-        "value": "#232A33"
+        "value": "#232A33",
+        "aliasOf": "palette.gray.825"
       },
       "color.background.hover": {
         "type": "Color",
         "cssVar": "--sl-color-background-hover",
         "xamlKey": "Sl.Color.Background.Hover",
-        "value": "#1B2128"
+        "value": "#1B2128",
+        "aliasOf": "palette.gray.850"
       },
       "color.background.pressed": {
         "type": "Color",
         "cssVar": "--sl-color-background-pressed",
         "xamlKey": "Sl.Color.Background.Pressed",
-        "value": "#10141A"
+        "value": "#10141A",
+        "aliasOf": "palette.gray.900"
       },
       "color.border.default": {
         "type": "Color",
         "cssVar": "--sl-color-border-default",
         "xamlKey": "Sl.Color.Border.Default",
-        "value": "#262E38"
+        "value": "#262E38",
+        "aliasOf": "palette.gray.800"
       },
       "color.border.strong": {
         "type": "Color",
         "cssVar": "--sl-color-border-strong",
         "xamlKey": "Sl.Color.Border.Strong",
-        "value": "#36404C"
+        "value": "#36404C",
+        "aliasOf": "palette.gray.700"
       },
       "color.border.control": {
         "type": "Color",
         "cssVar": "--sl-color-border-control",
         "xamlKey": "Sl.Color.Border.Control",
         "value": "#677282",
-        "description": "Boundaries of checkboxes, radios and unchecked switches. Must stay >= 3:1 against surfaces (WCAG 1.4.11)."
+        "description": "Boundaries of checkboxes, radios and unchecked switches. Must stay >= 3:1 against surfaces (WCAG 1.4.11).",
+        "aliasOf": "palette.gray.550"
       },
       "color.border.controlHover": {
         "type": "Color",
         "cssVar": "--sl-color-border-control-hover",
         "xamlKey": "Sl.Color.Border.ControlHover",
-        "value": "#8792A1"
+        "value": "#8792A1",
+        "aliasOf": "palette.gray.400"
       },
       "color.text.primary": {
         "type": "Color",
         "cssVar": "--sl-color-text-primary",
         "xamlKey": "Sl.Color.Text.Primary",
-        "value": "#E9ECF0"
+        "value": "#E9ECF0",
+        "aliasOf": "palette.gray.75"
       },
       "color.text.secondary": {
         "type": "Color",
         "cssVar": "--sl-color-text-secondary",
         "xamlKey": "Sl.Color.Text.Secondary",
-        "value": "#AEB7C2"
+        "value": "#AEB7C2",
+        "aliasOf": "palette.gray.350"
       },
       "color.text.tertiary": {
         "type": "Color",
         "cssVar": "--sl-color-text-tertiary",
         "xamlKey": "Sl.Color.Text.Tertiary",
-        "value": "#8792A1"
+        "value": "#8792A1",
+        "aliasOf": "palette.gray.400"
       },
       "color.text.placeholder": {
         "type": "Color",
         "cssVar": "--sl-color-text-placeholder",
         "xamlKey": "Sl.Color.Text.Placeholder",
-        "value": "#8792A1"
+        "value": "#8792A1",
+        "aliasOf": "palette.gray.400"
       },
       "color.text.onAccent": {
         "type": "Color",
         "cssVar": "--sl-color-text-on-accent",
         "xamlKey": "Sl.Color.Text.OnAccent",
-        "value": "#05181C"
+        "value": "#05181C",
+        "aliasOf": "palette.teal.900"
       },
       "color.text.link": {
         "type": "Color",
         "cssVar": "--sl-color-text-link",
         "xamlKey": "Sl.Color.Text.Link",
-        "value": "#5CC4D4"
+        "value": "#5CC4D4",
+        "aliasOf": "palette.teal.300"
       },
       "color.text.linkHover": {
         "type": "Color",
         "cssVar": "--sl-color-text-link-hover",
         "xamlKey": "Sl.Color.Text.LinkHover",
-        "value": "#9BE0EA"
+        "value": "#9BE0EA",
+        "aliasOf": "palette.teal.200"
       },
       "color.accent.default": {
         "type": "Color",
         "cssVar": "--sl-color-accent-default",
         "xamlKey": "Sl.Color.Accent.Default",
-        "value": "#3FB3C6"
+        "value": "#3FB3C6",
+        "aliasOf": "palette.teal.400"
       },
       "color.accent.hover": {
         "type": "Color",
         "cssVar": "--sl-color-accent-hover",
         "xamlKey": "Sl.Color.Accent.Hover",
-        "value": "#5CC4D4"
+        "value": "#5CC4D4",
+        "aliasOf": "palette.teal.300"
       },
       "color.accent.pressed": {
         "type": "Color",
         "cssVar": "--sl-color-accent-pressed",
         "xamlKey": "Sl.Color.Accent.Pressed",
-        "value": "#2A9BAE"
+        "value": "#2A9BAE",
+        "aliasOf": "palette.teal.450"
       },
       "color.accent.subtle": {
         "type": "Color",
@@ -1585,13 +2051,15 @@
         "type": "Color",
         "cssVar": "--sl-color-accent-text",
         "xamlKey": "Sl.Color.Accent.Text",
-        "value": "#5CC4D4"
+        "value": "#5CC4D4",
+        "aliasOf": "palette.teal.300"
       },
       "color.focus.ring": {
         "type": "Color",
         "cssVar": "--sl-color-focus-ring",
         "xamlKey": "Sl.Color.Focus.Ring",
-        "value": "#2BD4A4"
+        "value": "#2BD4A4",
+        "aliasOf": "palette.mint.400"
       },
       "color.selection.background": {
         "type": "Color",
@@ -1603,13 +2071,15 @@
         "type": "Color",
         "cssVar": "--sl-color-selection-indicator",
         "xamlKey": "Sl.Color.Selection.Indicator",
-        "value": "#2BD4A4"
+        "value": "#2BD4A4",
+        "aliasOf": "palette.mint.400"
       },
       "color.status.success.fg": {
         "type": "Color",
         "cssVar": "--sl-color-status-success-fg",
         "xamlKey": "Sl.Color.Status.Success.Fg",
-        "value": "#3CCB95"
+        "value": "#3CCB95",
+        "aliasOf": "palette.green.400"
       },
       "color.status.success.bg": {
         "type": "Color",
@@ -1627,19 +2097,22 @@
         "type": "Color",
         "cssVar": "--sl-color-status-success-solid",
         "xamlKey": "Sl.Color.Status.Success.Solid",
-        "value": "#3CCB95"
+        "value": "#3CCB95",
+        "aliasOf": "palette.green.400"
       },
       "color.status.success.onSolid": {
         "type": "Color",
         "cssVar": "--sl-color-status-success-on-solid",
         "xamlKey": "Sl.Color.Status.Success.OnSolid",
-        "value": "#0D1014"
+        "value": "#0D1014",
+        "aliasOf": "palette.gray.950"
       },
       "color.status.warning.fg": {
         "type": "Color",
         "cssVar": "--sl-color-status-warning-fg",
         "xamlKey": "Sl.Color.Status.Warning.Fg",
-        "value": "#F0B455"
+        "value": "#F0B455",
+        "aliasOf": "palette.amber.400"
       },
       "color.status.warning.bg": {
         "type": "Color",
@@ -1657,19 +2130,22 @@
         "type": "Color",
         "cssVar": "--sl-color-status-warning-solid",
         "xamlKey": "Sl.Color.Status.Warning.Solid",
-        "value": "#F0B455"
+        "value": "#F0B455",
+        "aliasOf": "palette.amber.400"
       },
       "color.status.warning.onSolid": {
         "type": "Color",
         "cssVar": "--sl-color-status-warning-on-solid",
         "xamlKey": "Sl.Color.Status.Warning.OnSolid",
-        "value": "#0D1014"
+        "value": "#0D1014",
+        "aliasOf": "palette.gray.950"
       },
       "color.status.danger.fg": {
         "type": "Color",
         "cssVar": "--sl-color-status-danger-fg",
         "xamlKey": "Sl.Color.Status.Danger.Fg",
-        "value": "#FF6B5E"
+        "value": "#FF6B5E",
+        "aliasOf": "palette.red.400"
       },
       "color.status.danger.bg": {
         "type": "Color",
@@ -1687,19 +2163,22 @@
         "type": "Color",
         "cssVar": "--sl-color-status-danger-solid",
         "xamlKey": "Sl.Color.Status.Danger.Solid",
-        "value": "#FF6B5E"
+        "value": "#FF6B5E",
+        "aliasOf": "palette.red.400"
       },
       "color.status.danger.onSolid": {
         "type": "Color",
         "cssVar": "--sl-color-status-danger-on-solid",
         "xamlKey": "Sl.Color.Status.Danger.OnSolid",
-        "value": "#1A0604"
+        "value": "#1A0604",
+        "aliasOf": "palette.red.900"
       },
       "color.status.info.fg": {
         "type": "Color",
         "cssVar": "--sl-color-status-info-fg",
         "xamlKey": "Sl.Color.Status.Info.Fg",
-        "value": "#8EA3FF"
+        "value": "#8EA3FF",
+        "aliasOf": "palette.blue.400"
       },
       "color.status.info.bg": {
         "type": "Color",
@@ -1717,31 +2196,36 @@
         "type": "Color",
         "cssVar": "--sl-color-status-info-solid",
         "xamlKey": "Sl.Color.Status.Info.Solid",
-        "value": "#8EA3FF"
+        "value": "#8EA3FF",
+        "aliasOf": "palette.blue.400"
       },
       "color.status.info.onSolid": {
         "type": "Color",
         "cssVar": "--sl-color-status-info-on-solid",
         "xamlKey": "Sl.Color.Status.Info.OnSolid",
-        "value": "#0D1014"
+        "value": "#0D1014",
+        "aliasOf": "palette.gray.950"
       },
       "color.inverse.background": {
         "type": "Color",
         "cssVar": "--sl-color-inverse-background",
         "xamlKey": "Sl.Color.Inverse.Background",
-        "value": "#262E38"
+        "value": "#262E38",
+        "aliasOf": "palette.gray.800"
       },
       "color.inverse.text": {
         "type": "Color",
         "cssVar": "--sl-color-inverse-text",
         "xamlKey": "Sl.Color.Inverse.Text",
-        "value": "#E9ECF0"
+        "value": "#E9ECF0",
+        "aliasOf": "palette.gray.75"
       },
       "color.inverse.textMuted": {
         "type": "Color",
         "cssVar": "--sl-color-inverse-text-muted",
         "xamlKey": "Sl.Color.Inverse.TextMuted",
-        "value": "#AEB7C2"
+        "value": "#AEB7C2",
+        "aliasOf": "palette.gray.350"
       },
       "color.scrim": {
         "type": "Color",
@@ -1753,19 +2237,22 @@
         "type": "Color",
         "cssVar": "--sl-color-control-track",
         "xamlKey": "Sl.Color.Control.Track",
-        "value": "#2A323C"
+        "value": "#2A323C",
+        "aliasOf": "palette.gray.750"
       },
       "color.control.thumb": {
         "type": "Color",
         "cssVar": "--sl-color-control-thumb",
         "xamlKey": "Sl.Color.Control.Thumb",
-        "value": "#E9ECF0"
+        "value": "#E9ECF0",
+        "aliasOf": "palette.gray.75"
       },
       "color.control.thumbShade": {
         "type": "Color",
         "cssVar": "--sl-color-control-thumb-shade",
         "xamlKey": "Sl.Color.Control.ThumbShade",
-        "value": "#CBD1D9"
+        "value": "#CBD1D9",
+        "aliasOf": "palette.gray.200"
       },
       "color.effect.highlight": {
         "type": "Color",
@@ -1820,6 +2307,398 @@
         "cssVar": "--sl-shadow-e3",
         "xamlKey": "Sl.Shadow.E3",
         "value": "inset 0px 1px 0px 0px #FFFFFF0F, 0px 24px 56px -12px #000000BF, 0px 0px 0px 1px #36404C"
+      },
+      "component.button.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-button-radius",
+        "xamlKey": "Sl.Component.Button.Radius",
+        "value": "6px",
+        "aliasOf": "radius.md"
+      },
+      "component.button.gap": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-button-gap",
+        "xamlKey": "Sl.Component.Button.Gap",
+        "value": "6px",
+        "aliasOf": "space.1_5"
+      },
+      "component.button.paddingSm": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-button-padding-sm",
+        "xamlKey": "Sl.Component.Button.PaddingSm",
+        "value": "8px",
+        "aliasOf": "space.2"
+      },
+      "component.button.paddingMd": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-button-padding-md",
+        "xamlKey": "Sl.Component.Button.PaddingMd",
+        "value": "12px",
+        "aliasOf": "space.3"
+      },
+      "component.button.paddingLg": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-button-padding-lg",
+        "xamlKey": "Sl.Component.Button.PaddingLg",
+        "value": "16px",
+        "aliasOf": "space.4"
+      },
+      "component.button.fontWeight": {
+        "type": "FontWeight",
+        "cssVar": "--sl-component-button-font-weight",
+        "xamlKey": "Sl.Component.Button.FontWeight",
+        "value": "500",
+        "aliasOf": "font.weight.medium"
+      },
+      "component.button.iconSize": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-button-icon-size",
+        "xamlKey": "Sl.Component.Button.IconSize",
+        "value": "16px",
+        "aliasOf": "size.icon.md"
+      },
+      "component.button.shadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-button-shadow",
+        "xamlKey": "Sl.Component.Button.Shadow",
+        "value": "inset 0px 1px 0px 0px #FFFFFF12, 0px 1px 0px 0px #00000073, 0px 1px 2px 0px #00000059",
+        "aliasOf": "shadow.control"
+      },
+      "component.button.solidShadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-button-solid-shadow",
+        "xamlKey": "Sl.Component.Button.SolidShadow",
+        "value": "inset 0px 1px 0px 0px #FFFFFF66, inset 0px -1px 0px 0px #00000040, 0px 1px 2px 0px #00000080",
+        "aliasOf": "shadow.primary"
+      },
+      "component.field.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-field-radius",
+        "xamlKey": "Sl.Component.Field.Radius",
+        "value": "6px",
+        "aliasOf": "radius.md"
+      },
+      "component.field.paddingX": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-field-padding-x",
+        "xamlKey": "Sl.Component.Field.PaddingX",
+        "value": "10px"
+      },
+      "component.field.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-field-background",
+        "xamlKey": "Sl.Component.Field.Background",
+        "value": "#10141A",
+        "aliasOf": "color.background.sunken"
+      },
+      "component.field.filledBackground": {
+        "type": "Color",
+        "cssVar": "--sl-component-field-filled-background",
+        "xamlKey": "Sl.Component.Field.FilledBackground",
+        "value": "#232A33",
+        "aliasOf": "color.background.muted"
+      },
+      "component.field.border": {
+        "type": "Color",
+        "cssVar": "--sl-component-field-border",
+        "xamlKey": "Sl.Component.Field.Border",
+        "value": "#36404C",
+        "aliasOf": "color.border.strong"
+      },
+      "component.field.borderHover": {
+        "type": "Color",
+        "cssVar": "--sl-component-field-border-hover",
+        "xamlKey": "Sl.Component.Field.BorderHover",
+        "value": "#8792A1",
+        "aliasOf": "color.border.controlHover"
+      },
+      "component.field.borderFocus": {
+        "type": "Color",
+        "cssVar": "--sl-component-field-border-focus",
+        "xamlKey": "Sl.Component.Field.BorderFocus",
+        "value": "#3FB3C6",
+        "aliasOf": "color.accent.default"
+      },
+      "component.field.shadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-field-shadow",
+        "xamlKey": "Sl.Component.Field.Shadow",
+        "value": "inset 0px 1px 2px 0px #00000059",
+        "aliasOf": "shadow.inset"
+      },
+      "component.selection.boxSize": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-selection-box-size",
+        "xamlKey": "Sl.Component.Selection.BoxSize",
+        "value": "16px"
+      },
+      "component.selection.boxRadius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-selection-box-radius",
+        "xamlKey": "Sl.Component.Selection.BoxRadius",
+        "value": "4px",
+        "aliasOf": "radius.sm"
+      },
+      "component.selection.border": {
+        "type": "Color",
+        "cssVar": "--sl-component-selection-border",
+        "xamlKey": "Sl.Component.Selection.Border",
+        "value": "#677282",
+        "aliasOf": "color.border.control"
+      },
+      "component.selection.checked": {
+        "type": "Color",
+        "cssVar": "--sl-component-selection-checked",
+        "xamlKey": "Sl.Component.Selection.Checked",
+        "value": "#3FB3C6",
+        "aliasOf": "color.accent.default"
+      },
+      "component.selection.switchWidth": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-selection-switch-width",
+        "xamlKey": "Sl.Component.Selection.SwitchWidth",
+        "value": "36px"
+      },
+      "component.selection.switchHeight": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-selection-switch-height",
+        "xamlKey": "Sl.Component.Selection.SwitchHeight",
+        "value": "20px"
+      },
+      "component.selection.thumbSize": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-selection-thumb-size",
+        "xamlKey": "Sl.Component.Selection.ThumbSize",
+        "value": "16px"
+      },
+      "component.card.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-card-radius",
+        "xamlKey": "Sl.Component.Card.Radius",
+        "value": "10px",
+        "aliasOf": "radius.xl"
+      },
+      "component.card.padding": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-card-padding",
+        "xamlKey": "Sl.Component.Card.Padding",
+        "value": "20px",
+        "aliasOf": "space.5"
+      },
+      "component.card.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-card-background",
+        "xamlKey": "Sl.Component.Card.Background",
+        "value": "#151A20",
+        "aliasOf": "color.background.surface"
+      },
+      "component.card.border": {
+        "type": "Color",
+        "cssVar": "--sl-component-card-border",
+        "xamlKey": "Sl.Component.Card.Border",
+        "value": "#262E38",
+        "aliasOf": "color.border.default"
+      },
+      "component.card.shadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-card-shadow",
+        "xamlKey": "Sl.Component.Card.Shadow",
+        "value": "inset 0px 1px 0px 0px #FFFFFF09, 0px 1px 2px 0px #00000073, 0px 0px 0px 1px #262E38",
+        "aliasOf": "shadow.e1"
+      },
+      "component.card.hoverShadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-card-hover-shadow",
+        "xamlKey": "Sl.Component.Card.HoverShadow",
+        "value": "inset 0px 1px 0px 0px #FFFFFF0D, 0px 8px 24px -6px #00000099, 0px 0px 0px 1px #36404C",
+        "aliasOf": "shadow.e2"
+      },
+      "component.badge.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-badge-radius",
+        "xamlKey": "Sl.Component.Badge.Radius",
+        "value": "4px",
+        "aliasOf": "radius.sm"
+      },
+      "component.badge.height": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-badge-height",
+        "xamlKey": "Sl.Component.Badge.Height",
+        "value": "20px"
+      },
+      "component.alert.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-alert-radius",
+        "xamlKey": "Sl.Component.Alert.Radius",
+        "value": "8px",
+        "aliasOf": "radius.lg"
+      },
+      "component.alert.padding": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-alert-padding",
+        "xamlKey": "Sl.Component.Alert.Padding",
+        "value": "12px",
+        "aliasOf": "space.3"
+      },
+      "component.progress.height": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-progress-height",
+        "xamlKey": "Sl.Component.Progress.Height",
+        "value": "6px"
+      },
+      "component.progress.track": {
+        "type": "Color",
+        "cssVar": "--sl-component-progress-track",
+        "xamlKey": "Sl.Component.Progress.Track",
+        "value": "#232A33",
+        "aliasOf": "color.background.muted"
+      },
+      "component.progress.fill": {
+        "type": "Color",
+        "cssVar": "--sl-component-progress-fill",
+        "xamlKey": "Sl.Component.Progress.Fill",
+        "value": "#3FB3C6",
+        "aliasOf": "color.accent.default"
+      },
+      "component.dialog.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-dialog-radius",
+        "xamlKey": "Sl.Component.Dialog.Radius",
+        "value": "12px",
+        "aliasOf": "radius.2xl"
+      },
+      "component.dialog.padding": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-dialog-padding",
+        "xamlKey": "Sl.Component.Dialog.Padding",
+        "value": "20px",
+        "aliasOf": "space.5"
+      },
+      "component.dialog.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-dialog-background",
+        "xamlKey": "Sl.Component.Dialog.Background",
+        "value": "#1B2128",
+        "aliasOf": "color.background.raised"
+      },
+      "component.dialog.footer": {
+        "type": "Color",
+        "cssVar": "--sl-component-dialog-footer",
+        "xamlKey": "Sl.Component.Dialog.Footer",
+        "value": "#1B2128",
+        "aliasOf": "color.background.subtle"
+      },
+      "component.dialog.shadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-dialog-shadow",
+        "xamlKey": "Sl.Component.Dialog.Shadow",
+        "value": "inset 0px 1px 0px 0px #FFFFFF0F, 0px 24px 56px -12px #000000BF, 0px 0px 0px 1px #36404C",
+        "aliasOf": "shadow.e3"
+      },
+      "component.dialog.scrim": {
+        "type": "Color",
+        "cssVar": "--sl-component-dialog-scrim",
+        "xamlKey": "Sl.Component.Dialog.Scrim",
+        "value": "#000000A3",
+        "aliasOf": "color.scrim"
+      },
+      "component.snackbar.radius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-snackbar-radius",
+        "xamlKey": "Sl.Component.Snackbar.Radius",
+        "value": "8px",
+        "aliasOf": "radius.lg"
+      },
+      "component.snackbar.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-snackbar-background",
+        "xamlKey": "Sl.Component.Snackbar.Background",
+        "value": "#262E38",
+        "aliasOf": "color.inverse.background"
+      },
+      "component.snackbar.foreground": {
+        "type": "Color",
+        "cssVar": "--sl-component-snackbar-foreground",
+        "xamlKey": "Sl.Component.Snackbar.Foreground",
+        "value": "#E9ECF0",
+        "aliasOf": "color.inverse.text"
+      },
+      "component.snackbar.muted": {
+        "type": "Color",
+        "cssVar": "--sl-component-snackbar-muted",
+        "xamlKey": "Sl.Component.Snackbar.Muted",
+        "value": "#AEB7C2",
+        "aliasOf": "color.inverse.textMuted"
+      },
+      "component.snackbar.shadow": {
+        "type": "Shadow",
+        "cssVar": "--sl-component-snackbar-shadow",
+        "xamlKey": "Sl.Component.Snackbar.Shadow",
+        "value": "inset 0px 1px 0px 0px #FFFFFF0F, 0px 24px 56px -12px #000000BF, 0px 0px 0px 1px #36404C",
+        "aliasOf": "shadow.e3"
+      },
+      "component.snackbar.timer": {
+        "type": "Color",
+        "cssVar": "--sl-component-snackbar-timer",
+        "xamlKey": "Sl.Component.Snackbar.Timer",
+        "value": "#2BD4A4",
+        "aliasOf": "color.focus.ring"
+      },
+      "component.appBar.height": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-app-bar-height",
+        "xamlKey": "Sl.Component.AppBar.Height",
+        "value": "56px",
+        "aliasOf": "size.appbar"
+      },
+      "component.appBar.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-app-bar-background",
+        "xamlKey": "Sl.Component.AppBar.Background",
+        "value": "#151A20",
+        "aliasOf": "color.background.surface"
+      },
+      "component.appBar.border": {
+        "type": "Color",
+        "cssVar": "--sl-component-app-bar-border",
+        "xamlKey": "Sl.Component.AppBar.Border",
+        "value": "#262E38",
+        "aliasOf": "color.border.default"
+      },
+      "component.drawer.width": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-drawer-width",
+        "xamlKey": "Sl.Component.Drawer.Width",
+        "value": "248px",
+        "aliasOf": "size.drawer.full"
+      },
+      "component.drawer.miniWidth": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-drawer-mini-width",
+        "xamlKey": "Sl.Component.Drawer.MiniWidth",
+        "value": "56px",
+        "aliasOf": "size.drawer.mini"
+      },
+      "component.drawer.background": {
+        "type": "Color",
+        "cssVar": "--sl-component-drawer-background",
+        "xamlKey": "Sl.Component.Drawer.Background",
+        "value": "#1B2128",
+        "aliasOf": "color.background.subtle"
+      },
+      "component.drawer.itemRadius": {
+        "type": "Dimension",
+        "cssVar": "--sl-component-drawer-item-radius",
+        "xamlKey": "Sl.Component.Drawer.ItemRadius",
+        "value": "6px",
+        "aliasOf": "radius.md"
+      },
+      "component.drawer.activeItem": {
+        "type": "Color",
+        "cssVar": "--sl-component-drawer-active-item",
+        "xamlKey": "Sl.Component.Drawer.ActiveItem",
+        "value": "#151A20",
+        "aliasOf": "color.background.surface"
       }
     }
   }

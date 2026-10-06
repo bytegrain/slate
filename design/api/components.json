@@ -1,0 +1,887 @@
+{
+  "$description": "Canonical component API. Every platform must expose each option under its canonical name (spelled per docs/design/configurability.md#spelling) with these values. Platform conformance tests read this file. 'kind': param = value option, bool = flag, slot = content region, event = notification. 'platforms' limits an option to some platforms (default: all).",
+  "common": {
+    "$description": "Applies to every component below unless it says otherwise.",
+    "styling": "Blazor: Class, Style, AdditionalAttributes. Web: host class/style, ::part(name) for every part listed, component CSS variables. XAML: native Classes/Style/Theme, named PART_* template parts, Sl.Component.* resources."
+  },
+  "enums": {
+    "Tone": [
+      "neutral",
+      "accent",
+      "success",
+      "warning",
+      "danger",
+      "info"
+    ],
+    "Severity": [
+      "normal",
+      "info",
+      "success",
+      "warning",
+      "error"
+    ],
+    "ButtonVariant": [
+      "outlined",
+      "solid",
+      "soft",
+      "ghost",
+      "link"
+    ],
+    "FieldVariant": [
+      "outlined",
+      "filled",
+      "underlined"
+    ],
+    "CardVariant": [
+      "elevated",
+      "outlined",
+      "flat"
+    ],
+    "BadgeVariant": [
+      "soft",
+      "solid",
+      "outlined"
+    ],
+    "AlertVariant": [
+      "soft",
+      "outlined",
+      "solid"
+    ],
+    "ControlSize": [
+      "small",
+      "medium",
+      "large"
+    ],
+    "Radius": [
+      "default",
+      "none",
+      "small",
+      "medium",
+      "large",
+      "full"
+    ],
+    "Placement": [
+      "start",
+      "end"
+    ],
+    "Density": [
+      "compact",
+      "comfortable"
+    ],
+    "ThemeMode": [
+      "system",
+      "light",
+      "dark"
+    ],
+    "DrawerVariant": [
+      "responsive",
+      "persistent",
+      "temporary",
+      "mini"
+    ],
+    "Direction": [
+      "row",
+      "column"
+    ],
+    "ContainerWidth": [
+      "sm",
+      "md",
+      "lg",
+      "xl",
+      "fluid"
+    ],
+    "SnackbarPosition": [
+      "top-left",
+      "top-center",
+      "top-right",
+      "bottom-left",
+      "bottom-center",
+      "bottom-right"
+    ],
+    "DialogWidth": [
+      "xs",
+      "sm",
+      "md",
+      "lg",
+      "xl"
+    ],
+    "StackAlign": [
+      "stretch",
+      "start",
+      "center",
+      "end",
+      "baseline"
+    ],
+    "StackJustify": [
+      "start",
+      "center",
+      "end",
+      "between"
+    ]
+  },
+  "components": {
+    "Button": {
+      "web": "sl-button",
+      "blazor": "SlButton",
+      "xaml": "Button + sl:Sl.* attached properties",
+      "options": {
+        "Variant": {
+          "kind": "param",
+          "type": "ButtonVariant",
+          "default": "outlined"
+        },
+        "Tone": {
+          "kind": "param",
+          "type": "Tone",
+          "default": "neutral"
+        },
+        "Size": {
+          "kind": "param",
+          "type": "ControlSize",
+          "default": "medium"
+        },
+        "Radius": {
+          "kind": "param",
+          "type": "Radius",
+          "default": "default"
+        },
+        "StartIcon": {
+          "kind": "param",
+          "type": "icon"
+        },
+        "EndIcon": {
+          "kind": "param",
+          "type": "icon"
+        },
+        "IconOnly": {
+          "kind": "bool",
+          "note": "Requires Label."
+        },
+        "Label": {
+          "kind": "param",
+          "type": "string",
+          "note": "Accessible name; required for IconOnly."
+        },
+        "Loading": {
+          "kind": "bool"
+        },
+        "Disabled": {
+          "kind": "bool",
+          "note": "XAML: native IsEnabled."
+        },
+        "FullWidth": {
+          "kind": "bool"
+        },
+        "Pressed": {
+          "kind": "param",
+          "type": "bool?",
+          "note": "Toggle state (aria-pressed). Null = not a toggle."
+        },
+        "Shortcut": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Href": {
+          "kind": "param",
+          "type": "string",
+          "platforms": [
+            "web",
+            "blazor"
+          ]
+        },
+        "Type": {
+          "kind": "param",
+          "type": "button|submit|reset",
+          "platforms": [
+            "web",
+            "blazor"
+          ]
+        },
+        "Content": {
+          "kind": "slot"
+        },
+        "Click": {
+          "kind": "event"
+        }
+      },
+      "parts": [
+        "base",
+        "label",
+        "start",
+        "end",
+        "spinner"
+      ]
+    },
+    "TextField": {
+      "web": "sl-text-field",
+      "blazor": "SlTextField<T>",
+      "xaml": "TextField (wraps TextBox)",
+      "options": {
+        "Variant": {
+          "kind": "param",
+          "type": "FieldVariant",
+          "default": "outlined"
+        },
+        "Size": {
+          "kind": "param",
+          "type": "ControlSize",
+          "default": "medium"
+        },
+        "Radius": {
+          "kind": "param",
+          "type": "Radius",
+          "default": "default"
+        },
+        "Label": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Placeholder": {
+          "kind": "param",
+          "type": "string"
+        },
+        "HelperText": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Error": {
+          "kind": "param",
+          "type": "string",
+          "note": "Non-empty = invalid."
+        },
+        "Required": {
+          "kind": "bool"
+        },
+        "Disabled": {
+          "kind": "bool"
+        },
+        "ReadOnly": {
+          "kind": "bool"
+        },
+        "InputType": {
+          "kind": "param",
+          "type": "text|password|email|number|search|tel|url"
+        },
+        "Multiline": {
+          "kind": "bool"
+        },
+        "Rows": {
+          "kind": "param",
+          "type": "int"
+        },
+        "MaxLength": {
+          "kind": "param",
+          "type": "int?"
+        },
+        "Counter": {
+          "kind": "bool",
+          "note": "Shows value length (and MaxLength)."
+        },
+        "Clearable": {
+          "kind": "bool",
+          "note": "Shows a clear button when not empty."
+        },
+        "Prefix": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Suffix": {
+          "kind": "param",
+          "type": "string"
+        },
+        "StartIcon": {
+          "kind": "param",
+          "type": "icon"
+        },
+        "EndIcon": {
+          "kind": "param",
+          "type": "icon"
+        },
+        "StartContent": {
+          "kind": "slot",
+          "note": "Custom leading adornment (overrides StartIcon)."
+        },
+        "EndContent": {
+          "kind": "slot",
+          "note": "Custom trailing adornment (overrides EndIcon)."
+        },
+        "Value": {
+          "kind": "param",
+          "type": "T"
+        },
+        "ValueChanged": {
+          "kind": "event"
+        }
+      },
+      "parts": [
+        "base",
+        "label",
+        "control",
+        "input",
+        "helper",
+        "error",
+        "prefix",
+        "suffix"
+      ]
+    },
+    "Checkbox": {
+      "web": "sl-checkbox",
+      "blazor": "SlCheckbox",
+      "xaml": "CheckBox + sl:Sl.*",
+      "options": {
+        "Checked": {
+          "kind": "param",
+          "type": "bool?",
+          "note": "Null = indeterminate."
+        },
+        "Label": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Description": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Tone": {
+          "kind": "param",
+          "type": "Tone",
+          "default": "accent"
+        },
+        "Size": {
+          "kind": "param",
+          "type": "ControlSize",
+          "default": "medium"
+        },
+        "LabelPlacement": {
+          "kind": "param",
+          "type": "Placement",
+          "default": "end"
+        },
+        "Disabled": {
+          "kind": "bool"
+        },
+        "CheckedChanged": {
+          "kind": "event"
+        }
+      },
+      "parts": [
+        "base",
+        "box",
+        "label",
+        "description"
+      ]
+    },
+    "Switch": {
+      "web": "sl-switch",
+      "blazor": "SlSwitch",
+      "xaml": "Switch",
+      "options": {
+        "Checked": {
+          "kind": "param",
+          "type": "bool"
+        },
+        "Label": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Description": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Tone": {
+          "kind": "param",
+          "type": "Tone",
+          "default": "accent"
+        },
+        "Size": {
+          "kind": "param",
+          "type": "ControlSize",
+          "default": "medium"
+        },
+        "LabelPlacement": {
+          "kind": "param",
+          "type": "Placement",
+          "default": "end"
+        },
+        "Spread": {
+          "kind": "bool",
+          "note": "Label and switch at opposite ends of the row."
+        },
+        "Disabled": {
+          "kind": "bool"
+        },
+        "CheckedChanged": {
+          "kind": "event"
+        }
+      },
+      "parts": [
+        "base",
+        "track",
+        "thumb",
+        "label",
+        "description"
+      ]
+    },
+    "RadioGroup": {
+      "web": "sl-radio-group",
+      "blazor": "SlRadioGroup<T>",
+      "xaml": "RadioGroup",
+      "options": {
+        "Value": {
+          "kind": "param",
+          "type": "T"
+        },
+        "Label": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Direction": {
+          "kind": "param",
+          "type": "Direction",
+          "default": "column"
+        },
+        "Tone": {
+          "kind": "param",
+          "type": "Tone",
+          "default": "accent"
+        },
+        "Size": {
+          "kind": "param",
+          "type": "ControlSize",
+          "default": "medium"
+        },
+        "Disabled": {
+          "kind": "bool"
+        },
+        "ValueChanged": {
+          "kind": "event"
+        }
+      }
+    },
+    "Alert": {
+      "web": "sl-alert",
+      "blazor": "SlAlert",
+      "xaml": "Alert",
+      "options": {
+        "Severity": {
+          "kind": "param",
+          "type": "Severity",
+          "default": "info"
+        },
+        "Variant": {
+          "kind": "param",
+          "type": "AlertVariant",
+          "default": "soft"
+        },
+        "Title": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Icon": {
+          "kind": "param",
+          "type": "icon",
+          "note": "Overrides the severity icon; 'none' hides it."
+        },
+        "Dense": {
+          "kind": "bool"
+        },
+        "Dismissible": {
+          "kind": "bool"
+        },
+        "Live": {
+          "kind": "bool",
+          "note": "Announce when it appears."
+        },
+        "Content": {
+          "kind": "slot"
+        },
+        "Actions": {
+          "kind": "slot"
+        },
+        "Dismissed": {
+          "kind": "event"
+        }
+      },
+      "parts": [
+        "base",
+        "icon",
+        "title",
+        "message",
+        "actions",
+        "close"
+      ]
+    },
+    "Badge": {
+      "web": "sl-badge",
+      "blazor": "SlBadge",
+      "xaml": "Badge",
+      "options": {
+        "Tone": {
+          "kind": "param",
+          "type": "Tone",
+          "default": "neutral"
+        },
+        "Variant": {
+          "kind": "param",
+          "type": "BadgeVariant",
+          "default": "soft"
+        },
+        "Size": {
+          "kind": "param",
+          "type": "small|medium",
+          "default": "medium"
+        },
+        "Dot": {
+          "kind": "bool"
+        },
+        "Icon": {
+          "kind": "param",
+          "type": "icon"
+        },
+        "Content": {
+          "kind": "slot"
+        }
+      }
+    },
+    "Progress": {
+      "web": "sl-progress",
+      "blazor": "SlProgress",
+      "xaml": "ProgressBar + sl:Sl.*",
+      "options": {
+        "Value": {
+          "kind": "param",
+          "type": "double"
+        },
+        "Max": {
+          "kind": "param",
+          "type": "double",
+          "default": 100
+        },
+        "Indeterminate": {
+          "kind": "bool"
+        },
+        "Tone": {
+          "kind": "param",
+          "type": "Tone",
+          "default": "accent"
+        },
+        "Size": {
+          "kind": "param",
+          "type": "ControlSize",
+          "default": "medium"
+        },
+        "Label": {
+          "kind": "param",
+          "type": "string"
+        },
+        "ShowValue": {
+          "kind": "bool"
+        }
+      }
+    },
+    "Spinner": {
+      "web": "sl-spinner",
+      "blazor": "SlSpinner",
+      "xaml": "LoadingSpinner (Avalonia) / Spinner (WPF)",
+      "options": {
+        "Size": {
+          "kind": "param",
+          "type": "ControlSize",
+          "default": "medium"
+        },
+        "Tone": {
+          "kind": "param",
+          "type": "Tone",
+          "default": "neutral"
+        },
+        "Label": {
+          "kind": "param",
+          "type": "string"
+        }
+      }
+    },
+    "Card": {
+      "web": "sl-card",
+      "blazor": "SlCard",
+      "xaml": "Card",
+      "options": {
+        "Variant": {
+          "kind": "param",
+          "type": "CardVariant",
+          "default": "elevated"
+        },
+        "Radius": {
+          "kind": "param",
+          "type": "Radius",
+          "default": "default"
+        },
+        "Title": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Subtitle": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Flush": {
+          "kind": "bool",
+          "note": "No body padding (tables, media)."
+        },
+        "Interactive": {
+          "kind": "bool"
+        },
+        "Header": {
+          "kind": "slot",
+          "note": "Replaces the title/subtitle header."
+        },
+        "HeaderActions": {
+          "kind": "slot"
+        },
+        "Content": {
+          "kind": "slot"
+        },
+        "Footer": {
+          "kind": "slot"
+        },
+        "Click": {
+          "kind": "event"
+        }
+      },
+      "parts": [
+        "base",
+        "header",
+        "title",
+        "subtitle",
+        "actions",
+        "body",
+        "footer"
+      ]
+    },
+    "AppShell": {
+      "web": "sl-app-shell",
+      "blazor": "SlAppShell",
+      "xaml": "AppShell",
+      "options": {
+        "DrawerVariant": {
+          "kind": "param",
+          "type": "DrawerVariant",
+          "default": "responsive"
+        },
+        "DrawerOpen": {
+          "kind": "param",
+          "type": "bool",
+          "note": "Two-way bindable."
+        },
+        "ResponsiveBreakpoint": {
+          "kind": "param",
+          "type": "sm|md|lg|xl",
+          "default": "md"
+        },
+        "FillViewport": {
+          "kind": "bool"
+        },
+        "AppBar": {
+          "kind": "slot"
+        },
+        "Drawer": {
+          "kind": "slot"
+        },
+        "Content": {
+          "kind": "slot"
+        },
+        "DrawerOpenChanged": {
+          "kind": "event"
+        }
+      }
+    },
+    "AppBar": {
+      "web": "sl-app-bar",
+      "blazor": "SlAppBar",
+      "xaml": "AppBar",
+      "options": {
+        "Title": {
+          "kind": "param",
+          "type": "string"
+        },
+        "ShowMenuButton": {
+          "kind": "bool",
+          "default": true
+        },
+        "Leading": {
+          "kind": "slot"
+        },
+        "Center": {
+          "kind": "slot"
+        },
+        "Actions": {
+          "kind": "slot"
+        }
+      }
+    },
+    "NavItem": {
+      "web": "sl-nav-item",
+      "blazor": "SlNavItem",
+      "xaml": "NavItem",
+      "options": {
+        "Label": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Icon": {
+          "kind": "param",
+          "type": "icon"
+        },
+        "Trailing": {
+          "kind": "param",
+          "type": "string",
+          "note": "Count or short status."
+        },
+        "Active": {
+          "kind": "bool"
+        },
+        "Href": {
+          "kind": "param",
+          "type": "string",
+          "platforms": [
+            "web",
+            "blazor"
+          ]
+        },
+        "Disabled": {
+          "kind": "bool"
+        },
+        "Click": {
+          "kind": "event"
+        }
+      }
+    },
+    "Container": {
+      "web": "sl-container",
+      "blazor": "SlContainer",
+      "xaml": "Container",
+      "options": {
+        "MaxWidth": {
+          "kind": "param",
+          "type": "ContainerWidth",
+          "default": "lg",
+          "xaml": "ContainerMaxWidth",
+          "note": "XAML spells it ContainerMaxWidth (FrameworkElement/Layoutable.MaxWidth already exists)."
+        },
+        "Gutters": {
+          "kind": "bool",
+          "default": true
+        }
+      }
+    },
+    "Stack": {
+      "web": "sl-stack",
+      "blazor": "SlStack",
+      "xaml": "Stack",
+      "options": {
+        "Direction": {
+          "kind": "param",
+          "type": "Direction",
+          "default": "column"
+        },
+        "Spacing": {
+          "kind": "param",
+          "type": "int",
+          "note": "Space token step (0-16)."
+        },
+        "Align": {
+          "kind": "param",
+          "type": "StackAlign",
+          "default": "stretch"
+        },
+        "Justify": {
+          "kind": "param",
+          "type": "StackJustify",
+          "default": "start"
+        },
+        "Wrap": {
+          "kind": "bool"
+        }
+      }
+    },
+    "SnackbarHost": {
+      "web": "sl-snackbar-host",
+      "blazor": "SnackbarHost",
+      "xaml": "SnackbarHost",
+      "options": {
+        "Position": {
+          "kind": "param",
+          "type": "SnackbarPosition",
+          "default": "bottom-right"
+        },
+        "Label": {
+          "kind": "param",
+          "type": "string",
+          "default": "Notifications"
+        }
+      }
+    },
+    "Dialog": {
+      "web": "sl-dialog",
+      "blazor": "SlDialog",
+      "xaml": "DialogContent",
+      "options": {
+        "Title": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Description": {
+          "kind": "param",
+          "type": "string"
+        },
+        "Icon": {
+          "kind": "param",
+          "type": "icon"
+        },
+        "Tone": {
+          "kind": "param",
+          "type": "Tone",
+          "default": "neutral"
+        },
+        "MaxWidth": {
+          "kind": "param",
+          "type": "DialogWidth",
+          "default": "sm",
+          "xaml": "DialogMaxWidth",
+          "note": "XAML spells it DialogMaxWidth (FrameworkElement/Layoutable.MaxWidth already exists)."
+        },
+        "FullWidth": {
+          "kind": "bool"
+        },
+        "FullScreen": {
+          "kind": "bool"
+        },
+        "CloseOnEscape": {
+          "kind": "bool",
+          "default": true
+        },
+        "CloseOnBackdropClick": {
+          "kind": "bool",
+          "default": true
+        },
+        "ShowCloseButton": {
+          "kind": "bool",
+          "default": true
+        },
+        "Content": {
+          "kind": "slot"
+        },
+        "Footer": {
+          "kind": "slot"
+        }
+      },
+      "parts": [
+        "scrim",
+        "panel",
+        "header",
+        "body",
+        "footer",
+        "close"
+      ]
+    }
+  }
+}

@@ -94,6 +94,29 @@ internal static class Xaml
         }
     }
 
+    /// <summary>Theme-level sizes and weights (component tokens). Radii also get a CornerRadius, paddings a Thickness.</summary>
+    public static bool WriteThemeScalar(Writer w, TokenBuild b, Token t, string doubleTag)
+    {
+        var key = Key(b, t.Path);
+        var leaf = t.Segments[^1].ToLowerInvariant();
+        switch (t.Value)
+        {
+            case DimensionValue { IsPixels: true } d:
+                var v = Format.Number(d.Value);
+                w.Line($"<{doubleTag} x:Key=\"{key}\">{v}</{doubleTag}>");
+                if (leaf.Contains("radius"))
+                    w.Line($"<CornerRadius x:Key=\"{key}.Corner\">{v}</CornerRadius>");
+                if (leaf.Contains("padding"))
+                    w.Line($"<Thickness x:Key=\"{key}.Thickness\">{v}</Thickness>");
+                return true;
+            case double n when t.Type == TokenType.FontWeight:
+                w.Line($"<FontWeight x:Key=\"{key}\">{FontWeightName(n)}</FontWeight>");
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public static string TimeSpan(DurationValue d) => d.ToTimeSpan().ToString("c", System.Globalization.CultureInfo.InvariantCulture);
 }
 
@@ -171,13 +194,18 @@ public sealed class WpfXamlEmitter : IEmitter
                     var layer = s.Layers.Where(l => !l.Inset && l.Blur.Value > 0).MaxBy(l => l.Blur.Value);
                     if (layer is null)
                         break;
-                    w.Line($"<DropShadowEffect x:Key=\"{Naming.XamlKey(b.Prefix, t.Path, "effect")}\" Direction=\"270\" " +
+                    var effectKey = t.Path.StartsWith("component.", StringComparison.Ordinal)
+                        ? Xaml.Key(b, t.Path) + ".Effect"
+                        : Naming.XamlKey(b.Prefix, t.Path, "effect");
+                    w.Line($"<DropShadowEffect x:Key=\"{effectKey}\" Direction=\"270\" " +
                            $"ShadowDepth=\"{Format.Number(Math.Abs(layer.OffsetY.Value))}\" BlurRadius=\"{Format.Number(layer.Blur.Value)}\" " +
                            $"Color=\"{new ColorValue(layer.Color.R, layer.Color.G, layer.Color.B).ToXamlHex()}\" " +
                            $"Opacity=\"{Format.Number(Math.Round(layer.Color.A / 255.0, 3))}\" RenderingBias=\"Performance\" />");
                     break;
                 default:
-                    throw new TokenException($"No WPF theme mapping for {t.Type}.", t.Path);
+                    if (!Xaml.WriteThemeScalar(w, b, t, "sys:Double"))
+                        throw new TokenException($"No WPF theme mapping for {t.Type}.", t.Path);
+                    break;
             }
         }
         return Close(w);
@@ -234,7 +262,9 @@ public sealed class AvaloniaXamlEmitter : IEmitter
                         w.Line($"<BoxShadows x:Key=\"{Xaml.Key(b, t.Path)}\">{BoxShadows(s)}</BoxShadows>");
                         break;
                     default:
-                        throw new TokenException($"No Avalonia theme mapping for {t.Type}.", t.Path);
+                        if (!Xaml.WriteThemeScalar(w, b, t, "x:Double"))
+                            throw new TokenException($"No Avalonia theme mapping for {t.Type}.", t.Path);
+                        break;
                 }
             }
             w.Outdent().Line("</ResourceDictionary>");

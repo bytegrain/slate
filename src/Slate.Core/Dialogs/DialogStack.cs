@@ -20,6 +20,15 @@ public enum DialogPlacement
 public sealed record DialogOptions
 {
     public string? Title { get; init; }
+
+    /// <summary>Supporting text under the title (the dialog's accessible description).</summary>
+    public string? Description { get; init; }
+
+    /// <summary>Icon shown in a tinted tile beside the title (an icon name from SlateIcons).</summary>
+    public string? Icon { get; init; }
+
+    /// <summary>Colours the icon tile; <see cref="Tone.Danger"/> for destructive confirmations.</summary>
+    public Tone Tone { get; init; } = Tone.Neutral;
     public DialogWidth MaxWidth { get; init; } = DialogWidth.Sm;
 
     /// <summary>Use the full <see cref="MaxWidth"/> instead of sizing to content.</summary>
@@ -64,7 +73,7 @@ public sealed record MessageBoxOptions
     /// <summary>Null hides the cancel button (an acknowledgement box).</summary>
     public string? CancelText { get; init; } = "Cancel";
 
-    /// <summary>Renders the confirm button as <see cref="ButtonVariant.DangerSolid"/>.</summary>
+    /// <summary>Renders the confirm button as <c>Solid + Danger</c> and adds a warning icon.</summary>
     public bool Destructive { get; init; }
 
     public Severity Severity { get; init; } = Severity.Normal;

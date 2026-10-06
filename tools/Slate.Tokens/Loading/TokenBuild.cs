@@ -10,6 +10,9 @@ public sealed record TokenConfig
     public string Prefix { get; init; } = "sl";
     public List<string> Primitives { get; init; } = [];
     public Dictionary<string, string> Themes { get; init; } = new();
+
+    /// <summary>Component token files, layered onto every theme (paths must start with "component.").</summary>
+    public List<string> Components { get; init; } = [];
     public string DefaultTheme { get; init; } = "light";
     public DensityConfig? Density { get; init; }
     public Dictionary<string, string> Outputs { get; init; } = new();
@@ -74,10 +77,14 @@ public sealed class TokenBuild
     {
         var config = TokenConfig.Load(configFile);
         var root = Path.GetDirectoryName(Path.GetFullPath(configFile))!;
+        var components = config.Components.SelectMany(f => TokenFileReader.ReadFile(Path.Combine(root, f))).ToList();
+        foreach (var c in components.Where(c => !c.Path.StartsWith("component.", StringComparison.Ordinal)))
+            throw new TokenException("Component tokens must live under 'component.'.", c.Path);
+
         var build = Create(
             config,
             config.Primitives.SelectMany(f => TokenFileReader.ReadFile(Path.Combine(root, f))).ToList(),
-            config.Themes.ToDictionary(kv => kv.Key, kv => TokenFileReader.ReadFile(Path.Combine(root, kv.Value))));
+            config.Themes.ToDictionary(kv => kv.Key, kv => (IReadOnlyList<RawToken>)TokenFileReader.ReadFile(Path.Combine(root, kv.Value)).Concat(components).ToList()));
         return config.Icons is { } icons
             ? new TokenBuild { Config = build.Config, Shared = build.Shared, Themes = build.Themes, Icons = IconSet.Load(Path.Combine(root, icons)) }
             : build;
