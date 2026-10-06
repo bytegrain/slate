@@ -30,6 +30,50 @@ public sealed class SlateJs(IJSRuntime js) : IAsyncDisposable, IDisposable
     public async ValueTask SetIndeterminateAsync(ElementReference input, bool value) =>
         await (await Module).InvokeVoidAsync("setIndeterminate", input, value);
 
+    // ---- Overlays and wave-2 helpers (see wwwroot/slate.js) ----
+
+    public async ValueTask OverlayOpenAsync<THandle, TManager>(string id, DotNetObjectReference<THandle> handle, DotNetObjectReference<TManager> manager,
+        ElementReference anchor, ElementReference panel, bool matchWidth) where THandle : class where TManager : class =>
+        await (await Module).InvokeVoidAsync("overlayOpen", id, handle, manager, anchor, panel, matchWidth);
+
+    public async ValueTask OverlayRepositionAsync(string id) =>
+        await (await Module).InvokeVoidAsync("overlayReposition", id);
+
+    public async ValueTask OverlayCloseAsync(string id) =>
+        await (await Module).InvokeVoidAsync("overlayClose", id);
+
+    /// <summary>Sets ARIA attributes on an anchor wrapper's first element (null removes).</summary>
+    public async ValueTask SetAnchorAriaAsync(ElementReference wrapper, IDictionary<string, string?> attributes) =>
+        await (await Module).InvokeVoidAsync("setAnchorAria", wrapper, attributes);
+
+    public async ValueTask FocusFirstChildAsync(ElementReference wrapper) =>
+        await (await Module).InvokeVoidAsync("focusFirstChild", wrapper);
+
+    public async ValueTask FocusSelectorAsync(ElementReference root, string selector) =>
+        await (await Module).InvokeVoidAsync("focusSelector", root, selector);
+
+    public async ValueTask FocusIdAsync(string id) =>
+        await (await Module).InvokeVoidAsync("focusId", id);
+
+    /// <summary>Prevents default browser behaviour for these keys (names as KeyboardEvent.key; " " is "Space").</summary>
+    public async ValueTask PreventKeysAsync(ElementReference element, params string[] keys) =>
+        await (await Module).InvokeVoidAsync("preventKeys", element, keys);
+
+    public async ValueTask TabsMeasureAsync(ElementReference root) =>
+        await (await Module).InvokeVoidAsync("tabsMeasure", root);
+
+    public async ValueTask TabsScrollAsync(ElementReference root, int direction) =>
+        await (await Module).InvokeVoidAsync("tabsScroll", root, direction);
+
+    public async ValueTask ScrollActiveIntoViewAsync(ElementReference root, string selector) =>
+        await (await Module).InvokeVoidAsync("scrollActiveIntoView", root, selector);
+
+    public async ValueTask SliderTrackAsync<T>(ElementReference track, DotNetObjectReference<T> callback) where T : class =>
+        await (await Module).InvokeVoidAsync("sliderTrack", track, callback);
+
+    public async ValueTask SliderReleaseAsync(ElementReference track) =>
+        await (await Module).InvokeVoidAsync("sliderRelease", track);
+
     /// <summary>Synchronous scopes (some hosts and tests) can't await JS; the module is released with the page.</summary>
     public void Dispose() => _module = null;
 

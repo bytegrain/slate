@@ -1,0 +1,540 @@
+@namespace Slate.Blazor
+@typeparam T
+@inherits SlInputBase<T>
+@implements IAsyncDisposable
+@inject OverlayManager Overlays
+@inject SlateJs Js
+@inject SlateOptions Options
+@*
+  Select / combobox (docs/design/css-classes.md#select). Single selection binds Value, Multiple binds Values.
+  Searchable turns it into a combobox (filtering via Slate.Core OptionFilter: case/diacritic-insensitive with
+  <mark> highlights); Creatable offers the typed text. DOM focus never leaves the trigger/input — the active option
+  is aria-activedescendant. Works inside EditForm for both Value and Values.
+*@
+<div @attributes="AdditionalAttributes" class="@CssClass" style="@Style">
+    @if (Label is not null)
+    {
+        <label class="sl-field__label" id="@LabelId" for="@ElementId">@Label@if (Required)
+            {<span class="sl-field__required" aria-hidden="true">*</span>}</label>
+    }
+    <div class="sl-field__control sl-select__control" @ref="_control" @onclick="OnControlClick">
+        @if (Searchable)
+        {
+            <span class="sl-select__value">
+                @if (Multiple)
+                {
+                    @Chips()
+                }
+                <input @ref="_focusTarget" id="@ElementId" class="sl-field__input sl-select__input" role="combobox" aria-autocomplete="list"
+                       aria-expanded="@(_open ? "true" : "false")" aria-controls="@ListboxId" aria-activedescendant="@ActiveDescendant"
+                       aria-invalid="@(IsInvalid ? "true" : "false")" aria-describedby="@DescribedBy" aria-required="@(Required ? "true" : null)"
+                       autocomplete="off" value="@InputText" placeholder="@InputPlaceholder" disabled="@Disabled"
+                       @oninput="OnInput" @onkeydown="OnKeyDown" />
+            </span>
+        }
+        else
+        {
+            <button @ref="_focusTarget" id="@ElementId" class="sl-select__trigger" type="button" role="combobox" aria-haspopup="listbox"
+                    aria-expanded="@(_open ? "true" : "false")" aria-controls="@ListboxId" aria-activedescendant="@ActiveDescendant"
+                    aria-labelledby="@(Label is not null ? LabelId : null)" aria-invalid="@(IsInvalid ? "true" : "false")"
+                    aria-describedby="@DescribedBy" aria-required="@(Required ? "true" : null)" disabled="@Disabled" @onkeydown="OnKeyDown">
+                <span class="sl-select__value">
+                    @if (Multiple)
+                    {
+                        @if (SelectedValues.Count > 0)
+                        {
+                            @Chips()
+                        }
+                        else
+                        {
+                            <span class="sl-select__placeholder">@Placeholder</span>
+                        }
+                    }
+                    else if (HasValue)
+                    {
+                        <span class="sl-select__text">@TextFor(Value!)</span>
+                    }
+                    else
+                    {
+                        <span class="sl-select__placeholder">@Placeholder</span>
+                    }
+                </span>
+            </button>
+        }
+        @if (Loading)
+        {
+            <span class="sl-select__spinner"><span class="sl-spinner sl-spinner--small" aria-hidden="true"></span></span>
+        }
+        @if (Clearable && HasValue && !Disabled)
+        {
+            <button class="sl-field__clear" type="button" aria-label="@ClearLabel" @onclick="ClearAsync" @onclick:stopPropagation="true"><SlIcon Name="x" /></button>
+        }
+        <span class="sl-select__chevron" aria-hidden="true"><SlIcon Name="chevron-down" /></span>
+    </div>
+    @if (IsInvalid || HelperText is not null)
+    {
+        <div class="sl-field__footer">
+            @if (ErrorText is { } error)
+            {
+                <p class="sl-field__error" id="@DescriptionId"><SlIcon Name="alert-circle" />@error</p>
+            }
+            else
+            {
+                <p class="sl-field__helper" id="@DescriptionId">@HelperText</p>
+            }
+        </div>
+    }
+    <div @ref="_panel" class="sl-popover-panel sl-select__panel" popover="manual" hidden="@(!_open)">
+        <div id="@ListboxId" class="sl-select__listbox" role="listbox" aria-label="@(Label ?? "Options")" aria-multiselectable="@(Multiple ? "true" : null)">
+            @if (_open)
+            {
+                @Listbox()
+            }
+            @if (Loading)
+            {
+                <div class="sl-select__empty" role="status">@LoadingText</div>
+            }
+            else if (_open && _view.Count == 0)
+            {
+                <div class="sl-select__empty">@(EmptyContent ?? (RenderFragment)(b => b.AddContent(0, "No results")))</div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public IEnumerable<T>? Items { get; set; }
+
+    /// <summary>Selected values in Multiple mode (two-way).</summary>
+    [Parameter] public IReadOnlyList<T>? Values { get; set; }
+    [Parameter] public EventCallback<IReadOnlyList<T>?> ValuesChanged { get; set; }
+    [Parameter] public Expression<Func<IReadOnlyList<T>?>>? ValuesExpression { get; set; }
+
+    [Parameter] public bool Multiple { get; set; }
+
+    /// <summary>Type to filter (combobox).</summary>
+    [Parameter] public bool Searchable { get; set; }
+
+    /// <summary>Offer the typed text as a new value (needs <see cref="CreateItem"/> unless T is string).</summary>
+    [Parameter] public bool Creatable { get; set; }
+
+    /// <summary>Turns typed text into an item for Creatable.</summary>
+    [Parameter] public Func<string, T>? CreateItem { get; set; }
+
+    [Parameter] public Func<T, string>? ItemText { get; set; }
+    [Parameter] public Func<T, string?>? ItemIcon { get; set; }
+    [Parameter] public Func<T, string?>? ItemDescription { get; set; }
+    [Parameter] public Func<T, bool>? ItemDisabled { get; set; }
+
+    /// <summary>Custom option content.</summary>
+    [Parameter] public RenderFragment<T>? ItemTemplate { get; set; }
+
+    /// <summary>Group heading for each item (groups keep first-appearance order).</summary>
+    [Parameter] public Func<T, string>? GroupBy { get; set; }
+
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public string? HelperText { get; set; }
+    [Parameter] public FieldVariant? Variant { get; set; }
+    [Parameter] public ControlSize? Size { get; set; }
+    [Parameter] public Radius? Radius { get; set; }
+    [Parameter] public bool Clearable { get; set; }
+    [Parameter] public bool Required { get; set; }
+
+    /// <summary>Shows a spinner (and "Loading…" in the list) — e.g. while server-side search runs.</summary>
+    [Parameter] public bool Loading { get; set; }
+
+    /// <summary>Chips shown before collapsing the rest into "+N" (Multiple).</summary>
+    [Parameter] public int? MaxVisibleChips { get; set; }
+
+    /// <summary>Shown when nothing matches.</summary>
+    [Parameter] public RenderFragment? EmptyContent { get; set; }
+
+    /// <summary>Raised with the search text as the user types (server-side search).</summary>
+    [Parameter] public EventCallback<string> SearchChanged { get; set; }
+
+    [Parameter] public string ClearLabel { get; set; } = "Clear";
+    [Parameter] public string LoadingText { get; set; } = "Loading…";
+
+    private sealed record ViewOption(int ItemIndex, IReadOnlyList<TextRange> Ranges, string Id, string Group);
+
+    private ElementReference _control;
+    private ElementReference _panel;
+    private ElementReference _focusTarget;
+    private OverlayHandle? _overlay;
+    private readonly Typeahead _typeahead = new();
+    private List<T> _items = [];
+    private List<ViewOption> _view = [];
+    private FieldIdentifier? _valuesField;
+    private bool _open;
+    private bool _shown;
+    private string _query = "";
+    private int _activeIndex = -1;
+    private int _scrolledTo = -1;
+
+    private string LabelId => $"{ElementId}-label";
+    private string ListboxId => $"{ElementId}-list";
+    private string DescriptionId => $"{ElementId}-desc";
+    private string? DescribedBy => ErrorText is not null || HelperText is not null ? DescriptionId : null;
+    private string? ActiveDescendant => _open && _activeIndex >= 0 && _activeIndex < _view.Count ? _view[_activeIndex].Id : null;
+
+    /// <summary>Whether the listbox is open.</summary>
+    public bool IsOpen => _open;
+
+    private OverlayHandle Overlay => _overlay ??= new OverlayHandle(Overlays, Js, OnDismiss)
+        { Placement = PopoverPlacement.BottomStart, Offset = 4, MatchAnchorWidth = true };
+
+    private IReadOnlyList<T> SelectedValues => Values ?? [];
+
+    private bool HasValue => Multiple ? SelectedValues.Count > 0 : Value is not null && !(Value is string s && s.Length == 0);
+
+    private string CssClass => Css.Of("sl-field").Add("sl-select")
+        .Add(Names.Variant(Variant ?? Defaults.Field.Variant, "sl-field"))
+        .Add(Names.Size(Size ?? Defaults.Field.Size, "sl-field"))
+        .Add(Names.Radius(Radius ?? Defaults.Field.Radius))
+        .Add("sl-select--multiple", Multiple).Add("sl-select--searchable", Searchable).Add("is-open", _open)
+        .Add("sl-field--invalid", IsInvalid).Add("sl-field--disabled", Disabled).Add(Class);
+
+    private string InputText => _open || Multiple ? _query : HasValue ? TextFor(Value!) : "";
+
+    private string? InputPlaceholder => Multiple ? (SelectedValues.Count > 0 ? "" : Placeholder)
+        : _open && HasValue ? TextFor(Value!) : Placeholder;
+
+    protected override string? ErrorText =>
+        Multiple && string.IsNullOrEmpty(Error) && EditContext is not null && _valuesField is { } f
+            ? EditContext.GetValidationMessages(f).FirstOrDefault()
+            : base.ErrorText;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        _items = Items?.ToList() ?? [];
+        _valuesField = EditContext is not null && ValuesExpression is not null ? FieldIdentifier.Create(ValuesExpression) : null;
+        BuildView();
+    }
+
+    private string TextFor(T value) => ItemText?.Invoke(value) ?? value?.ToString() ?? "";
+
+    private bool IsItemDisabled(T item) => ItemDisabled?.Invoke(item) ?? false;
+
+    private bool IsSelected(T item) => Multiple
+        ? SelectedValues.Any(v => EqualityComparer<T>.Default.Equals(v, item))
+        : HasValue && EqualityComparer<T>.Default.Equals(Value!, item);
+
+    private void BuildView()
+    {
+        var query = Searchable ? _query.Trim() : "";
+        var labels = _items.Select(TextFor).ToList();
+        var matches = OptionFilter.Filter(labels, query);
+        var groups = matches.Select(m => GroupBy?.Invoke(_items[m.Index]) ?? "").ToList();
+        var ordered = OptionFilter.Group(groups).SelectMany(g => g.Indices.Select(i => matches[i])).ToList();
+        _view = ordered.Select((m, i) => new ViewOption(m.Index, m.Ranges, $"{ElementId}-opt-{i}", GroupBy?.Invoke(_items[m.Index]) ?? "")).ToList();
+        if (Creatable && query.Length > 0 && !labels.Any(l => TextFolding.Fold(l) == TextFolding.Fold(query)))
+            _view.Add(new ViewOption(-1, [], $"{ElementId}-opt-create", ""));
+        if (_activeIndex >= _view.Count) _activeIndex = _view.Count - 1;
+    }
+
+    private IReadOnlyList<bool> Skips => _view.Select(v => v.ItemIndex >= 0 && IsItemDisabled(_items[v.ItemIndex])).ToList();
+
+    /// <summary>Opens the listbox.</summary>
+    public void Show()
+    {
+        if (Disabled || _open) return;
+        _open = true;
+        Overlay.MarkOpen();
+        BuildView();
+        var selected = _view.FindIndex(v => v.ItemIndex >= 0 && IsSelected(_items[v.ItemIndex]));
+        _activeIndex = selected >= 0 ? selected : ListNavigator.Move(-1, ListKey.First, Skips);
+        StateHasChanged();
+    }
+
+    /// <summary>Closes the listbox.</summary>
+    public void Hide()
+    {
+        if (!_open) return;
+        _open = false;
+        _activeIndex = -1;
+        Overlay.MarkClosed();
+        if (Searchable && !Multiple) _ = SetQueryAsync("");
+        StateHasChanged();
+    }
+
+    private Task OnDismiss(OverlayDismissReason reason) => InvokeAsync(async () =>
+    {
+        Hide();
+        if (reason == OverlayDismissReason.Escape) await JsSafe.Run(() => Js.FocusAsync(_focusTarget));
+    });
+
+    private async Task SetQueryAsync(string query)
+    {
+        if (query == _query) return;
+        _query = query;
+        BuildView();
+        await SearchChanged.InvokeAsync(query);
+    }
+
+    private async Task ChooseAsync(int index)
+    {
+        if (index < 0 || index >= _view.Count) return;
+        var entry = _view[index];
+        T value;
+        if (entry.ItemIndex >= 0)
+        {
+            value = _items[entry.ItemIndex];
+            if (IsItemDisabled(value)) return;
+        }
+        else
+        {
+            var text = _query.Trim();
+            value = CreateItem is not null ? CreateItem(text)
+                : text is T t ? t : throw new InvalidOperationException($"Creatable SlSelect<{typeof(T).Name}> needs CreateItem.");
+        }
+
+        if (Multiple)
+        {
+            var exists = SelectedValues.Any(v => EqualityComparer<T>.Default.Equals(v, value));
+            var next = exists ? SelectedValues.Where(v => !EqualityComparer<T>.Default.Equals(v, value)).ToList() : SelectedValues.Append(value).ToList();
+            await SetValuesAsync(next);
+            if (Searchable && _query.Length > 0) await SetQueryAsync("");
+            _activeIndex = Math.Min(index, Math.Max(0, _view.Count - 1));
+        }
+        else
+        {
+            CurrentValue = value;
+            Hide();
+        }
+    }
+
+    private async Task SetValuesAsync(IReadOnlyList<T> values)
+    {
+        Values = values;
+        await ValuesChanged.InvokeAsync(values);
+        if (EditContext is not null && _valuesField is { } f) EditContext.NotifyFieldChanged(f);
+        BuildView();
+    }
+
+    private async Task RemoveValueAsync(T value)
+    {
+        await SetValuesAsync(SelectedValues.Where(v => !EqualityComparer<T>.Default.Equals(v, value)).ToList());
+        await JsSafe.Run(() => Js.FocusAsync(_focusTarget));
+    }
+
+    /// <summary>Clears the selection (as the clear button does).</summary>
+    public async Task ClearAsync()
+    {
+        if (Multiple) await SetValuesAsync([]);
+        else CurrentValue = default;
+        await SetQueryAsync("");
+        await JsSafe.Run(() => Js.FocusAsync(_focusTarget));
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (Disabled) return;
+        ListKey? key = e.Key switch
+        {
+            "ArrowDown" => ListKey.Next,
+            "ArrowUp" => ListKey.Previous,
+            "PageDown" => ListKey.PageDown,
+            "PageUp" => ListKey.PageUp,
+            "Home" when !Searchable => ListKey.First,
+            "End" when !Searchable => ListKey.Last,
+            _ => null,
+        };
+        if (key is { } k)
+        {
+            if (!_open)
+            {
+                Show();
+                if (e.Key == "ArrowUp") _activeIndex = ListNavigator.Move(-1, ListKey.Last, Skips);
+                return;
+            }
+            _activeIndex = ListNavigator.Move(_activeIndex, k, Skips, new ListNavigationOptions { PageSize = 8 });
+            return;
+        }
+
+        switch (e.Key)
+        {
+            case "Enter":
+                if (_open && _activeIndex >= 0) await ChooseAsync(_activeIndex);
+                else if (!_open) Show();
+                return;
+            case " " when !Searchable:
+                if (_open && _activeIndex >= 0) await ChooseAsync(_activeIndex);
+                else Show();
+                return;
+            case "Tab":
+                Hide();
+                return;
+            case "Backspace" when Searchable && Multiple && _query.Length == 0 && SelectedValues.Count > 0:
+                await RemoveValueAsync(SelectedValues[^1]);
+                return;
+        }
+
+        if (!Searchable && e.Key.Length == 1 && !e.CtrlKey && !e.MetaKey && !e.AltKey)
+        {
+            var labels = _view.Select(v => v.ItemIndex >= 0 ? TextFor(_items[v.ItemIndex]) : "").ToList();
+            var found = _typeahead.Search(e.Key, Options.TimeProvider.GetUtcNow().ToUnixTimeMilliseconds(), labels, _activeIndex, Skips);
+            if (found >= 0)
+            {
+                if (!_open) Show();
+                _activeIndex = found;
+            }
+        }
+    }
+
+    private async Task OnInput(ChangeEventArgs e)
+    {
+        await SetQueryAsync(e.Value?.ToString() ?? "");
+        if (!_open) Show();
+        _activeIndex = ListNavigator.Move(-1, ListKey.First, Skips);
+    }
+
+    private void OnControlClick(MouseEventArgs e)
+    {
+        if (Disabled) return;
+        if (Searchable)
+        {
+            Show();
+            _ = JsSafe.Run(() => Js.FocusAsync(_focusTarget));
+        }
+        else if (_open) Hide();
+        else Show();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var keys = Searchable ? new[] { "ArrowUp", "ArrowDown", "PageUp", "PageDown", "Enter" }
+                : new[] { "ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", "Enter", "Space" };
+            await JsSafe.Run(() => Js.PreventKeysAsync(_focusTarget, keys));
+        }
+        if (_open && !_shown)
+        {
+            _shown = true;
+            await Overlay.ShowAsync(_control, _panel);
+        }
+        else if (!_open && _shown)
+        {
+            _shown = false;
+            _scrolledTo = -1;
+            await Overlay.HideAsync();
+        }
+        else if (_open)
+        {
+            await Overlay.RepositionAsync();
+        }
+        if (_open && _activeIndex != _scrolledTo)
+        {
+            _scrolledTo = _activeIndex;
+            await JsSafe.Run(() => Js.ScrollActiveIntoViewAsync(_panel, ".sl-select__option.is-active"));
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Dispose();
+        if (_overlay is not null) await _overlay.DisposeAsync();
+    }
+
+    private RenderFragment Chips() => __builder =>
+    {
+        var values = SelectedValues;
+        var max = MaxVisibleChips ?? values.Count;
+        foreach (var v in values.Take(max))
+        {
+            var value = v;
+            var text = TextFor(value);
+            <span class="sl-select__chip"><span class="sl-select__chip-text">@text</span><button class="sl-select__chip-remove" type="button" tabindex="-1"
+                aria-label="@($"Remove {text}")" disabled="@Disabled" @onclick="() => RemoveValueAsync(value)" @onclick:stopPropagation="true"><SlIcon Name="x" /></button></span>
+        }
+        if (values.Count > max)
+        {
+            <span class="sl-select__chip sl-select__chip--more">+@(values.Count - max)</span>
+        }
+    };
+
+    private RenderFragment Listbox() => __builder =>
+    {
+        var groups = OptionFilter.Group(_view.Select(v => v.Group).ToList());
+        var hasGroups = groups.Any(g => g.Key.Length > 0);
+        if (!hasGroups)
+        {
+            for (var i = 0; i < _view.Count; i++) { @Option(i) }
+            return;
+        }
+        for (var gi = 0; gi < groups.Count; gi++)
+        {
+            var group = groups[gi];
+            var groupId = $"{ListboxId}-g{gi}";
+            <div class="sl-select__group" role="group" aria-labelledby="@groupId">
+                @if (group.Key.Length > 0)
+                {
+                    <div class="sl-select__group-label" id="@groupId">@group.Key</div>
+                }
+                @foreach (var i in group.Indices) { @Option(i) }
+            </div>
+        }
+    };
+
+    private RenderFragment Option(int index) => __builder =>
+    {
+        var entry = _view[index];
+        var active = index == _activeIndex;
+        if (entry.ItemIndex < 0)
+        {
+            <div id="@entry.Id" class="@(Css.Of("sl-select__option").Add("sl-select__option--create").Add("is-active", active))" role="option" aria-selected="false"
+                 @onpointerdown:preventDefault="true" @onpointermove="() => _activeIndex = index" @onclick="() => ChooseAsync(index)">
+                <span class="sl-select__option-icon"><SlIcon Name="plus" /></span>
+                <span class="sl-select__option-text"><span class="sl-select__option-label">Create “@_query.Trim()”</span></span>
+            </div>
+            return;
+        }
+        var item = _items[entry.ItemIndex];
+        var selected = IsSelected(item);
+        var disabled = IsItemDisabled(item);
+        <div id="@entry.Id" class="@(Css.Of("sl-select__option").Add("is-active", active).Add("is-selected", selected).Add("is-disabled", disabled))"
+             role="option" aria-selected="@(selected ? "true" : "false")" aria-disabled="@(disabled ? "true" : null)"
+             @onpointerdown:preventDefault="true" @onpointermove="() => { if (!disabled) _activeIndex = index; }" @onclick="() => ChooseAsync(index)">
+            @if (Multiple)
+            {
+                <span class="sl-select__option-box" aria-hidden="true"><SlIcon Name="check" /></span>
+            }
+            else
+            {
+                <span class="sl-select__option-check" aria-hidden="true"><SlIcon Name="check" /></span>
+            }
+            @if (ItemIcon?.Invoke(item) is { } icon)
+            {
+                <span class="sl-select__option-icon"><SlIcon Name="@icon" /></span>
+            }
+            <span class="sl-select__option-text">
+                @if (ItemTemplate is not null)
+                {
+                    @ItemTemplate(item)
+                }
+                else
+                {
+                    <span class="sl-select__option-label">@Highlight(TextFor(item), entry.Ranges)</span>
+                    @if (ItemDescription?.Invoke(item) is { } description)
+                    {
+                        <span class="sl-select__option-description">@description</span>
+                    }
+                }
+            </span>
+        </div>
+    };
+
+    /// <summary>Wraps the matched ranges of a label in &lt;mark&gt;.</summary>
+    internal static RenderFragment Highlight(string text, IReadOnlyList<TextRange> ranges) => __builder =>
+    {
+        var pos = 0;
+        foreach (var r in ranges.OrderBy(r => r.Start))
+        {
+            if (r.Start > pos) { @text[pos..r.Start] }
+            <mark>@text.Substring(r.Start, r.Length)</mark>
+            pos = r.Start + r.Length;
+        }
+        if (pos < text.Length) { @text[pos..] }
+    };
+}

@@ -126,9 +126,248 @@
             </DemoSection>
         </SlItem>
     </SlGrid>
+
+    <DemoSection Title="Select">
+        <div class="demo-playground">
+            <div class="demo-stage">
+                <div style="width: min(100%, 360px)">
+                    @if (_s.Multiple)
+                    {
+                        <SlSelect T="string" Items="PlayLanguages" @bind-Values="_s.Values" Multiple="true" Searchable="_s.Searchable" Creatable="_s.Creatable"
+                                  Variant="_s.Variant" Size="_s.Size" Radius="_s.Radius" Label="@_s.Label" Placeholder="@_s.Placeholder" HelperText="@_s.Helper"
+                                  Clearable="_s.Clearable" Disabled="_s.Disabled" Required="_s.Required" Loading="_s.Loading" MaxVisibleChips="@(_s.LimitChips ? 2 : null)"
+                                  GroupBy="@(_s.Grouped ? PlayGroup : null)" Error="@(_s.ShowError ? "Pick something else." : null)" />
+                    }
+                    else
+                    {
+                        <SlSelect T="string" Items="PlayLanguages" @bind-Value="_s.Value" Searchable="_s.Searchable" Creatable="_s.Creatable"
+                                  Variant="_s.Variant" Size="_s.Size" Radius="_s.Radius" Label="@_s.Label" Placeholder="@_s.Placeholder" HelperText="@_s.Helper"
+                                  Clearable="_s.Clearable" Disabled="_s.Disabled" Required="_s.Required" Loading="_s.Loading"
+                                  GroupBy="@(_s.Grouped ? PlayGroup : null)" Error="@(_s.ShowError ? "Pick something else." : null)" />
+                    }
+                </div>
+            </div>
+            <div class="demo-controls">
+                <EnumSelect TEnum="FieldVariant" Label="Variant" @bind-Value="_s.Variant" />
+                <EnumSelect TEnum="ControlSize" Label="Size" @bind-Value="_s.Size" />
+                <EnumSelect TEnum="Radius" Label="Radius" @bind-Value="_s.Radius" />
+                <SlTextField @bind-Value="_s.Label" Label="Label" Size="ControlSize.Small" Immediate="true" />
+                <SlTextField @bind-Value="_s.Placeholder" Label="Placeholder" Size="ControlSize.Small" Immediate="true" />
+                <SlTextField @bind-Value="_s.Helper" Label="Helper text" Size="ControlSize.Small" Immediate="true" />
+                <SlCheckbox @bind-Checked="_s.Multiple" Label="Multiple" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_s.Searchable" Label="Searchable" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_s.Creatable" Label="Creatable" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_s.Grouped" Label="Group by" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_s.LimitChips" Label="Max 2 chips" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_s.Clearable" Label="Clearable" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_s.Required" Label="Required" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_s.Loading" Label="Loading" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_s.ShowError" Label="Error" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_s.Disabled" Label="Disabled" Size="ControlSize.Small" />
+            </div>
+        </div>
+    </DemoSection>
+
+    <DemoSection Title="Date picker">
+        <div class="demo-playground">
+            <div class="demo-stage">
+                <div style="width: min(100%, 360px)">
+                    <SlDatePicker @bind-Value="_d.Value" @bind-Range="_d.Range" Selection="_d.Selection" Inline="_d.Inline" Variant="_d.Variant" Size="_d.Size"
+                                  Label="@(_d.Inline ? null : "Date")" Clearable="_d.Clearable" Disabled="_d.Disabled" FirstDayOfWeek="@(_d.Monday ? DayOfWeek.Monday : null)"
+                                  Format="@(_d.Iso ? "yyyy-MM-dd" : null)" Presets="@(_d.Presets ? Slate.Dates.CalendarModel.DefaultPresets : null)"
+                                  Min="@(_d.Limit ? PlayToday.AddDays(-14) : null)" Max="@(_d.Limit ? PlayToday.AddDays(30) : null)"
+                                  DisabledDates="@(_d.NoWeekends ? d => d.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday : null)" />
+                </div>
+            </div>
+            <div class="demo-controls">
+                <EnumSelect TEnum="DateSelection" Label="Selection" @bind-Value="_d.Selection" />
+                <EnumSelect TEnum="FieldVariant" Label="Variant" @bind-Value="_d.Variant" />
+                <EnumSelect TEnum="ControlSize" Label="Size" @bind-Value="_d.Size" />
+                <SlCheckbox @bind-Checked="_d.Inline" Label="Inline" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_d.Presets" Label="Presets" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_d.Monday" Label="Week starts Monday" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_d.Iso" Label="ISO format" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_d.Limit" Label="Min/max (−14d…+30d)" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_d.NoWeekends" Label="No weekends" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_d.Clearable" Label="Clearable" Size="ControlSize.Small" />
+                <SlCheckbox @bind-Checked="_d.Disabled" Label="Disabled" Size="ControlSize.Small" />
+            </div>
+        </div>
+    </DemoSection>
+
+    <SlGrid>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Slider">
+                <SlStack Spacing="4">
+                    <div class="demo-stage" style="place-items: stretch">
+                        @if (_l.Range)
+                        {
+                            <SlSlider @bind-Value="_l.Value" @bind-RangeEnd="_l.End" Min="0" Max="_l.Max" Step="_l.Step" Ticks="_l.Ticks" ShowValue="_l.ShowValue"
+                                      Tone="_l.Tone" Disabled="_l.Disabled" Label="Range" />
+                        }
+                        else
+                        {
+                            <SlSlider @bind-Value="_l.Value" Min="0" Max="_l.Max" Step="_l.Step" Ticks="_l.Ticks" ShowValue="_l.ShowValue" Tone="_l.Tone"
+                                      Disabled="_l.Disabled" Label="Value" />
+                        }
+                    </div>
+                    <div class="demo-controls">
+                        <EnumSelect TEnum="Tone" Label="Tone" @bind-Value="_l.Tone" />
+                        <div class="demo-labelled"><span class="sl-field__label">Step</span><SlSegmented T="double" Items="PlaySteps" @bind-Value="_l.Step" Size="ControlSize.Small" Label="Step" /></div>
+                        <SlCheckbox @bind-Checked="_l.Range" Label="Range" Size="ControlSize.Small" />
+                        <SlCheckbox @bind-Checked="_l.Ticks" Label="Ticks" Size="ControlSize.Small" />
+                        <SlCheckbox @bind-Checked="_l.ShowValue" Label="Show value" Size="ControlSize.Small" />
+                        <SlCheckbox @bind-Checked="_l.Disabled" Label="Disabled" Size="ControlSize.Small" />
+                    </div>
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Tabs">
+                <SlStack Spacing="4">
+                    <div class="demo-stage" style="place-items: stretch">
+                        <SlTabs Variant="_t.Variant" Size="_t.Size" Direction="_t.Direction" KeepAlive="_t.KeepAlive" Label="Playground tabs">
+                            <SlTab Label="Overview" Icon="@(_t.Icons ? "home" : null)">Overview</SlTab>
+                            <SlTab Label="Activity" Icon="@(_t.Icons ? "bell" : null)" Badge="@(_t.Badges ? "4" : null)" Closable="_t.Closable">Activity</SlTab>
+                            <SlTab Label="Settings" Icon="@(_t.Icons ? "settings" : null)" Closable="_t.Closable">Settings</SlTab>
+                        </SlTabs>
+                    </div>
+                    <div class="demo-controls">
+                        <EnumSelect TEnum="TabsVariant" Label="Variant" @bind-Value="_t.Variant" />
+                        <EnumSelect TEnum="ControlSize" Label="Size" @bind-Value="_t.Size" />
+                        <EnumSelect TEnum="Direction" Label="Direction" @bind-Value="_t.Direction" />
+                        <SlCheckbox @bind-Checked="_t.Icons" Label="Icons" Size="ControlSize.Small" />
+                        <SlCheckbox @bind-Checked="_t.Badges" Label="Badge" Size="ControlSize.Small" />
+                        <SlCheckbox @bind-Checked="_t.Closable" Label="Closable" Size="ControlSize.Small" />
+                        <SlCheckbox @bind-Checked="_t.KeepAlive" Label="Keep alive" Size="ControlSize.Small" />
+                    </div>
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Tooltip &amp; popover">
+                <SlStack Spacing="4">
+                    <div class="demo-stage">
+                        <div class="demo-row">
+                            <SlTooltip Text="@_o.Text" Shortcut="@(string.IsNullOrEmpty(_o.Shortcut) ? null : _o.Shortcut)" Placement="_o.Placement" Delay="_o.Delay" Disabled="_o.Disabled">
+                                <SlButton>Hover me</SlButton>
+                            </SlTooltip>
+                            <SlPopover Placement="_o.Placement" Offset="_o.Offset" Modal="_o.Modal" CloseOnOutsideClick="_o.OutsideCloses" MatchAnchorWidth="_o.MatchWidth" Label="Playground popover">
+                                <Anchor><SlButton Variant="ButtonVariant.Solid" Tone="Tone.Accent">Click me</SlButton></Anchor>
+                                <ChildContent><SlText Typo="Typo.Body">Popover content.</SlText></ChildContent>
+                            </SlPopover>
+                        </div>
+                    </div>
+                    <div class="demo-controls">
+                        <EnumSelect TEnum="PopoverPlacement" Label="Placement" @bind-Value="_o.Placement" />
+                        <div class="demo-labelled"><span class="sl-field__label">Tooltip delay</span><SlSegmented T="int" Items="PlayDelays" @bind-Value="_o.Delay" ItemText="@(d => $"{d} ms")" Size="ControlSize.Small" Label="Tooltip delay" /></div>
+                        <SlTextField @bind-Value="_o.Text" Label="Tooltip text" Size="ControlSize.Small" Immediate="true" />
+                        <SlTextField @bind-Value="_o.Shortcut" Label="Shortcut" Size="ControlSize.Small" Immediate="true" />
+                        <SlCheckbox @bind-Checked="_o.Disabled" Label="Tooltip disabled" Size="ControlSize.Small" />
+                        <SlCheckbox @bind-Checked="_o.Modal" Label="Modal popover" Size="ControlSize.Small" />
+                        <SlCheckbox @bind-Checked="_o.OutsideCloses" Label="Outside click closes" Size="ControlSize.Small" />
+                        <SlCheckbox @bind-Checked="_o.MatchWidth" Label="Match anchor width" Size="ControlSize.Small" />
+                    </div>
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Avatar, pagination &amp; segmented">
+                <SlStack Spacing="4">
+                    <div class="demo-stage">
+                        <SlStack Spacing="4" Align="StackAlign.Center">
+                            <SlAvatar Name="@_v.Name" Size="_v.Size" Status="@(_v.HasStatus ? _v.Status : null)" Tone="@(_v.AutoTone ? null : _v.Tone)" />
+                            <SlPagination @bind-Page="_v.Page" PageCount="_v.Pages" Siblings="_v.Siblings" Size="_v.Size" />
+                            <SlSegmented T="string" Items="PlayViews" @bind-Value="_v.View" Size="_v.Size" FullWidth="_v.FullWidth" Label="View" />
+                        </SlStack>
+                    </div>
+                    <div class="demo-controls">
+                        <SlTextField @bind-Value="_v.Name" Label="Avatar name" Size="ControlSize.Small" Immediate="true" />
+                        <EnumSelect TEnum="ControlSize" Label="Size" @bind-Value="_v.Size" />
+                        <EnumSelect TEnum="AvatarStatus" Label="Status" @bind-Value="_v.Status" />
+                        <EnumSelect TEnum="Tone" Label="Tone" @bind-Value="_v.Tone" />
+                        <SlCheckbox @bind-Checked="_v.HasStatus" Label="Show status" Size="ControlSize.Small" />
+                        <SlCheckbox @bind-Checked="_v.AutoTone" Label="Tone from name" Size="ControlSize.Small" />
+                        <div class="demo-labelled"><span class="sl-field__label">Siblings</span><SlSegmented T="int" Items="PlaySiblings" @bind-Value="_v.Siblings" Size="ControlSize.Small" Label="Siblings" /></div>
+                        <SlCheckbox @bind-Checked="_v.FullWidth" Label="Segmented full width" Size="ControlSize.Small" />
+                    </div>
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+    </SlGrid>
 </div>
 
 @code {
+    private static readonly string[] PlayLanguages = ["C#", "F#", "TypeScript", "JavaScript", "Python", "Rust", "Go", "Kotlin", "Swift"];
+    private static string PlayGroup(string l) => l is "C#" or "F#" ? ".NET" : l is "TypeScript" or "JavaScript" ? "Web" : "Other";
+    private static readonly DateOnly PlayToday = DateOnly.FromDateTime(DateTime.Today);
+    private static readonly double[] PlaySteps = [1, 5, 10];
+    private static readonly int[] PlayDelays = [0, 500, 1000];
+    private static readonly int[] PlaySiblings = [0, 1, 2];
+    private static readonly string[] PlayViews = ["List", "Board", "Calendar"];
+
+    private sealed class SelectState
+    {
+        public FieldVariant Variant = FieldVariant.Outlined;
+        public ControlSize Size = ControlSize.Medium;
+        public Radius Radius = Radius.Default;
+        public string? Value = "TypeScript", Label = "Language", Placeholder = "Choose a language", Helper = "Used for syntax highlighting.";
+        public IReadOnlyList<string>? Values = ["C#", "Rust"];
+        public bool Multiple, Searchable, Creatable, Grouped, LimitChips, Clearable = true, Required, Loading, ShowError, Disabled;
+    }
+
+    private sealed class DateState
+    {
+        public DateOnly? Value = PlayToday;
+        public Slate.Dates.DateRange? Range;
+        public DateSelection Selection = DateSelection.Single;
+        public FieldVariant Variant = FieldVariant.Outlined;
+        public ControlSize Size = ControlSize.Medium;
+        public bool Inline, Presets, Monday, Iso, Limit, NoWeekends, Clearable = true, Disabled;
+    }
+
+    private sealed class SliderState
+    {
+        public double Value = 30, Max = 100, Step = 5;
+        public double? End = 70;
+        public Tone Tone = Tone.Accent;
+        public bool Range, Ticks, ShowValue = true, Disabled;
+    }
+
+    private sealed class TabsState
+    {
+        public TabsVariant Variant = TabsVariant.Line;
+        public ControlSize Size = ControlSize.Medium;
+        public Direction Direction = Direction.Row;
+        public bool Icons = true, Badges = true, Closable, KeepAlive;
+    }
+
+    private sealed class OverlayState
+    {
+        public PopoverPlacement Placement = PopoverPlacement.Top;
+        public int Delay = 500;
+        public double Offset = 6;
+        public string? Text = "Deploy to production", Shortcut = "⌘D";
+        public bool Disabled, Modal, OutsideCloses = true, MatchWidth;
+    }
+
+    private sealed class MiscState
+    {
+        public string? Name = "Ada Lovelace", View = "Board";
+        public ControlSize Size = ControlSize.Medium;
+        public AvatarStatus Status = AvatarStatus.Online;
+        public Tone Tone = Tone.Accent;
+        public bool HasStatus = true, AutoTone = true, FullWidth;
+        public int Page = 5, Pages = 12, Siblings = 1;
+    }
+
+    private readonly SelectState _s = new();
+    private readonly DateState _d = new();
+    private readonly SliderState _l = new();
+    private readonly TabsState _t = new();
+    private readonly OverlayState _o = new();
+    private readonly MiscState _v = new();
+
     private static readonly IReadOnlyList<(string, string)> Icons =
         SlateIcons.All.Keys.Order().Select(k => (k, k)).ToList();
 

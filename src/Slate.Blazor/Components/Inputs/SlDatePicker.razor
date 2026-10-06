@@ -1,0 +1,405 @@
+@namespace Slate.Blazor
+@inherits SlInputBase<DateOnly?>
+@implements IAsyncDisposable
+@inject OverlayManager Overlays
+@inject SlateJs Js
+@inject SlateOptions Options
+@*
+  Date picker (docs/design/css-classes.md#datepicker): a typed field plus a calendar popover, or an inline
+  calendar. Single selection binds Value, range selection binds Range. Calendar state, keyboard and presets come
+  from Slate.Core CalendarModel; typed text uses DateText with the culture's short pattern (or Format).
+*@
+@if (Inline)
+{
+    <div @attributes="AdditionalAttributes" class="@CssClass" style="@Style">
+        @if (Label is not null)
+        {
+            <span class="sl-field__label">@Label</span>
+        }
+        <div @ref="_panel" class="sl-date-picker__panel" role="group" aria-label="@(Label ?? "Calendar")">@Calendar()</div>
+    </div>
+}
+else
+{
+    <div @attributes="AdditionalAttributes" class="@CssClass" style="@Style">
+        @if (Label is not null)
+        {
+            <label class="sl-field__label" for="@ElementId">@Label</label>
+        }
+        <div class="sl-field__control" @ref="_control">
+            <input @ref="_input" id="@ElementId" class="sl-field__input sl-date-picker__input" type="text" inputmode="numeric" autocomplete="off"
+                   value="@(_text ?? DisplayText)" placeholder="@(Placeholder ?? DefaultPlaceholder)" aria-invalid="@(IsInvalid ? "true" : "false")"
+                   aria-describedby="@DescribedBy" aria-haspopup="dialog" aria-expanded="@(_open ? "true" : "false")" disabled="@Disabled"
+                   @oninput="e => _text = e.Value?.ToString()" @onchange="CommitText" @onkeydown="OnInputKeyDown" />
+            @if (Clearable && HasValue && !Disabled)
+            {
+                <button class="sl-field__clear" type="button" aria-label="@ClearLabel" @onclick="ClearAsync"><SlIcon Name="x" /></button>
+            }
+            <button class="sl-date-picker__trigger" type="button" aria-label="@(_open ? "Close calendar" : "Open calendar")" disabled="@Disabled"
+                    @onclick="ToggleAsync"><SlIcon Name="calendar" /></button>
+        </div>
+        @if (IsInvalid || HelperText is not null)
+        {
+            <div class="sl-field__footer">
+                @if (ErrorText is { } error)
+                {
+                    <p class="sl-field__error" id="@DescriptionId"><SlIcon Name="alert-circle" />@error</p>
+                }
+                else
+                {
+                    <p class="sl-field__helper" id="@DescriptionId">@HelperText</p>
+                }
+            </div>
+        }
+        <div @ref="_panel" id="@PanelId" class="sl-popover-panel sl-date-picker__panel" role="dialog" aria-modal="false"
+             aria-label="@(Label ?? "Choose date")" popover="manual" hidden="@(!_open)">
+            @if (_open)
+            {
+                @Calendar()
+            }
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>Range selection value (two-way), used when Selection is Range.</summary>
+    [Parameter] public DateRange? Range { get; set; }
+    [Parameter] public EventCallback<DateRange?> RangeChanged { get; set; }
+
+    [Parameter] public DateSelection Selection { get; set; } = DateSelection.Single;
+    [Parameter] public DateOnly? Min { get; set; }
+    [Parameter] public DateOnly? Max { get; set; }
+    [Parameter] public Func<DateOnly, bool>? DisabledDates { get; set; }
+
+    /// <summary>First column of the calendar. Null follows the current culture.</summary>
+    [Parameter] public DayOfWeek? FirstDayOfWeek { get; set; }
+
+    /// <summary>Display/typing pattern (tokens yyyy, yy, MM, M, dd, d). Null follows the culture's short date.</summary>
+    [Parameter] public string? Format { get; set; }
+
+    /// <summary>Quick picks shown beside the calendar (e.g. <c>CalendarModel.DefaultPresets</c>).</summary>
+    [Parameter] public IEnumerable<DatePreset>? Presets { get; set; }
+
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public string? HelperText { get; set; }
+    [Parameter] public FieldVariant? Variant { get; set; }
+    [Parameter] public ControlSize? Size { get; set; }
+    [Parameter] public bool Clearable { get; set; }
+
+    /// <summary>Render the calendar without a field.</summary>
+    [Parameter] public bool Inline { get; set; }
+
+    [Parameter] public string ClearLabel { get; set; } = "Clear";
+
+    private ElementReference _control;
+    private ElementReference _input;
+    private ElementReference _panel;
+    private OverlayHandle? _overlay;
+    private bool _open;
+    private bool _shown;
+    private bool _focusDay;
+    private (int Year, int Month) _view;
+    private DateOnly _focused;
+    private DateOnly? _hover;
+    private DateRange? _pending;
+    private string? _text;
+    private (DateOnly?, DateRange?)? _lastSeen;
+
+    private System.Globalization.CultureInfo Culture => System.Globalization.CultureInfo.CurrentCulture;
+    private string Pattern => Format ?? DateText.ShortPattern(Culture);
+    private string DefaultPlaceholder => Selection == DateSelection.Range ? $"{Pattern} – {Pattern}" : Pattern;
+    private DateOnly Today => DateOnly.FromDateTime(Options.TimeProvider.GetLocalNow().DateTime);
+    private DayOfWeek WeekStart => FirstDayOfWeek ?? CalendarModel.FirstDayOfWeek(Culture);
+    private string PanelId => $"{ElementId}-panel";
+    private string TitleId => $"{ElementId}-title";
+    private string DescriptionId => $"{ElementId}-desc";
+    private string? DescribedBy => ErrorText is not null || HelperText is not null ? DescriptionId : null;
+    private bool HasValue => Selection == DateSelection.Range ? Range is not null : Value is not null;
+
+    /// <summary>Whether the calendar popover is open.</summary>
+    public bool IsOpen => _open;
+
+    private OverlayHandle Overlay => _overlay ??= new OverlayHandle(Overlays, Js, OnDismiss) { Placement = PopoverPlacement.BottomStart, Offset = 4 };
+
+    private string CssClass => Css.Of("sl-field").Add("sl-date-picker")
+        .Add(Names.Variant(Variant ?? Defaults.Field.Variant, "sl-field"))
+        .Add(Names.Size(Size ?? Defaults.Field.Size, "sl-field"))
+        .Add($"sl-date-picker--{Names.Kebab(Selection.ToString())}")
+        .Add("sl-date-picker--inline", Inline).Add("is-open", _open)
+        .Add("sl-field--invalid", IsInvalid).Add("sl-field--disabled", Disabled).Add(Class);
+
+    private CalendarOptions CalendarOptions => new()
+    {
+        FirstDayOfWeek = WeekStart,
+        Today = Today,
+        Min = Min,
+        Max = Max,
+        IsDateDisabled = DisabledDates,
+        Selected = Selection == DateSelection.Single ? Value : null,
+        Range = Selection == DateSelection.Range ? _pending ?? Range : null,
+        Hover = _hover,
+    };
+
+    private string DisplayText => Selection == DateSelection.Range
+        ? Range is { } r ? r.End is { } end ? $"{DateText.Format(r.Start, Pattern)} – {DateText.Format(end, Pattern)}" : DateText.Format(r.Start, Pattern) : ""
+        : Value is { } v ? DateText.Format(v, Pattern) : "";
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        var seen = (Value, Range);
+        if (_lastSeen is null || (!_open && _lastSeen != seen)) JumpTo(AnchorDate());
+        _lastSeen = seen;
+    }
+
+    private DateOnly AnchorDate() => Selection == DateSelection.Range ? Range?.Start ?? Today : Value ?? Today;
+
+    private void JumpTo(DateOnly date)
+    {
+        _focused = date;
+        _view = (date.Year, date.Month);
+    }
+
+    private bool IsAllowed(DateOnly d) => !CalendarOptions.IsDisabled(d);
+
+    /// <summary>Opens the calendar popover (no-op when Inline).</summary>
+    public void Show()
+    {
+        if (Disabled || Inline || _open) return;
+        JumpTo(AnchorDate());
+        _pending = null;
+        _open = true;
+        _focusDay = true;
+        Overlay.MarkOpen();
+        StateHasChanged();
+    }
+
+    public void Hide() => Close(returnFocus: false);
+
+    private void Close(bool returnFocus)
+    {
+        if (!_open) return;
+        _open = false;
+        _hover = null;
+        _pending = null;
+        Overlay.MarkClosed();
+        StateHasChanged();
+        if (returnFocus) _ = JsSafe.Run(() => Js.FocusAsync(_input));
+    }
+
+    private Task OnDismiss(OverlayDismissReason reason) => InvokeAsync(() => Close(returnFocus: reason == OverlayDismissReason.Escape));
+
+    private void ToggleAsync()
+    {
+        if (_open) Close(returnFocus: true);
+        else Show();
+    }
+
+    private async Task SetRangeAsync(DateRange? range)
+    {
+        Range = range;
+        await RangeChanged.InvokeAsync(range);
+    }
+
+    /// <summary>Picks a day as a click would.</summary>
+    public async Task PickAsync(DateOnly date)
+    {
+        if (!IsAllowed(date)) return;
+        _focused = date;
+        if (Selection == DateSelection.Single)
+        {
+            CurrentValue = date;
+            _text = null;
+            Close(returnFocus: !Inline);
+            return;
+        }
+        var next = CalendarModel.PickRange(_pending, date);
+        if (next.End is null)
+        {
+            _pending = next;
+            return;
+        }
+        _pending = null;
+        await SetRangeAsync(next);
+        _text = null;
+        Close(returnFocus: !Inline);
+    }
+
+    private bool PresetSelected(DatePreset preset)
+    {
+        var r = CalendarModel.Resolve(preset.Kind, Today);
+        return Selection == DateSelection.Range ? Range == r : Value is { } v && r.Start == v && (r.End ?? r.Start) == v;
+    }
+
+    private async Task ApplyPresetAsync(DatePreset preset)
+    {
+        var r = CalendarModel.Resolve(preset.Kind, Today);
+        if (Selection == DateSelection.Range) await SetRangeAsync(r);
+        else CurrentValue = r.Start;
+        JumpTo(r.Start);
+        _text = null;
+        Close(returnFocus: !Inline);
+    }
+
+    public async Task ClearAsync()
+    {
+        if (Selection == DateSelection.Range) await SetRangeAsync(null);
+        else CurrentValue = null;
+        _text = null;
+        await JsSafe.Run(() => Js.FocusAsync(_input));
+    }
+
+    private async Task CommitText()
+    {
+        var text = _text;
+        if (text is null) return;
+        _text = null;
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            if (Selection == DateSelection.Range) await SetRangeAsync(null);
+            else CurrentValue = null;
+            return;
+        }
+        if (Selection == DateSelection.Range)
+        {
+            var parts = System.Text.RegularExpressions.Regex.Split(text, @"\s*[–—]\s*|\s+-\s+|\s+to\s+", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            var start = DateText.Parse(parts[0], Pattern);
+            var end = parts.Length > 1 ? DateText.Parse(parts[1], Pattern) : null;
+            if (start is { } s && IsAllowed(s) && (end is null || (IsAllowed(end.Value) && end.Value >= s)))
+                await SetRangeAsync(new DateRange(s, end ?? s));
+            return;
+        }
+        if (DateText.Parse(text, Pattern) is { } date && IsAllowed(date) && date != Value) CurrentValue = date;
+    }
+
+    private async Task OnInputKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await CommitText();
+        else if (e.Key == "ArrowDown" && (e.AltKey || !_open)) Show();
+    }
+
+    private async Task OnGridKeyDown(KeyboardEventArgs e)
+    {
+        CalendarKey? key = e.Key switch
+        {
+            "ArrowLeft" => CalendarKey.Left,
+            "ArrowRight" => CalendarKey.Right,
+            "ArrowUp" => CalendarKey.Up,
+            "ArrowDown" => CalendarKey.Down,
+            "Home" => CalendarKey.Home,
+            "End" => CalendarKey.End,
+            "PageUp" => CalendarKey.PageUp,
+            "PageDown" => CalendarKey.PageDown,
+            _ => null,
+        };
+        if (key is { } k)
+        {
+            var next = CalendarModel.Navigate(_focused, k, e.ShiftKey, CalendarOptions);
+            JumpTo(next);
+            if (Selection == DateSelection.Range && _pending is not null) _hover = next;
+            _focusDay = true;
+        }
+        else if (e.Key is "Enter" or " ")
+        {
+            _focusDay = true;
+            await PickAsync(_focused);
+        }
+    }
+
+    private void ShiftMonth(int delta)
+    {
+        var first = new DateOnly(_view.Year, _view.Month, 1).AddMonths(delta);
+        _view = (first.Year, first.Month);
+        _focused = first;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !Inline) await JsSafe.Run(() => Js.PreventKeysAsync(_input, "Enter"));
+        if (_open && !_shown)
+        {
+            _shown = true;
+            await Overlay.ShowAsync(_control, _panel);
+        }
+        else if (!_open && _shown)
+        {
+            _shown = false;
+            await Overlay.HideAsync();
+        }
+        if (_open || Inline)
+            await JsSafe.Run(() => Js.PreventKeysAsync(_grid, "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown", "Space", "Enter"));
+        if (_focusDay && (_open || Inline))
+        {
+            _focusDay = false;
+            await JsSafe.Run(() => Js.FocusSelectorAsync(_panel, ".sl-calendar__day[tabindex=\"0\"]"));
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Dispose();
+        if (_overlay is not null) await _overlay.DisposeAsync();
+    }
+
+    private ElementReference _grid;
+
+    private RenderFragment Calendar() => __builder =>
+    {
+        var month = CalendarModel.Build(_view.Year, _view.Month, CalendarOptions);
+        var dtf = Culture.DateTimeFormat;
+        var title = new DateTime(_view.Year, _view.Month, 1).ToString(dtf.YearMonthPattern, Culture);
+        <div class="sl-calendar">
+            @if (Presets?.Any() == true)
+            {
+                <div class="sl-calendar__presets" role="group" aria-label="Presets">
+                    @foreach (var preset in Presets)
+                    {
+                        <button class="@(Css.Of("sl-calendar__preset").Add("is-selected", PresetSelected(preset)))" type="button" @onclick="() => ApplyPresetAsync(preset)">@preset.Label</button>
+                    }
+                </div>
+            }
+            <div class="sl-calendar__main">
+                <div class="sl-calendar__header">
+                    <button class="sl-button sl-button--ghost sl-tone-neutral sl-button--small sl-button--icon-only" type="button" aria-label="Previous month"
+                            @onclick="() => ShiftMonth(-1)"><SlIcon Name="chevron-left" /></button>
+                    <span class="sl-calendar__title" id="@TitleId" aria-live="polite">@title</span>
+                    <button class="sl-button sl-button--ghost sl-tone-neutral sl-button--small sl-button--icon-only" type="button" aria-label="Next month"
+                            @onclick="() => ShiftMonth(1)"><SlIcon Name="chevron-right" /></button>
+                </div>
+                <table @ref="_grid" class="sl-calendar__grid" role="grid" aria-labelledby="@TitleId" @onkeydown="OnGridKeyDown">
+                    <thead>
+                        <tr>
+                            @foreach (var w in month.Weekdays)
+                            {
+                                var shortName = dtf.AbbreviatedDayNames[(int)w];
+                                <th class="sl-calendar__weekday" scope="col" abbr="@dtf.DayNames[(int)w]">@(shortName.Length > 2 ? shortName[..2] : shortName)</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody @onpointerleave="() => _hover = null">
+                        @foreach (var week in month.Weeks)
+                        {
+                            <tr>
+                                @foreach (var day in week.Days)
+                                {
+                                    var d = day.Date;
+                                    <td class="sl-calendar__cell" role="gridcell" aria-selected="@(day.IsSelected ? "true" : "false")">
+                                        <button class="@DayClass(day)" type="button" tabindex="@(d == _focused ? 0 : -1)"
+                                                data-date="@d.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)"
+                                                aria-label="@d.ToDateTime(TimeOnly.MinValue).ToString("D", Culture)" aria-current="@(day.IsToday ? "date" : null)"
+                                                disabled="@day.IsDisabled" @onclick="() => PickAsync(d)"
+                                                @onpointerenter="() => { if (Selection == DateSelection.Range && _pending is not null) _hover = d; }">@d.Day</button>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    };
+
+    private static string DayClass(CalendarDay day) => Css.Of("sl-calendar__day").Add("is-outside", !day.InMonth).Add("is-today", day.IsToday)
+        .Add("is-selected", day.IsSelected).Add("is-range-start", day.IsRangeStart).Add("is-range-end", day.IsRangeEnd)
+        .Add("is-in-range", day.InRange && !day.IsSelected).Add("is-in-preview", day.InPreview && !day.IsSelected);
+}

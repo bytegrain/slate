@@ -1,0 +1,279 @@
+@inherits SlateTestContext
+
+@code {
+    // ---- tabs ------------------------------------------------------------------------------------------------
+
+    private string? _tab = "b";
+    private readonly List<string> _closed = [];
+
+    private IRenderedComponent<SlTabs> RenderTabs(TabsVariant variant = TabsVariant.Line, ControlSize size = ControlSize.Medium,
+        Direction direction = Direction.Row, bool keepAlive = false) => Render<SlTabs>(p => p
+        .Add(x => x.Variant, variant).Add(x => x.Size, size).Add(x => x.Direction, direction).Add(x => x.KeepAlive, keepAlive)
+        .Bind(x => x.Value, _tab, v => _tab = v)
+        .AddChildContent(@<text>
+            <SlTab Key="a" Label="Overview" Icon="home"><p id="pa">A</p></SlTab>
+            <SlTab Key="b" Label="Activity" Badge="3" Closable="true" Closed="k => _closed.Add(k)"><p id="pb">B</p></SlTab>
+            <SlTab Key="c" Label="Locked" Disabled="true"><p id="pc">C</p></SlTab>
+            <SlTab Key="d" Label="Settings"><p id="pd">D</p></SlTab>
+        </text>));
+
+    [Fact]
+    public void Tabs_render_the_contract_with_modifiers_on_each_tab()
+    {
+        var cut = RenderTabs(TabsVariant.Pills, ControlSize.Small);
+        Assert.Contains("sl-tabs--pills", cut.Find(".sl-tabs").ClassList);
+        var tabs = cut.FindAll(".sl-tab");
+        Assert.Equal(4, tabs.Count);
+        Assert.All(tabs, t => Assert.Contains("sl-tab--pills", t.ClassList));
+        Assert.All(tabs, t => Assert.Contains("sl-tab--small", t.ClassList));
+        Assert.Equal("tablist", cut.Find(".sl-tabs__list").GetAttribute("role"));
+        Assert.Equal("true", tabs[1].GetAttribute("aria-selected"));
+        Assert.Contains("is-selected", tabs[1].ClassList);
+        Assert.Equal(["-1", "0", "-1", "-1"], tabs.Select(t => t.GetAttribute("tabindex")));
+        Assert.Equal("3", tabs[1].QuerySelector(".sl-tab__badge")!.TextContent);
+        Assert.NotNull(tabs[0].QuerySelector(".sl-tab__icon"));
+        Assert.Contains("is-disabled", tabs[2].ClassList);
+        Assert.NotNull(cut.Find(".sl-tabs__indicator"));
+
+        var panel = cut.Find(".sl-tab-panel");
+        Assert.Equal(tabs[1].GetAttribute("aria-controls"), panel.Id);
+        Assert.Equal(tabs[1].Id, panel.GetAttribute("aria-labelledby"));
+        Assert.Single(cut.FindAll(".sl-tab-panel"));
+    }
+
+    [Fact]
+    public void Column_tabs_use_vertical_orientation()
+    {
+        var cut = RenderTabs(direction: Direction.Column);
+        Assert.Equal("vertical", cut.Find(".sl-tabs__list").GetAttribute("aria-orientation"));
+        Assert.Contains("sl-tabs--column", cut.Find(".sl-tabs").ClassList);
+        cut.Find(".sl-tabs__list").KeyDown("ArrowDown");
+        Assert.Equal("d", _tab);
+    }
+
+    [Theory]
+    [InlineData("ArrowRight", "d")] // skips the disabled tab
+    [InlineData("ArrowLeft", "a")]
+    [InlineData("Home", "a")]
+    [InlineData("End", "d")]
+    public void Tab_keys_select_with_automatic_activation(string key, string expected)
+    {
+        var cut = RenderTabs();
+        cut.Find(".sl-tabs__list").KeyDown(key);
+        Assert.Equal(expected, _tab);
+        Assert.NotNull(cut.Find($"#p{expected}"));
+    }
+
+    [Fact]
+    public void Delete_closes_a_closable_tab_and_selects_a_neighbour()
+    {
+        var cut = RenderTabs();
+        cut.Find(".sl-tabs__list").KeyDown("Delete");
+        Assert.Equal(["b"], _closed);
+        Assert.NotEqual("b", _tab);
+    }
+
+    [Fact]
+    public void Keep_alive_keeps_inactive_panels_hidden_in_the_dom()
+    {
+        var cut = RenderTabs(keepAlive: true);
+        Assert.Equal(4, cut.FindAll(".sl-tab-panel").Count);
+        Assert.True(cut.Find("#pa").ParentElement!.HasAttribute("hidden"));
+    }
+
+    // ---- breadcrumbs -----------------------------------------------------------------------------------------
+
+    private static readonly BreadcrumbItem[] Trail =
+        [new("Home", "/", "home"), new("Projects", "/p"), new("Slate", "/p/s"), new("Components", "/p/s/c"), new("Button")];
+
+    [Fact]
+    public void Breadcrumbs_mark_the_last_item_as_current()
+    {
+        var cut = Render<SlBreadcrumbs>(p => p.Add(x => x.Items, Trail));
+        Assert.Equal("Breadcrumb", cut.Find("nav").GetAttribute("aria-label"));
+        Assert.Equal(5, cut.FindAll(".sl-breadcrumbs__item").Count);
+        Assert.Equal(4, cut.FindAll(".sl-breadcrumbs__separator").Count);
+        Assert.Equal("page", cut.Find(".sl-breadcrumbs__current").GetAttribute("aria-current"));
+        Assert.Equal("Button", cut.Find(".sl-breadcrumbs__current").TextContent.Trim());
+        Assert.Equal("/p", cut.FindAll("a.sl-breadcrumbs__link")[1].GetAttribute("href"));
+    }
+
+    [Fact]
+    public void Breadcrumbs_collapse_to_the_first_and_last_max_minus_one()
+    {
+        BreadcrumbClickEventArgs? clicked = null;
+        var cut = Render<SlBreadcrumbs>(p => p.Add(x => x.Items, Trail).Add(x => x.MaxItems, 3)
+            .Add(x => x.ItemClick, (BreadcrumbClickEventArgs e) => clicked = e));
+        var labels = cut.FindAll(".sl-breadcrumbs__link:not(.sl-breadcrumbs__more), .sl-breadcrumbs__current")
+            .Where(e => e.Closest(".sl-menu__panel") is null).Select(e => e.TextContent.Trim()).ToList();
+        Assert.Equal(["Home", "Components", "Button"], labels);
+        Assert.Equal("Show 2 more", cut.Find(".sl-breadcrumbs__more").GetAttribute("aria-label"));
+
+        cut.Find(".sl-breadcrumbs__more").Click();
+        var hidden = cut.FindAll(".sl-menu-item");
+        Assert.Equal(["Projects", "Slate"], hidden.Select(h => h.TextContent.Trim()));
+        hidden[1].Click();
+        Assert.Equal(2, clicked!.Index);
+    }
+
+    // ---- pagination ------------------------------------------------------------------------------------------
+
+    [Fact]
+    public void Pagination_renders_pages_with_ellipses()
+    {
+        var page = 6;
+        var cut = Render<SlPagination>(p => p.Add(x => x.PageCount, 12).Bind(x => x.Page, page, v => page = v));
+        var items = cut.FindAll(".sl-pagination__pages > li").Select(li => li.TextContent.Trim()).ToList();
+        Assert.Equal(["", "1", "…", "5", "6", "7", "…", "12", ""], items);
+        Assert.Equal("page", cut.Find("[aria-current]").GetAttribute("aria-current"));
+        Assert.Equal("Page 6", cut.Find("[aria-current]").GetAttribute("aria-label"));
+
+        cut.Find("[aria-label='Next page']").Click();
+        Assert.Equal(7, page);
+        cut.Find("[aria-label='Page 12']").Click();
+        Assert.Equal(12, page);
+        Assert.True(cut.Find("[aria-label='Next page']").HasAttribute("disabled"));
+    }
+
+    [Fact]
+    public void Pagination_derives_pages_from_total_and_changes_page_size()
+    {
+        int page = 3; int? size = 10;
+        var cut = Render<SlPagination>(p => p.Add(x => x.TotalCount, 95).Add(x => x.PageSizes, new[] { 10, 25, 50 })
+            .Bind(x => x.Page, page, v => page = v).Bind(x => x.PageSize, size, v => size = v));
+        Assert.Equal("Page 10", cut.FindAll(".sl-pagination__page").SkipLast(1).Last().GetAttribute("aria-label"));
+        Assert.Contains("21", cut.Find(".sl-pagination__summary").TextContent);
+
+        cut.Find(".sl-pagination__select").Change("25");
+        Assert.Equal(25, size);
+        Assert.Equal(1, page); // first item (21) is on page 1 of 25
+    }
+
+    // ---- tree view -------------------------------------------------------------------------------------------
+
+    public sealed record Node(string Name, string? Icon = null, params Node[] Children);
+
+    private static readonly Node[] Repo =
+    [
+        new("src", "folder",
+            new Node("Slate.Core", "folder", new Node("TreeModel.cs"), new Node("Calendar.cs")),
+            new Node("Slate.Blazor", "folder", new Node("SlTreeView.razor"))),
+        new("README.md", "file"),
+    ];
+
+    private IRenderedComponent<SlTreeView<Node>> RenderTreeView(TreeSelectionMode mode = TreeSelectionMode.Single, string? filter = null,
+        IReadOnlyCollection<Node>? expanded = null, Action<IReadOnlyCollection<Node>>? selected = null, Action<Node>? activated = null) =>
+        Render<SlTreeView<Node>>(p => p.Add(x => x.Items, Repo).Add(x => x.ChildrenSelector, n => n.Children).Add(x => x.ItemText, n => n.Name)
+            .Add(x => x.ItemIcon, n => n.Icon).Add(x => x.SelectionMode, mode).Add(x => x.Filter, filter).Add(x => x.Expanded, expanded)
+            .Add(x => x.SelectedItemsChanged, s => selected?.Invoke(s)).Add(x => x.ItemActivated, n => activated?.Invoke(n)));
+
+    [Fact]
+    public void Tree_renders_the_contract()
+    {
+        var cut = RenderTreeView(expanded: [Repo[0]]);
+        Assert.Equal("tree", cut.Find(".sl-tree").GetAttribute("role"));
+        Assert.Contains("sl-tree--single", cut.Find(".sl-tree").ClassList);
+        var src = cut.Find(".sl-tree__item");
+        Assert.Equal("treeitem", src.GetAttribute("role"));
+        Assert.Equal("true", src.GetAttribute("aria-expanded"));
+        Assert.Equal("1", src.GetAttribute("aria-level"));
+        Assert.Equal("2", src.GetAttribute("aria-setsize"));
+        Assert.Equal("0", src.GetAttribute("tabindex"));
+        Assert.Equal("group", src.QuerySelector(".sl-tree__children")!.GetAttribute("role"));
+        var core = src.QuerySelector(".sl-tree__children > .sl-tree__item")!;
+        Assert.Equal("2", core.GetAttribute("aria-level"));
+        Assert.Equal("--_depth:1", core.QuerySelector(".sl-tree__row")!.GetAttribute("style"));
+        Assert.Equal("false", core.GetAttribute("aria-expanded"));
+        var readme = cut.FindAll(".sl-tree > .sl-tree__item")[1];
+        Assert.Null(readme.GetAttribute("aria-expanded"));
+        Assert.Contains("is-leaf", readme.QuerySelector(".sl-tree__expander")!.ClassList);
+    }
+
+    [Fact]
+    public void Tree_keys_follow_the_aria_pattern()
+    {
+        var cut = RenderTreeView();
+        var tree = cut.Find(".sl-tree");
+        tree.KeyDown("ArrowRight"); // expand src
+        Assert.Equal("true", cut.Find(".sl-tree__item").GetAttribute("aria-expanded"));
+        cut.Find(".sl-tree").KeyDown("ArrowRight"); // to first child
+        Assert.Equal("Slate.Core", cut.Find(".sl-tree__item[tabindex='0'] .sl-tree__label").TextContent);
+        cut.Find(".sl-tree").KeyDown("*"); // expand siblings
+        Assert.Equal(3, cut.FindAll(".sl-tree__item[aria-expanded='true']").Count);
+        cut.Find(".sl-tree").KeyDown("ArrowLeft"); // collapse Slate.Core
+        cut.Find(".sl-tree").KeyDown("ArrowLeft"); // to parent
+        Assert.Equal("src", cut.Find(".sl-tree__item[tabindex='0'] > .sl-tree__row .sl-tree__label").TextContent);
+        cut.Find(".sl-tree").KeyDown("End");
+        Assert.Equal("README.md", cut.Find(".sl-tree__item[tabindex='0'] .sl-tree__label").TextContent);
+    }
+
+    [Fact]
+    public void Tree_typeahead_and_enter_activate()
+    {
+        Node? activated = null;
+        IReadOnlyCollection<Node>? selected = null;
+        var cut = RenderTreeView(selected: s => selected = s, activated: n => activated = n);
+        cut.Find(".sl-tree").KeyDown("r");
+        cut.Find(".sl-tree").KeyDown("Enter");
+        Assert.Equal("README.md", activated?.Name);
+        Assert.Equal(["README.md"], selected!.Select(n => n.Name));
+        Assert.Equal("true", cut.FindAll(".sl-tree > .sl-tree__item")[1].GetAttribute("aria-selected"));
+    }
+
+    [Fact]
+    public void Multi_select_extends_with_shift_and_toggles_with_ctrl()
+    {
+        IReadOnlyCollection<Node>? selected = null;
+        var cut = RenderTreeView(TreeSelectionMode.Multi, expanded: [Repo[0]], selected: s => selected = s);
+        Assert.Equal("true", cut.Find(".sl-tree").GetAttribute("aria-multiselectable"));
+        var rows = cut.FindAll(".sl-tree__row");
+        rows[0].Click();
+        cut.FindAll(".sl-tree__row")[2].Click(new MouseEventArgs { ShiftKey = true });
+        Assert.Equal(["src", "Slate.Core", "Slate.Blazor"], selected!.Select(n => n.Name));
+        cut.FindAll(".sl-tree__row")[1].Click(new MouseEventArgs { CtrlKey = true });
+        Assert.Equal(["src", "Slate.Blazor"], selected!.Select(n => n.Name));
+    }
+
+    [Fact]
+    public void Checkbox_mode_propagates_tri_state()
+    {
+        IReadOnlyCollection<Node>? selected = null;
+        var cut = RenderTreeView(TreeSelectionMode.Checkbox, expanded: [Repo[0], Repo[0].Children[0]], selected: s => selected = s);
+        Assert.Contains("sl-tree--checkbox", cut.Find(".sl-tree").ClassList);
+        // Check TreeModel.cs: Slate.Core and src become indeterminate.
+        cut.FindAll(".sl-tree__row")[2].Click();
+        Assert.Equal("indeterminate", cut.FindAll(".sl-tree__checkbox")[1].GetAttribute("data-state"));
+        Assert.Equal("mixed", cut.Find(".sl-tree__item").GetAttribute("aria-checked"));
+        cut.FindAll(".sl-tree__row")[3].Click(); // Calendar.cs completes Slate.Core
+        Assert.Equal("checked", cut.FindAll(".sl-tree__checkbox")[1].GetAttribute("data-state"));
+        Assert.Contains(selected!, n => n.Name == "Slate.Core");
+    }
+
+    [Fact]
+    public void Filter_keeps_ancestors_expands_them_and_highlights()
+    {
+        var cut = RenderTreeView(filter: "calen");
+        var labels = cut.FindAll(".sl-tree__label").Select(l => l.TextContent).ToList();
+        Assert.Equal(["src", "Slate.Core", "Calendar.cs"], labels);
+        Assert.Equal("Calen", cut.Find(".sl-tree__label mark").TextContent);
+
+        var none = RenderTreeView(filter: "zzz");
+        Assert.Equal("No matches", none.Find(".sl-tree__empty").TextContent);
+    }
+
+    [Fact]
+    public async Task Lazy_children_load_on_first_expand()
+    {
+        var gate = new TaskCompletionSource<IEnumerable<string>>();
+        var cut = Render<SlTreeView<string>>(p => p.Add(x => x.Items, new[] { "root" }).Add(x => x.HasChildren, s => s == "root")
+            .Add(x => x.LoadChildren, _ => gate.Task));
+        Assert.Equal("false", cut.Find(".sl-tree__item").GetAttribute("aria-expanded"));
+        cut.Find(".sl-tree__expander").Click();
+        Assert.Equal("true", cut.Find(".sl-tree__item").GetAttribute("aria-busy"));
+        Assert.NotNull(cut.Find(".sl-tree__spinner"));
+
+        await cut.InvokeAsync(() => gate.SetResult(["a", "b"]));
+        cut.WaitForAssertion(() => Assert.Equal(3, cut.FindAll(".sl-tree__item").Count));
+        Assert.Null(cut.Find(".sl-tree__item").GetAttribute("aria-busy"));
+    }
+}

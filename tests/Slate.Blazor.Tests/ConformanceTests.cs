@@ -42,12 +42,44 @@ public class ConformanceTests
         ["Stack"] = typeof(SlStack),
         ["SnackbarHost"] = typeof(SlSnackbarHost),
         ["Dialog"] = typeof(SlDialog),
+        ["Select"] = typeof(SlSelect<string>),
+        ["Menu"] = typeof(SlMenu),
+        ["Tabs"] = typeof(SlTabs),
+        ["Tooltip"] = typeof(SlTooltip),
+        ["Popover"] = typeof(SlPopover),
+        ["DatePicker"] = typeof(SlDatePicker),
+        ["TreeView"] = typeof(SlTreeView<string>),
+        ["SegmentedControl"] = typeof(SlSegmented<string>),
+        ["Slider"] = typeof(SlSlider),
+        ["Avatar"] = typeof(SlAvatar),
+        ["Breadcrumbs"] = typeof(SlBreadcrumbs),
+        ["Pagination"] = typeof(SlPagination),
+        ["Skeleton"] = typeof(SlSkeleton),
+    };
+
+    /// <summary>Canonical item spec ("item" in components.json) → Blazor child component type.</summary>
+    public static readonly Dictionary<string, Type> ItemComponents = new()
+    {
+        ["Menu"] = typeof(SlMenuItem),
+        ["Tabs"] = typeof(SlTab),
+    };
+
+    /// <summary>
+    /// Per-component renames forced by Razor. SlTooltip's ChildContent is the anchor it wraps (so a tooltip reads
+    /// <c>&lt;SlTooltip Text="…"&gt;&lt;SlButton/&gt;&lt;/SlTooltip&gt;</c>); the canonical rich Content is TooltipContent.
+    /// </summary>
+    private static readonly Dictionary<(string, string), string> Renames = new()
+    {
+        [("Tooltip", "Content")] = "TooltipContent",
     };
 
     public static TheoryData<string> ComponentNames => new(Api["components"]!.AsObject().Where(kv => kv.Value?["status"]?.GetValue<string>() != "planned").Select(kv => kv.Key));
 
     /// <summary>Blazor's one fixed spelling: the default content region is ChildContent (Razor needs it for inline content).</summary>
     private static string BlazorName(string canonical) => canonical == "Content" ? "ChildContent" : canonical;
+
+    private static string BlazorName(string component, string canonical) =>
+        Renames.TryGetValue((component, canonical), out var renamed) ? renamed : BlazorName(canonical);
 
     private static IEnumerable<(string Name, JsonObject Spec)> Options(string component) =>
         Api["components"]![component]!["options"]!.AsObject()
@@ -65,7 +97,7 @@ public class ConformanceTests
         var missing = new List<string>();
         foreach (var (name, spec) in Options(component))
         {
-            var prop = type.GetProperty(BlazorName(name), BindingFlags.Public | BindingFlags.Instance);
+            var prop = type.GetProperty(BlazorName(component, name), BindingFlags.Public | BindingFlags.Instance);
             if (prop is null || prop.GetCustomAttribute<ParameterAttribute>() is null)
             {
                 missing.Add(name);
@@ -77,7 +109,8 @@ public class ConformanceTests
             switch (kind)
             {
                 case "slot":
-                    Assert.True(t == typeof(RenderFragment), $"{component}.{name} must be a RenderFragment, is {t.Name}.");
+                    Assert.True(t == typeof(RenderFragment) || (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(RenderFragment<>)),
+                        $"{component}.{name} must be a RenderFragment, is {t.Name}.");
                     break;
                 case "event":
                     Assert.True(t == typeof(EventCallback) || (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(EventCallback<>)),
@@ -103,10 +136,20 @@ public class ConformanceTests
             var core = typeof(Tone).Assembly.GetType($"Slate.{typeName}") ?? typeof(Tone).Assembly.GetType($"Slate.Dialogs.{typeName}")
                        ?? typeof(Tone).Assembly.GetType($"Slate.Snackbars.{typeName}");
             if (core is null) continue; // e.g. Severity lives in Slate too; non-enum JSON vocab like ContainerWidth all exist
-            var prop = Components[component].GetProperty(BlazorName(name))!;
+            var prop = Components[component].GetProperty(BlazorName(component, name))!;
             var actual = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
             Assert.True(actual == core, $"{component}.{name} should use {core.FullName}, uses {actual.FullName}.");
         }
+    }
+
+    [Theory, MemberData(nameof(ComponentNames))]
+    public void Every_item_option_is_a_parameter_of_the_item_component(string component)
+    {
+        if (Api["components"]![component]!["item"] is not JsonObject item) return;
+        Assert.True(ItemComponents.TryGetValue(component, out var type), $"No Blazor item component mapped for '{component}'.");
+        var missing = item.Select(kv => kv.Key)
+            .Where(name => type!.GetProperty(BlazorName(name))?.GetCustomAttribute<ParameterAttribute>() is null).ToList();
+        Assert.True(missing.Count == 0, $"{component} item ({type!.Name}) is missing: {string.Join(", ", missing)}");
     }
 
     [Fact]

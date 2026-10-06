@@ -1,0 +1,140 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@implements IAsyncDisposable
+@inject OverlayManager Overlays
+@inject SlateJs Js
+@inject SlateOptions Options
+@*
+  Tooltip (docs/design/css-classes.md#tooltip). ChildContent is the anchor (as the web default slot); rich content
+  goes in TooltipContent. Shows after Delay on hover/focus (immediately within 400 ms of another tooltip hiding),
+  hides on leave, blur, pointer-down and Escape. The anchor gets aria-description (WCAG 1.4.13).
+*@
+<span @attributes="AdditionalAttributes" class="@(new Css().Add(Class).ToString() is { Length: > 0 } c ? c : null)" style="@Style"
+      @onpointerenter="ScheduleShow" @onpointerleave="Hide" @onfocusin="ScheduleShow" @onfocusout="Hide" @onpointerdown="Hide">
+    <span class="sl-tooltip__anchor" @ref="_anchor">@ChildContent</span>
+    <div @ref="_bubble" id="@BubbleId" class="sl-tooltip" role="tooltip" data-placement="@Names.Kebab(Placement.ToString())" popover="manual" hidden="@(!_visible)">
+        @Text@TooltipContent@if (Shortcut is not null)
+        {
+            <kbd class="sl-kbd">@Shortcut</kbd>
+        }
+    </div>
+</span>
+
+@code {
+    /// <summary>The anchor (the element the tooltip describes).</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public string? Text { get; set; }
+
+    /// <summary>Rich tooltip content (canonical <c>Content</c>; Blazor's ChildContent is the anchor).</summary>
+    [Parameter] public RenderFragment? TooltipContent { get; set; }
+
+    [Parameter] public string? Shortcut { get; set; }
+
+    [Parameter] public PopoverPlacement Placement { get; set; } = PopoverPlacement.Top;
+
+    /// <summary>Milliseconds before showing on hover/focus.</summary>
+    [Parameter] public int Delay { get; set; } = 500;
+
+    [Parameter] public bool Disabled { get; set; }
+
+    private const int WarmWindowMs = 400;
+    private ElementReference _anchor;
+    private ElementReference _bubble;
+    private OverlayHandle? _overlay;
+    private CancellationTokenSource? _timer;
+    private bool _visible;
+    private bool _shown;
+    private string? _described;
+
+    private string BubbleId => $"{UniqueId}-tip";
+
+    /// <summary>Whether the tooltip is showing.</summary>
+    public bool Visible => _visible;
+
+    private OverlayHandle Overlay => _overlay ??= new OverlayHandle(Overlays, Js, _ => InvokeAsync(Hide));
+
+    private bool HasContent => !string.IsNullOrEmpty(Text) || TooltipContent is not null;
+
+    private string? Description => string.IsNullOrEmpty(Text) ? null : Shortcut is null ? Text : $"{Text} ({Shortcut})";
+
+    protected override void OnParametersSet()
+    {
+        Overlay.Placement = Placement;
+        Overlay.Offset = 6;
+        if (Disabled && _visible) Hide();
+    }
+
+    /// <summary>Shows immediately (ignores Delay).</summary>
+    public void Show()
+    {
+        if (Disabled || !HasContent) return;
+        CancelTimer();
+        if (_visible) return;
+        _visible = true;
+        Overlay.MarkOpen();
+        StateHasChanged();
+    }
+
+    public void Hide()
+    {
+        CancelTimer();
+        if (!_visible) return;
+        _visible = false;
+        Overlays.LastTooltipHidden = Options.TimeProvider.GetUtcNow();
+        Overlay.MarkClosed();
+        StateHasChanged();
+    }
+
+    private async Task ScheduleShow()
+    {
+        if (Disabled || !HasContent || _visible) return;
+        CancelTimer();
+        var warm = Options.TimeProvider.GetUtcNow() - Overlays.LastTooltipHidden < TimeSpan.FromMilliseconds(WarmWindowMs);
+        var wait = warm ? 0 : Math.Max(0, Delay);
+        if (wait == 0)
+        {
+            Show();
+            return;
+        }
+        var cts = _timer = new CancellationTokenSource();
+        try
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(wait), Options.TimeProvider, cts.Token);
+            Show();
+        }
+        catch (TaskCanceledException) { }
+    }
+
+    private void CancelTimer()
+    {
+        _timer?.Cancel();
+        _timer?.Dispose();
+        _timer = null;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_described != Description)
+        {
+            _described = Description;
+            await JsSafe.Run(() => Js.SetAnchorAriaAsync(_anchor, new Dictionary<string, string?> { ["aria-description"] = Description }));
+        }
+        if (_visible && !_shown)
+        {
+            _shown = true;
+            await Overlay.ShowAsync(_anchor, _bubble);
+        }
+        else if (!_visible && _shown)
+        {
+            _shown = false;
+            await Overlay.HideAsync();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        CancelTimer();
+        if (_overlay is not null) await _overlay.DisposeAsync();
+    }
+}

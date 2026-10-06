@@ -13,3 +13,17 @@ public enum ButtonType { Button, Submit, Reset }
 
 /// <summary>Badge sizes (badges have no large size).</summary>
 public enum BadgeSize { Small, Medium }
+
+/// <summary>Presence dot on an <c>SlAvatar</c>.</summary>
+public enum AvatarStatus { Online, Away, Busy, Offline }
+
+public enum SkeletonShape { Text, Rect, Circle }
+
+/// <summary>One crumb of <c>SlBreadcrumbs</c>. The last item is the current page.</summary>
+public sealed record BreadcrumbItem(string Label, string? Href = null, string? Icon = null);
+
+/// <summary><c>SlBreadcrumbs.ItemClick</c> payload.</summary>
+public sealed record BreadcrumbClickEventArgs(BreadcrumbItem Item, int Index);
+
+/// <summary><c>SlMenuItem</c> activation payload (also raised on the owning <c>SlMenu.ItemSelected</c>).</summary>
+public sealed record MenuSelectEventArgs(string Label, string? Value, bool? Checked);

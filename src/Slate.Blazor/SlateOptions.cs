@@ -48,6 +48,7 @@ public static class SlateServiceCollectionExtensions
         services.TryAddScoped<ISnackbarService, SnackbarService>();
         services.TryAddScoped<IDialogService, DialogService>();
         services.TryAddScoped<SlateJs>();
+        services.TryAddScoped<OverlayManager>();
         return services;
     }
 }

@@ -50,3 +50,11 @@ h1:focus { outline: none; }
 .demo-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sl-space-3); }
 .demo-controls > .demo-span { grid-column: 1 / -1; }
 @media (max-width: 900px) { .demo-playground { grid-template-columns: minmax(0, 1fr); } }
+
+/* Wave-2 demo pages */
+.demo-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--sl-space-3); align-items: end; }
+.demo-surface { min-height: 120px; display: grid; place-items: center; border: 1px dashed var(--sl-color-border-strong); border-radius: var(--sl-radius-lg);
+  color: var(--sl-color-text-tertiary); font-size: var(--sl-font-size-sm); user-select: none; }
+.demo-tree { max-height: 360px; overflow: auto; border: 1px solid var(--sl-color-border-default); border-radius: var(--sl-radius-lg); padding: var(--sl-space-1); }
+.demo-skeleton-card { display: flex; gap: var(--sl-space-3); align-items: center; }
+.demo-labelled { display: flex; flex-direction: column; gap: var(--sl-space-1); align-items: flex-start; }

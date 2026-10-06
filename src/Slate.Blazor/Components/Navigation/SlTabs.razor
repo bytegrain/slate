@@ -1,0 +1,172 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@inject SlateJs Js
+@*
+  Tabs (docs/design/css-classes.md#tabs). WAI-ARIA tabs with automatic activation: ←/→ (↑/↓ in a column) move and
+  select, Home/End jump, Delete closes a closable tab. Variant/size/column modifiers are on every .sl-tab too.
+  Inactive panels are removed unless KeepAlive.
+*@
+<CascadingValue Value="this" IsFixed="true">@ChildContent</CascadingValue>
+<div @attributes="AdditionalAttributes" @ref="_root" class="@CssClass" style="@Style">
+    <div class="sl-tabs__bar">
+        <div class="sl-tabs__list" role="tablist" aria-label="@Label" aria-orientation="@(Direction == Direction.Column ? "vertical" : "horizontal")"
+             @onkeydown="OnKeyDown">
+            @foreach (var tab in _tabs)
+            {
+                var selected = tab.TabKey == SelectedKey;
+                <div @attributes="tab.ExtraAttributes" id="@tab.TabId" class="@TabClass(tab, selected)" style="@tab.ExtraStyle"
+                     role="tab" aria-selected="@(selected ? "true" : "false")" aria-controls="@tab.PanelId"
+                     aria-disabled="@(tab.Disabled ? "true" : null)" tabindex="@(selected ? 0 : -1)"
+                     @onclick="() => SelectAsync(tab)">
+                    @if (tab.Icon is not null)
+                    {
+                        <span class="sl-tab__icon"><SlIcon Name="@tab.Icon" /></span>
+                    }
+                    <span class="sl-tab__label">@(tab.Header ?? (RenderFragment)(b => b.AddContent(0, tab.Label)))</span>
+                    @if (tab.Badge is not null)
+                    {
+                        <span class="sl-tab__badge">@tab.Badge</span>
+                    }
+                    @if (tab.Closable)
+                    {
+                        <button class="sl-tab__close" type="button" tabindex="-1" aria-label="@($"Close {tab.Label ?? tab.TabKey}")"
+                                @onclick="() => CloseAsync(tab)" @onclick:stopPropagation="true"><SlIcon Name="x" /></button>
+                    }
+                </div>
+            }
+            <span class="sl-tabs__indicator" aria-hidden="true"></span>
+        </div>
+        <div class="sl-tabs__overflow" hidden>
+            <button class="sl-button sl-button--ghost sl-tone-neutral sl-button--small sl-button--icon-only" type="button" aria-label="Scroll tabs left"
+                    @onclick="() => ScrollAsync(-1)"><SlIcon Name="chevron-left" /></button>
+            <button class="sl-button sl-button--ghost sl-tone-neutral sl-button--small sl-button--icon-only" type="button" aria-label="Scroll tabs right"
+                    @onclick="() => ScrollAsync(1)"><SlIcon Name="chevron-right" /></button>
+        </div>
+    </div>
+    <div class="sl-tabs__panels">
+        @foreach (var tab in _tabs)
+        {
+            var selected = tab.TabKey == SelectedKey;
+            @if (selected || KeepAlive)
+            {
+                <div id="@tab.PanelId" class="@(Css.Of("sl-tab-panel").Add("sl-tab-panel--column", Direction == Direction.Column))" role="tabpanel"
+                     aria-labelledby="@tab.TabId" tabindex="0" hidden="@(!selected)">@tab.ChildContent</div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>Key of the selected tab (two-way). Defaults to the first enabled tab.</summary>
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter] public TabsVariant Variant { get; set; } = TabsVariant.Line;
+    [Parameter] public ControlSize Size { get; set; } = ControlSize.Medium;
+    [Parameter] public Direction Direction { get; set; } = Direction.Row;
+
+    /// <summary>Keep inactive panels rendered (hidden) so their state survives switching.</summary>
+    [Parameter] public bool KeepAlive { get; set; }
+
+    /// <summary>Accessible name of the tab list.</summary>
+    [Parameter] public string? Label { get; set; }
+
+    /// <summary><c>SlTab</c>s.</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private readonly List<SlTab> _tabs = [];
+    private ElementReference _root;
+    private bool _focusSelected;
+
+    public IReadOnlyList<SlTab> Tabs => _tabs;
+
+    /// <summary>The selected key: Value if it names an existing tab, else the first enabled tab.</summary>
+    public string? SelectedKey =>
+        _tabs.FirstOrDefault(t => t.TabKey == Value)?.TabKey ?? _tabs.FirstOrDefault(t => !t.Disabled)?.TabKey;
+
+    private string CssClass => Css.Of("sl-tabs").Add(Names.Variant(Variant, "sl-tabs")).Add(Names.Size(Size, "sl-tabs"))
+        .Add("sl-tabs--column", Direction == Direction.Column).Add(Class);
+
+    private string TabClass(SlTab tab, bool selected) => Css.Of("sl-tab").Add(Names.Variant(Variant, "sl-tab")).Add(Names.Size(Size, "sl-tab"))
+        .Add("sl-tab--column", Direction == Direction.Column).Add("is-selected", selected).Add("is-disabled", tab.Disabled).Add(tab.ExtraClass);
+
+    internal void Register(SlTab tab)
+    {
+        if (_tabs.Contains(tab)) return;
+        _tabs.Add(tab);
+        StateHasChanged();
+    }
+
+    internal void Unregister(SlTab tab)
+    {
+        if (_tabs.Remove(tab)) InvokeAsync(StateHasChanged);
+    }
+
+    internal void TabChanged() => StateHasChanged();
+
+    public async Task SelectAsync(SlTab tab)
+    {
+        if (tab.Disabled || tab.TabKey == SelectedKey) return;
+        Value = tab.TabKey;
+        await ValueChanged.InvokeAsync(tab.TabKey);
+        StateHasChanged();
+    }
+
+    private async Task CloseAsync(SlTab tab)
+    {
+        var index = _tabs.IndexOf(tab);
+        var wasSelected = tab.TabKey == SelectedKey;
+        await tab.Closed.InvokeAsync(tab.TabKey);
+        if (wasSelected)
+        {
+            // Move the selection to a neighbour so the panel area never goes empty.
+            var neighbour = _tabs.Where(t => t != tab && !t.Disabled).OrderBy(t => Math.Abs(_tabs.IndexOf(t) - index)).FirstOrDefault();
+            if (neighbour is not null) await SelectAsync(neighbour);
+        }
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        var enabled = _tabs.Select(t => t.Disabled).ToList();
+        var current = _tabs.FindIndex(t => t.TabKey == SelectedKey);
+        ListKey? key = (e.Key, Direction) switch
+        {
+            ("ArrowRight", Direction.Row) or ("ArrowDown", Direction.Column) => ListKey.Next,
+            ("ArrowLeft", Direction.Row) or ("ArrowUp", Direction.Column) => ListKey.Previous,
+            ("Home", _) => ListKey.First,
+            ("End", _) => ListKey.Last,
+            _ => null,
+        };
+        if (key is { } k)
+        {
+            var next = ListNavigator.Move(current, k, enabled, new ListNavigationOptions { Wrap = true });
+            if (next >= 0)
+            {
+                _focusSelected = true;
+                await SelectAsync(_tabs[next]);
+                _focusSelected = true;
+                StateHasChanged();
+            }
+        }
+        else if (e.Key == "Delete" && current >= 0 && _tabs[current].Closable)
+        {
+            _focusSelected = true;
+            await CloseAsync(_tabs[current]);
+        }
+    }
+
+    private ValueTask ScrollAsync(int direction) => JsSafe.Run(() => Js.TabsScrollAsync(_root, direction));
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await JsSafe.Run(() => Js.PreventKeysAsync(_root, "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"));
+        await JsSafe.Run(() => Js.TabsMeasureAsync(_root));
+        if (_focusSelected)
+        {
+            _focusSelected = false;
+            if (_tabs.FirstOrDefault(t => t.TabKey == SelectedKey) is { } tab)
+                await JsSafe.Run(() => Js.FocusIdAsync(tab.TabId));
+        }
+    }
+}

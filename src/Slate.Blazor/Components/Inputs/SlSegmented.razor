@@ -1,0 +1,107 @@
+@namespace Slate.Blazor
+@typeparam T
+@inherits SlComponentBase
+@inject SlateJs Js
+@*
+  Segmented control (docs/design/css-classes.md#segmentedcontrol): a radio group of buttons with roving focus.
+  Arrows move focus and select; Home/End jump to the ends.
+*@
+<div @attributes="AdditionalAttributes" @ref="_root" class="@CssClass" style="@Style" role="radiogroup" aria-label="@Label"
+     aria-disabled="@(Disabled ? "true" : null)" @onkeydown="OnKeyDown">
+    @for (var i = 0; i < _items.Count; i++)
+    {
+        var item = _items[i];
+        var index = i;
+        var selected = IsSelected(item);
+        <button id="@($"{UniqueId}-{index}")" class="@(Css.Of("sl-segmented__item").Add("is-selected", selected))" type="button" role="radio"
+                aria-checked="@(selected ? "true" : "false")" tabindex="@(index == TabStop ? 0 : -1)" disabled="@(Disabled || IsItemDisabled(item))"
+                @onclick="() => ChooseAsync(item)">
+            @if (ItemIcon?.Invoke(item) is { } icon)
+            {
+                <SlIcon Name="@icon" />
+            }
+            @TextOf(item)
+        </button>
+    }
+</div>
+
+@code {
+    [Parameter] public IEnumerable<T>? Items { get; set; }
+
+    [Parameter] public T? Value { get; set; }
+    [Parameter] public EventCallback<T?> ValueChanged { get; set; }
+
+    [Parameter] public Func<T, string>? ItemText { get; set; }
+    [Parameter] public Func<T, string?>? ItemIcon { get; set; }
+    [Parameter] public Func<T, bool>? ItemDisabled { get; set; }
+
+    [Parameter] public ControlSize Size { get; set; } = ControlSize.Medium;
+
+    /// <summary>Stretch to fill the row, segments sharing the width.</summary>
+    [Parameter] public bool FullWidth { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    /// <summary>Accessible name of the group.</summary>
+    [Parameter] public string? Label { get; set; }
+
+    private List<T> _items = [];
+    private ElementReference _root;
+    private int _focus = -1;
+
+    protected override void OnParametersSet() => _items = Items?.ToList() ?? [];
+
+    private string CssClass => Css.Of("sl-segmented").Add(Names.Size(Size, "sl-segmented")).Add("sl-segmented--full", FullWidth)
+        .Add("is-disabled", Disabled).Add(Class);
+
+    private string TextOf(T item) => ItemText?.Invoke(item) ?? item?.ToString() ?? "";
+
+    private bool IsItemDisabled(T item) => ItemDisabled?.Invoke(item) ?? false;
+
+    private bool IsSelected(T item) => EqualityComparer<T>.Default.Equals(item, Value);
+
+    private int TabStop
+    {
+        get
+        {
+            var selected = _items.FindIndex(IsSelected);
+            return selected >= 0 ? selected : _items.FindIndex(i => !IsItemDisabled(i));
+        }
+    }
+
+    private async Task ChooseAsync(T item)
+    {
+        if (Disabled || IsItemDisabled(item) || IsSelected(item)) return;
+        Value = item;
+        await ValueChanged.InvokeAsync(item);
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (Disabled) return;
+        ListKey? key = e.Key switch
+        {
+            "ArrowRight" or "ArrowDown" => ListKey.Next,
+            "ArrowLeft" or "ArrowUp" => ListKey.Previous,
+            "Home" => ListKey.First,
+            "End" => ListKey.Last,
+            _ => null,
+        };
+        if (key is not { } k) return;
+        var next = ListNavigator.Move(TabStop, k, _items.Select(IsItemDisabled).ToList(), new ListNavigationOptions { Wrap = true });
+        if (next < 0) return;
+        _focus = next;
+        await ChooseAsync(_items[next]);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) await JsSafe.Run(() => Js.PreventKeysAsync(_root, "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"));
+        if (_focus >= 0)
+        {
+            var id = $"{UniqueId}-{_focus}";
+            _focus = -1;
+            await JsSafe.Run(() => Js.FocusIdAsync(id));
+        }
+    }
+}

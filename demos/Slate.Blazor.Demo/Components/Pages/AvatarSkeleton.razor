@@ -1,0 +1,79 @@
+@page "/avatar-skeleton"
+<PageTitle>Avatar &amp; skeleton · Slate</PageTitle>
+
+<div class="demo-page">
+    <PageHeader Title="Avatar &amp; skeleton">Avatars fall back to initials with a tone derived from the name. Skeletons hold layout while content loads.</PageHeader>
+
+    <SlGrid>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Avatar" Subtitle="Sizes, images with fallback, status and explicit tones">
+                <SlStack Spacing="4">
+                    <div class="demo-row">
+                        <SlAvatar Name="Ada Lovelace" Size="ControlSize.Small" />
+                        <SlAvatar Name="Alan Turing" />
+                        <SlAvatar Name="Grace Hopper" Size="ControlSize.Large" />
+                        <SlAvatar Name="Broken Image" Image="/does-not-exist.png" />
+                        <SlAvatar />
+                    </div>
+                    <div class="demo-row">
+                        @foreach (var status in Enum.GetValues<AvatarStatus>())
+                        {
+                            <SlAvatar Name="@($"{status} User")" Status="status" />
+                        }
+                    </div>
+                    <div class="demo-row">
+                        @foreach (var tone in new[] { Tone.Neutral, Tone.Accent, Tone.Success, Tone.Warning, Tone.Danger, Tone.Info })
+                        {
+                            <SlAvatar Name="@tone.ToString()" Tone="tone" />
+                        }
+                    </div>
+                    <SlAvatarGroup>
+                        @foreach (var name in Team)
+                        {
+                            <SlAvatar Name="@name" />
+                        }
+                    </SlAvatarGroup>
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Skeleton" Subtitle="Text, rect and circle; shimmer is off under reduced motion">
+                <SlStack Spacing="4">
+                    <div class="demo-row">
+                        <SlButton Size="ControlSize.Small" Click="() => _loading = !_loading">@(_loading ? "Show content" : "Show skeleton")</SlButton>
+                        <SlCheckbox @bind-Checked="_animated" Label="Animated" Size="ControlSize.Small" />
+                    </div>
+                    <div aria-busy="@(_loading ? "true" : "false")">
+                        @if (_loading)
+                        {
+                            <SlStack Spacing="3">
+                                <div class="demo-skeleton-card">
+                                    <SlSkeleton Shape="SkeletonShape.Circle" Width="40px" Height="40px" Animated="_animated" />
+                                    <SlStack Spacing="1" Style="flex: 1"><SlSkeleton Width="40%" Animated="_animated" /><SlSkeleton Width="25%" Animated="_animated" /></SlStack>
+                                </div>
+                                <SlSkeleton Shape="SkeletonShape.Rect" Height="120px" Animated="_animated" />
+                                <SlSkeleton Lines="3" Animated="_animated" />
+                            </SlStack>
+                        }
+                        else
+                        {
+                            <SlStack Spacing="3">
+                                <div class="demo-skeleton-card">
+                                    <SlAvatar Name="Grace Hopper" Status="AvatarStatus.Online" />
+                                    <SlStack Spacing="0"><SlText Typo="Typo.BodyStrong">Grace Hopper</SlText><SlText Typo="Typo.Caption" Tone="TextTone.Tertiary">Rear admiral · 2 min ago</SlText></SlStack>
+                                </div>
+                                <div class="demo-preview" style="height: 120px; display: grid; place-items: center"><SlText Tone="TextTone.Secondary">Chart goes here</SlText></div>
+                                <SlText Tone="TextTone.Secondary">The first compiler, COBOL, and the word “bug” for a moth in a relay. Nanoseconds explained with a length of wire.</SlText>
+                            </SlStack>
+                        }
+                    </div>
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+    </SlGrid>
+</div>
+
+@code {
+    private static readonly string[] Team = ["Ada Lovelace", "Alan Turing", "Grace Hopper", "Katherine Johnson", "Linus Torvalds", "Margaret Hamilton"];
+    private bool _loading = true, _animated = true;
+}

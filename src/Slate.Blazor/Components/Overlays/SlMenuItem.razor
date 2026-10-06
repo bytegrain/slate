@@ -1,0 +1,208 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@implements IAsyncDisposable
+@inject OverlayManager Overlays
+@inject SlateJs Js
+@inject SlateOptions Options
+@*
+  One menu entry (flat markup: role and .sl-menu-item on the same element). Checkable only when Checked is set
+  (menuitemcheckbox); a Submenu renders a nested .sl-menu__panel placed right-start.
+*@
+@if (Separator)
+{
+    <div @attributes="AdditionalAttributes" class="@(Css.Of("sl-menu-separator").Add(Class))" style="@Style" role="separator"></div>
+}
+else
+{
+    @if (Href is not null && !Disabled)
+    {
+        <a @attributes="AdditionalAttributes" @ref="_element" id="@ItemId" class="@CssClass" style="@Style" href="@Href" target="@Target"
+           role="@Role" tabindex="-1" aria-checked="@AriaChecked" aria-disabled="@(Disabled ? "true" : "false")"
+           @onclick="OnClick" @onpointerenter="OnPointerEnter" @onfocus="OnFocus">@Content</a>
+    }
+    else
+    {
+        <div @attributes="AdditionalAttributes" @ref="_element" id="@ItemId" class="@CssClass" style="@Style"
+             role="@Role" tabindex="-1" aria-checked="@AriaChecked" aria-disabled="@(Disabled ? "true" : "false")"
+             aria-haspopup="@(HasSubmenu ? "menu" : null)" aria-expanded="@(HasSubmenu ? (_submenuOpen ? "true" : "false") : null)"
+             aria-controls="@(HasSubmenu ? SubmenuId : null)"
+             @onclick="OnClick" @onpointerenter="OnPointerEnter" @onfocus="OnFocus">@Content</div>
+    }
+    @if (HasSubmenu)
+    {
+        <div @ref="_panel" id="@SubmenuId" class="sl-popover-panel sl-menu__panel" role="menu" aria-label="@Text"
+             data-placement="right-start" popover="manual" hidden="@(!_submenuOpen)"
+             @onkeydown="OnSubmenuKeyDown" @onkeydown:stopPropagation="true">
+            <CascadingValue Value="SubmenuList" IsFixed="true">@Submenu</CascadingValue>
+        </div>
+    }
+}
+
+@code {
+    [CascadingParameter] private MenuList? Parent { get; set; }
+
+    [Parameter] public string? Label { get; set; }
+
+    /// <summary>Custom label content (overrides <see cref="Label"/> visually; Label is still used for typeahead).</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public string? Shortcut { get; set; }
+    [Parameter] public Tone Tone { get; set; } = Tone.Neutral;
+    [Parameter] public bool Disabled { get; set; }
+
+    /// <summary>Null = not checkable. Set it (true/false) to render a menuitemcheckbox that toggles on activation.</summary>
+    [Parameter] public bool? Checked { get; set; }
+    [Parameter] public EventCallback<bool?> CheckedChanged { get; set; }
+
+    /// <summary>Nested <c>SlMenuItem</c>s shown in a submenu.</summary>
+    [Parameter] public RenderFragment? Submenu { get; set; }
+
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public string? Target { get; set; }
+
+    /// <summary>Free-form value passed to <c>SlMenu.ItemSelected</c>.</summary>
+    [Parameter] public string? Value { get; set; }
+
+    [Parameter] public bool Separator { get; set; }
+
+    [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
+
+    private ElementReference _element;
+    private ElementReference _panel;
+    private OverlayHandle? _overlay;
+    private MenuList? _submenuList;
+    private bool _submenuOpen;
+    private bool _shown;
+    private bool _focusFirstOnOpen;
+
+    internal string ItemId => ElementId;
+    private string SubmenuId => $"{UniqueId}-sub";
+
+    /// <summary>Text for typeahead and the submenu's accessible name.</summary>
+    public string Text => Label ?? "";
+
+    public bool HasSubmenu => Submenu is not null;
+
+    private MenuList SubmenuList => _submenuList ??= new MenuList(Parent?.Root ?? throw new InvalidOperationException("SlMenuItem must be inside an SlMenu."), this, Js, Options.TimeProvider);
+
+    private OverlayHandle Overlay => _overlay ??= new OverlayHandle(Overlays, Js, OnDismiss) { Placement = PopoverPlacement.RightStart, Offset = 2 };
+
+    private string Role => Checked is null ? "menuitem" : "menuitemcheckbox";
+
+    private string? AriaChecked => Checked is { } c ? (c ? "true" : "false") : null;
+
+    private string CssClass => Css.Of("sl-menu-item").Add(Names.Tone(Tone)).Add("is-checked", Checked == true).Add("is-disabled", Disabled)
+        .Add("is-expanded", _submenuOpen).Add(Class);
+
+    private RenderFragment Content => @<text>
+        @if (Checked is not null)
+        {
+            <span class="sl-menu-item__check"><SlIcon Name="check" /></span>
+        }
+        @if (Icon is not null)
+        {
+            <span class="sl-menu-item__icon"><SlIcon Name="@Icon" /></span>
+        }
+        <span class="sl-menu-item__label">@(ChildContent ?? (RenderFragment)(b => b.AddContent(0, Label)))</span>
+        @if (Shortcut is not null)
+        {
+            <kbd class="sl-menu-item__shortcut">@Shortcut</kbd>
+        }
+        @if (HasSubmenu)
+        {
+            <span class="sl-menu-item__chevron"><SlIcon Name="chevron-right" /></span>
+        }
+    </text>;
+
+    protected override void OnInitialized() => Parent?.Register(this);
+
+    /// <summary>Activates the item as a click or Enter/Space would.</summary>
+    public async Task ActivateAsync(bool fromKeyboard = false)
+    {
+        if (Separator || Disabled) return;
+        if (HasSubmenu)
+        {
+            await OpenSubmenuAsync(focusFirst: true);
+            return;
+        }
+        bool? next = Checked is { } c ? !c : null;
+        if (Checked is not null)
+        {
+            Checked = next;
+            await CheckedChanged.InvokeAsync(next);
+        }
+        await Click.InvokeAsync(new MouseEventArgs { Detail = fromKeyboard ? 0 : 1 });
+        if (Parent is not null) await Parent.Root.NotifySelectedAsync(new MenuSelectEventArgs(Text, Value ?? Text, next));
+    }
+
+    private Task OnClick(MouseEventArgs e) => ActivateAsync(fromKeyboard: e.Detail == 0);
+
+    private void OnFocus()
+    {
+        if (Parent is null) return;
+        var index = Parent.Items.ToList().IndexOf(this);
+        if (index >= 0) Parent.FocusedIndex = index;
+    }
+
+    private async Task OnPointerEnter()
+    {
+        if (Separator || Parent is null) return;
+        if (HasSubmenu) await OpenSubmenuAsync(focusFirst: false);
+        else await Parent.CloseSubmenusAsync();
+        if (!Disabled) await JsSafe.Run(() => Js.FocusIdAsync(ItemId));
+    }
+
+    internal async Task OpenSubmenuAsync(bool focusFirst)
+    {
+        if (!HasSubmenu || Disabled) return;
+        if (Parent is not null) await Parent.CloseSubmenusAsync(except: this);
+        _focusFirstOnOpen = focusFirst;
+        if (_submenuOpen)
+        {
+            if (focusFirst) await SubmenuList.FocusFirstAsync();
+            return;
+        }
+        _submenuOpen = true;
+        Overlay.MarkOpen();
+        StateHasChanged();
+    }
+
+    internal async Task CloseSubmenuAsync(bool refocus)
+    {
+        if (_submenuList is not null) await _submenuList.CloseSubmenusAsync();
+        if (!_submenuOpen) return;
+        _submenuOpen = false;
+        Overlay.MarkClosed();
+        StateHasChanged();
+        if (refocus) await JsSafe.Run(() => Js.FocusIdAsync(ItemId));
+    }
+
+    private Task OnDismiss(OverlayDismissReason reason) => InvokeAsync(() => CloseSubmenuAsync(refocus: reason == OverlayDismissReason.Escape));
+
+    private Task OnSubmenuKeyDown(KeyboardEventArgs e) => SubmenuList.HandleKeyAsync(e);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!HasSubmenu) return;
+        if (firstRender) await JsSafe.Run(() => Js.PreventKeysAsync(_panel, "ArrowUp", "ArrowDown", "Home", "End", "Space"));
+        if (_submenuOpen && !_shown)
+        {
+            _shown = true;
+            await Overlay.ShowAsync(_element, _panel);
+            if (_focusFirstOnOpen) await SubmenuList.FocusFirstAsync();
+        }
+        else if (!_submenuOpen && _shown)
+        {
+            _shown = false;
+            SubmenuList.FocusedIndex = -1;
+            await Overlay.HideAsync();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Parent?.Unregister(this);
+        if (_overlay is not null) await _overlay.DisposeAsync();
+    }
+}

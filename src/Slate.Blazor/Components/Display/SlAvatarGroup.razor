@@ -1,0 +1,8 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@* Overlapping row of SlAvatars (docs/design/css-classes.md#avatar). *@
+<span @attributes="AdditionalAttributes" class="@(Css.Of("sl-avatar-group").Add(Class))" style="@Style">@ChildContent</span>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

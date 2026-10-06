@@ -1,0 +1,256 @@
+@inherits SlateTestContext
+@using Microsoft.Extensions.DependencyInjection
+@using Slate.Blazor.Internal
+@using Slate.Overlays
+
+@code {
+    private OverlayManager Manager => Services.GetRequiredService<OverlayManager>();
+
+    // ---- overlay stack rules ---------------------------------------------------------------------------------
+
+    [Fact]
+    public async Task Escape_closes_only_the_topmost_overlay()
+    {
+        bool outer = true, inner = true;
+        var cut = Render(@<SlPopover @bind-Open="outer" Label="Outer">
+            <Anchor><button id="outer">Outer</button></Anchor>
+            <ChildContent>
+                <SlPopover @bind-Open="inner" Label="Inner"><Anchor><button id="inner">Inner</button></Anchor><ChildContent>x</ChildContent></SlPopover>
+            </ChildContent>
+        </SlPopover>);
+
+        Assert.Equal(2, Manager.Open.Count);
+        await cut.InvokeAsync(Manager.OnEscape);
+        Assert.False(inner);
+        Assert.True(outer);
+        Assert.Single(Manager.Open);
+
+        await cut.InvokeAsync(Manager.OnEscape);
+        Assert.False(outer);
+        Assert.Empty(Manager.Open);
+        Assert.False(await cut.InvokeAsync(Manager.OnEscape));
+    }
+
+    [Fact]
+    public async Task Outside_pointer_closes_overlays_top_down_until_one_contains_the_target()
+    {
+        bool outer = true, inner = true;
+        var cut = Render(@<SlPopover @bind-Open="outer"><Anchor><b>o</b></Anchor><ChildContent>
+            <SlPopover @bind-Open="inner"><Anchor><b>i</b></Anchor><ChildContent>x</ChildContent></SlPopover>
+        </ChildContent></SlPopover>);
+        var bottom = Manager.Open[0];
+
+        // A click inside the outer panel (but outside the inner) closes only the inner one.
+        await cut.InvokeAsync(() => Manager.OnPointerDown([bottom.Id]));
+        Assert.False(inner);
+        Assert.True(outer);
+    }
+
+    [Fact]
+    public async Task A_click_outside_everything_closes_the_whole_stack()
+    {
+        bool outer = true, inner = true;
+        var cut = Render(@<SlPopover @bind-Open="outer"><Anchor><b>o</b></Anchor><ChildContent>
+            <SlPopover @bind-Open="inner"><Anchor><b>i</b></Anchor><ChildContent>x</ChildContent></SlPopover>
+        </ChildContent></SlPopover>);
+
+        await cut.InvokeAsync(() => Manager.OnPointerDown([]));
+        Assert.False(inner);
+        Assert.False(outer);
+        Assert.Empty(Manager.Open);
+    }
+
+    [Fact]
+    public async Task An_overlay_that_ignores_outside_clicks_stops_the_cascade()
+    {
+        bool outer = true, inner = true;
+        var cut = Render(@<SlPopover @bind-Open="outer"><Anchor><b>o</b></Anchor><ChildContent>
+            <SlPopover @bind-Open="inner" CloseOnOutsideClick="false"><Anchor><b>i</b></Anchor><ChildContent>x</ChildContent></SlPopover>
+        </ChildContent></SlPopover>);
+
+        await cut.InvokeAsync(() => Manager.OnPointerDown([]));
+        Assert.True(inner);
+        Assert.True(outer);
+    }
+
+    [Fact]
+    public void Placement_is_computed_by_core_and_flips_when_there_is_no_room()
+    {
+        var handle = new OverlayHandle(Manager, Services.GetRequiredService<SlateJs>(), _ => Task.CompletedTask)
+            { Placement = PopoverPlacement.Bottom, Offset = 6 };
+        var viewport = new BrowserRect(0, 0, 1000, 800);
+
+        var below = handle.Compute(new BrowserRect(100, 100, 80, 30), 200, 100, viewport);
+        Assert.Equal("bottom", below.Side);
+        Assert.Equal(136, below.Top);
+
+        var flipped = handle.Compute(new BrowserRect(100, 740, 80, 30), 200, 100, viewport);
+        Assert.Equal("top", flipped.Side);
+        Assert.True(flipped.Top + 100 <= 740);
+    }
+
+    // ---- popover ---------------------------------------------------------------------------------------------
+
+    [Fact]
+    public void Popover_renders_the_contract_and_toggles_from_the_anchor()
+    {
+        var open = false;
+        var cut = Render(@<SlPopover @bind-Open="open" Label="Filters" Placement="PopoverPlacement.BottomStart">
+            <Anchor><button>Filters</button></Anchor><ChildContent><p id="body">Body</p></ChildContent>
+        </SlPopover>);
+
+        var panel = cut.Find(".sl-popover-panel");
+        Assert.Equal("dialog", panel.GetAttribute("role"));
+        Assert.Equal("manual", panel.GetAttribute("popover"));
+        Assert.Equal("bottom-start", panel.GetAttribute("data-placement"));
+        Assert.True(panel.HasAttribute("hidden"));
+        Assert.NotNull(cut.Find(".sl-popover__arrow"));
+        Assert.Empty(cut.FindAll("#body"));
+
+        cut.Find(".sl-popover__anchor").Click();
+        Assert.True(open);
+        cut.Render();
+        Assert.False(cut.Find(".sl-popover-panel").HasAttribute("hidden"));
+        Assert.NotNull(cut.Find("#body"));
+    }
+
+    // ---- tooltip ---------------------------------------------------------------------------------------------
+
+    [Fact]
+    public void Tooltip_shows_after_the_delay_and_hides_on_leave()
+    {
+        var cut = Render(@<SlTooltip Text="Save" Shortcut="⌘S" Delay="500"><button>Save</button></SlTooltip>);
+        var bubble = () => cut.Find(".sl-tooltip");
+        Assert.Equal("tooltip", bubble().GetAttribute("role"));
+        Assert.Equal("top", bubble().GetAttribute("data-placement"));
+        Assert.NotNull(cut.Find(".sl-tooltip .sl-kbd"));
+
+        cut.Find("span").PointerEnter();
+        Assert.True(bubble().HasAttribute("hidden"));
+        Time.Advance(TimeSpan.FromMilliseconds(500));
+        cut.WaitForAssertion(() => Assert.False(bubble().HasAttribute("hidden")));
+
+        cut.Find("span").PointerLeave();
+        Assert.True(bubble().HasAttribute("hidden"));
+    }
+
+    [Fact]
+    public void A_second_tooltip_shows_immediately_after_one_hides()
+    {
+        var cut = Render(@<div>
+            <SlTooltip Text="One" id="one"><button>1</button></SlTooltip>
+            <SlTooltip Text="Two" id="two"><button>2</button></SlTooltip>
+        </div>);
+        cut.Find("#one").PointerEnter();
+        Time.Advance(TimeSpan.FromMilliseconds(500));
+        cut.WaitForAssertion(() => Assert.False(cut.Find("#one .sl-tooltip").HasAttribute("hidden")));
+        cut.Find("#one").PointerLeave();
+
+        cut.Find("#two").PointerEnter();
+        Assert.False(cut.Find("#two .sl-tooltip").HasAttribute("hidden"));
+    }
+
+    [Fact]
+    public void Tooltip_text_goes_to_the_anchor_as_aria_description()
+    {
+        var call = Module.SetupVoid("setAnchorAria", _ => true);
+        Render(@<SlTooltip Text="Save changes"><button>Save</button></SlTooltip>);
+        var attrs = call.Invocations.Select(i => i.Arguments[1]).OfType<IDictionary<string, string?>>().Last();
+        Assert.Equal("Save changes", attrs["aria-description"]);
+    }
+
+    // ---- menu ------------------------------------------------------------------------------------------------
+
+    private string? _picked;
+    private bool? _wrap = true;
+
+    private IRenderedComponent<SlMenu> RenderMenu(bool open = false) => Render<SlMenu>(p => p
+        .Add(x => x.Open, open)
+        .Add(x => x.Label, "Actions")
+        .Add(x => x.Trigger, @<button>Actions</button>)
+        .Add(x => x.ItemSelected, (MenuSelectEventArgs e) => _picked = e.Label)
+        .Add(x => x.Items, @<text>
+            <SlMenuItem Label="Rename" Icon="pencil" Shortcut="F2" />
+            <SlMenuItem Label="Duplicate" Disabled="true" />
+            <SlMenuItem Label="Word wrap" @bind-Checked="_wrap" />
+            <SlMenuItem Separator="true" />
+            <SlMenuItem Label="Delete" Tone="Tone.Danger" />
+        </text>));
+
+    [Fact]
+    public void Menu_renders_the_contract()
+    {
+        var cut = RenderMenu(open: true);
+        var panel = cut.Find(".sl-menu__panel");
+        Assert.Equal("menu", panel.GetAttribute("role"));
+        Assert.Contains("sl-popover-panel", panel.ClassList);
+        var items = cut.FindAll(".sl-menu-item");
+        Assert.Equal(4, items.Count);
+        Assert.Equal("menuitem", items[0].GetAttribute("role"));
+        Assert.NotNull(items[0].QuerySelector(".sl-menu-item__shortcut"));
+        Assert.Contains("is-disabled", items[1].ClassList);
+        Assert.Equal("true", items[1].GetAttribute("aria-disabled"));
+        // Checkable only when Checked is set.
+        Assert.Equal("menuitemcheckbox", items[2].GetAttribute("role"));
+        Assert.Equal("true", items[2].GetAttribute("aria-checked"));
+        Assert.Null(items[0].QuerySelector(".sl-menu-item__check"));
+        Assert.Contains("sl-tone-danger", items[3].ClassList);
+        Assert.Equal("separator", cut.Find(".sl-menu-separator").GetAttribute("role"));
+    }
+
+    [Fact]
+    public void Menu_keyboard_skips_disabled_items_and_activates_with_enter()
+    {
+        var focused = Module.SetupVoid("focusId", _ => true);
+        var cut = RenderMenu();
+        cut.Find(".sl-menu__trigger").KeyDown("ArrowDown");
+        Assert.True(cut.Instance.Open);
+
+        var panel = cut.Find(".sl-menu__panel");
+        panel.KeyDown("ArrowDown");
+        var ids = cut.FindAll(".sl-menu-item").Select(i => i.Id).ToList();
+        Assert.Equal(ids[2], focused.Invocations.Last().Arguments[0]);
+
+        cut.Find(".sl-menu__panel").KeyDown("Enter");
+        Assert.Equal("Word wrap", _picked);
+        Assert.False(_wrap);
+        Assert.False(cut.Instance.Open);
+    }
+
+    [Fact]
+    public void Menu_typeahead_focuses_the_matching_item()
+    {
+        var focused = Module.SetupVoid("focusId", _ => true);
+        var cut = RenderMenu();
+        cut.Find(".sl-menu__trigger").KeyDown("ArrowDown");
+        cut.Find(".sl-menu__panel").KeyDown("d");
+        var ids = cut.FindAll(".sl-menu-item").Select(i => i.Id).ToList();
+        Assert.Equal(ids[3], focused.Invocations.Last().Arguments[0]); // "Duplicate" is disabled, so "Delete"
+    }
+
+    [Fact]
+    public void Context_menu_opens_at_the_pointer()
+    {
+        var cut = Render(@<SlMenu ContextMenu="true"><Trigger><div id="area">Right-click</div></Trigger>
+            <Items><SlMenuItem Label="Copy" /></Items></SlMenu>);
+        cut.Find(".sl-menu__trigger").ContextMenu(new MouseEventArgs { ClientX = 40, ClientY = 60 });
+        Assert.Single(Manager.Open);
+        Assert.Equal((40d, 60d), Manager.Open[0].Point);
+    }
+
+    [Fact]
+    public async Task Submenus_close_one_level_per_escape()
+    {
+        var cut = Render(@<SlMenu Open="true"><Trigger><button>File</button></Trigger><Items>
+            <SlMenuItem Label="Export"><Submenu><SlMenuItem Label="PDF" /></Submenu></SlMenuItem>
+        </Items></SlMenu>);
+        cut.Find(".sl-menu-item").PointerEnter();
+        Assert.Equal(2, Manager.Open.Count);
+        Assert.Contains("is-expanded", cut.Find(".sl-menu-item").ClassList);
+
+        await cut.InvokeAsync(Manager.OnEscape);
+        Assert.Single(Manager.Open);
+        await cut.InvokeAsync(Manager.OnEscape);
+        Assert.Empty(Manager.Open);
+    }
+}

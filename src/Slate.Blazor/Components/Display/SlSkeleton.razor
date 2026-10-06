@@ -1,0 +1,43 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@*
+  Loading placeholder (docs/design/css-classes.md#skeleton). Decorative: hidden from assistive tech — mark the
+  loading region with aria-busy. Lines > 1 renders a group whose last line is 60% wide.
+*@
+@if (Shape == SkeletonShape.Text && Lines > 1)
+{
+    <span @attributes="AdditionalAttributes" class="@(Css.Of("sl-skeleton-group").Add(Class))" style="@Style" aria-hidden="true">
+        @for (var i = 0; i < Lines; i++)
+        {
+            <span class="@BlockClass" style="@BlockStyle(i == Lines - 1 ? "60%" : Width)"></span>
+        }
+    </span>
+}
+else
+{
+    <span @attributes="AdditionalAttributes" class="@(Css.Of(BlockClass).Add(Class))" style="@(Combine(BlockStyle(Width), Style))" aria-hidden="true"></span>
+}
+
+@code {
+    [Parameter] public SkeletonShape Shape { get; set; } = SkeletonShape.Text;
+
+    /// <summary>CSS width (e.g. "120px", "40%").</summary>
+    [Parameter] public string? Width { get; set; }
+
+    /// <summary>CSS height.</summary>
+    [Parameter] public string? Height { get; set; }
+
+    /// <summary>Text lines (text shape only).</summary>
+    [Parameter] public int Lines { get; set; } = 1;
+
+    /// <summary>Shimmer (off under reduced motion regardless).</summary>
+    [Parameter] public bool Animated { get; set; } = true;
+
+    private string BlockClass => Css.Of("sl-skeleton").Add($"sl-skeleton--{Names.Kebab(Shape.ToString())}").Add("is-animated", Animated);
+
+    private string? BlockStyle(string? width) =>
+        Combine(width is null ? null : $"width:{width}", Height is null ? null : $"height:{Height}");
+
+    private static string? Combine(params string?[] parts) =>
+        string.Join(';', parts.Where(p => !string.IsNullOrEmpty(p))) is { Length: > 0 } s ? s : null;
+}

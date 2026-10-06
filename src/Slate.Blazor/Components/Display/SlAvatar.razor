@@ -1,0 +1,49 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@*
+  Avatar (docs/design/css-classes.md#avatar). Initials and a deterministic tone come from the name (Slate.Core
+  AvatarText — identical on every platform); Tone overrides. Falls back to initials if the image fails.
+*@
+<span @attributes="AdditionalAttributes" class="@CssClass" style="@Style" role="img" aria-label="@AriaLabel"
+      data-status="@(Status is { } s ? Names.Kebab(s.ToString()) : null)">
+    @if (Image is not null && !_failed)
+    {
+        <img class="sl-avatar__image" src="@Image" alt="" @onerror="() => _failed = true" />
+    }
+    else
+    {
+        <span class="sl-avatar__initials" aria-hidden="true">@AvatarText.Initials(Name)</span>
+    }
+    @if (Status is { } status)
+    {
+        <span class="@($"sl-avatar__status sl-avatar__status--{Names.Kebab(status.ToString())}")" aria-hidden="true"></span>
+    }
+</span>
+
+@code {
+    /// <summary>Person or entity name: initials, tone and the accessible name.</summary>
+    [Parameter] public string? Name { get; set; }
+
+    /// <summary>Image URL. Initials are shown while it is missing or if it fails to load.</summary>
+    [Parameter] public string? Image { get; set; }
+
+    [Parameter] public ControlSize Size { get; set; } = ControlSize.Medium;
+
+    /// <summary>Overrides the tone derived from the name.</summary>
+    [Parameter] public Tone? Tone { get; set; }
+
+    [Parameter] public AvatarStatus? Status { get; set; }
+
+    private bool _failed;
+    private string? _image;
+
+    protected override void OnParametersSet()
+    {
+        if (_image != Image) _failed = false;
+        _image = Image;
+    }
+
+    private string AriaLabel => string.Join(", ", new[] { Name, Status is { } s ? Names.Kebab(s.ToString()) : null }.Where(x => !string.IsNullOrEmpty(x))) is { Length: > 0 } l ? l : "Avatar";
+
+    private string CssClass => Css.Of("sl-avatar").Add(Names.Tone(Tone ?? AvatarText.ToneFor(Name))).Add(Names.Size(Size, "sl-avatar")).Add(Class);
+}

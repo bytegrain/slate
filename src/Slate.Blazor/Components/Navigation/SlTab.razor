@@ -1,0 +1,61 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@implements IDisposable
+@*
+  One tab of an SlTabs. Renders nothing itself: SlTabs draws the tab list and the active panel. ChildContent is
+  the panel content.
+*@
+
+@code {
+    [CascadingParameter] private SlTabs? Parent { get; set; }
+
+    /// <summary>Identity used by <c>SlTabs.Value</c>. Defaults to the label.</summary>
+    [Parameter] public string? Key { get; set; }
+
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Icon { get; set; }
+
+    /// <summary>Small count/status pill after the label.</summary>
+    [Parameter] public string? Badge { get; set; }
+
+    /// <summary>Shows a close button (and Delete closes it from the keyboard).</summary>
+    [Parameter] public bool Closable { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    /// <summary>Raised with the tab's key when closed.</summary>
+    [Parameter] public EventCallback<string> Closed { get; set; }
+
+    /// <summary>Custom label content (overrides Label visually).</summary>
+    [Parameter] public RenderFragment? Header { get; set; }
+
+    /// <summary>The panel content.</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    public string TabKey => Key ?? Label ?? UniqueId;
+
+    internal string TabId => $"{UniqueId}-tab";
+    internal string PanelId => $"{UniqueId}-panel";
+    internal string? ExtraClass => Class;
+    internal string? ExtraStyle => Style;
+    internal IReadOnlyDictionary<string, object>? ExtraAttributes => AdditionalAttributes;
+
+    protected override void OnInitialized()
+    {
+        if (Parent is null) throw new InvalidOperationException("SlTab must be inside an SlTabs.");
+        Parent.Register(this);
+    }
+
+    private (string?, string?, string?, string?, bool, bool, string?)? _rendered;
+
+    // Re-render the tab list only when something it shows changed (RenderFragment parameters are always re-set,
+    // so notifying unconditionally would loop).
+    protected override void OnParametersSet()
+    {
+        var snapshot = (Key, Label, Icon, Badge, Closable, Disabled, Class);
+        if (_rendered is not null && _rendered != snapshot) Parent?.TabChanged();
+        _rendered = snapshot;
+    }
+
+    public void Dispose() => Parent?.Unregister(this);
+}

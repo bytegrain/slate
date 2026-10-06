@@ -1,0 +1,122 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@implements IAsyncDisposable
+@inject OverlayManager Overlays
+@inject SlateJs Js
+@*
+  Anchored floating panel (docs/design/css-classes.md#popover). Clicking the anchor toggles it; Escape and
+  outside clicks follow the shared overlay stack. The panel is promoted to the top layer by slate.js.
+*@
+<span @attributes="AdditionalAttributes" class="@(Css.Of("sl-popover").Add(Class))" style="@Style">
+    <span class="sl-popover__anchor" @ref="_anchor" @onclick="OnAnchorClick">@Anchor</span>
+    <div @ref="_panel" id="@PanelId" class="sl-popover-panel sl-popover__panel" role="dialog" aria-modal="@(Modal ? "true" : null)"
+         aria-label="@Label" tabindex="-1" data-placement="@Names.Kebab(Placement.ToString())" popover="manual" hidden="@(!Open)">
+        <span class="sl-popover__arrow" aria-hidden="true"></span>
+        @if (Open || KeepContent)
+        {
+            @ChildContent
+        }
+    </div>
+</span>
+
+@code {
+    /// <summary>The element that opens the popover (usually a button).</summary>
+    [Parameter] public RenderFragment? Anchor { get; set; }
+
+    /// <summary>Panel content.</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter] public PopoverPlacement Placement { get; set; } = PopoverPlacement.Bottom;
+
+    /// <summary>Gap between anchor and panel, px.</summary>
+    [Parameter] public double Offset { get; set; } = 6;
+
+    /// <summary>Moves focus into the panel and traps Tab.</summary>
+    [Parameter] public bool Modal { get; set; }
+
+    [Parameter] public bool CloseOnOutsideClick { get; set; } = true;
+
+    /// <summary>Panel at least as wide as the anchor.</summary>
+    [Parameter] public bool MatchAnchorWidth { get; set; }
+
+    /// <summary>Accessible name for the panel (role="dialog").</summary>
+    [Parameter] public string? Label { get; set; }
+
+    /// <summary>Keep the content rendered while closed (preserves component state).</summary>
+    [Parameter] public bool KeepContent { get; set; }
+
+    private ElementReference _anchor;
+    private ElementReference _panel;
+    private OverlayHandle? _overlay;
+    private IJSObjectReference? _trap;
+    private bool _shown;
+    private bool? _ariaExpanded;
+
+    private string PanelId => $"{UniqueId}-panel";
+
+    private OverlayHandle Overlay => _overlay ??= new OverlayHandle(Overlays, Js, OnDismiss) { DismissOnOutside = () => CloseOnOutsideClick };
+
+    protected override void OnParametersSet()
+    {
+        Overlay.Placement = Placement;
+        Overlay.Offset = Offset;
+        Overlay.MatchAnchorWidth = MatchAnchorWidth;
+        if (Open && !Overlay.IsOpen) Overlay.MarkOpen();
+        else if (!Open && Overlay.IsOpen) Overlay.MarkClosed();
+    }
+
+    /// <summary>Opens, closes or toggles from code.</summary>
+    public Task SetOpenAsync(bool open) => SetOpen(open, returnFocus: !open);
+
+    public Task ToggleAsync() => SetOpen(!Open, returnFocus: true);
+
+    private async Task SetOpen(bool open, bool returnFocus)
+    {
+        if (open == Open) return;
+        Open = open;
+        OnParametersSet();
+        await OpenChanged.InvokeAsync(open);
+        StateHasChanged();
+        if (!open && returnFocus) await JsSafe.Run(() => Js.FocusFirstChildAsync(_anchor));
+    }
+
+    private Task OnAnchorClick(MouseEventArgs e) => SetOpen(!Open, returnFocus: false);
+
+    private Task OnDismiss(OverlayDismissReason reason) => InvokeAsync(() => SetOpen(false, returnFocus: reason == OverlayDismissReason.Escape));
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_ariaExpanded != Open)
+        {
+            _ariaExpanded = Open;
+            await JsSafe.Run(() => Js.SetAnchorAriaAsync(_anchor, new Dictionary<string, string?> { ["aria-haspopup"] = "dialog", ["aria-expanded"] = Open ? "true" : "false", ["aria-controls"] = PanelId }));
+        }
+
+        if (Open && !_shown)
+        {
+            _shown = true;
+            await Overlay.ShowAsync(_anchor, _panel);
+            if (Modal) await JsSafe.Run(async () => _trap = await Js.TrapFocusAsync(_panel));
+        }
+        else if (!Open && _shown)
+        {
+            _shown = false;
+            await JsSafe.DisposeQuietly(_trap, "release", false);
+            _trap = null;
+            await Overlay.HideAsync();
+        }
+        else if (Open)
+        {
+            await Overlay.RepositionAsync();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await JsSafe.DisposeQuietly(_trap, "release", false);
+        if (_overlay is not null) await _overlay.DisposeAsync();
+    }
+}

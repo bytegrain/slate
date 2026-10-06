@@ -1,0 +1,171 @@
+@page "/pickers"
+@using Slate.Dates
+<PageTitle>Pickers · Slate</PageTitle>
+
+<div class="demo-page">
+    <PageHeader Title="Pickers">Select and combobox, date picker, slider and segmented control. All bind two-way and validate inside EditForm.</PageHeader>
+
+    <SlGrid>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Select" Subtitle="Keyboard: arrows, Home/End, typeahead; Enter or Space picks">
+                <SlStack Spacing="4">
+                    <SlSelect T="Region" Items="Regions" @bind-Value="_region" ItemText="r => r.Name" ItemIcon="r => r.Icon"
+                              ItemDescription="r => r.Zone" ItemDisabled="r => r.Down" Label="Region" Placeholder="Choose a region"
+                              HelperText="@($"Selected: {_region?.Name ?? "none"}")" Clearable="true" />
+                    <SlSelect T="string" Items="Languages" @bind-Value="_language" Searchable="true" Label="Language (searchable)"
+                              Placeholder="Type to filter…" GroupBy="LanguageGroup" />
+                    <SlSelect T="string" Items="Languages" @bind-Values="_tags" Multiple="true" Searchable="true" Creatable="true"
+                              MaxVisibleChips="3" Label="Tags (multiple, creatable)" Placeholder="Add tags" Clearable="true" />
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Select states" Subtitle="Variants, sizes, loading, empty, error and disabled">
+                <SlStack Spacing="4">
+                    <div class="demo-fields">
+                        <SlSelect T="string" Items="Languages" Variant="FieldVariant.Outlined" Size="ControlSize.Small" Label="Outlined, small" Placeholder="Pick" />
+                        <SlSelect T="string" Items="Languages" Variant="FieldVariant.Filled" Label="Filled" Placeholder="Pick" />
+                        <SlSelect T="string" Items="Languages" Variant="FieldVariant.Underlined" Size="ControlSize.Large" Label="Underlined, large" Placeholder="Pick" />
+                    </div>
+                    <SlSelect T="string" Items="_remote" Searchable="true" Loading="_loading" SearchChanged="SearchAsync" Label="Server search"
+                              Placeholder="Search users…" HelperText="Results arrive after 600 ms">
+                        <EmptyContent>No users match. Try “ada”.</EmptyContent>
+                    </SlSelect>
+                    <SlSelect T="string" Items="Languages" Value="@("Rust")" Error="Rust isn't supported on this plan." Label="With error" />
+                    <SlSelect T="string" Items="Languages" Value="@("C#")" Disabled="true" Label="Disabled" />
+                    <SlSelect T="Region" Items="Regions" @bind-Value="_region" ItemText="r => r.Name" Label="Item template">
+                        <ItemTemplate Context="r"><SlStack Row="true" Spacing="2" Align="StackAlign.Center"><SlBadge Tone="@(r.Down ? Tone.Danger : Tone.Success)" Dot="true">@(r.Down ? "Down" : "Up")</SlBadge>@r.Name</SlStack></ItemTemplate>
+                    </SlSelect>
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Date picker" Subtitle="Arrows move a day/week, PgUp/PgDn a month (Shift: a year); type a date or pick one">
+                <SlStack Spacing="4">
+                    <SlDatePicker @bind-Value="_due" Label="Due date" Clearable="true" HelperText="@($"Value: {_due?.ToString("yyyy-MM-dd") ?? "none"}")" />
+                    <SlDatePicker Selection="DateSelection.Range" @bind-Range="_range" Presets="CalendarModel.DefaultPresets" Label="Reporting period"
+                                  HelperText="@RangeText" Clearable="true" />
+                    <SlDatePicker @bind-Value="_weekday" Label="Weekdays this quarter" Min="_today" Max="_today.AddMonths(3)"
+                                  DisabledDates="d => d.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday" FirstDayOfWeek="DayOfWeek.Monday" Format="yyyy-MM-dd"
+                                  Variant="FieldVariant.Filled" />
+                    <SlDatePicker Label="Disabled" Value="_today" Disabled="true" Size="ControlSize.Small" />
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Inline calendar" Subtitle="Range with hover preview and presets">
+                <SlDatePicker Inline="true" Selection="DateSelection.Range" @bind-Range="_inlineRange" Presets="CalendarModel.DefaultPresets" />
+                <SlText Typo="Typo.Caption" Tone="TextTone.Tertiary" Style="margin-top: var(--sl-space-2)">@InlineText</SlText>
+            </DemoSection>
+        </SlItem>
+
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Slider" Subtitle="Arrows step, PgUp/PgDn move 10%, Home/End jump; drag the track">
+                <SlStack Spacing="5">
+                    <SlSlider @bind-Value="_volume" Label="Volume" ShowValue="true" />
+                    <SlSlider @bind-Value="_priceMin" @bind-RangeEnd="_priceMax" Min="0" Max="500" Step="10" Label="Price" ShowValue="true"
+                              Format="@(v => $"${v:0}")" Tone="Tone.Success" />
+                    <SlSlider @bind-Value="_quality" Min="0" Max="10" Step="1" Ticks="true" Label="Quality" ShowValue="true" Tone="Tone.Warning" />
+                    <SlSlider Value="40" Label="Disabled" Disabled="true" ShowValue="true" />
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Segmented control" Subtitle="A radio group; arrows move and select">
+                <SlStack Spacing="4">
+                    <SlSegmented T="string" Items="Ranges" @bind-Value="_span" Label="Range" />
+                    <SlSegmented T="string" Items="Views" @bind-Value="_view" ItemIcon="ViewIcon" Size="ControlSize.Small" Label="View" />
+                    <SlSegmented T="string" Items="Ranges" @bind-Value="_span" Size="ControlSize.Large" ItemDisabled="@(s => s == "1y")" Label="Large, 1y disabled" />
+                    <SlSegmented T="string" Items="Views" @bind-Value="_view" FullWidth="true" Label="Full width" />
+                    <SlSegmented T="string" Items="Ranges" Value="@("7d")" Disabled="true" Label="Disabled" />
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+    </SlGrid>
+
+    <DemoSection Title="In a form" Subtitle="EditForm + DataAnnotations: submit empty to see validation">
+        <EditForm Model="_booking" OnValidSubmit="() => _booked = true">
+            <DataAnnotationsValidator />
+            <SlGrid>
+                <SlItem Xs="12" Md="6"><SlSelect T="string" Items="Rooms" @bind-Value="_booking.Room" Label="Room" Placeholder="Choose a room" Required="true" /></SlItem>
+                <SlItem Xs="12" Md="6"><SlSelect T="string" Items="Extras" @bind-Values="_booking.Extras" Multiple="true" Label="Extras" Placeholder="Pick extras" /></SlItem>
+                <SlItem Xs="12" Md="6"><SlDatePicker @bind-Value="_booking.Date" Label="Date" Min="_today" /></SlItem>
+                <SlItem Xs="12" Md="6"><SlSlider @bind-Value="_booking.Guests" Label="Guests" Min="0" Max="12" ShowValue="true" /></SlItem>
+            </SlGrid>
+            <div class="demo-row" style="margin-top: var(--sl-space-4)">
+                <SlButton Type="ButtonType.Submit" Variant="ButtonVariant.Solid" Tone="Tone.Accent">Book</SlButton>
+                @if (_booked)
+                {
+                    <SlBadge Tone="Tone.Success">Booked @_booking.Room for @_booking.Guests</SlBadge>
+                }
+            </div>
+        </EditForm>
+    </DemoSection>
+</div>
+
+@code {
+    public sealed record Region(string Name, string Zone, string Icon, bool Down = false);
+
+    private static readonly Region[] Regions =
+    [
+        new("London", "eu-west-2", "pin"), new("Frankfurt", "eu-central-1", "pin"), new("Virginia", "us-east-1", "pin"),
+        new("Oregon", "us-west-2", "pin", Down: true), new("Tokyo", "ap-northeast-1", "pin"), new("Sydney", "ap-southeast-2", "pin"),
+    ];
+
+    private static readonly string[] Languages = ["C#", "F#", "TypeScript", "JavaScript", "Python", "Rust", "Go", "Kotlin", "Swift", "Zig"];
+    private static string LanguageGroup(string l) => l is "C#" or "F#" ? ".NET" : l is "TypeScript" or "JavaScript" ? "Web" : "Systems & more";
+    private static readonly string[] People = ["Ada Lovelace", "Alan Turing", "Grace Hopper", "Katherine Johnson", "Linus Torvalds", "Margaret Hamilton"];
+    private static readonly string[] Ranges = ["24h", "7d", "30d", "90d", "1y"];
+    private static readonly string[] Views = ["List", "Board", "Calendar"];
+    private static string? ViewIcon(string v) => v switch { "List" => "menu", "Board" => "layers", _ => "calendar" };
+    private static readonly string[] Rooms = ["Studio", "Boardroom", "Garden room"];
+    private static readonly string[] Extras = ["Projector", "Catering", "Whiteboard", "Video call"];
+
+    private static readonly DateOnly _today = DateOnly.FromDateTime(DateTime.Today);
+
+    private Region? _region = Regions[0];
+    private string? _language;
+    private IReadOnlyList<string>? _tags = ["C#", "TypeScript"];
+    private IReadOnlyList<string> _remote = [];
+    private bool _loading;
+    private CancellationTokenSource? _search;
+    private DateOnly? _due = _today.AddDays(7);
+    private DateRange? _range = new(_today.AddDays(-6), _today);
+    private DateRange? _inlineRange;
+    private DateOnly? _weekday;
+    private double _volume = 35, _priceMin = 80, _quality = 7;
+    private double? _priceMax = 320;
+    private string? _span = "7d", _view = "Board";
+
+    public sealed class Booking
+    {
+        [Required(ErrorMessage = "Choose a room.")] public string? Room { get; set; }
+        [MinLength(1, ErrorMessage = "Pick at least one extra.")] public IReadOnlyList<string>? Extras { get; set; } = [];
+        [Required(ErrorMessage = "Choose a date.")] public DateOnly? Date { get; set; }
+        [Range(1, 12, ErrorMessage = "Between 1 and 12 guests.")] public double Guests { get; set; }
+    }
+
+    private readonly Booking _booking = new();
+    private bool _booked;
+
+    private string RangeText => _range is { } r ? $"{r.Start:MMM d} – {r.End:MMM d}" : "No range";
+    private string InlineText => _inlineRange is { } r ? $"Selected {r.Start:ddd d MMM} – {r.End:ddd d MMM}" : "Click a start day, then an end day.";
+
+    private async Task SearchAsync(string query)
+    {
+        _search?.Cancel();
+        var cts = _search = new CancellationTokenSource();
+        _loading = true;
+        try
+        {
+            await Task.Delay(600, cts.Token);
+            _remote = People.Where(p => p.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+        _loading = false;
+    }
+}

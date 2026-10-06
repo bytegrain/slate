@@ -1,0 +1,84 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@*
+  Breadcrumbs (docs/design/css-classes.md#breadcrumbs). The last item is the current page. With MaxItems, keeps
+  the first item and the last MaxItems − 1; the rest collapse into a "…" menu.
+*@
+<nav @attributes="AdditionalAttributes" class="@(Css.Of("sl-breadcrumbs").Add(Class))" style="@Style" aria-label="@Label">
+    <ol class="sl-breadcrumbs__list">
+        @foreach (var (item, index) in Head)
+        {
+            @Crumb(item, index, last: false)
+        }
+        @if (Hidden.Count > 0)
+        {
+            <li class="sl-breadcrumbs__item">
+                <SlMenu Label="More breadcrumbs">
+                    <Trigger>
+                        <button class="sl-breadcrumbs__link sl-breadcrumbs__more" type="button" aria-label="@($"Show {Hidden.Count} more")">…</button>
+                    </Trigger>
+                    <Items>
+                        @foreach (var (item, index) in Hidden)
+                        {
+                            <SlMenuItem Label="@item.Label" Icon="@item.Icon" Href="@item.Href" Click="@(() => OnItemClick(item, index))" />
+                        }
+                    </Items>
+                </SlMenu>
+                <span class="sl-breadcrumbs__separator" aria-hidden="true"><SlIcon Name="@Separator" /></span>
+            </li>
+        }
+        @foreach (var (item, index) in Tail)
+        {
+            @Crumb(item, index, last: index == _items.Count - 1)
+        }
+    </ol>
+</nav>
+
+@code {
+    [Parameter] public IEnumerable<BreadcrumbItem>? Items { get; set; }
+
+    /// <summary>Collapse the middle into a menu when there are more items than this (≥ 2).</summary>
+    [Parameter] public int? MaxItems { get; set; }
+
+    /// <summary>Separator icon name.</summary>
+    [Parameter] public string Separator { get; set; } = "chevron-right";
+
+    /// <summary>Raised when a crumb is clicked (links still navigate).</summary>
+    [Parameter] public EventCallback<BreadcrumbClickEventArgs> ItemClick { get; set; }
+
+    [Parameter] public string Label { get; set; } = "Breadcrumb";
+
+    private List<BreadcrumbItem> _items = [];
+
+    private bool Collapse => MaxItems is { } max && max >= 2 && _items.Count > max;
+    private int TailCount => Collapse ? MaxItems!.Value - 1 : _items.Count;
+    private IEnumerable<(BreadcrumbItem, int)> Head => Collapse ? [(_items[0], 0)] : [];
+    private List<(BreadcrumbItem, int)> Hidden => Collapse ? _items.Select((x, i) => (x, i)).Skip(1).Take(_items.Count - 1 - TailCount).ToList() : [];
+    private IEnumerable<(BreadcrumbItem, int)> Tail => _items.Select((x, i) => (x, i)).Skip(_items.Count - TailCount);
+
+    protected override void OnParametersSet() => _items = Items?.ToList() ?? [];
+
+    private Task OnItemClick(BreadcrumbItem item, int index) => ItemClick.InvokeAsync(new BreadcrumbClickEventArgs(item, index));
+
+    private RenderFragment Crumb(BreadcrumbItem item, int index, bool last) => @<li class="sl-breadcrumbs__item">
+        @if (last)
+        {
+            <span class="sl-breadcrumbs__current" aria-current="page">@CrumbContent(item)</span>
+        }
+        else if (item.Href is not null)
+        {
+            <a class="sl-breadcrumbs__link" href="@item.Href" @onclick="() => OnItemClick(item, index)">@CrumbContent(item)</a>
+        }
+        else
+        {
+            <button class="sl-breadcrumbs__link" type="button" @onclick="() => OnItemClick(item, index)">@CrumbContent(item)</button>
+        }
+        @if (!last)
+        {
+            <span class="sl-breadcrumbs__separator" aria-hidden="true"><SlIcon Name="@Separator" /></span>
+        }
+    </li>;
+
+    private static RenderFragment CrumbContent(BreadcrumbItem item) => @<text>@if (item.Icon is not null)
+        {<SlIcon Name="@item.Icon" />}@item.Label</text>;
+}

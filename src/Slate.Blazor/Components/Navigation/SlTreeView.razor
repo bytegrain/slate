@@ -1,0 +1,385 @@
+@namespace Slate.Blazor
+@typeparam T
+@inherits SlComponentBase
+@inject SlateJs Js
+@inject SlateOptions Options
+@*
+  Tree view (docs/design/css-classes.md#treeview). Flattening, filtering, keyboard (WAI-ARIA tree), tri-state checks
+  and lazy-load bookkeeping come from Slate.Core TreeModel. Items are addressed by ItemKey, or by reference identity
+  (value by value for strings and value types). Expanded and SelectedItems are two-way and hold items.
+*@
+<div @attributes="AdditionalAttributes" @ref="_root" class="@CssClass" style="@Style" role="tree" aria-label="@Label"
+     aria-multiselectable="@(SelectionMode is TreeSelectionMode.Multi or TreeSelectionMode.Checkbox ? "true" : null)"
+     @onkeydown="OnKeyDown">
+    @{
+        var (rows, visible, expanded) = Rows();
+        var tabStop = _focusId is not null && rows.Any(r => r.Id == _focusId) ? _focusId
+            : rows.FirstOrDefault(r => _selected.Contains(r.Id))?.Id ?? rows.FirstOrDefault()?.Id;
+    }
+    @if (rows.Count == 0 && !string.IsNullOrWhiteSpace(Filter))
+    {
+        <div class="sl-tree__empty">@NoMatchesText</div>
+    }
+    else
+    {
+        @Level(_model.Roots, 0, visible, expanded, tabStop)
+    }
+</div>
+
+@code {
+    [Parameter] public IEnumerable<T>? Items { get; set; }
+
+    /// <summary>Children of an item (null or empty for leaves).</summary>
+    [Parameter] public Func<T, IEnumerable<T>?>? ChildrenSelector { get; set; }
+
+    /// <summary>Lazy trees: whether an item has children that LoadChildren will fetch.</summary>
+    [Parameter] public Func<T, bool>? HasChildren { get; set; }
+
+    /// <summary>Lazy trees: fetches an item's children the first time it expands.</summary>
+    [Parameter] public Func<T, Task<IEnumerable<T>>>? LoadChildren { get; set; }
+
+    [Parameter] public Func<T, string>? ItemText { get; set; }
+    [Parameter] public Func<T, string?>? ItemIcon { get; set; }
+
+    /// <summary>Custom label content (replaces the highlighted text).</summary>
+    [Parameter] public RenderFragment<T>? ItemTemplate { get; set; }
+
+    /// <summary>Stable id for an item. Default: reference identity (value for strings and value types).</summary>
+    [Parameter] public Func<T, string>? ItemKey { get; set; }
+
+    [Parameter] public TreeSelectionMode SelectionMode { get; set; } = TreeSelectionMode.Single;
+
+    /// <summary>Selected (or, in Checkbox mode, checked) items. Two-way.</summary>
+    [Parameter] public IReadOnlyCollection<T>? SelectedItems { get; set; }
+    [Parameter] public EventCallback<IReadOnlyCollection<T>> SelectedItemsChanged { get; set; }
+
+    /// <summary>Raised after the selection changes (same payload as SelectedItemsChanged).</summary>
+    [Parameter] public EventCallback<IReadOnlyCollection<T>> SelectionChanged { get; set; }
+
+    /// <summary>Expanded items. Two-way.</summary>
+    [Parameter] public IReadOnlyCollection<T>? Expanded { get; set; }
+    [Parameter] public EventCallback<IReadOnlyCollection<T>> ExpandedChanged { get; set; }
+
+    /// <summary>Shows matching items with their ancestors (auto-expanded) and highlights the match.</summary>
+    [Parameter] public string? Filter { get; set; }
+
+    [Parameter] public bool Dense { get; set; }
+
+    /// <summary>Enter or double-click on an item.</summary>
+    [Parameter] public EventCallback<T> ItemActivated { get; set; }
+
+    /// <summary>Accessible name of the tree.</summary>
+    [Parameter] public string? Label { get; set; }
+
+    [Parameter] public string NoMatchesText { get; set; } = "No matches";
+    [Parameter] public string LoadFailedText { get; set; } = "Couldn’t load";
+
+    private TreeModel<T> _model = new([], _ => "", _ => null);
+    private HashSet<string> _expanded = new(StringComparer.Ordinal);
+    private HashSet<string> _selected = new(StringComparer.Ordinal);
+    private readonly Dictionary<object, string> _refIds = new(ReferenceEqualityComparer.Instance);
+    private readonly Dictionary<string, string> _domIds = new(StringComparer.Ordinal);
+    private readonly Typeahead _typeahead = new();
+    private ElementReference _root;
+    private string? _focusId;
+    private string? _anchorId;
+    private bool _focusPending;
+    private (object?, object?, object?, object?) _modelInputs;
+    private object? _lastExpanded, _lastSelected;
+
+    private string CssClass => Css.Of("sl-tree").Add($"sl-tree--{Names.Kebab(SelectionMode.ToString())}").Add("sl-tree--dense", Dense).Add(Class);
+
+    private string IdOf(T item)
+    {
+        if (ItemKey is not null) return ItemKey(item);
+        if (item is null) return "";
+        if (item is string s) return s;
+        if (typeof(T).IsValueType) return item.ToString() ?? "";
+        if (!_refIds.TryGetValue(item, out var id)) _refIds[item] = id = $"n{_refIds.Count}";
+        return id;
+    }
+
+    private string TextOf(T item) => ItemText?.Invoke(item) ?? item?.ToString() ?? "";
+
+    private string DomId(string id)
+    {
+        if (!_domIds.TryGetValue(id, out var d)) _domIds[id] = d = $"{UniqueId}-{_domIds.Count}";
+        return d;
+    }
+
+    protected override void OnParametersSet()
+    {
+        var inputs = ((object?)Items, (object?)ChildrenSelector, (object?)HasChildren, (object?)ItemKey);
+        if (!Equals(inputs, _modelInputs))
+        {
+            _modelInputs = inputs;
+            _model = new TreeModel<T>(Items ?? [], IdOf, n => ChildrenSelector?.Invoke(n), HasChildren);
+            _domIds.Clear();
+        }
+        if (!ReferenceEquals(Expanded, _lastExpanded))
+        {
+            _lastExpanded = Expanded;
+            _expanded = new HashSet<string>((Expanded ?? []).Select(IdOf), StringComparer.Ordinal);
+            foreach (var id in _expanded.ToList()) _ = EnsureLoadedAsync(id);
+        }
+        if (!ReferenceEquals(SelectedItems, _lastSelected))
+        {
+            _lastSelected = SelectedItems;
+            _selected = new HashSet<string>((SelectedItems ?? []).Select(IdOf), StringComparer.Ordinal);
+        }
+    }
+
+    private (IReadOnlyList<TreeRow> Rows, IReadOnlySet<string>? Visible, IReadOnlySet<string> Expanded) Rows()
+    {
+        var query = Filter?.Trim();
+        if (string.IsNullOrEmpty(query)) return (_model.Flatten(_expanded), null, _expanded);
+        var q = TextFolding.Fold(query);
+        var (visible, expand) = _model.Filter(n => TextFolding.Fold(TextOf(n)).Contains(q, StringComparison.Ordinal));
+        var expanded = new HashSet<string>(_expanded, StringComparer.Ordinal);
+        expanded.UnionWith(expand);
+        return (_model.Flatten(expanded, visible), visible, expanded);
+    }
+
+    // ---- state changes ---------------------------------------------------------------------------------------
+
+    private bool Known(string id)
+    {
+        try { _model.Node(id); return true; }
+        catch (KeyNotFoundException) { return false; }
+    }
+
+    private async Task SetExpandedAsync(HashSet<string> ids)
+    {
+        _expanded = ids;
+        var items = ids.Where(Known).Select(_model.Node).ToList();
+        _lastExpanded = Expanded = items;
+        await ExpandedChanged.InvokeAsync(items);
+        foreach (var id in ids.ToList()) _ = EnsureLoadedAsync(id);
+    }
+
+    /// <summary>Expands or collapses an item.</summary>
+    public Task ToggleAsync(T item) => ToggleIdAsync(IdOf(item));
+
+    private Task ToggleIdAsync(string id)
+    {
+        var next = new HashSet<string>(_expanded, StringComparer.Ordinal);
+        if (!next.Remove(id)) next.Add(id);
+        return SetExpandedAsync(next);
+    }
+
+    private async Task EnsureLoadedAsync(string id)
+    {
+        if (LoadChildren is null || !Known(id) || _model.LoadState(id) == TreeLoadState.Loaded || !_model.BeginLoad(id)) return;
+        await InvokeAsync(StateHasChanged);
+        try
+        {
+            var children = await LoadChildren(_model.Node(id));
+            _model.CompleteLoad(id, children);
+        }
+        catch (Exception)
+        {
+            _model.FailLoad(id);
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task SetSelectedAsync(IEnumerable<string> ids)
+    {
+        _selected = new HashSet<string>(ids, StringComparer.Ordinal);
+        var items = _selected.Where(Known).Select(_model.Node).ToList();
+        _lastSelected = SelectedItems = items;
+        await SelectedItemsChanged.InvokeAsync(items);
+        await SelectionChanged.InvokeAsync(items);
+    }
+
+    private async Task SelectAsync(string id, bool shift = false, bool toggle = false)
+    {
+        switch (SelectionMode)
+        {
+            case TreeSelectionMode.None:
+                return;
+            case TreeSelectionMode.Checkbox:
+                await SetSelectedAsync(_model.ToggleCheck(id, _selected));
+                return;
+            case TreeSelectionMode.Single:
+                await SetSelectedAsync([id]);
+                return;
+            case TreeSelectionMode.Multi:
+                if (shift && _anchorId is not null)
+                {
+                    var ids = Rows().Rows.Select(r => r.Id).ToList();
+                    int a = ids.IndexOf(_anchorId), b = ids.IndexOf(id);
+                    if (a >= 0 && b >= 0) await SetSelectedAsync(ids.GetRange(Math.Min(a, b), Math.Abs(a - b) + 1));
+                    return;
+                }
+                _anchorId = id;
+                if (toggle)
+                {
+                    var next = new HashSet<string>(_selected, StringComparer.Ordinal);
+                    if (!next.Remove(id)) next.Add(id);
+                    await SetSelectedAsync(next);
+                }
+                else await SetSelectedAsync([id]);
+                return;
+        }
+    }
+
+    private Task ActivateAsync(string id) => ItemActivated.InvokeAsync(_model.Node(id));
+
+    private void FocusItem(string? id)
+    {
+        _focusId = id;
+        _focusPending = id is not null;
+    }
+
+    // ---- input -----------------------------------------------------------------------------------------------
+
+    private static TreeKey? KeyFor(string key) => key switch
+    {
+        "ArrowUp" => TreeKey.Up,
+        "ArrowDown" => TreeKey.Down,
+        "Home" => TreeKey.Home,
+        "End" => TreeKey.End,
+        "ArrowRight" => TreeKey.Right,
+        "ArrowLeft" => TreeKey.Left,
+        "*" => TreeKey.ExpandSiblings,
+        _ => null,
+    };
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        var (rows, visible, expanded) = Rows();
+        if (rows.Count == 0) return;
+        var focus = _focusId is not null && rows.Any(r => r.Id == _focusId) ? _focusId : rows[0].Id;
+        if (KeyFor(e.Key) is { } key)
+        {
+            var nav = _model.Navigate(focus, key, expanded, visible);
+            if (!nav.Expanded.SetEquals(expanded))
+            {
+                // Keep filter-forced expansion separate from the user's own expansion state.
+                var user = new HashSet<string>(_expanded, StringComparer.Ordinal);
+                foreach (var id in nav.Expanded) if (!expanded.Contains(id)) user.Add(id);
+                foreach (var id in expanded) if (!nav.Expanded.Contains(id)) user.Remove(id);
+                await SetExpandedAsync(user);
+            }
+            FocusItem(nav.FocusId);
+            if (e.ShiftKey && SelectionMode == TreeSelectionMode.Multi && nav.FocusId is not null && key is TreeKey.Up or TreeKey.Down)
+                await SelectAsync(nav.FocusId, shift: true);
+            return;
+        }
+        switch (e.Key)
+        {
+            case "Enter":
+                if (SelectionMode == TreeSelectionMode.Single) await SelectAsync(focus);
+                await ActivateAsync(focus);
+                return;
+            case " ":
+                await SelectAsync(focus, toggle: SelectionMode == TreeSelectionMode.Multi);
+                return;
+        }
+        if (e.Key.Length == 1 && !e.CtrlKey && !e.MetaKey && !e.AltKey)
+        {
+            var labels = rows.Select(r => TextOf(_model.Node(r.Id))).ToList();
+            var current = rows.Select(r => r.Id).ToList().IndexOf(focus);
+            var index = _typeahead.Search(e.Key, Options.TimeProvider.GetUtcNow().ToUnixTimeMilliseconds(), labels, current);
+            if (index >= 0) FocusItem(rows[index].Id);
+        }
+    }
+
+    private Task OnRowClick(string id, MouseEventArgs e)
+    {
+        _focusId = id;
+        _focusPending = true;
+        return SelectAsync(id, e.ShiftKey, e.CtrlKey || e.MetaKey);
+    }
+
+    private Task OnExpanderClick(string id)
+    {
+        FocusItem(id);
+        return _model.HasChildren(id) ? ToggleIdAsync(id) : Task.CompletedTask;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) await JsSafe.Run(() => Js.PreventKeysAsync(_root, "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "Space", "Enter"));
+        if (_focusPending && _focusId is not null)
+        {
+            _focusPending = false;
+            var dom = DomId(_focusId);
+            await JsSafe.Run(() => Js.FocusIdAsync(dom));
+        }
+    }
+
+    // ---- rendering -------------------------------------------------------------------------------------------
+
+    private static string CheckText(CheckState s) => s switch
+    {
+        CheckState.Checked => "checked",
+        CheckState.Indeterminate => "indeterminate",
+        _ => "unchecked",
+    };
+
+    private RenderFragment Level(IReadOnlyList<string> ids, int depth, IReadOnlySet<string>? visible, IReadOnlySet<string> expanded, string? tabStop) => __builder =>
+    {
+        var shown = visible is null ? ids : ids.Where(visible.Contains).ToList();
+        for (var i = 0; i < shown.Count; i++)
+        {
+            var id = shown[i];
+            var node = _model.Node(id);
+            var has = _model.HasChildren(id);
+            var open = has && expanded.Contains(id);
+            var state = _model.LoadState(id);
+            var text = TextOf(node);
+            var icon = ItemIcon?.Invoke(node);
+            CheckState? check = SelectionMode == TreeSelectionMode.Checkbox ? _model.GetCheckState(id, _selected) : null;
+            var selectable = SelectionMode is TreeSelectionMode.Single or TreeSelectionMode.Multi;
+            var selected = selectable && _selected.Contains(id);
+            var ranges = string.IsNullOrWhiteSpace(Filter) ? [] : OptionFilter.Filter([text], Filter).FirstOrDefault()?.Ranges ?? [];
+            <div @key="id" id="@DomId(id)" class="@(Css.Of("sl-tree__item").Add("is-selected", selected))" role="treeitem"
+                 tabindex="@(id == tabStop ? 0 : -1)" aria-level="@(depth + 1)" aria-setsize="@shown.Count" aria-posinset="@(i + 1)"
+                 aria-expanded="@(has ? open ? "true" : "false" : null)" aria-selected="@(selectable ? selected ? "true" : "false" : null)"
+                 aria-checked="@(check switch { CheckState.Indeterminate => "mixed", CheckState.Checked => "true", CheckState.Unchecked => "false", _ => null })"
+                 aria-busy="@(state == TreeLoadState.Loading ? "true" : null)" @onfocus="() => _focusId = id">
+                <div class="sl-tree__row" style="@($"--_depth:{depth}")" @onclick="e => OnRowClick(id, e)" @ondblclick="() => ActivateAsync(id)">
+                    <span class="@(Css.Of("sl-tree__expander").Add("is-leaf", !has))" aria-hidden="true"
+                          @onclick="() => OnExpanderClick(id)" @onclick:stopPropagation="true"><SlIcon Name="chevron-right" /></span>
+                    @if (check is { } c)
+                    {
+                        <span class="sl-tree__checkbox" data-state="@CheckText(c)" aria-hidden="true">
+                            @if (c == CheckState.Checked)
+                            {
+                                <SlIcon Name="check" />
+                            }
+                            else if (c == CheckState.Indeterminate)
+                            {
+                                <SlIcon Name="minus" />
+                            }
+                        </span>
+                    }
+                    @if (icon is not null)
+                    {
+                        <span class="sl-tree__icon"><SlIcon Name="@icon" /></span>
+                    }
+                    <span class="sl-tree__label">@(ItemTemplate is not null ? ItemTemplate(node) : SlSelect<string>.Highlight(text, ranges))</span>
+                    @if (state == TreeLoadState.Loading)
+                    {
+                        <span class="sl-tree__spinner"><span class="sl-spinner sl-spinner--small" role="status" aria-label="Loading"></span></span>
+                    }
+                </div>
+                @if (open)
+                {
+                    <div class="sl-tree__children" role="group">
+                        @if (state == TreeLoadState.Failed)
+                        {
+                            <div class="sl-tree__empty" style="@($"padding-left:calc({depth + 1} * var(--sl-component-tree-indent))")">@LoadFailedText</div>
+                        }
+                        else
+                        {
+                            @Level(_model.ChildrenOf(id), depth + 1, visible, expanded, tabStop)
+                        }
+                    </div>
+                }
+            </div>
+        }
+    };
+}

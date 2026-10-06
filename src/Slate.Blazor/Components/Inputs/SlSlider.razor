@@ -1,0 +1,166 @@
+@namespace Slate.Blazor
+@inherits SlInputBase<double>
+@implements IAsyncDisposable
+@inject SlateJs Js
+@*
+  Slider (docs/design/css-classes.md#slider). Thumbs are ARIA sliders: arrows step, PageUp/PageDown move 10 %,
+  Home/End jump to the ends. Set RangeEnd for two thumbs (they never cross). Dragging snaps to Step.
+  Value maths come from Slate.Core SliderMath.
+*@
+<div @attributes="AdditionalAttributes" class="@CssClass" style="@Style">
+    @if (Label is not null || ShowValue)
+    {
+        <div class="sl-slider__header">
+            <span class="sl-slider__label" id="@LabelId">@Label</span>
+            @if (ShowValue)
+            {
+                <output class="sl-slider__value">@Display</output>
+            }
+        </div>
+    }
+    <div class="sl-slider__track" @ref="_track">
+        <span class="sl-slider__rail"></span>
+        <span class="sl-slider__fill" style="@($"--_start:{Num(StartFraction)};--_end:{Num(EndFraction)}")"></span>
+        @if (Ticks)
+        {
+            @foreach (var p in TickPositions())
+            {
+                <span class="sl-slider__tick" style="@($"--_pos:{Num(p)}")"></span>
+            }
+        }
+        @for (var i = 0; i < ThumbCount; i++)
+        {
+            var thumb = i;
+            var value = ThumbValue(thumb);
+            <span @ref="_thumbs[thumb]" class="@(Css.Of("sl-slider__thumb").Add("is-dragging", _dragging == thumb))" role="slider"
+                  tabindex="@(Disabled ? -1 : 0)" style="@($"--_pos:{Num(SliderMath.ToFraction(value, Min, Max))}")"
+                  aria-valuemin="@Num(IsRange && thumb == 1 ? Value : Min)" aria-valuemax="@Num(IsRange && thumb == 0 ? RangeEnd!.Value : Max)"
+                  aria-valuenow="@Num(value)" aria-orientation="horizontal" aria-disabled="@(Disabled ? "true" : null)"
+                  aria-labelledby="@(Label is not null && !IsRange ? LabelId : null)" aria-label="@ThumbLabel(thumb)"
+                  @onkeydown="e => OnThumbKeyDown(thumb, e)"></span>
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>Second thumb's value: set it to make a range slider.</summary>
+    [Parameter] public double? RangeEnd { get; set; }
+    [Parameter] public EventCallback<double?> RangeEndChanged { get; set; }
+
+    [Parameter] public double Min { get; set; }
+    [Parameter] public double Max { get; set; } = 100;
+    [Parameter] public double Step { get; set; } = 1;
+
+    /// <summary>Tick marks: one per step up to 50 steps, otherwise 11.</summary>
+    [Parameter] public bool Ticks { get; set; }
+
+    [Parameter] public bool ShowValue { get; set; }
+
+    [Parameter] public Tone Tone { get; set; } = Tone.Accent;
+
+    /// <summary>Formats the shown value (ShowValue).</summary>
+    [Parameter] public Func<double, string>? Format { get; set; }
+
+    private readonly ElementReference[] _thumbs = new ElementReference[2];
+    private ElementReference _track;
+    private DotNetObjectReference<SlSlider>? _self;
+    private int? _dragging;
+
+    private bool IsRange => RangeEnd is not null;
+    private int ThumbCount => IsRange ? 2 : 1;
+    private string LabelId => $"{UniqueId}-label";
+
+    private string CssClass => Css.Of("sl-slider").Add(Names.Tone(Tone)).Add("sl-slider--range", IsRange).Add("is-disabled", Disabled)
+        .Add("is-invalid", IsInvalid).Add(Class);
+
+    private double StartFraction => IsRange ? SliderMath.ToFraction(Value, Min, Max) : 0;
+    private double EndFraction => SliderMath.ToFraction(IsRange ? RangeEnd!.Value : Value, Min, Max);
+
+    private string Show(double v) => Format?.Invoke(v) ?? Num(v);
+    private string Display => IsRange ? $"{Show(Value)} – {Show(RangeEnd!.Value)}" : Show(Value);
+
+    private double ThumbValue(int thumb) => thumb == 1 ? RangeEnd!.Value : Value;
+
+    private string? ThumbLabel(int thumb)
+    {
+        if (Label is not null && !IsRange) return null;
+        var name = IsRange ? (thumb == 0 ? "Minimum" : "Maximum") : "Value";
+        return Label is not null ? $"{Label} {name.ToLowerInvariant()}" : name;
+    }
+
+    private static string Num(double v) => v.ToString("0.####", System.Globalization.CultureInfo.InvariantCulture);
+
+    private IEnumerable<double> TickPositions()
+    {
+        var span = Max - Min;
+        if (span <= 0 || Step <= 0) yield break;
+        var count = (int)Math.Round(span / Step);
+        var n = count <= 50 ? count : 10;
+        for (var i = 0; i <= n; i++) yield return (double)i / n;
+    }
+
+    private async Task SetThumbAsync(int thumb, double value)
+    {
+        if (IsRange)
+        {
+            var (start, end) = SliderMath.SetRangeThumb((Value, RangeEnd!.Value), thumb, value, Min, Max, Step);
+            if (start != Value) CurrentValue = start;
+            if (end != RangeEnd)
+            {
+                RangeEnd = end;
+                await RangeEndChanged.InvokeAsync(end);
+            }
+        }
+        else
+        {
+            CurrentValue = SliderMath.Snap(value, Min, Max, Step);
+        }
+    }
+
+    private async Task OnThumbKeyDown(int thumb, KeyboardEventArgs e)
+    {
+        if (Disabled) return;
+        SliderKey? key = e.Key switch
+        {
+            "ArrowRight" or "ArrowUp" => SliderKey.Increase,
+            "ArrowLeft" or "ArrowDown" => SliderKey.Decrease,
+            "PageUp" => SliderKey.PageIncrease,
+            "PageDown" => SliderKey.PageDecrease,
+            "Home" => SliderKey.Home,
+            "End" => SliderKey.End,
+            _ => null,
+        };
+        if (key is { } k) await SetThumbAsync(thumb, SliderMath.Key(ThumbValue(thumb), k, Min, Max, Step));
+    }
+
+    /// <summary>Pointer on the track (from slate.js): fraction 0..1 and phase down/move/up.</summary>
+    [JSInvokable]
+    public async Task OnTrackPointer(double fraction, string phase)
+    {
+        if (Disabled) return;
+        var value = SliderMath.FromFraction(fraction, Min, Max, Step);
+        if (phase == "down")
+            _dragging = IsRange && Math.Abs(value - RangeEnd!.Value) < Math.Abs(value - Value) ? 1
+                : IsRange && value > RangeEnd!.Value ? 1 : 0;
+        if (_dragging is { } thumb) await InvokeAsync(() => SetThumbAsync(thumb, value));
+        if (phase == "up") _dragging = null;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        _self = DotNetObjectReference.Create(this);
+        await JsSafe.Run(() => Js.SliderTrackAsync(_track, _self));
+        foreach (var t in _thumbs.Take(ThumbCount))
+            await JsSafe.Run(() => Js.PreventKeysAsync(t, "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End"));
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Dispose();
+        if (_self is null) return; // never rendered interactively (prerender): nothing to release
+        await JsSafe.Run(() => Js.SliderReleaseAsync(_track));
+        _self.Dispose();
+    }
+}

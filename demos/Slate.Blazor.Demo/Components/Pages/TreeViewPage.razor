@@ -1,0 +1,101 @@
+@page "/tree-view"
+<PageTitle>Tree view · Slate</PageTitle>
+
+<div class="demo-page">
+    <PageHeader Title="Tree view">WAI-ARIA tree: ↑/↓ move, → expands or enters, ← collapses or leaves, * expands siblings, typeahead. Enter activates.</PageHeader>
+
+    <SlGrid>
+        <SlItem Xs="12" Lg="7">
+            <DemoSection Title="Project explorer" Subtitle="Filter keeps ancestors of matches and highlights them">
+                <SlStack Spacing="3">
+                    <div class="demo-fields">
+                        <SlTextField @bind-Value="_filter" Placeholder="Filter files…" StartIcon="search" Clearable="true" Immediate="true" Size="ControlSize.Small" />
+                        <SlSegmented T="TreeSelectionMode" Items="Enum.GetValues<TreeSelectionMode>()" @bind-Value="_mode" Size="ControlSize.Small" Label="Selection mode" />
+                    </div>
+                    <div class="demo-tree">
+                        <SlTreeView T="FileNode" Items="Repo" ChildrenSelector="n => n.Children" ItemText="n => n.Name" ItemIcon="Icon"
+                                    SelectionMode="_mode" @bind-SelectedItems="_selected" @bind-Expanded="_expanded" Filter="@_filter" Dense="_dense"
+                                    ItemActivated="n => _opened = n.Name" Label="Project files" />
+                    </div>
+                    <div class="demo-row">
+                        <SlCheckbox @bind-Checked="_dense" Label="Dense" Size="ControlSize.Small" />
+                        <SlButton Size="ControlSize.Small" Variant="ButtonVariant.Ghost" Click="ExpandAll">Expand all</SlButton>
+                        <SlButton Size="ControlSize.Small" Variant="ButtonVariant.Ghost" Click="() => _expanded = []">Collapse all</SlButton>
+                    </div>
+                    <SlText Typo="Typo.Caption" Tone="TextTone.Tertiary">
+                        Selected: @(_selected.Count == 0 ? "—" : string.Join(", ", _selected.Select(s => s.Name).Take(6)))@(_selected.Count > 6 ? $" +{_selected.Count - 6}" : "") · Opened: @(_opened ?? "—")
+                    </SlText>
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+        <SlItem Xs="12" Lg="5">
+            <SlStack Spacing="6">
+                <DemoSection Title="Lazy loading" Subtitle="Children load on first expand; the third level fails once">
+                    <div class="demo-tree">
+                        <SlTreeView T="string" Items="Servers" HasChildren="s => s.Count(c => c == '/') < 2" LoadChildren="LoadAsync"
+                                    ItemText="s => s[(s.LastIndexOf('/') + 1)..]" ItemIcon="@(s => s.Count(c => c == '/') < 2 ? "folder" : "file")" Label="Servers" />
+                    </div>
+                </DemoSection>
+                <DemoSection Title="Custom item template">
+                    <div class="demo-tree">
+                        <SlTreeView T="FileNode" Items="SrcOnly" ChildrenSelector="n => n.Children" ItemText="n => n.Name" ItemIcon="Icon" Expanded="SrcOnly"
+                                    SelectionMode="TreeSelectionMode.None" Label="Templated">
+                            <ItemTemplate Context="n">
+                                <span>@n.Name</span>
+                                @if (n.Children.Length > 0)
+                                {
+                                    <SlBadge Size="BadgeSize.Small" Variant="BadgeVariant.Soft" Style="margin-left: var(--sl-space-2)">@n.Children.Length</SlBadge>
+                                }
+                            </ItemTemplate>
+                        </SlTreeView>
+                    </div>
+                </DemoSection>
+            </SlStack>
+        </SlItem>
+    </SlGrid>
+</div>
+
+@code {
+    public sealed record FileNode(string Name, params FileNode[] Children);
+
+    private static FileNode F(string name, params FileNode[] children) => new(name, children);
+
+    private static readonly FileNode[] Repo =
+    [
+        F("src",
+            F("Slate.Core", F("Collections", F("TreeModel.cs"), F("ListNavigation.cs"), F("Widgets.cs")), F("Dates", F("CalendarModel.cs"), F("DateText.cs")),
+                F("Overlays", F("PopoverPositioner.cs"))),
+            F("Slate.Blazor", F("Components", F("SlTreeView.razor"), F("SlSelect.razor"), F("SlDatePicker.razor")), F("wwwroot", F("slate.css"), F("slate.js"))),
+            F("Slate.Wpf", F("Themes", F("Generic.xaml")))),
+        F("tests", F("Slate.Core.Tests", F("TreeModelTests.cs")), F("Slate.Blazor.Tests", F("NavigationTests.razor"))),
+        F("design", F("tokens.json"), F("icons", F("icons.json"))),
+        F("README.md"),
+        F("LICENSE"),
+    ];
+
+    private static readonly FileNode[] SrcOnly = [Repo[0]];
+    private static readonly string[] Servers = ["eu-west", "us-east", "ap-south"];
+
+    private static string? Icon(FileNode n) => n.Children.Length > 0 ? "folder" : "file";
+
+    private TreeSelectionMode _mode = TreeSelectionMode.Single;
+    private IReadOnlyCollection<FileNode> _selected = [];
+    private IReadOnlyCollection<FileNode> _expanded = [Repo[0], Repo[0].Children[0]];
+    private string? _filter, _opened;
+    private bool _dense;
+    private readonly HashSet<string> _failedOnce = [];
+
+    private void ExpandAll()
+    {
+        IEnumerable<FileNode> All(IEnumerable<FileNode> nodes) => nodes.SelectMany(n => All(n.Children).Prepend(n));
+        _expanded = All(Repo).Where(n => n.Children.Length > 0).ToList();
+    }
+
+    private async Task<IEnumerable<string>> LoadAsync(string parent)
+    {
+        await Task.Delay(700);
+        if (parent.Count(c => c == '/') == 1 && _failedOnce.Add(parent)) throw new InvalidOperationException("Simulated failure");
+        var depth = parent.Count(c => c == '/');
+        return depth == 0 ? Enumerable.Range(1, 3).Select(i => $"{parent}/node-{i}") : Enumerable.Range(1, 2).Select(i => $"{parent}/disk-{i}.vhd");
+    }
+}

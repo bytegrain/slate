@@ -1,0 +1,93 @@
+@page "/navigation"
+<PageTitle>Navigation · Slate</PageTitle>
+
+<div class="demo-page">
+    <PageHeader Title="Navigation">Tabs, breadcrumbs and pagination. Tabs use automatic activation: arrows move and select, Delete closes.</PageHeader>
+
+    <DemoSection Title="Tabs" Subtitle="Line (default), pills and enclosed; icons, badges, disabled">
+        <SlStack Spacing="6">
+            @foreach (var variant in Enum.GetValues<TabsVariant>())
+            {
+                <SlTabs Variant="variant" Label="@($"{variant} tabs")">
+                    <SlTab Key="overview" Label="Overview" Icon="home"><SlText Tone="TextTone.Secondary">@variant — overview panel.</SlText></SlTab>
+                    <SlTab Key="activity" Label="Activity" Icon="bell" Badge="12"><SlText Tone="TextTone.Secondary">12 new events since yesterday.</SlText></SlTab>
+                    <SlTab Key="files" Label="Files" Icon="folder"><SlText Tone="TextTone.Secondary">Files panel.</SlText></SlTab>
+                    <SlTab Key="billing" Label="Billing" Disabled="true" />
+                    <SlTab Key="settings" Label="Settings" Icon="settings"><SlText Tone="TextTone.Secondary">Settings panel.</SlText></SlTab>
+                </SlTabs>
+            }
+        </SlStack>
+    </DemoSection>
+
+    <SlGrid>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Closable and overflowing" Subtitle="Add tabs until they scroll; Delete or × closes">
+                <SlTabs @bind-Value="_doc" Size="ControlSize.Small" Variant="TabsVariant.Enclosed" KeepAlive="true" Label="Open documents">
+                    @foreach (var doc in _docs)
+                    {
+                        <SlTab @key="doc" Key="@doc" Label="@doc" Icon="file" Closable="_docs.Count > 1" Closed="Close">
+                            <SlTextField TValue="string" Label="@($"Notes for {doc}")" Placeholder="State survives tab switches (KeepAlive)" Size="ControlSize.Small" />
+                        </SlTab>
+                    }
+                </SlTabs>
+                <div class="demo-row" style="margin-top: var(--sl-space-3)">
+                    <SlButton Size="ControlSize.Small" StartIcon="plus" Click="Add">New tab</SlButton>
+                    <SlText Typo="Typo.Caption" Tone="TextTone.Tertiary">Active: @_doc</SlText>
+                </div>
+            </DemoSection>
+        </SlItem>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Vertical and large" Subtitle="Direction=Column uses ↑/↓">
+                <SlTabs Direction="Direction.Column" Size="ControlSize.Large" Variant="TabsVariant.Pills" Label="Settings sections">
+                    <SlTab Label="Profile" Icon="user"><SlText Tone="TextTone.Secondary">Name, avatar and contact details.</SlText></SlTab>
+                    <SlTab Label="Notifications" Icon="bell" Badge="2"><SlText Tone="TextTone.Secondary">Email and push preferences.</SlText></SlTab>
+                    <SlTab Label="Security" Icon="eye"><SlText Tone="TextTone.Secondary">Passwords and sessions.</SlText></SlTab>
+                </SlTabs>
+            </DemoSection>
+        </SlItem>
+
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Breadcrumbs" Subtitle="The last item is the current page">
+                <SlStack Spacing="4">
+                    <SlBreadcrumbs Items="Trail" ItemClick="e => _crumb = e.Item.Label" />
+                    <SlBreadcrumbs Items="Trail" MaxItems="3" ItemClick="e => _crumb = e.Item.Label" />
+                    <SlBreadcrumbs Items="Trail.Take(3)" Separator="arrow-right" />
+                    <SlText Typo="Typo.Caption" Tone="TextTone.Tertiary">Last clicked: @(_crumb ?? "—") · MaxItems=3 keeps the first and the last two.</SlText>
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Pagination" Subtitle="Ellipses come from Slate.Core PaginationRange">
+                <SlStack Spacing="4">
+                    <SlPagination @bind-Page="_page" PageCount="20" />
+                    <SlPagination @bind-Page="_page2" @bind-PageSize="_size" TotalCount="487" PageSizes="Sizes" Size="ControlSize.Small" />
+                    <SlPagination @bind-Page="_page3" PageCount="50" Siblings="2" Size="ControlSize.Large" />
+                </SlStack>
+            </DemoSection>
+        </SlItem>
+    </SlGrid>
+</div>
+
+@code {
+    private static readonly BreadcrumbItem[] Trail =
+    [
+        new("Home", "navigation", "home"), new("Projects", "navigation"), new("Slate", "navigation"), new("Components", "navigation"), new("Navigation"),
+    ];
+    private static readonly int[] Sizes = [10, 25, 50, 100];
+
+    private readonly List<string> _docs = ["README.md", "Program.cs", "slate.css"];
+    private string? _doc = "Program.cs";
+    private int _next = 1;
+    private string? _crumb;
+    private int _page = 4, _page2 = 3, _page3 = 25;
+    private int? _size = 25;
+
+    private void Add()
+    {
+        var name = $"Untitled-{_next++}.md";
+        _docs.Add(name);
+        _doc = name;
+    }
+
+    private void Close(string key) => _docs.Remove(key);
+}

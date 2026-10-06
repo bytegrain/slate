@@ -1,0 +1,166 @@
+@namespace Slate.Blazor
+@inherits SlComponentBase
+@implements IAsyncDisposable
+@inject OverlayManager Overlays
+@inject SlateJs Js
+@inject SlateOptions Options
+@*
+  Menu and context menu (docs/design/css-classes.md#menu-and-context-menu).
+  <SlMenu><Trigger><SlButton>Actions</SlButton></Trigger><Items><SlMenuItem Label="Rename" /></Items></SlMenu>
+  Keyboard: Enter/Space/↓ on the trigger open on the first item, ↑ on the last; arrows/Home/End/typeahead move
+  (wrapping); → opens a submenu, ← closes it; Escape closes the topmost panel; Tab closes everything.
+  With ContextMenu the trigger area opens the menu at the pointer on right-click (or Shift+F10 / the Menu key).
+*@
+<span @attributes="AdditionalAttributes" class="@(Css.Of("sl-menu").Add(Class))" style="@Style">
+    <span class="sl-menu__trigger" @ref="_trigger" @onclick="OnTriggerClick" @onkeydown="OnTriggerKeyDown"
+          @oncontextmenu="OnContextMenu" @oncontextmenu:preventDefault="ContextMenu">@Trigger</span>
+    <div @ref="_panel" id="@PanelId" class="sl-popover-panel sl-menu__panel" role="menu" aria-label="@Label"
+         data-placement="@Names.Kebab(Placement.ToString())" popover="manual" hidden="@(!Open)" @onkeydown="OnPanelKeyDown">
+        <CascadingValue Value="List" IsFixed="true">
+            @(Items ?? ChildContent)
+        </CascadingValue>
+    </div>
+</span>
+
+@code {
+    /// <summary>The element that opens the menu (or, with ContextMenu, the area that opens it).</summary>
+    [Parameter] public RenderFragment? Trigger { get; set; }
+
+    /// <summary><c>SlMenuItem</c>s (separators, submenus…).</summary>
+    [Parameter] public RenderFragment? Items { get; set; }
+
+    /// <summary>Alternative to <see cref="Items"/> for inline content.</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public PopoverPlacement Placement { get; set; } = PopoverPlacement.BottomStart;
+
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    /// <summary>Opens on right-click / Shift+F10 / the Menu key at the pointer instead of on click.</summary>
+    [Parameter] public bool ContextMenu { get; set; }
+
+    /// <summary>Raised when any item (at any depth) is activated.</summary>
+    [Parameter] public EventCallback<MenuSelectEventArgs> ItemSelected { get; set; }
+
+    /// <summary>Accessible name of the menu panel.</summary>
+    [Parameter] public string? Label { get; set; }
+
+    private ElementReference _trigger;
+    private ElementReference _panel;
+    private OverlayHandle? _overlay;
+    private MenuList? _list;
+    private bool _shown;
+    private bool? _ariaExpanded;
+    private string _pendingFocus = "first";
+
+    private string PanelId => $"{UniqueId}-menu";
+
+    /// <summary>The top-level items.</summary>
+    public MenuList List => _list ??= new MenuList(this, null, Js, Options.TimeProvider);
+
+    private OverlayHandle Overlay => _overlay ??= new OverlayHandle(Overlays, Js, OnDismiss);
+
+    protected override void OnParametersSet()
+    {
+        Overlay.Placement = Placement;
+        Overlay.Offset = 6;
+        if (Open && !Overlay.IsOpen) Overlay.MarkOpen();
+        else if (!Open && Overlay.IsOpen) Overlay.MarkClosed();
+    }
+
+    /// <summary>Opens the menu. <paramref name="focus"/>: "first", "last" or "none"; <paramref name="at"/> opens at a viewport point.</summary>
+    public async Task ShowAsync(string focus = "first", (double X, double Y)? at = null)
+    {
+        _pendingFocus = focus;
+        Overlay.Point = at;
+        if (Open)
+        {
+            _shown = false; // re-show at the new point
+            StateHasChanged();
+            return;
+        }
+        Open = true;
+        OnParametersSet();
+        Overlay.Point = at;
+        await OpenChanged.InvokeAsync(true);
+        StateHasChanged();
+    }
+
+    /// <summary>Closes the menu and every submenu; optionally returns focus to the trigger.</summary>
+    public async Task CloseAsync(bool returnFocus = true)
+    {
+        await List.CloseSubmenusAsync();
+        if (!Open) return;
+        Open = false;
+        OnParametersSet();
+        await OpenChanged.InvokeAsync(false);
+        StateHasChanged();
+        if (returnFocus && !ContextMenu) await JsSafe.Run(() => Js.FocusFirstChildAsync(_trigger));
+    }
+
+    internal async Task NotifySelectedAsync(MenuSelectEventArgs args)
+    {
+        await ItemSelected.InvokeAsync(args);
+        await CloseAsync(returnFocus: true);
+    }
+
+    private Task OnDismiss(OverlayDismissReason reason) => InvokeAsync(() => CloseAsync(returnFocus: reason == OverlayDismissReason.Escape));
+
+    private async Task OnTriggerClick(MouseEventArgs e)
+    {
+        if (ContextMenu) return;
+        if (Open) await CloseAsync(returnFocus: false);
+        else await ShowAsync(e.Detail == 0 ? "first" : "none"); // Detail 0: activated by Enter/Space
+    }
+
+    private async Task OnTriggerKeyDown(KeyboardEventArgs e)
+    {
+        if (ContextMenu)
+        {
+            if (e.Key == "ContextMenu" || (e.Key == "F10" && e.ShiftKey)) await ShowAsync("first");
+            return;
+        }
+        if (e.Key == "ArrowDown") await ShowAsync("first");
+        else if (e.Key == "ArrowUp") await ShowAsync("last");
+    }
+
+    private Task OnContextMenu(MouseEventArgs e) => ContextMenu ? ShowAsync("first", (e.ClientX, e.ClientY)) : Task.CompletedTask;
+
+    private Task OnPanelKeyDown(KeyboardEventArgs e) => List.HandleKeyAsync(e);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JsSafe.Run(() => Js.PreventKeysAsync(_panel, "ArrowUp", "ArrowDown", "Home", "End", "Space"));
+            await JsSafe.Run(() => Js.PreventKeysAsync(_trigger, "ArrowUp", "ArrowDown"));
+        }
+        if (!ContextMenu && _ariaExpanded != Open)
+        {
+            _ariaExpanded = Open;
+            await JsSafe.Run(() => Js.SetAnchorAriaAsync(_trigger, new Dictionary<string, string?> { ["aria-haspopup"] = "menu", ["aria-expanded"] = Open ? "true" : "false" }));
+        }
+
+        if (Open && !_shown)
+        {
+            _shown = true;
+            await Overlay.ShowAsync(_trigger, _panel);
+            var focus = _pendingFocus;
+            _pendingFocus = "first";
+            if (focus == "first") await List.FocusFirstAsync();
+            else if (focus == "last") await List.FocusLastAsync();
+        }
+        else if (!Open && _shown)
+        {
+            _shown = false;
+            List.FocusedIndex = -1;
+            await Overlay.HideAsync();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_overlay is not null) await _overlay.DisposeAsync();
+    }
+}

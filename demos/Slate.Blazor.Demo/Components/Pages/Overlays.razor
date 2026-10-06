@@ -1,0 +1,130 @@
+@page "/overlays"
+<PageTitle>Overlays · Slate</PageTitle>
+
+<div class="demo-page">
+    <PageHeader Title="Overlays">Menus, popovers and tooltips share one overlay stack: Escape closes only the topmost, an outside click closes top-down.</PageHeader>
+
+    <SlGrid>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Menu" Subtitle="Arrows, Home/End, typeahead; → opens a submenu, ← closes it">
+                <div class="demo-row">
+                    <SlMenu Label="File" ItemSelected="e => _last = e.Label">
+                        <Trigger><SlButton EndIcon="chevron-down">File</SlButton></Trigger>
+                        <Items>
+                            <SlMenuItem Label="New file" Icon="plus" Shortcut="⌘N" />
+                            <SlMenuItem Label="Open…" Icon="folder" Shortcut="⌘O" />
+                            <SlMenuItem Label="Open recent" Icon="clock">
+                                <Submenu>
+                                    <SlMenuItem Label="Program.cs" Icon="file" />
+                                    <SlMenuItem Label="slate.css" Icon="file" />
+                                    <SlMenuItem Label="More">
+                                        <Submenu><SlMenuItem Label="README.md" /><SlMenuItem Label="LICENSE" /></Submenu>
+                                    </SlMenuItem>
+                                </Submenu>
+                            </SlMenuItem>
+                            <SlMenuItem Separator="true" />
+                            <SlMenuItem Label="Duplicate" Icon="copy" Shortcut="⌘D" />
+                            <SlMenuItem Label="Share" Icon="external-link" Disabled="true" />
+                            <SlMenuItem Separator="true" />
+                            <SlMenuItem Label="Delete" Icon="trash" Tone="Tone.Danger" Shortcut="⌫" />
+                        </Items>
+                    </SlMenu>
+
+                    <SlMenu Label="View options" Placement="PopoverPlacement.BottomEnd" ItemSelected="e => _last = e.Label">
+                        <Trigger><SlButton Variant="ButtonVariant.Ghost" StartIcon="eye">View</SlButton></Trigger>
+                        <Items>
+                            <SlMenuItem Label="Word wrap" @bind-Checked="_wrap" />
+                            <SlMenuItem Label="Minimap" @bind-Checked="_minimap" />
+                            <SlMenuItem Label="Line numbers" @bind-Checked="_lines" />
+                        </Items>
+                    </SlMenu>
+
+                    <SlMenu Label="Links">
+                        <Trigger><SlButton IconOnly="true" Variant="ButtonVariant.Ghost" StartIcon="more-horizontal" Label="More" /></Trigger>
+                        <Items>
+                            <SlMenuItem Label="Pickers page" Href="pickers" Icon="calendar" />
+                            <SlMenuItem Label="Slate on GitHub" Href="https://github.com" Target="_blank" Icon="external-link" />
+                        </Items>
+                    </SlMenu>
+                </div>
+                <SlText Typo="Typo.Caption" Tone="TextTone.Tertiary" Style="margin-top: var(--sl-space-3)">
+                    Last chosen: @(_last ?? "—") · wrap @On(_wrap), minimap @On(_minimap), line numbers @On(_lines)
+                </SlText>
+            </DemoSection>
+        </SlItem>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Context menu" Subtitle="Right-click (or Shift+F10) opens at the pointer">
+                <SlMenu ContextMenu="true" Label="Canvas actions" ItemSelected="e => _context = e.Label">
+                    <Trigger><div class="demo-surface" tabindex="0">Right-click anywhere here</div></Trigger>
+                    <Items>
+                        <SlMenuItem Label="Cut" Shortcut="⌘X" />
+                        <SlMenuItem Label="Copy" Icon="copy" Shortcut="⌘C" />
+                        <SlMenuItem Label="Paste" Shortcut="⌘V" />
+                        <SlMenuItem Separator="true" />
+                        <SlMenuItem Label="Arrange">
+                            <Submenu><SlMenuItem Label="Bring to front" /><SlMenuItem Label="Send to back" /></Submenu>
+                        </SlMenuItem>
+                    </Items>
+                </SlMenu>
+                <SlText Typo="Typo.Caption" Tone="TextTone.Tertiary" Style="margin-top: var(--sl-space-2)">Context action: @(_context ?? "—")</SlText>
+            </DemoSection>
+        </SlItem>
+
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Popover" Subtitle="Placement flips and shifts to stay on screen">
+                <div class="demo-row">
+                    @foreach (var placement in new[] { PopoverPlacement.Top, PopoverPlacement.Right, PopoverPlacement.Bottom, PopoverPlacement.Left })
+                    {
+                        <SlPopover Placement="placement" Label="@($"{placement} popover")">
+                            <Anchor><SlButton Size="ControlSize.Small">@placement</SlButton></Anchor>
+                            <ChildContent><SlText Typo="Typo.Body">Placed @placement.ToString().ToLowerInvariant().</SlText></ChildContent>
+                        </SlPopover>
+                    }
+                </div>
+                <div class="demo-row" style="margin-top: var(--sl-space-4)">
+                    <SlPopover @bind-Open="_filters" Modal="true" Label="Filters" Placement="PopoverPlacement.BottomStart">
+                        <Anchor><SlButton StartIcon="filter">Filters (modal)</SlButton></Anchor>
+                        <ChildContent>
+                            <SlStack Spacing="3" Style="width: 260px">
+                                <SlText Typo="Typo.BodyStrong">Filter issues</SlText>
+                                <SlSelect T="string" Items="Statuses" @bind-Value="_status" Label="Status" Size="ControlSize.Small" />
+                                <SlCheckbox @bind-Checked="_mine" Label="Assigned to me" Size="ControlSize.Small" />
+                                <div class="demo-row" style="justify-content: flex-end">
+                                    <SlButton Size="ControlSize.Small" Variant="ButtonVariant.Ghost" Click="() => _filters = false">Cancel</SlButton>
+                                    <SlButton Size="ControlSize.Small" Variant="ButtonVariant.Solid" Tone="Tone.Accent" Click="() => _filters = false">Apply</SlButton>
+                                </div>
+                            </SlStack>
+                        </ChildContent>
+                    </SlPopover>
+                    <SlPopover MatchAnchorWidth="true" CloseOnOutsideClick="false" Label="Sticky">
+                        <Anchor><SlButton>Ignores outside clicks (Escape closes)</SlButton></Anchor>
+                        <ChildContent><SlText Typo="Typo.Body">At least as wide as its anchor.</SlText></ChildContent>
+                    </SlPopover>
+                </div>
+            </DemoSection>
+        </SlItem>
+        <SlItem Xs="12" Lg="6">
+            <DemoSection Title="Tooltip" Subtitle="Shows after 500 ms; moving between tooltips shows instantly">
+                <div class="demo-row">
+                    <SlTooltip Text="Bold" Shortcut="⌘B"><SlButton IconOnly="true" Variant="ButtonVariant.Ghost" StartIcon="pencil" Label="Bold" /></SlTooltip>
+                    <SlTooltip Text="Copy link" Shortcut="⌘L" Placement="PopoverPlacement.Bottom"><SlButton IconOnly="true" Variant="ButtonVariant.Ghost" StartIcon="copy" Label="Copy" /></SlTooltip>
+                    <SlTooltip Text="Delete forever" Placement="PopoverPlacement.Right"><SlButton IconOnly="true" Variant="ButtonVariant.Ghost" Tone="Tone.Danger" StartIcon="trash" Label="Delete" /></SlTooltip>
+                    <SlTooltip Delay="0" Placement="PopoverPlacement.Top">
+                        <ChildContent><SlBadge Tone="Tone.Warning">Rich, no delay</SlBadge></ChildContent>
+                        <TooltipContent><strong>3 checks pending</strong> · lint, test, build</TooltipContent>
+                    </SlTooltip>
+                    <SlTooltip Text="You won't see me" Disabled="true"><SlButton Size="ControlSize.Small">Disabled tooltip</SlButton></SlTooltip>
+                </div>
+            </DemoSection>
+        </SlItem>
+    </SlGrid>
+</div>
+
+@code {
+    private static readonly string[] Statuses = ["Open", "In progress", "Done"];
+    private string? _last, _context, _status = "Open";
+    private bool? _wrap = true, _minimap = false, _lines = true;
+    private bool _filters, _mine;
+
+    private static string On(bool? v) => v == true ? "on" : "off";
+}

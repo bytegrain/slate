@@ -1,0 +1,353 @@
+@inherits SlateTestContext
+@using System.ComponentModel.DataAnnotations
+@using Slate.Dates
+
+@code {
+    private static readonly string[] Fruits = ["Apple", "Apricot", "Banana", "Blueberry", "Cherry"];
+
+    // ---- select ----------------------------------------------------------------------------------------------
+
+    [Fact]
+    public void Select_renders_the_field_contract()
+    {
+        var cut = Render<SlSelect<string>>(p => p.Add(x => x.Items, Fruits).Add(x => x.Label, "Fruit").Add(x => x.Placeholder, "Pick one")
+            .Add(x => x.Variant, FieldVariant.Filled).Add(x => x.Size, ControlSize.Small));
+        var root = cut.Find(".sl-field");
+        Assert.Contains("sl-select", root.ClassList);
+        Assert.Contains("sl-field--filled", root.ClassList);
+        Assert.Contains("sl-field--small", root.ClassList);
+        var trigger = cut.Find(".sl-select__trigger");
+        Assert.Equal("combobox", trigger.GetAttribute("role"));
+        Assert.Equal("false", trigger.GetAttribute("aria-expanded"));
+        Assert.Equal("Pick one", cut.Find(".sl-select__placeholder").TextContent);
+        Assert.True(cut.Find(".sl-select__panel").HasAttribute("hidden"));
+        Assert.Equal("listbox", cut.Find(".sl-select__listbox").GetAttribute("role"));
+    }
+
+    [Fact]
+    public void Select_opens_with_arrow_moves_the_active_option_and_picks_with_enter()
+    {
+        string? value = null;
+        var cut = Render<SlSelect<string>>(p => p.Add(x => x.Items, Fruits).Bind(x => x.Value, value, v => value = v));
+        var trigger = cut.Find(".sl-select__trigger");
+        trigger.KeyDown("ArrowDown");
+        Assert.Equal("true", cut.Find(".sl-select__trigger").GetAttribute("aria-expanded"));
+        Assert.Equal(5, cut.FindAll(".sl-select__option").Count);
+
+        cut.Find(".sl-select__trigger").KeyDown("ArrowDown");
+        var active = cut.Find(".sl-select__option.is-active");
+        Assert.Equal(active.Id, cut.Find(".sl-select__trigger").GetAttribute("aria-activedescendant"));
+
+        cut.Find(".sl-select__trigger").KeyDown("Enter");
+        Assert.Equal("Apricot", value);
+        Assert.False(cut.Instance.IsOpen);
+    }
+
+    [Fact]
+    public void Select_typeahead_cycles_through_matching_items()
+    {
+        var cut = Render<SlSelect<string>>(p => p.Add(x => x.Items, Fruits));
+        cut.Find(".sl-select__trigger").KeyDown("b");
+        Assert.Equal("Banana", cut.Find(".sl-select__option.is-active").TextContent.Trim());
+        Time.Advance(TimeSpan.FromSeconds(1));
+        cut.Find(".sl-select__trigger").KeyDown("b");
+        Assert.Equal("Blueberry", cut.Find(".sl-select__option.is-active").TextContent.Trim());
+    }
+
+    [Fact]
+    public void Searchable_select_filters_and_highlights()
+    {
+        var cut = Render<SlSelect<string>>(p => p.Add(x => x.Items, Fruits).Add(x => x.Searchable, true));
+        cut.Find(".sl-select__input").Input("ap");
+        var options = cut.FindAll(".sl-select__option");
+        Assert.Equal(["Apple", "Apricot"], options.Select(o => o.TextContent.Trim()));
+        Assert.Equal("Ap", cut.Find(".sl-select__option mark").TextContent);
+    }
+
+    [Fact]
+    public void Multiple_select_toggles_values_and_shows_chips()
+    {
+        IReadOnlyList<string>? values = ["Cherry"];
+        var cut = Render<SlSelect<string>>(p => p.Add(x => x.Items, Fruits).Add(x => x.Multiple, true)
+            .Bind(x => x.Values, values, v => values = v));
+        Assert.Single(cut.FindAll(".sl-select__chip"));
+        cut.Find(".sl-select__control").Click();
+        Assert.Equal("true", cut.Find(".sl-select__listbox").GetAttribute("aria-multiselectable"));
+        cut.FindAll(".sl-select__option")[0].Click();
+        Assert.Equal(["Cherry", "Apple"], values);
+        Assert.True(cut.Instance.IsOpen); // stays open for more picks
+    }
+
+    [Fact]
+    public void Select_groups_items()
+    {
+        var cut = Render<SlSelect<string>>(p => p.Add(x => x.Items, Fruits).Add(x => x.GroupBy, s => s[..1]));
+        cut.Find(".sl-select__trigger").Click();
+        Assert.Equal(["A", "B", "C"], cut.FindAll(".sl-select__group-label").Select(g => g.TextContent));
+    }
+
+    // ---- date picker -----------------------------------------------------------------------------------------
+
+    /// <summary>Fixes the clock and the culture (en-US: M/d/yyyy, Sunday first) for date tests.</summary>
+    private readonly System.Globalization.CultureInfo _culture = System.Globalization.CultureInfo.CurrentCulture;
+
+    protected override void Dispose(bool disposing)
+    {
+        System.Globalization.CultureInfo.CurrentCulture = _culture;
+        base.Dispose(disposing);
+    }
+
+    private void Today(int y, int m, int d)
+    {
+        System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+        Time.SetUtcNow(new DateTimeOffset(y, m, d, 12, 0, 0, TimeSpan.Zero));
+    }
+
+    [Fact]
+    public void Date_picker_renders_a_six_week_grid_with_today_and_selection()
+    {
+        Today(2026, 10, 6);
+        var cut = Render<SlDatePicker>(p => p.Add(x => x.Inline, true).Add(x => x.Value, new DateOnly(2026, 10, 14))
+            .Add(x => x.FirstDayOfWeek, DayOfWeek.Sunday));
+        Assert.Contains("sl-date-picker--inline", cut.Find(".sl-date-picker").ClassList);
+        Assert.Equal(42, cut.FindAll(".sl-calendar__day").Count);
+        Assert.Equal(6, cut.FindAll(".sl-calendar__grid tbody tr").Count);
+        Assert.Equal("Sunday", cut.Find(".sl-calendar__weekday").GetAttribute("abbr"));
+        var today = cut.Find(".sl-calendar__day.is-today");
+        Assert.Equal("2026-10-06", today.GetAttribute("data-date"));
+        Assert.Equal("date", today.GetAttribute("aria-current"));
+        var selected = cut.Find(".sl-calendar__day.is-selected");
+        Assert.Equal("2026-10-14", selected.GetAttribute("data-date"));
+        Assert.Equal("0", selected.GetAttribute("tabindex"));
+        Assert.Equal("true", selected.ParentElement!.GetAttribute("aria-selected"));
+        Assert.Equal("Wednesday, October 14, 2026", selected.GetAttribute("aria-label"));
+        Assert.Contains("is-outside", cut.Find("[data-date='2026-09-27']").ClassList);
+    }
+
+    [Theory]
+    [InlineData("ArrowRight", false, "2026-10-15")]
+    [InlineData("ArrowUp", false, "2026-10-07")]
+    [InlineData("PageDown", false, "2026-11-14")]
+    [InlineData("PageUp", true, "2025-10-14")]
+    [InlineData("Home", false, "2026-10-11")]
+    public void Calendar_keys_move_the_focused_day(string key, bool shift, string expected)
+    {
+        Today(2026, 10, 6);
+        var cut = Render<SlDatePicker>(p => p.Add(x => x.Inline, true).Add(x => x.Value, new DateOnly(2026, 10, 14))
+            .Add(x => x.FirstDayOfWeek, DayOfWeek.Sunday));
+        cut.Find(".sl-calendar__grid").KeyDown(new KeyboardEventArgs { Key = key, ShiftKey = shift });
+        Assert.Equal(expected, cut.Find(".sl-calendar__day[tabindex='0']").GetAttribute("data-date"));
+    }
+
+    [Fact]
+    public void Enter_picks_the_focused_day_and_closes_the_popup()
+    {
+        Today(2026, 10, 6);
+        DateOnly? value = null;
+        var cut = Render<SlDatePicker>(p => p.Bind(x => x.Value, value, v => value = v));
+        cut.Find(".sl-date-picker__trigger").Click();
+        Assert.Contains("is-open", cut.Find(".sl-date-picker").ClassList);
+        cut.Find(".sl-calendar__grid").KeyDown("ArrowRight");
+        cut.Find(".sl-calendar__grid").KeyDown("Enter");
+        Assert.Equal(new DateOnly(2026, 10, 7), value);
+        Assert.False(cut.Instance.IsOpen);
+        Assert.Equal("10/7/2026", cut.Find("input").GetAttribute("value"));
+    }
+
+    [Fact]
+    public void Range_selection_holds_a_pending_start_and_previews_on_hover()
+    {
+        Today(2026, 10, 6);
+        DateRange? range = null;
+        var cut = Render<SlDatePicker>(p => p.Add(x => x.Selection, DateSelection.Range).Add(x => x.Inline, true)
+            .Bind(x => x.Range, range, r => range = r));
+        cut.Find("[data-date='2026-10-10']").Click();
+        Assert.Null(range);
+        cut.Find("[data-date='2026-10-13']").PointerEnter();
+        Assert.Equal(["2026-10-11", "2026-10-12", "2026-10-13"], cut.FindAll(".sl-calendar__day.is-in-preview").Select(d => d.GetAttribute("data-date")));
+
+        cut.Find("[data-date='2026-10-13']").Click();
+        Assert.Equal(new DateRange(new DateOnly(2026, 10, 10), new DateOnly(2026, 10, 13)), range);
+        Assert.Contains("is-range-start", cut.Find("[data-date='2026-10-10']").ClassList);
+        Assert.Contains("is-range-end", cut.Find("[data-date='2026-10-13']").ClassList);
+        Assert.Equal(2, cut.FindAll(".sl-calendar__day.is-in-range").Count);
+    }
+
+    [Fact]
+    public void Typed_dates_parse_with_the_pattern_and_respect_min_max()
+    {
+        Today(2026, 10, 6);
+        DateOnly? value = null;
+        var cut = Render<SlDatePicker>(p => p.Add(x => x.Format, "yyyy-MM-dd").Add(x => x.Max, new DateOnly(2026, 12, 31))
+            .Bind(x => x.Value, value, v => value = v));
+        cut.Find("input").Input("2026-11-02");
+        cut.Find("input").Change("2026-11-02");
+        Assert.Equal(new DateOnly(2026, 11, 2), value);
+
+        cut.Find("input").Input("2027-01-05");
+        cut.Find("input").Change("2027-01-05");
+        Assert.Equal(new DateOnly(2026, 11, 2), value);
+    }
+
+    [Fact]
+    public void Disabled_dates_and_presets()
+    {
+        Today(2026, 10, 6);
+        DateRange? range = null;
+        var cut = Render<SlDatePicker>(p => p.Add(x => x.Selection, DateSelection.Range).Add(x => x.Inline, true)
+            .Add(x => x.DisabledDates, d => d.DayOfWeek == DayOfWeek.Saturday)
+            .Add(x => x.Presets, CalendarModel.DefaultPresets)
+            .Bind(x => x.Range, range, r => range = r));
+        Assert.True(cut.Find("[data-date='2026-10-10']").HasAttribute("disabled"));
+
+        var presets = cut.FindAll(".sl-calendar__preset");
+        Assert.NotEmpty(presets);
+        presets[0].Click();
+        Assert.NotNull(range);
+        Assert.Contains("is-selected", cut.FindAll(".sl-calendar__preset")[0].ClassList);
+    }
+
+    // ---- slider ----------------------------------------------------------------------------------------------
+
+    [Fact]
+    public void Slider_renders_fill_ticks_and_thumb_aria()
+    {
+        var cut = Render<SlSlider>(p => p.Add(x => x.Value, 20).Add(x => x.Max, 50).Add(x => x.Step, 10).Add(x => x.Ticks, true)
+            .Add(x => x.Label, "Volume").Add(x => x.ShowValue, true));
+        Assert.Equal("--_start:0;--_end:0.4", cut.Find(".sl-slider__fill").GetAttribute("style"));
+        Assert.Equal(6, cut.FindAll(".sl-slider__tick").Count);
+        var thumb = cut.Find(".sl-slider__thumb");
+        Assert.Equal("slider", thumb.GetAttribute("role"));
+        Assert.Equal("20", thumb.GetAttribute("aria-valuenow"));
+        Assert.Equal("50", thumb.GetAttribute("aria-valuemax"));
+        Assert.Equal("20", cut.Find(".sl-slider__value").TextContent);
+        Assert.Contains("sl-tone-accent", cut.Find(".sl-slider").ClassList);
+    }
+
+    [Theory]
+    [InlineData("ArrowRight", 21)]
+    [InlineData("ArrowDown", 19)]
+    [InlineData("PageUp", 30)]
+    [InlineData("Home", 0)]
+    [InlineData("End", 100)]
+    public void Slider_keys(string key, double expected)
+    {
+        var value = 20d;
+        var cut = Render<SlSlider>(p => p.Bind(x => x.Value, value, v => value = v));
+        cut.Find(".sl-slider__thumb").KeyDown(key);
+        Assert.Equal(expected, value);
+    }
+
+    [Fact]
+    public void Range_slider_thumbs_never_cross_and_are_labelled()
+    {
+        double start = 20, end = 60;
+        double? rangeEnd = end;
+        var cut = Render<SlSlider>(p => p.Add(x => x.Label, "Price").Bind(x => x.Value, start, v => start = v)
+            .Bind(x => x.RangeEnd, rangeEnd, v => rangeEnd = v));
+        var thumbs = cut.FindAll(".sl-slider__thumb");
+        Assert.Equal("Price minimum", thumbs[0].GetAttribute("aria-label"));
+        Assert.Equal("60", thumbs[0].GetAttribute("aria-valuemax"));
+        Assert.Equal("20", thumbs[1].GetAttribute("aria-valuemin"));
+        thumbs[0].KeyDown("End");
+        Assert.Equal(60, start);
+    }
+
+    [Fact]
+    public async Task Track_pointer_moves_the_nearest_thumb()
+    {
+        double start = 20;
+        double? end = 60;
+        var cut = Render<SlSlider>(p => p.Bind(x => x.Value, start, v => start = v).Bind(x => x.RangeEnd, end, v => end = v));
+        await cut.InvokeAsync(() => cut.Instance.OnTrackPointer(0.7, "down"));
+        Assert.Equal(70, end);
+        await cut.InvokeAsync(() => cut.Instance.OnTrackPointer(0.1, "move"));
+        Assert.Equal(20, end); // clamped to the other thumb
+        await cut.InvokeAsync(() => cut.Instance.OnTrackPointer(0.1, "up"));
+        Assert.Equal(20, start);
+    }
+
+    // ---- segmented -------------------------------------------------------------------------------------------
+
+    [Fact]
+    public void Segmented_is_a_radio_group_with_roving_focus()
+    {
+        var value = "7d";
+        var cut = Render<SlSegmented<string>>(p => p.Add(x => x.Items, new[] { "24h", "7d", "30d" }).Add(x => x.Label, "Range")
+            .Add(x => x.ItemDisabled, s => s == "30d").Bind(x => x.Value, value, v => value = v!));
+        Assert.Equal("radiogroup", cut.Find(".sl-segmented").GetAttribute("role"));
+        var items = cut.FindAll(".sl-segmented__item");
+        Assert.Equal(["-1", "0", "-1"], items.Select(i => i.GetAttribute("tabindex")));
+        Assert.Equal("true", items[1].GetAttribute("aria-checked"));
+
+        cut.Find(".sl-segmented").KeyDown("ArrowRight"); // skips disabled 30d, wraps to 24h
+        Assert.Equal("24h", value);
+        cut.FindAll(".sl-segmented__item")[1].Click();
+        Assert.Equal("7d", value);
+    }
+
+    // ---- EditForm ----------------------------------------------------------------------------------------------
+
+    public sealed class Booking
+    {
+        [Required(ErrorMessage = "Choose a room.")]
+        public string? Room { get; set; }
+
+        [Required(ErrorMessage = "Pick at least one extra."), MinLength(1, ErrorMessage = "Pick at least one extra.")]
+        public IReadOnlyList<string>? Extras { get; set; } = [];
+
+        [Required(ErrorMessage = "Choose a date.")]
+        public DateOnly? Date { get; set; }
+
+        [Range(2, 10, ErrorMessage = "Between 2 and 10 guests.")]
+        public double Guests { get; set; }
+    }
+
+    private readonly Booking _booking = new();
+
+    private IRenderedComponent<EditForm> RenderBooking() => Render<EditForm>(@<EditForm Model="_booking">
+        <DataAnnotationsValidator />
+        <SlSelect T="string" Items="Fruits" @bind-Value="_booking.Room" Label="Room" id="room" />
+        <SlSelect T="string" Items="Fruits" Multiple="true" @bind-Values="_booking.Extras" Label="Extras" id="extras" />
+        <SlDatePicker @bind-Value="_booking.Date" Label="Date" id="date" />
+        <SlSlider @bind-Value="_booking.Guests" Label="Guests" Max="20" id="guests" />
+        <button type="submit">Book</button>
+    </EditForm>);
+
+    [Fact]
+    public void Edit_form_validation_marks_select_date_and_slider_invalid()
+    {
+        var cut = RenderBooking();
+        cut.Find("form").Submit();
+        Assert.Equal(4, cut.FindAll(".sl-field--invalid, .sl-slider.is-invalid").Count);
+        Assert.Contains("Choose a room.", cut.Find("#room .sl-field__error").TextContent);
+        Assert.Contains("Pick at least one extra.", cut.Find("#extras .sl-field__error").TextContent);
+        Assert.Contains("Choose a date.", cut.Find("#date .sl-field__error").TextContent);
+    }
+
+    [Fact]
+    public void Fixing_values_clears_the_errors()
+    {
+        Today(2026, 10, 6);
+        var cut = RenderBooking();
+        cut.Find("form").Submit();
+
+        cut.Find("#room .sl-select__trigger").KeyDown("ArrowDown");
+        cut.Find("#room .sl-select__trigger").KeyDown("Enter");
+        Assert.Equal("Apple", _booking.Room);
+        Assert.Empty(cut.FindAll("#room .sl-field__error"));
+
+        cut.Find("#extras .sl-select__trigger").Click();
+        cut.Find("#extras .sl-select__option").Click();
+        Assert.Empty(cut.FindAll("#extras .sl-field__error"));
+
+        cut.Find("#date input").Input("10/9/2026");
+        cut.Find("#date input").Change("10/9/2026");
+        Assert.Equal(new DateOnly(2026, 10, 9), _booking.Date);
+        Assert.Empty(cut.FindAll("#date .sl-field__error"));
+
+        cut.Find("#guests .sl-slider__thumb").KeyDown("PageUp");
+        Assert.Equal(2, _booking.Guests);
+        Assert.DoesNotContain("is-invalid", cut.Find("#guests").ClassList);
+    }
+}
