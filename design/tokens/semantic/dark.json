@@ -1,0 +1,370 @@
+{
+  "$description": "Alloy dark theme. Light and dark files MUST define exactly the same token paths.",
+  "color": {
+    "$type": "color",
+    "background": {
+      "canvas": {
+        "$value": "{palette.gray.950}"
+      },
+      "surface": {
+        "$value": "{palette.gray.875}"
+      },
+      "sunken": {
+        "$value": "{palette.gray.900}"
+      },
+      "raised": {
+        "$value": "{palette.gray.850}"
+      },
+      "subtle": {
+        "$value": "{palette.gray.850}"
+      },
+      "muted": {
+        "$value": "{palette.gray.825}"
+      },
+      "hover": {
+        "$value": "{palette.gray.850}"
+      },
+      "pressed": {
+        "$value": "{palette.gray.900}"
+      }
+    },
+    "border": {
+      "default": {
+        "$value": "{palette.gray.800}"
+      },
+      "strong": {
+        "$value": "{palette.gray.700}"
+      },
+      "control": {
+        "$value": "{palette.gray.550}",
+        "$description": "Boundaries of checkboxes, radios and unchecked switches. Must stay >= 3:1 against surfaces (WCAG 1.4.11)."
+      },
+      "controlHover": {
+        "$value": "{palette.gray.400}"
+      }
+    },
+    "text": {
+      "primary": {
+        "$value": "{palette.gray.75}"
+      },
+      "secondary": {
+        "$value": "{palette.gray.350}"
+      },
+      "tertiary": {
+        "$value": "{palette.gray.400}"
+      },
+      "placeholder": {
+        "$value": "{palette.gray.400}"
+      },
+      "onAccent": {
+        "$value": "{palette.teal.900}"
+      },
+      "link": {
+        "$value": "{palette.teal.300}"
+      },
+      "linkHover": {
+        "$value": "{palette.teal.200}"
+      }
+    },
+    "accent": {
+      "default": {
+        "$value": "{palette.teal.400}"
+      },
+      "hover": {
+        "$value": "{palette.teal.300}"
+      },
+      "pressed": {
+        "$value": "{palette.teal.450}"
+      },
+      "subtle": {
+        "$value": "#3FB3C61F"
+      },
+      "text": {
+        "$value": "{palette.teal.300}"
+      }
+    },
+    "focus": {
+      "ring": {
+        "$value": "{palette.mint.400}"
+      }
+    },
+    "selection": {
+      "background": {
+        "$value": "#2BD4A41F"
+      },
+      "indicator": {
+        "$value": "{palette.mint.400}"
+      }
+    },
+    "status": {
+      "success": {
+        "fg": {
+          "$value": "{palette.green.400}"
+        },
+        "bg": {
+          "$value": "#3CCB951F"
+        },
+        "border": {
+          "$value": "#3CCB954D"
+        },
+        "solid": {
+          "$value": "{palette.green.400}"
+        },
+        "onSolid": {
+          "$value": "{palette.gray.950}"
+        }
+      },
+      "warning": {
+        "fg": {
+          "$value": "{palette.amber.400}"
+        },
+        "bg": {
+          "$value": "#F0B4551F"
+        },
+        "border": {
+          "$value": "#F0B4554D"
+        },
+        "solid": {
+          "$value": "{palette.amber.400}"
+        },
+        "onSolid": {
+          "$value": "{palette.gray.950}"
+        }
+      },
+      "danger": {
+        "fg": {
+          "$value": "{palette.red.400}"
+        },
+        "bg": {
+          "$value": "#FF6B5E1F"
+        },
+        "border": {
+          "$value": "#FF6B5E4D"
+        },
+        "solid": {
+          "$value": "{palette.red.400}"
+        },
+        "onSolid": {
+          "$value": "{palette.red.900}"
+        }
+      },
+      "info": {
+        "fg": {
+          "$value": "{palette.blue.400}"
+        },
+        "bg": {
+          "$value": "#8EA3FF21"
+        },
+        "border": {
+          "$value": "#8EA3FF4D"
+        },
+        "solid": {
+          "$value": "{palette.blue.400}"
+        },
+        "onSolid": {
+          "$value": "{palette.gray.950}"
+        }
+      }
+    },
+    "inverse": {
+      "background": {
+        "$value": "{palette.gray.800}"
+      },
+      "text": {
+        "$value": "{palette.gray.75}"
+      },
+      "textMuted": {
+        "$value": "{palette.gray.350}"
+      }
+    },
+    "scrim": {
+      "$value": "#000000A3"
+    },
+    "control": {
+      "track": {
+        "$value": "{palette.gray.750}"
+      },
+      "thumb": {
+        "$value": "{palette.gray.75}"
+      },
+      "thumbShade": {
+        "$value": "{palette.gray.200}"
+      }
+    },
+    "effect": {
+      "highlight": {
+        "$value": "#FFFFFF12"
+      },
+      "shade": {
+        "$value": "#00000073"
+      }
+    }
+  },
+  "shadow": {
+    "$type": "shadow",
+    "control": {
+      "$value": [
+        {
+          "color": "{color.effect.highlight}",
+          "offsetX": "0px",
+          "offsetY": "1px",
+          "blur": "0px",
+          "spread": "0px",
+          "inset": true
+        },
+        {
+          "color": "{color.effect.shade}",
+          "offsetX": "0px",
+          "offsetY": "1px",
+          "blur": "0px",
+          "spread": "0px",
+          "inset": false
+        },
+        {
+          "color": "#00000059",
+          "offsetX": "0px",
+          "offsetY": "1px",
+          "blur": "2px",
+          "spread": "0px",
+          "inset": false
+        }
+      ]
+    },
+    "primary": {
+      "$value": [
+        {
+          "color": "#FFFFFF66",
+          "offsetX": "0px",
+          "offsetY": "1px",
+          "blur": "0px",
+          "spread": "0px",
+          "inset": true
+        },
+        {
+          "color": "#00000040",
+          "offsetX": "0px",
+          "offsetY": "-1px",
+          "blur": "0px",
+          "spread": "0px",
+          "inset": true
+        },
+        {
+          "color": "#00000080",
+          "offsetX": "0px",
+          "offsetY": "1px",
+          "blur": "2px",
+          "spread": "0px",
+          "inset": false
+        }
+      ]
+    },
+    "inset": {
+      "$value": [
+        {
+          "color": "#00000059",
+          "offsetX": "0px",
+          "offsetY": "1px",
+          "blur": "2px",
+          "spread": "0px",
+          "inset": true
+        }
+      ]
+    },
+    "pressed": {
+      "$value": [
+        {
+          "color": "#00000080",
+          "offsetX": "0px",
+          "offsetY": "1px",
+          "blur": "3px",
+          "spread": "0px",
+          "inset": true
+        }
+      ]
+    },
+    "e1": {
+      "$value": [
+        {
+          "color": "#FFFFFF09",
+          "offsetX": "0px",
+          "offsetY": "1px",
+          "blur": "0px",
+          "spread": "0px",
+          "inset": true
+        },
+        {
+          "color": "#00000073",
+          "offsetX": "0px",
+          "offsetY": "1px",
+          "blur": "2px",
+          "spread": "0px",
+          "inset": false
+        },
+        {
+          "color": "{color.border.default}",
+          "offsetX": "0px",
+          "offsetY": "0px",
+          "blur": "0px",
+          "spread": "1px",
+          "inset": false
+        }
+      ]
+    },
+    "e2": {
+      "$value": [
+        {
+          "color": "#FFFFFF0D",
+          "offsetX": "0px",
+          "offsetY": "1px",
+          "blur": "0px",
+          "spread": "0px",
+          "inset": true
+        },
+        {
+          "color": "#00000099",
+          "offsetX": "0px",
+          "offsetY": "8px",
+          "blur": "24px",
+          "spread": "-6px",
+          "inset": false
+        },
+        {
+          "color": "{color.border.strong}",
+          "offsetX": "0px",
+          "offsetY": "0px",
+          "blur": "0px",
+          "spread": "1px",
+          "inset": false
+        }
+      ]
+    },
+    "e3": {
+      "$value": [
+        {
+          "color": "#FFFFFF0F",
+          "offsetX": "0px",
+          "offsetY": "1px",
+          "blur": "0px",
+          "spread": "0px",
+          "inset": true
+        },
+        {
+          "color": "#000000BF",
+          "offsetX": "0px",
+          "offsetY": "24px",
+          "blur": "56px",
+          "spread": "-12px",
+          "inset": false
+        },
+        {
+          "color": "{color.border.strong}",
+          "offsetX": "0px",
+          "offsetY": "0px",
+          "blur": "0px",
+          "spread": "1px",
+          "inset": false
+        }
+      ]
+    }
+  }
+}

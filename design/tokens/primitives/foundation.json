@@ -1,0 +1,506 @@
+{
+  "$description": "Theme-independent foundations: type, space, radius, size, motion, layout, layering.",
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "ui": {
+        "$value": [
+          "Instrument Sans",
+          "Segoe UI",
+          "system-ui",
+          "sans-serif"
+        ],
+        "$description": "All interface text."
+      },
+      "mono": {
+        "$value": [
+          "IBM Plex Mono",
+          "Cascadia Mono",
+          "Consolas",
+          "ui-monospace",
+          "monospace"
+        ],
+        "$description": "IDs, numbers in tables, code, keyboard hints."
+      }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "regular": {
+        "$value": 400
+      },
+      "medium": {
+        "$value": 500
+      },
+      "semibold": {
+        "$value": 600
+      },
+      "bold": {
+        "$value": 700
+      }
+    },
+    "size": {
+      "$type": "dimension",
+      "2xs": {
+        "$value": "11px"
+      },
+      "xs": {
+        "$value": "12px"
+      },
+      "sm": {
+        "$value": "13px"
+      },
+      "md": {
+        "$value": "14px"
+      },
+      "lg": {
+        "$value": "16px"
+      },
+      "xl": {
+        "$value": "18px"
+      },
+      "2xl": {
+        "$value": "22px"
+      },
+      "3xl": {
+        "$value": "28px"
+      },
+      "4xl": {
+        "$value": "36px"
+      },
+      "display": {
+        "$value": "56px"
+      }
+    },
+    "lineHeight": {
+      "$type": "number",
+      "tight": {
+        "$value": 1.15
+      },
+      "snug": {
+        "$value": 1.3
+      },
+      "normal": {
+        "$value": 1.5
+      }
+    },
+    "tracking": {
+      "$type": "dimension",
+      "tight": {
+        "$value": "-0.02em"
+      },
+      "normal": {
+        "$value": "0em"
+      },
+      "caps": {
+        "$value": "0.04em"
+      }
+    }
+  },
+  "typography": {
+    "$type": "typography",
+    "$description": "Named text styles. Every platform exposes these by name (e.g. Text Typo=\"Body\").",
+    "display": {
+      "$value": {
+        "fontFamily": "{font.family.ui}",
+        "fontSize": "{font.size.display}",
+        "fontWeight": "{font.weight.semibold}",
+        "lineHeight": "{font.lineHeight.tight}",
+        "letterSpacing": "-0.035em"
+      }
+    },
+    "h1": {
+      "$value": {
+        "fontFamily": "{font.family.ui}",
+        "fontSize": "{font.size.4xl}",
+        "fontWeight": "{font.weight.semibold}",
+        "lineHeight": "{font.lineHeight.tight}",
+        "letterSpacing": "-0.03em"
+      }
+    },
+    "h2": {
+      "$value": {
+        "fontFamily": "{font.family.ui}",
+        "fontSize": "{font.size.3xl}",
+        "fontWeight": "{font.weight.semibold}",
+        "lineHeight": "{font.lineHeight.tight}",
+        "letterSpacing": "-0.02em"
+      }
+    },
+    "h3": {
+      "$value": {
+        "fontFamily": "{font.family.ui}",
+        "fontSize": "{font.size.2xl}",
+        "fontWeight": "{font.weight.semibold}",
+        "lineHeight": "{font.lineHeight.snug}",
+        "letterSpacing": "-0.015em"
+      }
+    },
+    "title": {
+      "$value": {
+        "fontFamily": "{font.family.ui}",
+        "fontSize": "{font.size.lg}",
+        "fontWeight": "{font.weight.semibold}",
+        "lineHeight": "{font.lineHeight.snug}",
+        "letterSpacing": "{font.tracking.normal}"
+      }
+    },
+    "body": {
+      "$value": {
+        "fontFamily": "{font.family.ui}",
+        "fontSize": "{font.size.md}",
+        "fontWeight": "{font.weight.regular}",
+        "lineHeight": "{font.lineHeight.normal}",
+        "letterSpacing": "{font.tracking.normal}"
+      }
+    },
+    "bodyStrong": {
+      "$value": {
+        "fontFamily": "{font.family.ui}",
+        "fontSize": "{font.size.md}",
+        "fontWeight": "{font.weight.semibold}",
+        "lineHeight": "{font.lineHeight.normal}",
+        "letterSpacing": "{font.tracking.normal}"
+      }
+    },
+    "label": {
+      "$value": {
+        "fontFamily": "{font.family.ui}",
+        "fontSize": "{font.size.sm}",
+        "fontWeight": "{font.weight.medium}",
+        "lineHeight": "{font.lineHeight.snug}",
+        "letterSpacing": "{font.tracking.normal}"
+      }
+    },
+    "caption": {
+      "$value": {
+        "fontFamily": "{font.family.ui}",
+        "fontSize": "{font.size.xs}",
+        "fontWeight": "{font.weight.regular}",
+        "lineHeight": "{font.lineHeight.snug}",
+        "letterSpacing": "{font.tracking.normal}"
+      }
+    },
+    "overline": {
+      "$value": {
+        "fontFamily": "{font.family.mono}",
+        "fontSize": "{font.size.2xs}",
+        "fontWeight": "{font.weight.medium}",
+        "lineHeight": "{font.lineHeight.snug}",
+        "letterSpacing": "{font.tracking.caps}"
+      }
+    },
+    "mono": {
+      "$value": {
+        "fontFamily": "{font.family.mono}",
+        "fontSize": "{font.size.sm}",
+        "fontWeight": "{font.weight.regular}",
+        "lineHeight": "{font.lineHeight.normal}",
+        "letterSpacing": "{font.tracking.normal}"
+      }
+    }
+  },
+  "space": {
+    "$type": "dimension",
+    "$description": "4px grid. Use these for padding, gaps and margins \u2014 never raw numbers.",
+    "0": {
+      "$value": "0px"
+    },
+    "0_5": {
+      "$value": "2px"
+    },
+    "1": {
+      "$value": "4px"
+    },
+    "1_5": {
+      "$value": "6px"
+    },
+    "2": {
+      "$value": "8px"
+    },
+    "3": {
+      "$value": "12px"
+    },
+    "4": {
+      "$value": "16px"
+    },
+    "5": {
+      "$value": "20px"
+    },
+    "6": {
+      "$value": "24px"
+    },
+    "8": {
+      "$value": "32px"
+    },
+    "10": {
+      "$value": "40px"
+    },
+    "12": {
+      "$value": "48px"
+    },
+    "16": {
+      "$value": "64px"
+    }
+  },
+  "radius": {
+    "$type": "dimension",
+    "xs": {
+      "$value": "3px"
+    },
+    "sm": {
+      "$value": "4px"
+    },
+    "md": {
+      "$value": "6px"
+    },
+    "lg": {
+      "$value": "8px"
+    },
+    "xl": {
+      "$value": "10px"
+    },
+    "2xl": {
+      "$value": "12px"
+    },
+    "full": {
+      "$value": "9999px"
+    }
+  },
+  "border": {
+    "width": {
+      "$type": "dimension",
+      "hairline": {
+        "$value": "1px"
+      },
+      "thick": {
+        "$value": "2px"
+      }
+    }
+  },
+  "size": {
+    "$type": "dimension",
+    "control": {
+      "$description": "Control heights. Compact is the default density; comfortable is opt-in per app or per region.",
+      "compact": {
+        "sm": {
+          "$value": "26px"
+        },
+        "md": {
+          "$value": "32px"
+        },
+        "lg": {
+          "$value": "40px"
+        }
+      },
+      "comfortable": {
+        "sm": {
+          "$value": "32px"
+        },
+        "md": {
+          "$value": "40px"
+        },
+        "lg": {
+          "$value": "48px"
+        }
+      }
+    },
+    "icon": {
+      "sm": {
+        "$value": "14px"
+      },
+      "md": {
+        "$value": "16px"
+      },
+      "lg": {
+        "$value": "20px"
+      }
+    },
+    "titlebar": {
+      "$value": "36px"
+    },
+    "appbar": {
+      "$value": "56px"
+    },
+    "drawer": {
+      "full": {
+        "$value": "248px"
+      },
+      "mini": {
+        "$value": "56px"
+      }
+    },
+    "dialog": {
+      "$description": "Dialog max widths (DialogWidth.Xs-Xl).",
+      "xs": {
+        "$value": "360px"
+      },
+      "sm": {
+        "$value": "480px"
+      },
+      "md": {
+        "$value": "640px"
+      },
+      "lg": {
+        "$value": "880px"
+      },
+      "xl": {
+        "$value": "1120px"
+      }
+    },
+    "snackbar": {
+      "min": {
+        "$value": "300px"
+      },
+      "max": {
+        "$value": "560px"
+      }
+    }
+  },
+  "focus": {
+    "ring": {
+      "$type": "dimension",
+      "width": {
+        "$value": "2px"
+      },
+      "offset": {
+        "$value": "2px"
+      }
+    }
+  },
+  "opacity": {
+    "$type": "number",
+    "disabled": {
+      "$value": 0.45
+    },
+    "scrim": {
+      "$value": 0.48
+    }
+  },
+  "motion": {
+    "duration": {
+      "$type": "duration",
+      "instant": {
+        "$value": "0ms"
+      },
+      "fast": {
+        "$value": "120ms"
+      },
+      "base": {
+        "$value": "160ms"
+      },
+      "slow": {
+        "$value": "240ms"
+      }
+    },
+    "easing": {
+      "$type": "cubicBezier",
+      "standard": {
+        "$value": [
+          0.2,
+          0,
+          0,
+          1
+        ]
+      },
+      "emphasized": {
+        "$value": [
+          0.3,
+          0,
+          0,
+          1
+        ]
+      },
+      "exit": {
+        "$value": [
+          0.4,
+          0,
+          1,
+          1
+        ]
+      }
+    }
+  },
+  "breakpoint": {
+    "$type": "dimension",
+    "$description": "Min-widths for the responsive grid and container (xs is everything below sm).",
+    "xs": {
+      "$value": "0px"
+    },
+    "sm": {
+      "$value": "600px"
+    },
+    "md": {
+      "$value": "900px"
+    },
+    "lg": {
+      "$value": "1200px"
+    },
+    "xl": {
+      "$value": "1536px"
+    }
+  },
+  "container": {
+    "$type": "dimension",
+    "$description": "Max widths for Container.",
+    "sm": {
+      "$value": "600px"
+    },
+    "md": {
+      "$value": "900px"
+    },
+    "lg": {
+      "$value": "1200px"
+    },
+    "xl": {
+      "$value": "1440px"
+    }
+  },
+  "z": {
+    "$type": "number",
+    "base": {
+      "$value": 0
+    },
+    "dropdown": {
+      "$value": 1000
+    },
+    "sticky": {
+      "$value": 1100
+    },
+    "appbar": {
+      "$value": 1200
+    },
+    "drawer": {
+      "$value": 1300
+    },
+    "dialog": {
+      "$value": 1400
+    },
+    "snackbar": {
+      "$value": 1500
+    },
+    "tooltip": {
+      "$value": 1600
+    }
+  },
+  "snackbar": {
+    "$description": "Snackbar timing rules (also enforced by Slate.Core's SnackbarQueue).",
+    "$type": "duration",
+    "duration": {
+      "default": {
+        "$value": "5000ms"
+      },
+      "error": {
+        "$value": "8000ms",
+        "$description": "Errors linger longer."
+      },
+      "withAction": {
+        "$value": "8000ms",
+        "$description": "Minimum when a snackbar has an action, so it can be reached by keyboard."
+      }
+    },
+    "maxVisible": {
+      "$type": "number",
+      "$value": 3
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "$description": "Entry point for the Slate token build. Primitives are shared; each theme layers its semantic file on top.",
+  "prefix": "sl",
+  "primitives": [
+    "primitives/color.json",
+    "primitives/foundation.json"
+  ],
+  "themes": {
+    "light": "semantic/light.json",
+    "dark": "semantic/dark.json"
+  },
+  "defaultTheme": "light",
+  "density": {
+    "group": "size.control",
+    "modes": [
+      "compact",
+      "comfortable"
+    ],
+    "default": "compact"
+  },
+  "outputs": {
+    "css": "../../packages/web/src/styles/generated",
+    "json": "../dist",
+    "csharp": "../../src/Slate.Core/Generated",
+    "wpf": "../../src/Slate.Wpf/Themes/Generated",
+    "avalonia": "../../src/Slate.Avalonia/Themes/Generated",
+    "icons-ts": "../../packages/web/src/icons/generated",
+    "icons-cs": "../../src/Slate.Core/Generated"
+  },
+  "icons": "../icons/icons.json"
+}

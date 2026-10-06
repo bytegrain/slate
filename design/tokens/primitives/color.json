@@ -1,0 +1,195 @@
+{
+  "$description": "Alloy raw palette. Never referenced by components directly \u2014 only by semantic tokens.",
+  "palette": {
+    "$type": "color",
+    "white": {
+      "$value": "#FFFFFF"
+    },
+    "black": {
+      "$value": "#000000"
+    },
+    "gray": {
+      "25": {
+        "$value": "#F6F7F9"
+      },
+      "50": {
+        "$value": "#F0F2F5"
+      },
+      "75": {
+        "$value": "#E9ECF0"
+      },
+      "100": {
+        "$value": "#E7EAEE"
+      },
+      "150": {
+        "$value": "#E1E5EA"
+      },
+      "200": {
+        "$value": "#CBD1D9"
+      },
+      "250": {
+        "$value": "#B9C0CA"
+      },
+      "300": {
+        "$value": "#A9B1BC"
+      },
+      "350": {
+        "$value": "#AEB7C2"
+      },
+      "400": {
+        "$value": "#8792A1"
+      },
+      "425": {
+        "$value": "#7F8895"
+      },
+      "450": {
+        "$value": "#687280"
+      },
+      "500": {
+        "$value": "#646E7B"
+      },
+      "550": {
+        "$value": "#677282"
+      },
+      "600": {
+        "$value": "#46505C"
+      },
+      "650": {
+        "$value": "#4A5563"
+      },
+      "700": {
+        "$value": "#36404C"
+      },
+      "750": {
+        "$value": "#2A323C"
+      },
+      "800": {
+        "$value": "#262E38"
+      },
+      "825": {
+        "$value": "#232A33"
+      },
+      "850": {
+        "$value": "#1B2128"
+      },
+      "875": {
+        "$value": "#151A20"
+      },
+      "900": {
+        "$value": "#10141A"
+      },
+      "925": {
+        "$value": "#12161C"
+      },
+      "950": {
+        "$value": "#0D1014"
+      },
+      "$description": "Cool, slightly blue-shifted neutral ramp. Light steps are used by the light theme, dark steps by the dark theme."
+    },
+    "teal": {
+      "50": {
+        "$value": "#E6F4F6"
+      },
+      "100": {
+        "$value": "#D6ECEF"
+      },
+      "200": {
+        "$value": "#9BE0EA"
+      },
+      "300": {
+        "$value": "#5CC4D4"
+      },
+      "400": {
+        "$value": "#3FB3C6"
+      },
+      "450": {
+        "$value": "#2A9BAE"
+      },
+      "500": {
+        "$value": "#1F8A9C"
+      },
+      "600": {
+        "$value": "#14707F"
+      },
+      "700": {
+        "$value": "#0E5E6F"
+      },
+      "800": {
+        "$value": "#08404C"
+      },
+      "900": {
+        "$value": "#05181C"
+      },
+      "$description": "The Alloy action colour."
+    },
+    "mint": {
+      "$description": "Focus and selection only. Never used for actions or text.",
+      "400": {
+        "$value": "#2BD4A4"
+      },
+      "600": {
+        "$value": "#0B8F6C",
+        "$description": "Focus ring on light surfaces (mint 400 is under 3:1 on white)."
+      }
+    },
+    "green": {
+      "50": {
+        "$value": "#E3F5EE"
+      },
+      "200": {
+        "$value": "#BFE6D6"
+      },
+      "400": {
+        "$value": "#3CCB95"
+      },
+      "700": {
+        "$value": "#0F7553"
+      }
+    },
+    "amber": {
+      "50": {
+        "$value": "#FDF1DE"
+      },
+      "200": {
+        "$value": "#F2D9AE"
+      },
+      "400": {
+        "$value": "#F0B455"
+      },
+      "700": {
+        "$value": "#8F5000"
+      }
+    },
+    "red": {
+      "50": {
+        "$value": "#FBE7E5"
+      },
+      "200": {
+        "$value": "#F2C6C1"
+      },
+      "400": {
+        "$value": "#FF6B5E"
+      },
+      "700": {
+        "$value": "#B3302A"
+      },
+      "900": {
+        "$value": "#1A0604"
+      }
+    },
+    "blue": {
+      "50": {
+        "$value": "#E8ECFC"
+      },
+      "200": {
+        "$value": "#C9D3F7"
+      },
+      "400": {
+        "$value": "#8EA3FF"
+      },
+      "700": {
+        "$value": "#2F4FD8"
+      }
+    }
+  }
+}
