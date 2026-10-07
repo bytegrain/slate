@@ -285,8 +285,11 @@ public class DataGridTests
         var cell = row?.Cell(field);
         var targetCellPeer = cell is null ? null : UIElementAutomationPeer.CreatePeerForElement(cell);
         var rawProvider = targetCellPeer is null ? null : peer.Provider(targetCellPeer);
+        var targetRowPeer = row is null ? null : UIElementAutomationPeer.CreatePeerForElement(row);
+        var rootChildren = peer.GetChildren() ?? [];
+        var rowChildren = targetRowPeer?.GetChildren() ?? [];
         Assert.True(cellProvider is not null,
-            $"row={row?.Index.ToString() ?? "not realized"}, cell={cell is not null}, visible={cell?.IsVisible}, loaded={cell?.IsLoaded}, source={cell is not null && PresentationSource.FromVisual(cell) is not null}, peer={targetCellPeer?.GetType().Name ?? "null"}, provider={rawProvider is not null}, offset={surface?.VerticalOffset}, window={surface?.WindowRange}");
+            $"row={row?.Index.ToString() ?? "not realized"}, cell={cell is not null}, visible={cell?.IsVisible}, loaded={cell?.IsLoaded}, source={cell is not null && PresentationSource.FromVisual(cell) is not null}, peer={targetCellPeer?.GetType().Name ?? "null"}, provider={rawProvider is not null}, rootHasRow={targetRowPeer is not null && rootChildren.Contains(targetRowPeer)}, rowHasCell={targetCellPeer is not null && rowChildren.Contains(targetCellPeer)}, offset={surface?.VerticalOffset}, window={surface?.WindowRange}");
         var table = (ITableProvider)peer.GetPattern(PatternInterface.Table)!;
         Assert.Equal(g.CurrentLayout.Columns.Count, table.GetColumnHeaders().Length);
 
