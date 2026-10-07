@@ -1,0 +1,133 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sl="using:Slate.Avalonia.Controls">
+
+  <!--
+    DataGrid (docs/design/data-grid.md). Every colour and size comes from the component.grid.* tokens
+    (Sl.Component.Grid.*). The parts are filled from code; rows and cells are virtualised by PART_Rows.
+  -->
+  <ControlTheme x:Key="{x:Type sl:DataGrid}" TargetType="sl:DataGrid">
+    <Setter Property="Background" Value="{DynamicResource Sl.Component.Grid.Background.Brush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Component.Grid.Border.Brush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Sl.Component.Grid.Radius.Corner}" />
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="FontFamily" Value="{DynamicResource Sl.Font.Family.Ui}" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" ClipToBounds="True">
+          <Grid RowDefinitions="Auto,Auto,Auto,*,Auto,Auto">
+            <Border Name="PART_Toolbar" Grid.Row="0" Classes="sl-grid-toolbar" Padding="12,10" IsVisible="False"
+                    BorderBrush="{DynamicResource Sl.Component.Grid.Border.Brush}" BorderThickness="0,0,0,1" />
+            <Border Name="PART_GroupBar" Grid.Row="1" Classes="sl-grid-groupbar" Padding="12,6" IsVisible="False" MinHeight="40"
+                    Background="{DynamicResource Sl.Brush.Background.Subtle}"
+                    BorderBrush="{DynamicResource Sl.Component.Grid.Border.Brush}" BorderThickness="0,0,0,1" />
+            <sl:DataGridHeaderRow Name="PART_Header" Grid.Row="2" />
+            <Panel Grid.Row="3">
+              <ScrollViewer Name="PART_Scroll" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                            AllowAutoHide="True" IsScrollInertiaEnabled="True">
+                <sl:DataGridRowsPresenter Name="PART_Rows" HorizontalAlignment="Left" VerticalAlignment="Top" />
+              </ScrollViewer>
+              <ContentControl Name="PART_Empty" IsVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24" />
+              <sl:DataGridLoadingBar Name="PART_LoadingBar" VerticalAlignment="Top" Height="2" IsVisible="{TemplateBinding Loading}" />
+            </Panel>
+            <sl:DataGridFooterRow Name="PART_Footer" Grid.Row="4" IsVisible="False" />
+            <Border Name="PART_BottomBar" Grid.Row="5" IsVisible="False"
+                    BorderBrush="{DynamicResource Sl.Component.Grid.Border.Brush}" BorderThickness="0,1,0,0" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <!-- Header row: sticky, subtle background, hairline below. -->
+  <ControlTheme x:Key="{x:Type sl:DataGridHeaderRow}" TargetType="sl:DataGridHeaderRow">
+    <Setter Property="Background" Value="{DynamicResource Sl.Component.Grid.HeaderBackground.Brush}" />
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type sl:DataGridHeaderCell}" TargetType="sl:DataGridHeaderCell">
+    <Setter Property="Background" Value="{DynamicResource Sl.Component.Grid.HeaderBackground.Brush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Component.Grid.Border.Brush}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+    <Setter Property="Padding" Value="12,0,6,0" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Sl.Component.Grid.HeaderText.Brush}" />
+    <Setter Property="TextElement.FontWeight" Value="Medium" />
+    <Setter Property="TextElement.FontSize" Value="12.5" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Style Selector="^:pointerover">
+      <Setter Property="TextElement.Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    </Style>
+    <Style Selector="^.sorted">
+      <Setter Property="TextElement.Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    </Style>
+    <Style Selector="^.dragging">
+      <Setter Property="Opacity" Value="0.55" />
+    </Style>
+    <Style Selector="^:focus-visible">
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Component.Grid.ActiveCell.Brush}" />
+      <Setter Property="BorderThickness" Value="2" />
+    </Style>
+  </ControlTheme>
+
+  <!-- Rows: hairline separators come from the cells; state colours from the grid tokens. -->
+  <ControlTheme x:Key="{x:Type sl:DataGridRow}" TargetType="sl:DataGridRow">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.6" />
+      </Transitions>
+    </Setter>
+    <Style Selector="^:pointerover">
+      <Setter Property="Background" Value="{DynamicResource Sl.Component.Grid.RowHover.Brush}" />
+    </Style>
+    <Style Selector="^.selected">
+      <Setter Property="Background" Value="{DynamicResource Sl.Component.Grid.RowSelected.Brush}" />
+    </Style>
+    <Style Selector="^.flash">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Accent.Subtle}" />
+    </Style>
+    <Style Selector="^.group">
+      <Setter Property="Background" Value="{DynamicResource Sl.Component.Grid.GroupBackground.Brush}" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="TextElement.FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="^.detail">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Background.Subtle}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type sl:DataGridCell}" TargetType="sl:DataGridCell">
+    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Component.Grid.Border.Brush}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+    <Style Selector="^.pinned">
+      <Setter Property="Background" Value="{DynamicResource Sl.Component.Grid.Background.Brush}" />
+    </Style>
+    <Style Selector="^.pin-edge-start">
+      <Setter Property="BoxShadow" Value="{DynamicResource Sl.Component.Grid.PinnedShadow}" />
+      <Setter Property="BorderThickness" Value="0,0,1,1" />
+    </Style>
+    <Style Selector="^.pin-edge-end">
+      <Setter Property="BoxShadow" Value="{DynamicResource Sl.Component.Grid.PinnedShadow}" />
+      <Setter Property="BorderThickness" Value="1,0,0,1" />
+    </Style>
+    <Style Selector="^.pending">
+      <Setter Property="Background" Value="{DynamicResource Sl.Brush.Status.Warning.Bg}" />
+    </Style>
+    <Style Selector="^.active">
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Component.Grid.ActiveCell.Brush}" />
+      <Setter Property="BorderThickness" Value="2" />
+    </Style>
+    <Style Selector="^.invalid">
+      <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Status.Danger.Fg}" />
+      <Setter Property="BorderThickness" Value="2" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type sl:DataGridFooterRow}" TargetType="sl:DataGridFooterRow">
+    <Setter Property="Background" Value="{DynamicResource Sl.Component.Grid.HeaderBackground.Brush}" />
+  </ControlTheme>
+</ResourceDictionary>

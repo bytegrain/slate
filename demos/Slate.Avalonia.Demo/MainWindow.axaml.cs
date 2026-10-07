@@ -18,6 +18,7 @@ public partial class MainWindow : SlateWindow
         ["navigation"] = () => new NavComponentsPage(),
         ["overlays"] = () => new OverlaysPage(),
         ["layout"] = () => new LayoutPage(),
+        ["grid"] = () => new DataGridPage(),
         ["feedback"] = () => new FeedbackPage(),
         ["dialogs"] = () => new DialogsPage(),
         ["sample"] = () => new MigrationPage(),

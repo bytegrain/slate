@@ -67,7 +67,8 @@ public class ConformanceTests
         : v.TryGetProperty("avalonia", out var a) ? a.GetString() : null;
 
     private static IEnumerable<JsonProperty> RequiredComponents =>
-        Api.GetProperty("components").EnumerateObject().Where(c => !(c.Value.TryGetProperty("status", out var st) && st.GetString() == "planned"));
+        Api.GetProperty("components").EnumerateObject().Where(c => c.Name == "DataGrid" // planned on the web, implemented here
+            || !(c.Value.TryGetProperty("status", out var st) && st.GetString() == "planned"));
 
     public static TheoryData<string, string> Options()
     {

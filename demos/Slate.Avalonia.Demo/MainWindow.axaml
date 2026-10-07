@@ -45,6 +45,7 @@
           <sl:NavItem Tag="navigation" Label="Navigation" Icon="menu" />
           <sl:NavItem Tag="overlays" Label="Overlays" Icon="copy" />
           <sl:NavItem Tag="layout" Label="Layout" Icon="home" />
+          <sl:NavItem Tag="grid" Label="Data grid" Icon="columns" />
           <sl:NavItem Tag="feedback" Label="Feedback" Icon="bell" Trailing="4" />
           <sl:NavItem Tag="dialogs" Label="Dialogs" Icon="copy" />
           <sl:NavItem Tag="theming" Label="Theming" Icon="settings" />

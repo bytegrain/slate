@@ -18,6 +18,7 @@
         <ResourceInclude Source="avares://Slate.Avalonia/Themes/Controls/Overlays.axaml" />
         <ResourceInclude Source="avares://Slate.Avalonia/Themes/Controls/Pickers.axaml" />
         <ResourceInclude Source="avares://Slate.Avalonia/Themes/Controls/Navigation.axaml" />
+        <ResourceInclude Source="avares://Slate.Avalonia/Themes/Controls/DataGrid.axaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

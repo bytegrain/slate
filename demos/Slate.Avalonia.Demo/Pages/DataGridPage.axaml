@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sl="https://slate.dev/avalonia"
+             x:Class="Slate.Avalonia.Demo.Pages.DataGridPage">
+  <sl:Container ContainerMaxWidth="Xl" Margin="0,24,0,40">
+    <sl:Stack Spacing="6">
+      <StackPanel Spacing="4">
+        <TextBlock Text="Data grid" Theme="{DynamicResource Sl.Typography.H2}" />
+        <TextBlock Text="100,000 rows, virtualised both ways. Sort (Shift+click for multi-sort), filter from the header menu, drag a header onto the group bar, pin, resize, reorder (Alt+←/→), select, edit (batch), copy (Ctrl+C) and export. Everything runs on the shared Slate.Core engine."
+                   Foreground="{DynamicResource Sl.Brush.Text.Secondary}" TextWrapping="Wrap" />
+      </StackPanel>
+
+      <sl:Card Title="Deployments" Subtitle="100k rows · pinned ID and actions · badges, progress, sparklines · grouping with aggregates · batch editing">
+        <sl:Stack Spacing="3">
+          <sl:Stack Direction="Row" Wrap="True" Spacing="4">
+            <sl:Switch x:Name="Grouped" Label="Group by status" IsChecked="True" />
+            <sl:Switch x:Name="Striped" Label="Striped" />
+            <sl:Switch x:Name="Batch" Label="Batch editing" IsChecked="True" />
+            <sl:Switch x:Name="Live" Label="Live updates" />
+            <sl:Switch x:Name="Detail" Label="Row detail" />
+            <sl:Switch x:Name="Toned" Label="Tint failed rows" IsChecked="True" />
+            <sl:Switch x:Name="Paged" Label="Pages" />
+          </sl:Stack>
+          <sl:DataGrid x:Name="Deployments" Height="560" RowKeyPath="Id" SelectionMode="Multi" ShowToolbar="True" ShowFooter="True"
+                       Groupable="True" EditMode="Batch" AutomationProperties.Name="Deployments">
+            <sl:DataGrid.Columns>
+              <sl:GridColumn Field="Id" Title="ID" Width="120" Pinned="Start" Hideable="False" />
+              <sl:GridColumn Field="Service" Width="170" Editable="True" />
+              <sl:GridColumn Field="Status" Type="Enum" Width="120" EnumOrder="Queued,Building,Ready,Failed,Cancelled"
+                             EnumTones="Queued:Neutral,Building:Info,Ready:Success,Failed:Danger,Cancelled:Warning" Editable="True" />
+              <sl:GridColumn Field="Region" Width="120" Type="Enum" />
+              <sl:GridColumn Field="Branch" Width="160" />
+              <sl:GridColumn Field="Progress" Type="Progress" Width="160" Format="0%" />
+              <sl:GridColumn Field="Duration" Title="Duration (s)" Type="Number" Width="120" Format="#,##0.0" Aggregate="Avg" Editable="True" />
+              <sl:GridColumn Field="Cost" Title="Cost ($)" Type="Number" Width="110" Format="#,##0.00" Aggregate="Sum" />
+              <sl:GridColumn Field="Cpu" Title="CPU (24h)" Type="Sparkline" Width="130" Sortable="False" Filterable="False" />
+              <sl:GridColumn Field="Started" Type="Date" Width="160" Format="yyyy-MM-dd HH:mm" />
+              <sl:GridColumn Field="Healthy" Type="Boolean" Width="90" />
+              <sl:GridColumn Field="Actions" Title="" Type="Actions" Width="56" Pinned="End" Sortable="False"
+                             Filterable="False" Resizable="False" Hideable="False" Searchable="False" />
+            </sl:DataGrid.Columns>
+            <sl:DataGrid.ToolbarContent>
+              <Button x:Name="Redeploy" Content="New deployment" sl:Sl.Size="Small" sl:Sl.Variant="Solid" sl:Sl.Tone="Accent" sl:Sl.StartIcon="plus" />
+            </sl:DataGrid.ToolbarContent>
+            <sl:DataGrid.SelectionActions>
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <Button x:Name="RetrySelected" Content="Retry" sl:Sl.Size="Small" sl:Sl.StartIcon="refresh" />
+                <Button x:Name="CancelSelected" Content="Cancel" sl:Sl.Size="Small" sl:Sl.Tone="Danger" sl:Sl.StartIcon="x" />
+              </StackPanel>
+            </sl:DataGrid.SelectionActions>
+          </sl:DataGrid>
+          <TextBlock x:Name="StateText" FontFamily="{DynamicResource Sl.Font.Family.Mono}" FontSize="11.5" TextWrapping="Wrap"
+                     Foreground="{DynamicResource Sl.Brush.Text.Tertiary}" />
+        </sl:Stack>
+      </sl:Card>
+
+      <sl:ResponsiveGrid Spacing="3">
+        <sl:Card sl:ResponsiveGrid.Lg="7" Title="Server mode" Subtitle="IGridDataSource with 400 ms latency · skeleton rows · infinite scroll · select all matching">
+          <sl:DataGrid x:Name="Server" Height="420" RowKeyPath="Id" SelectionMode="Multi" ShowToolbar="True" Density="Compact">
+            <sl:DataGrid.Columns>
+              <sl:GridColumn Field="Id" Title="ID" Width="110" Pinned="Start" />
+              <sl:GridColumn Field="Service" Width="150" />
+              <sl:GridColumn Field="Status" Type="Enum" Width="110" EnumTones="Ready:Success,Failed:Danger,Building:Info" />
+              <sl:GridColumn Field="Region" Width="110" />
+              <sl:GridColumn Field="Duration" Type="Number" Width="110" Format="#,##0.0" />
+            </sl:DataGrid.Columns>
+          </sl:DataGrid>
+        </sl:Card>
+        <sl:Card sl:ResponsiveGrid.Lg="5" Title="Tree data" Subtitle="ChildrenSelector · folder sizes roll up · ←/→ collapse and expand">
+          <sl:DataGrid x:Name="Files" Height="420" RowKeyPath="Path" SelectionMode="Single">
+            <sl:DataGrid.Columns>
+              <sl:GridColumn Field="Name" Flex="1" MinWidth="180" />
+              <sl:GridColumn Field="Size" Title="Size (KB)" Type="Number" Width="110" Format="#,##0" />
+              <sl:GridColumn Field="Kind" Type="Enum" Width="100" EnumTones="Folder:Accent,Code:Info,Image:Success" />
+            </sl:DataGrid.Columns>
+          </sl:DataGrid>
+        </sl:Card>
+      </sl:ResponsiveGrid>
+    </sl:Stack>
+  </sl:Container>
+</UserControl>

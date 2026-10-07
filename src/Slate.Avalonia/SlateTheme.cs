@@ -356,11 +356,25 @@ public partial class SlateTheme : Styles
     /// </summary>
     internal static void ApplyDensityScope(StyledElement element, Density? density)
     {
-        foreach (var d in element.Resources.MergedDictionaries.Where(m => m is ResourceDictionary rd && DensityCache.ContainsValue(rd)).ToList())
+        foreach (var d in element.Resources.MergedDictionaries.Where(m => m is ResourceDictionary rd && rd.ContainsKey(DensityScopeMarker)).ToList())
             element.Resources.MergedDictionaries.Remove(d);
         if (density is { } value)
-            element.Resources.MergedDictionaries.Add(DensityDictionary(value));
+        {
+            // A dictionary has one owner, so each scope gets its own flat copy of the (cached) density values.
+            var scope = new ResourceDictionary { [DensityScopeMarker] = value };
+            static void Copy(ResourceDictionary from, ResourceDictionary to)
+            {
+                foreach (var merged in from.MergedDictionaries.OfType<ResourceDictionary>())
+                    Copy(merged, to);
+                foreach (var (k, v) in from)
+                    to[k] = v;
+            }
+            Copy(DensityDictionary(value), scope);
+            element.Resources.MergedDictionaries.Add(scope);
+        }
     }
+
+    private const string DensityScopeMarker = "Sl.DensityScope";
 
     /// <summary>Switch geometry per density, from the component tokens (compact) — comfortable is 8/4/4px larger.</summary>
     internal static IEnumerable<(string Key, object Value)> SwitchSizes(Density d)
