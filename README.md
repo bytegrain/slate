@@ -5,11 +5,13 @@ language — precise, calm and built for professional software. One design sourc
 
 | Platform | Package | Status |
 |---|---|---|
-| Web (any framework) | `@slate/web` — Lit web components + CSS | in progress |
-| Blazor | `Slate.Blazor` | in progress |
-| WPF | `Slate.Wpf` | in progress |
-| Avalonia | `Slate.Avalonia` | in progress |
+| Web (any framework) | `@slate/web` — Lit web components + CSS | ✅ preview |
+| Blazor | `Slate.Blazor` | ✅ preview |
+| WPF | `Slate.Wpf` | ✅ preview — compiles everywhere, UI unverified until run on Windows |
+| Avalonia | `Slate.Avalonia` | ✅ preview |
 | Shared .NET core | `Slate.Core` | ✅ |
+
+Current state, decisions and next steps: [`docs/HANDOFF.md`](docs/HANDOFF.md). Agent instructions: [`CLAUDE.md`](CLAUDE.md).
 
 ## The design source
 
