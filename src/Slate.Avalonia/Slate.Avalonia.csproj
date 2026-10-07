@@ -3,10 +3,12 @@
     <RootNamespace>Slate.Avalonia</RootNamespace>
     <PackageId>Slate.Avalonia</PackageId>
     <Description>Slate (Alloy design system) for Avalonia: themes for native controls, layout framework, snackbars and dialogs.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <None Update="README.md" Pack="true" PackagePath="\" />
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />

@@ -493,7 +493,11 @@
 }
 
 .sl-data-grid__cell.is-pinned-start,
-.sl-data-grid__cell.is-pinned-end { background: inherit; }
+.sl-data-grid__cell.is-pinned-end {
+  /* The row's background is synthesized from these inherited variables. Rebuild it here instead of
+     inheriting the row's background image, which can paint with a different origin while scrolling. */
+  background: linear-gradient(var(--_tint), var(--_tint)), var(--_base);
+}
 
 .sl-data-grid__cell.is-pinned-edge-start,
 .sl-data-grid__header-cell.is-pinned-edge-start { clip-path: inset(0 -16px 0 0); }

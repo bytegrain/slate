@@ -3,11 +3,13 @@
     <RootNamespace>Slate</RootNamespace>
     <PackageId>Slate.Core</PackageId>
     <Description>Platform-independent core of Slate: Alloy design tokens and the shared logic behind snackbars, dialogs and responsive layout used by Slate.Blazor, Slate.Wpf and Slate.Avalonia.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Self-explanatory members (enum values, obvious properties) are not required to carry XML docs. -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <None Update="README.md" Pack="true" PackagePath="\" />
     <InternalsVisibleTo Include="Slate.Core.Tests" />
   </ItemGroup>
 </Project>

@@ -1,10 +1,16 @@
 {
   "name": "slate-workspace",
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
+    "test:e2e": "playwright test",
     "dev": "npm run dev --workspace @slate/web"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
   }
 }

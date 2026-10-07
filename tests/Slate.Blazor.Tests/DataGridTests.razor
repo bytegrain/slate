@@ -585,8 +585,8 @@
         Assert.NotEmpty(cut.FindAll(".sl-data-grid__row--skeleton"));
         Time.Advance(TimeSpan.FromMilliseconds(400));
         cut.WaitForAssertion(() => Assert.Empty(cut.FindAll(".sl-data-grid__row--skeleton")));
-        cut.Find(".sl-data-grid__header-cell--select input").Click();
-        Assert.Equal(2500, grid.SelectedCount);
+        await cut.Find(".sl-data-grid__header-cell--select input").ClickAsync();
+        cut.WaitForAssertion(() => Assert.Equal(2500, grid.SelectedCount));
         Assert.Equal("2,500 selected", cut.Find(".sl-data-grid__selection-count").TextContent);
 
         // A new query (sort) resets the cache and clears the selection.

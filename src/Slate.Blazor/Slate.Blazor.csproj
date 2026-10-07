@@ -3,6 +3,7 @@
     <RootNamespace>Slate.Blazor</RootNamespace>
     <PackageId>Slate.Blazor</PackageId>
     <Description>Slate for Blazor: Razor components rendering the Alloy design system (styles from @slate/web), with layout, forms, snackbars and dialogs.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <StaticWebAssetBasePath>_content/Slate.Blazor</StaticWebAssetBasePath>
@@ -12,6 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Update="README.md" Pack="true" PackagePath="\" />
     <SupportedPlatform Include="browser" />
   </ItemGroup>
 

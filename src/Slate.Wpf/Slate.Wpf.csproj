@@ -5,10 +5,12 @@
     <RootNamespace>Slate.Wpf</RootNamespace>
     <PackageId>Slate.Wpf</PackageId>
     <Description>Slate for WPF: the Alloy design system as implicit styles for native controls, Slate controls (AppShell, SlateWindow, TextField, Card, ResponsiveGrid…) and snackbar/dialog services.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <None Update="README.md" Pack="true" PackagePath="\" />
     <ProjectReference Include="..\Slate.Core\Slate.Core.csproj" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
   </ItemGroup>
