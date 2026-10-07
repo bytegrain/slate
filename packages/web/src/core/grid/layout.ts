@@ -27,7 +27,7 @@ export interface GridColumnLayout<T> {
 export function resolveColumns<T>(columns: readonly GridColumn<T>[], state: GridState, availableWidth = 0): GridColumnLayout<T> {
   const byField = new Map(columns.map((c) => [c.field, c] as const));
   const order: string[] = [];
-  for (const c of state.columns) if (byField.has(c.field) && !order.includes(c.field)) order.push(c.field);
+  for (const f of state.order) if (byField.has(f) && !order.includes(f)) order.push(f);
   for (const c of columns) if (!order.includes(c.field)) order.push(c.field);
 
   const entries: { c: GridColumn<T>; pin: GridPin; width: number | null; flex: number }[] = [];

@@ -224,6 +224,18 @@ const personCols: GridColumn<Person>[] = [
 ];
 
 describe('data grid engine — behaviour', () => {
+  it('resizing, hiding or pinning a column never moves it; only moveColumn sets an order', () => {
+    const cols: GridColumn<Record<string, unknown>>[] = [
+      { field: 'a', width: 100 }, { field: 'b', width: 100 }, { field: 'c', width: 100 },
+    ];
+    const names = (s: GridState) => resolveColumns(cols, s).columns.map((x) => x.column.field);
+    expect(names(resizeColumn(createGridState(), 'c', 90))).toEqual(['a', 'b', 'c']);
+    expect(names(setColumnHidden(setColumnHidden(createGridState(), 'b', true), 'b', false))).toEqual(['a', 'b', 'c']);
+    const moved = resizeColumn(moveColumn(createGridState(), ['a', 'b', 'c'], 'c', 0), 'a', 140);
+    expect(names(moved)).toEqual(['c', 'a', 'b']);
+    expect(gridStateFromJson(serializeGridState(moved)).order).toEqual(['c', 'a', 'b']);
+  });
+
   it('caches results until the state, items or version change', () => {
     const p = new DataPipeline<Person>(personCols);
     const s = toggleSort(createGridState(), 'name');

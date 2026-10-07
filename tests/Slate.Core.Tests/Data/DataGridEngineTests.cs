@@ -291,7 +291,7 @@ public class GridStateTests
             .ResizeColumn("b", 999, 40, 200)
             .PinColumn("c", GridPin.End)
             .SetColumnHidden("b", true);
-        Assert.Equal(["c", "a", "b"], s.Columns.Select(c => c.Field));
+        Assert.Equal(["c", "a", "b"], s.Order); // order lives apart from the overrides
         Assert.Equal(40, s.Column("a")!.Width);
         Assert.Equal(200, s.Column("b")!.Width);
         Assert.Equal(GridPin.End, s.Column("c")!.Pinned);
@@ -351,6 +351,27 @@ public class GridLayoutTests
         new() { Field = "d", Pinned = GridPin.End, Width = 80 },
         new() { Field = "e", Pinned = GridPin.Start, Width = 60 },
     ];
+
+    [Fact]
+    public void Resizing_hiding_or_unpinning_an_unseen_column_never_moves_it()
+    {
+        // Regression: overrides used to double as the order list, so touching column "c" first moved it ahead of "a".
+        var base_ = GridLayout.Resolve(Cols, new GridState(), 0).Columns.Select(c => c.Field).ToList();
+        var resized = GridLayout.Resolve(Cols, new GridState().ResizeColumn("c", 90), 0).Columns.Select(c => c.Field);
+        Assert.Equal(base_, resized);
+
+        var hiddenThenShown = new GridState().SetColumnHidden("b", true).SetColumnHidden("b", false);
+        Assert.Equal(base_, GridLayout.Resolve(Cols, hiddenThenShown, 0).Columns.Select(c => c.Field));
+    }
+
+    [Fact]
+    public void Moving_a_column_sets_an_explicit_order_that_survives_later_overrides()
+    {
+        var order = GridLayout.Resolve(Cols, new GridState(), 0).Columns.Select(c => c.Field).ToList();
+        var moved = new GridState().MoveColumn(order, "c", 1).ResizeColumn("a", 140);
+        Assert.Equal(["e", "c", "a", "b", "d"], GridLayout.Resolve(Cols, moved, 0).Columns.Select(c => c.Field));
+        Assert.Equal(moved.Order, GridState.FromJson(moved.ToJson()).Order);
+    }
 
     [Fact]
     public void Flex_columns_share_leftover_width_and_redistribute_clamps()

@@ -54,7 +54,7 @@ public static class GridLayout
     public static GridColumnLayout<T> Resolve<T>(IReadOnlyList<GridColumn<T>> columns, GridState state, double availableWidth = 0)
     {
         var byField = columns.ToDictionary(c => c.Field);
-        var order = state.Columns.Select(c => c.Field).Where(byField.ContainsKey).Distinct().ToList();
+        var order = state.Order.Where(byField.ContainsKey).Distinct().ToList();
         order.AddRange(columns.Select(c => c.Field).Where(f => !order.Contains(f)));
 
         var entries = new List<(GridColumn<T> Col, GridPin Pin, double? Width, double Flex)>();

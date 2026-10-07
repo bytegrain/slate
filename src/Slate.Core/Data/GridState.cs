@@ -29,7 +29,14 @@ public sealed record GridColumnState(string Field, double? Width = null, bool? H
 /// </summary>
 public sealed record GridState
 {
-    /// <summary>Column order and per-column overrides. Columns not listed follow, in definition order.</summary>
+    /// <summary>
+    /// Explicit display order, set only by <see cref="MoveColumn"/>. Empty = definition order; fields not listed
+    /// follow, in definition order. Kept separate from <see cref="Columns"/> so that resizing, pinning or hiding a
+    /// column never moves it.
+    /// </summary>
+    public IReadOnlyList<string> Order { get; init; } = [];
+
+    /// <summary>Per-column overrides (width, visibility, pinning). The order of this list carries no meaning.</summary>
     public IReadOnlyList<GridColumnState> Columns { get; init; } = [];
     public IReadOnlyList<GridSort> Sorts { get; init; } = [];
     public IReadOnlyList<GridFilter> Filters { get; init; } = [];
@@ -105,8 +112,7 @@ public sealed record GridState
         var order = currentOrder.ToList();
         if (!order.Remove(field)) return this;
         order.Insert(Math.Clamp(toIndex, 0, order.Count), field);
-        var byField = Columns.ToDictionary(c => c.Field);
-        return this with { Columns = [.. order.Select(f => byField.TryGetValue(f, out var c) ? c : new GridColumnState(f))] };
+        return this with { Order = order };
     }
 
     /// <summary>Sets a column width, clamped to [<paramref name="min"/>, <paramref name="max"/>].</summary>
@@ -164,6 +170,7 @@ public sealed record GridState
 
     public JsonObject ToJsonNode() => new()
     {
+        ["order"] = new JsonArray([.. Order.Select(f => (JsonNode)JsonValue.Create(f))]),
         ["columns"] = new JsonArray([.. Columns.Select(c =>
         {
             var o = new JsonObject { ["field"] = c.Field };
@@ -195,6 +202,7 @@ public sealed record GridState
 
     public static GridState FromJsonNode(JsonObject o) => new()
     {
+        Order = Array(o, "order").Select(n => n.GetValue<string>()).ToList(),
         Columns = Array(o, "columns").Select(n => new GridColumnState(
             Str(n, "field"),
             n["width"] is { } w ? (double?)FromNode(w) : null,

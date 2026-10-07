@@ -27,7 +27,12 @@ export interface GridColumnState {
 }
 
 export interface GridState {
-  /** Column order and per-column overrides; unlisted columns follow in definition order. */
+  /**
+   * Explicit display order, set only by moveColumn. Empty = definition order; unlisted fields follow in
+   * definition order. Separate from `columns` so resizing, pinning or hiding never moves a column.
+   */
+  readonly order: readonly string[];
+  /** Per-column overrides (width, visibility, pinning); list order carries no meaning. */
   readonly columns: readonly GridColumnState[];
   readonly sorts: readonly GridSort[];
   readonly filters: readonly GridFilter[];
@@ -43,6 +48,7 @@ export interface GridState {
 }
 
 export const emptyGridState: GridState = Object.freeze({
+  order: [],
   columns: [],
   sorts: [],
   filters: [],
@@ -95,8 +101,7 @@ export function moveColumn(s: GridState, currentOrder: readonly string[], field:
   if (i < 0) return s;
   order.splice(i, 1);
   order.splice(Math.min(Math.max(toIndex, 0), order.length), 0, field);
-  const by = new Map(s.columns.map((c) => [c.field, c] as const));
-  return { ...s, columns: order.map((f) => by.get(f) ?? { field: f }) };
+  return { ...s, order };
 }
 
 function update(s: GridState, field: string, change: (c: GridColumnState) => GridColumnState): GridState {
@@ -140,6 +145,7 @@ export const setPageSize = (s: GridState, pageSize: number): GridState => ({ ...
 /** The JSON object (same shape and key order as C# `GridState.ToJsonNode`). */
 export function gridStateToJson(s: GridState): Record<string, unknown> {
   return {
+    order: [...s.order],
     columns: s.columns.map((c) => {
       const o: Record<string, unknown> = { field: c.field };
       if (c.width !== undefined) o.width = c.width;
@@ -187,6 +193,7 @@ export function gridStateFromJson(json: string | Record<string, unknown>): GridS
   if (!o || typeof o !== 'object' || Array.isArray(o)) throw new Error('Grid state JSON must be an object.');
   const arr = (k: string) => (Array.isArray(o[k]) ? (o[k] as Record<string, unknown>[]) : []);
   return {
+    order: Array.isArray(o.order) ? (o.order as unknown[]).map(String) : [],
     columns: arr('columns').map((c) => {
       const out: { field: string; width?: number; hidden?: boolean; pinned?: GridPin } = { field: String(c.field) };
       if (typeof c.width === 'number') out.width = c.width;
