@@ -278,7 +278,11 @@ public class DataGridTests
         var grid = (IGridProvider)peer.GetPattern(PatternInterface.Grid)!;
         Assert.Equal(100, grid.RowCount);
         Assert.Equal(g.CurrentLayout.Columns.Count, grid.ColumnCount);
-        Assert.NotNull(grid.GetItem(80, 2)); // scrolls into view on demand
+        var cellProvider = grid.GetItem(80, 2); // scrolls into view on demand
+        var surface = g.Surface;
+        var row = surface?.RowView(80);
+        Assert.True(cellProvider is not null,
+            $"row={row?.Index.ToString() ?? "not realized"}, cell={row?.Cell(g.CurrentLayout.Columns[2].Field) is not null}, offset={surface?.VerticalOffset}, window={surface?.WindowRange}");
         var table = (ITableProvider)peer.GetPattern(PatternInterface.Table)!;
         Assert.Equal(g.CurrentLayout.Columns.Count, table.GetColumnHeaders().Length);
 

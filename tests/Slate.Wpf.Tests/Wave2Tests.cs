@@ -29,7 +29,9 @@ public class Wave2Tests
     private static void Press(UIElement target, Key key)
     {
         var source = PresentationSource.FromVisual(target)!;
-        target.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice, source, 0, key) { RoutedEvent = Keyboard.PreviewKeyDownEvent });
+        var preview = new KeyEventArgs(Keyboard.PrimaryDevice, source, 0, key) { RoutedEvent = Keyboard.PreviewKeyDownEvent };
+        target.RaiseEvent(preview);
+        if (preview.Handled) return;
         target.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice, source, 0, key) { RoutedEvent = Keyboard.KeyDownEvent });
     }
 
