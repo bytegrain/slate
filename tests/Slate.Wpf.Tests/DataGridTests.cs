@@ -273,6 +273,10 @@ public class DataGridTests
     public void Automation_exposes_grid_table_and_selection_patterns() => Wpf.Run(() =>
     {
         var g = Grid(100);
+        // UIA providers must be connected through the hosting window before a grid peer can return element providers.
+        var windowPeer = UIElementAutomationPeer.CreatePeerForElement(Window.GetWindow(g)!);
+        Assert.NotNull(windowPeer);
+        windowPeer.GetChildren();
         var peer = (DataGridAutomationPeer)UIElementAutomationPeer.CreatePeerForElement(g);
         Assert.Equal(AutomationControlType.DataGrid, peer.GetAutomationControlType());
         var grid = (IGridProvider)peer.GetPattern(PatternInterface.Grid)!;
