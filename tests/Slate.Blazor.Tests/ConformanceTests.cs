@@ -55,6 +55,7 @@ public class ConformanceTests
         ["Breadcrumbs"] = typeof(SlBreadcrumbs),
         ["Pagination"] = typeof(SlPagination),
         ["Skeleton"] = typeof(SlSkeleton),
+        ["DataGrid"] = typeof(SlDataGrid<object>),
     };
 
     /// <summary>Canonical item spec ("item" in components.json) → Blazor child component type.</summary>
@@ -73,7 +74,9 @@ public class ConformanceTests
         [("Tooltip", "Content")] = "TooltipContent",
     };
 
-    public static TheoryData<string> ComponentNames => new(Api["components"]!.AsObject().Where(kv => kv.Value?["status"]?.GetValue<string>() != "planned").Select(kv => kv.Key));
+    /// <summary>Implemented components, plus planned ones that already have a Blazor implementation (DataGrid).</summary>
+    public static TheoryData<string> ComponentNames => new(Api["components"]!.AsObject()
+        .Where(kv => kv.Value?["status"]?.GetValue<string>() != "planned" || Components.ContainsKey(kv.Key)).Select(kv => kv.Key));
 
     /// <summary>Blazor's one fixed spelling: the default content region is ChildContent (Razor needs it for inline content).</summary>
     private static string BlazorName(string canonical) => canonical == "Content" ? "ChildContent" : canonical;

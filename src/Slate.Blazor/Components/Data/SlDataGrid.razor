@@ -1,0 +1,845 @@
+@namespace Slate.Blazor
+@typeparam T
+@inherits SlComponentBase
+@using Microsoft.AspNetCore.Components.Rendering
+@*
+  Data grid (docs/design/data-grid.md; markup contract docs/design/css-classes.md#datagrid — identical to the web grid).
+  One scroll container: sticky header, absolutely translated row window, sticky footer. Rows are keyed by row key, so
+  a window shift on Blazor Server sends only the rows that entered (not a re-diff of every row by position).
+*@
+@{
+    var chrome = ChromeVersion();
+    var w = Window();
+    _renderedWindow = $"{w.First}:{w.Count}";
+    var cols = VisibleColumnSet();
+    var count = SlotCount;
+    var loadingBar = Loading || (_cache is not null && _cache.TotalCount is null);
+    var ariaRows = (_cache is not null ? (_cache.TotalCount ?? 0) : _result?.ViewRowCount ?? 0) + HeaderRowCount + (ShowFooter ? 1 : 0);
+    var leading = LeadingWidth;
+    var canvasWidth = _layout.TotalWidth + leading;
+}
+<div @attributes="AdditionalAttributes" class="@RootClass" style="@Style" part="base">
+    <span class="sl-data-grid__probe" aria-hidden="true"></span>
+    <span class="sl-data-grid__probe sl-data-grid__probe--head" aria-hidden="true"></span>
+    <Memo Version="chrome" ChildContent="_barsFragment" />
+    <div @ref="_viewport" class="sl-data-grid__viewport" role="@(ChildrenSelector is not null ? "treegrid" : "grid")" tabindex="0"
+         aria-label="@(Label ?? "Data grid")" aria-rowcount="@ariaRows"
+         aria-colcount="@(_layout.Columns.Count + (SelectionMode == GridSelectionMode.Multi ? 1 : 0) + (HasDetail ? 1 : 0))"
+         aria-multiselectable="@(SelectionMode == GridSelectionMode.Multi ? "true" : null)"
+         aria-activedescendant="@(count > 0 ? CellId(_active.Row, _active.Column) : null)"
+         aria-busy="@(Loading ? "true" : null)" @onkeydown="OnKeyDown">
+        <div class="sl-data-grid__canvas" style="width:@GridCells.Px(canvasWidth);height:@GridCells.Px(TotalHeight + _headerHeight + (ShowFooter ? _rowHeight : 0))">
+            <Memo Version="chrome" ChildContent="_headerFragment" />
+            <div class="sl-data-grid__rows" role="rowgroup" part="body" style="transform:translateY(@GridCells.Px(w.OffsetTop + _headerHeight));width:@GridCells.Px(canvasWidth)"
+                 @onkeydown:stopPropagation="true">
+                @for (var i = 0; i < w.Count; i++)
+                {
+                    var row = w.First + i;
+                    RenderRow(__builder, GetSlot(row), row, row, cols);
+                }
+            </div>
+        </div>
+        @if (ShowFooter)
+        {
+            RenderFooter(__builder, cols);
+        }
+    </div>
+    @if (loadingBar)
+    {
+        <div class="sl-data-grid__loading-bar" role="presentation"></div>
+    }
+    @if (count == 0 && !Loading)
+    {
+        RenderEmpty(__builder);
+    }
+    @if (Pagination == GridPagination.Pages)
+    {
+        RenderPager(__builder);
+    }
+    <div class="sl-data-grid__sr-only" role="status" aria-live="polite">@_announcement</div>
+    <CascadingValue Value="this" IsFixed="true">@Columns</CascadingValue>
+</div>
+
+@code {
+    private RenderFragment? _barsCache;
+    private RenderFragment? _headerCache;
+    private RenderFragment _barsFragment => _barsCache ??= RenderBars;
+    private RenderFragment _headerFragment => _headerCache ??= RenderHeader;
+
+    private string RootClass => Css.Of("sl-data-grid")
+        .Add("sl-data-grid--comfortable", IsComfortable)
+        .Add("sl-data-grid--striped", Striped)
+        .Add("sl-data-grid--bordered", Bordered)
+        .Add($"sl-data-grid--selection-{Names.Kebab(SelectionMode.ToString())}")
+        .Add($"sl-data-grid--edit-{Names.Kebab(EditMode.ToString())}")
+        .Add($"sl-data-grid--pagination-{Names.Kebab(Pagination.ToString())}")
+        .Add("is-keyboard", _keyboard)
+        .Add("is-loading", Loading || (_cache is not null && _cache.TotalCount is null))
+        .Add("is-scrolled-x", _scrolledX)
+        .Add("is-scrollable-end", _scrollableEnd)
+        .Add(Class);
+
+    private static readonly Dictionary<string, RenderFragment> Icons = new();
+
+    /// <summary>A design-system icon exactly as the web grid renders it (decorative inline SVG).</summary>
+    private static RenderFragment Ico(string name)
+    {
+        lock (Icons)
+        {
+            if (!Icons.TryGetValue(name, out var icon))
+            {
+                var path = SlateIcons.All[name];
+                icon = @<svg class="sl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="@path"></path></svg>;
+                Icons[name] = icon;
+            }
+            return icon;
+        }
+    }
+
+    // ---- toolbar, selection bar, chips, group bar, batch bar ----
+
+    private void RenderBars(RenderTreeBuilder __builder)
+    {
+        var selected = _selection.Count;
+        var pending = _edit.Pending.Count;
+        var matching = _cache is not null ? _cache.TotalCount ?? 0 : _result?.FilteredCount ?? 0;
+        int? total = _cache is not null ? _cache.TotalCount : _result?.TotalCount;
+        int? filtered = _cache is not null ? _cache.TotalCount : _result?.FilteredCount;
+        if (SelectionMode == GridSelectionMode.Multi && selected > 0)
+        {
+            <div class="sl-data-grid__selection-bar" part="toolbar">
+                <span class="sl-data-grid__selection-count">@GridCells.Number(selected) selected</span>
+                @if (!_selection.AllMatching && _cache is not null && selected < matching)
+                {
+                    <button class="sl-data-grid__link" type="button" @onclick="() => _selection.SelectAllMatching(matching)">Select all @GridCells.Number(matching) matching</button>
+                }
+                @SelectionActions
+                <span class="sl-data-grid__toolbar-spacer"></span>
+                <button class="sl-data-grid__link" type="button" @onclick="() => _selection.Clear()">Clear selection</button>
+            </div>
+        }
+        else if (ShowToolbar)
+        {
+            <div class="sl-data-grid__toolbar" part="toolbar">
+                <SlTextField TValue="string" Class="sl-data-grid__quick-filter" Size="ControlSize.Small" InputType="search" StartIcon="search" Placeholder="Search"
+                             Clearable="true" aria-label="Search rows" Immediate="true" DebounceMilliseconds="200"
+                             Value="@_state.QuickFilter" ValueChanged="@((string? v) => CommitState(_state.SetQuickFilter(v ?? "")))" />
+                <span class="sl-data-grid__status">@(filtered is { } f && total is { } t ? f == t ? $"{GridCells.Number(t)} rows" : $"{GridCells.Number(f)} of {GridCells.Number(t)} rows" : "Loading…")</span>
+                @ToolbarContent
+                <span class="sl-data-grid__toolbar-spacer"></span>
+                <SlButton Size="ControlSize.Small" Variant="ButtonVariant.Ghost" StartIcon="layers" Click="ToggleDensity">@(IsComfortable ? "Comfortable" : "Compact")</SlButton>
+                @{ RenderChooser(__builder); }
+                <SlMenu Placement="PopoverPlacement.BottomEnd" ItemSelected="OnExportSelected">
+                    <Trigger><SlButton Size="ControlSize.Small" Variant="ButtonVariant.Ghost" StartIcon="download" EndIcon="chevron-down">Export</SlButton></Trigger>
+                    <Items>
+                        <SlMenuItem Value="csv:visible" Label="CSV · current view" />
+                        <SlMenuItem Value="csv:selected" Label="CSV · selected rows" Disabled="@(selected == 0)" />
+                        <SlMenuItem Value="csv:all" Label="CSV · all rows" />
+                        <SlMenuItem Separator="true" />
+                        <SlMenuItem Value="tsv:visible" Label="TSV · current view" />
+                        <SlMenuItem Value="tsv:selected" Label="TSV · selected rows" Disabled="@(selected == 0)" />
+                    </Items>
+                </SlMenu>
+            </div>
+        }
+        var chips = _state.Filters.Where(f => EngineColumn(f.Field) is not null).ToList();
+        if (chips.Count > 0)
+        {
+            <div class="sl-data-grid__chips" role="list" aria-label="Active filters">
+                <span class="sl-data-grid__bar-label">Filters</span>
+                @foreach (var f in chips)
+                {
+                    var c = EngineColumn(f.Field)!;
+                    <span class="sl-data-grid__chip" role="listitem">
+                        <button class="sl-data-grid__link" type="button" style="text-decoration:none;color:inherit" @onclick="() => OpenFilterFor(c.Field)">@GridCells.Describe(c.DisplayTitle, c.Type, f)</button>
+                        <button class="sl-data-grid__chip-remove" type="button" aria-label="Remove filter @c.DisplayTitle"
+                                @onclick="@(() => CommitState(_state.ClearFilter(c.Field), $"Filter removed from {c.DisplayTitle}"))">@Ico("x")</button>
+                    </span>
+                }
+                <button class="sl-data-grid__link" type="button" @onclick="@(() => CommitState(_state.ClearFilters(), "Filters cleared"))">Clear all</button>
+            </div>
+        }
+        if (Groupable && ChildrenSelector is null)
+        {
+            <div class="@(Css.Of("sl-data-grid__group-bar").Add("is-drop-target", _drag?.OverGroupBar == true))" aria-label="Group by">
+                <span class="sl-data-grid__bar-label">Group by</span>
+                @if (_state.GroupBy.Count == 0)
+                {
+                    <span>Drag a column header here, or use a column's menu</span>
+                }
+                else
+                {
+                    for (var i = 0; i < _state.GroupBy.Count; i++)
+                    {
+                        var field = _state.GroupBy[i];
+                        var title = EngineColumn(field)?.DisplayTitle ?? field;
+                        if (i > 0)
+                        {
+                            @Ico("chevron-right")
+                        }
+                        <span class="sl-data-grid__chip">
+                            @title
+                            <button class="sl-data-grid__chip-remove" type="button" aria-label="Ungroup @title"
+                                    @onclick="@(() => CommitState(_state.RemoveGroupBy(field), $"Ungrouped {title}"))">@Ico("x")</button>
+                        </span>
+                    }
+                }
+            </div>
+        }
+        if (EditMode == GridEditMode.Batch && pending > 0)
+        {
+            <div class="sl-data-grid__batch-bar" role="status">
+                @Ico("alert-triangle")
+                <span class="sl-data-grid__batch-count">@pending unsaved change@(pending == 1 ? "" : "s")</span>
+                <span class="sl-data-grid__toolbar-spacer"></span>
+                <SlButton Size="ControlSize.Small" Variant="ButtonVariant.Ghost" Click="DiscardEditsAsync">Discard</SlButton>
+                <SlButton Size="ControlSize.Small" Variant="ButtonVariant.Solid" Tone="Tone.Accent" Click="CommitEditsAsync">Commit</SlButton>
+            </div>
+        }
+    }
+
+    private void RenderChooser(RenderTreeBuilder __builder)
+    {
+        <SlPopover Placement="PopoverPlacement.BottomEnd" Open="_chooserOpen" OpenChanged="@((bool open) => _chooserOpen = open)">
+            <Anchor><SlButton Size="ControlSize.Small" Variant="ButtonVariant.Ghost" StartIcon="columns">Columns</SlButton></Anchor>
+            <ChildContent>
+                @if (_chooserOpen)
+                {
+                    <div class="sl-data-grid__panel" part="column-chooser">
+                        <span class="sl-data-grid__panel-title">Columns</span>
+                        @foreach (var field in _layout.Order)
+                        {
+                            var c = EngineColumn(field);
+                            if (c is null) continue;
+                            var cs = _state.Column(field);
+                            var hidden = cs?.Hidden ?? c.Hidden;
+                            var pin = cs?.Pinned ?? c.Pinned;
+                            <div class="sl-data-grid__chooser-item">
+                                <label class="sl-checkbox sl-tone-accent sl-checkbox--small sl-checkbox--label-end">
+                                    <input type="checkbox" class="sl-checkbox__input" checked="@(!hidden)" disabled="@(!c.Hideable)"
+                                           @onchange="@((ChangeEventArgs e) => CommitState(_state.SetColumnHidden(field, e.Value is not true)))" />
+                                    <span class="sl-checkbox__text"><span class="sl-checkbox__label">@c.DisplayTitle</span></span>
+                                </label>
+                                @if (pin != GridPin.None)
+                                {
+                                    <span class="sl-data-grid__muted" title="Pinned">@Ico("pin")</span>
+                                }
+                            </div>
+                        }
+                        <div class="sl-data-grid__panel-actions">
+                            <SlButton Size="ControlSize.Small" Variant="ButtonVariant.Ghost"
+                                      Click="@(() => CommitState(_state with { Columns = [], Order = [] }, "Column layout reset"))">Reset layout</SlButton>
+                        </div>
+                    </div>
+                }
+            </ChildContent>
+        </SlPopover>
+    }
+
+    // ---- header ----
+
+    private void RenderHeader(RenderTreeBuilder __builder)
+    {
+        var cols = VisibleColumnSet();
+        var headerState = HeaderSelectState();
+        var leading = LeadingWidth;
+        <div class="sl-data-grid__header" role="rowgroup" part="header" style="width:@GridCells.Px(_layout.TotalWidth + leading)" @onkeydown:stopPropagation="true">
+            @if (HeaderRowCount == 2)
+            {
+                <div class="sl-data-grid__header-groups" role="row" aria-rowindex="1">
+                    @if (leading > 0)
+                    {
+                        <span class="sl-data-grid__header-group" role="presentation" style="width:@GridCells.Px(leading)"></span>
+                    }
+                    @foreach (var (label, width) in HeaderGroups(cols.Cells))
+                    {
+                        <span class="sl-data-grid__header-group" role="columnheader" style="width:@GridCells.Px(width)">@label</span>
+                    }
+                </div>
+            }
+            <div class="sl-data-grid__header-row" role="row" aria-rowindex="@HeaderRowCount">
+                @if (SelectionMode == GridSelectionMode.Multi)
+                {
+                    <div class="@(Css.Of("sl-data-grid__header-cell sl-data-grid__header-cell--select is-pinned-start").Add("is-pinned-edge-start", SelectIsEdge))"
+                         role="columnheader" aria-colindex="1" style="width:@GridCells.Px(SelectWidth);left:0">
+                        <label class="sl-checkbox sl-tone-accent sl-data-grid__check">
+                            <input type="checkbox" class="@(Css.Of("sl-checkbox__input").Add("is-indeterminate", headerState == SelectAllState.Some))"
+                                   aria-label="Select all rows" checked="@(headerState == SelectAllState.All)"
+                                   aria-checked="@(headerState == SelectAllState.Some ? "mixed" : headerState == SelectAllState.All ? "true" : "false")"
+                                   @onclick="ToggleHeaderSelection" @onclick:preventDefault="true" />
+                        </label>
+                    </div>
+                }
+                @if (HasDetail)
+                {
+                    <div class="sl-data-grid__header-cell sl-data-grid__header-cell--select is-pinned-start" role="columnheader"
+                         style="width:@GridCells.Px(DetailToggleWidth);left:@GridCells.Px(SelectionMode == GridSelectionMode.Multi ? SelectWidth : 0)"><span class="sl-data-grid__sr-only">Details</span></div>
+                }
+                @foreach (var c in cols.Cells)
+                {
+                    if (c is null)
+                    {
+                        <span class="sl-data-grid__spacer" style="width:@GridCells.Px(cols.SpacerBefore)"></span>
+                    }
+                    else
+                    {
+                        RenderHeaderCell(__builder, c);
+                    }
+                }
+                @if (cols.SpacerAfter > 0)
+                {
+                    <span class="sl-data-grid__spacer" style="width:@GridCells.Px(cols.SpacerAfter)"></span>
+                }
+            </div>
+        </div>
+    }
+
+    private List<(string Label, double Width)> HeaderGroups(List<ResolvedColumn<T>?> cells)
+    {
+        var groups = new List<(string Label, double Width)>();
+        foreach (var c in cells)
+        {
+            var width = c?.Width ?? 0;
+            var label = c is null ? "" : Def(c.Field)?.HeaderGroup ?? "";
+            if (groups.Count > 0 && groups[^1].Label == label) groups[^1] = (label, groups[^1].Width + width);
+            else groups.Add((label, width));
+        }
+        return groups;
+    }
+
+    private void RenderHeaderCell(RenderTreeBuilder __builder, ResolvedColumn<T> c)
+    {
+        var column = c.Column;
+        var def = Def(c.Field);
+        var dir = _state.SortOf(c.Field);
+        var sortIndex = IndexOf(_state.Sorts.Select(s => s.Field).ToList(), c.Field);
+        var filtered = _state.Filters.Any(f => f.Field == c.Field);
+        var sortable = column.Sortable;
+        var filterable = column.Filterable && column.Type is not GridColumnType.Actions and not GridColumnType.Sparkline;
+        var end = column.EffectiveAlign == GridAlign.End && column.Type != GridColumnType.Progress;
+        var title = column.DisplayTitle;
+        var drag = _drag;
+        var grouped = _state.GroupBy.Contains(c.Field);
+        var cls = PinClasses(Css.Of("sl-data-grid__header-cell")
+            .Add("sl-data-grid__header-cell--end", end)
+            .Add("is-sorted", dir is not null)
+            .Add("is-filtered", filtered)
+            .Add("is-dragging", drag?.Field == c.Field)
+            .Add("is-drop-before", drag?.Over == c.Field && drag?.After == false && drag?.Field != c.Field)
+            .Add("is-drop-after", drag?.Over == c.Field && drag?.After == true && drag?.Field != c.Field), c);
+        <div class="@cls" role="columnheader" part="header-cell" data-field="@c.Field" aria-colindex="@ColIndex(c)"
+             aria-sort="@(dir is { } sd ? Names.Kebab(sd.ToString()) : sortable ? "none" : null)" title="@def?.Description" style="@PinStyle(c)">
+            <button class="sl-data-grid__sort" type="button" disabled="@(!sortable && !column.Reorderable)"
+                    @onclick="e => OnSortClick(e, c)" @onkeydown="e => OnSortKeyDown(e, c)"
+                    aria-label="@($"{title}{(dir is { } ad ? $", sorted {Names.Kebab(ad.ToString())}" : "")}{(sortable ? ". Click to sort, Shift+click to add a sort" : "")}")">
+                <span class="sl-data-grid__title">@title</span>
+                @if (sortable)
+                {
+                    <span class="sl-data-grid__sort-icon" aria-hidden="true">@Ico(dir == SortDirection.Descending ? "arrow-down" : "arrow-up")
+                        @if (dir is not null && _state.Sorts.Count > 1)
+                        {
+                            <span class="sl-data-grid__sort-order">@(sortIndex + 1)</span>
+                        }
+                    </span>
+                }
+            </button>
+            <span class="sl-data-grid__header-actions">
+                @if (filterable)
+                {
+                    <SlPopover Placement="PopoverPlacement.BottomStart" Modal="true" Open="@(_openFilter == c.Field)" OpenChanged="@((bool open) => OnFilterOpenChanged(c.Field, open))">
+                        <Anchor>
+                            <button type="button" class="@(Css.Of("sl-data-grid__header-button").Add("is-active", filtered))" aria-label="Filter @title">@Ico("filter")</button>
+                        </Anchor>
+                        <ChildContent>
+                            @if (_openFilter == c.Field && _filterDraft is not null)
+                            {
+                                @FilterEditor(def, column, _filterDraft)
+                            }
+                        </ChildContent>
+                    </SlPopover>
+                }
+                <SlMenu Placement="PopoverPlacement.BottomEnd" Open="@(_openMenu == c.Field)" OpenChanged="@((bool open) => OnMenuOpenChanged(c.Field, open))"
+                        ItemSelected="@((MenuSelectEventArgs a) => OnMenuSelect(a, c))">
+                    <Trigger><button type="button" class="sl-data-grid__header-button" aria-label="@title column menu">@Ico("more-horizontal")</button></Trigger>
+                    <Items>
+                        @if (_openMenu == c.Field)
+                        {
+                            if (sortable)
+                            {
+                                <SlMenuItem Value="asc" Label="Sort ascending" Icon="arrow-up" />
+                                <SlMenuItem Value="desc" Label="Sort descending" Icon="arrow-down" />
+                                if (dir is not null)
+                                {
+                                    <SlMenuItem Value="unsort" Label="Clear sort" Icon="x" />
+                                }
+                                <SlMenuItem Separator="true" />
+                            }
+                            if (filterable)
+                            {
+                                <SlMenuItem Value="filter" Label="Filter…" Icon="filter" />
+                            }
+                            if (Groupable && ChildrenSelector is null)
+                            {
+                                if (grouped)
+                                {
+                                    <SlMenuItem Value="ungroup" Label="Ungroup" Icon="group" />
+                                }
+                                else
+                                {
+                                    <SlMenuItem Value="group" Label="@($"Group by {title}")" Icon="group" />
+                                }
+                            }
+                            <SlMenuItem Separator="true" />
+                            if (c.Pin != GridPin.Start)
+                            {
+                                <SlMenuItem Value="pin-start" Label="Pin to start" Icon="pin" />
+                            }
+                            if (c.Pin != GridPin.End)
+                            {
+                                <SlMenuItem Value="pin-end" Label="Pin to end" Icon="pin" />
+                            }
+                            if (c.Pin != GridPin.None)
+                            {
+                                <SlMenuItem Value="unpin" Label="Unpin" Icon="x" />
+                            }
+                            <SlMenuItem Value="autosize" Label="Autosize column" Icon="arrow-right" />
+                            <SlMenuItem Separator="true" />
+                            if (column.Hideable)
+                            {
+                                <SlMenuItem Value="hide" Label="Hide column" Icon="eye-off" />
+                            }
+                            <SlMenuItem Value="columns" Label="Columns…" Icon="columns" />
+                        }
+                    </Items>
+                </SlMenu>
+            </span>
+            @if (column.Resizable)
+            {
+                <span class="@(Css.Of("sl-data-grid__resize").Add("is-resizing", _resizing?.Field == c.Field))" role="separator" aria-orientation="vertical"
+                      aria-label="Resize @title" @ondblclick="() => Autosize(c)"></span>
+            }
+        </div>
+    }
+
+    // ---- filter editor (inside the column's popover) ----
+
+    private RenderFragment FilterEditor(DataGridColumn<T>? def, GridColumn<T> column, GridCells.FilterDraft draft) => b => RenderFilterEditor(b, def, column, draft);
+
+    private void RenderFilterEditor(RenderTreeBuilder __builder, DataGridColumn<T>? def, GridColumn<T> column, GridCells.FilterDraft draft)
+    {
+        var kind = GridCells.KindOf(column.Type);
+        var ops = GridCells.Operators[kind];
+        <form class="sl-data-grid__panel" part="filter-panel" @onsubmit="() => ApplyFilter(column)">
+            <span class="sl-data-grid__panel-title">Filter · @column.DisplayTitle</span>
+            @if (kind == GridCells.FilterKind.Boolean)
+            {
+                <SlSegmented T="string" Label="Value" FullWidth="true" Size="ControlSize.Small" Items="@(new[] { "true", "false" })"
+                             ItemText="@(v => v == "true" ? "Yes" : "No")" Value="@(draft.Value.Length > 0 ? draft.Value : null)"
+                             ValueChanged="@((string? v) => { draft.Operator = FilterOperator.Equals; draft.Value = v ?? ""; })" />
+            }
+            else
+            {
+                <SlSelect T="FilterOperator" Label="Condition" Size="ControlSize.Small" Items="@(ops.Select(o => o.Value))"
+                          ItemText="@(o => GridCells.OperatorLabel(o))" Value="@draft.Operator" ValueChanged="@((FilterOperator o) => draft.Operator = o)" />
+            }
+            @if (GridCells.NeedsValue(draft.Operator) && kind != GridCells.FilterKind.Boolean)
+            {
+                if (draft.Operator == FilterOperator.AnyOf)
+                {
+                    <SlSelect T="string" Label="Values" Size="ControlSize.Small" Multiple="true" Searchable="true" Items="@FilterOptionsFor(def, column)"
+                              Values="@draft.Values" ValuesChanged="@((IReadOnlyList<string>? v) => draft.Values = v?.ToList() ?? [])" />
+                }
+                else
+                {
+                    RenderFilterValue(__builder, kind, draft, false, draft.Operator == FilterOperator.Between ? "From" : "Value", column);
+                    if (draft.Operator == FilterOperator.Between)
+                    {
+                        RenderFilterValue(__builder, kind, draft, true, "To", column);
+                    }
+                }
+            }
+            <div class="sl-data-grid__panel-actions">
+                <SlButton Size="ControlSize.Small" Variant="ButtonVariant.Ghost" Click="() => ClearFilterDraft(column)">Clear</SlButton>
+                <SlButton Size="ControlSize.Small" Variant="ButtonVariant.Solid" Tone="Tone.Accent" Type="ButtonType.Submit">Apply</SlButton>
+            </div>
+        </form>
+    }
+
+    private EventCallback<KeyboardEventArgs> FilterEnter(GridColumn<T> column) =>
+        EventCallback.Factory.Create<KeyboardEventArgs>(this, e => { if (e.Key == "Enter") ApplyFilter(column); });
+
+    private void RenderFilterValue(RenderTreeBuilder __builder, GridCells.FilterKind kind, GridCells.FilterDraft draft, bool second, string label, GridColumn<T> column)
+    {
+        var text = second ? draft.Value2 : draft.Value;
+        if (kind == GridCells.FilterKind.Date)
+        {
+            DateOnly? date = DateOnly.TryParseExact(text.Length >= 10 ? text[..10] : text, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var parsed) ? parsed : null;
+            <SlDatePicker Label="@label" Size="ControlSize.Small" Clearable="true" Value="@date"
+                          ValueChanged="@((DateOnly? v) => { var s = v?.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) ?? ""; if (second) draft.Value2 = s; else draft.Value = s; })" />
+        }
+        else
+        {
+            <SlTextField TValue="string" Label="@label" Size="ControlSize.Small" InputType="@(kind == GridCells.FilterKind.Number ? "number" : "text")" Value="@text" Immediate="true"
+                         onkeydown="@FilterEnter(column)"
+                         ValueChanged="@((string? v) => { if (second) draft.Value2 = v ?? ""; else draft.Value = v ?? ""; })" />
+        }
+    }
+
+    // ---- rows ----
+
+    private void RenderRow(RenderTreeBuilder __builder, Slot slot, int row, int position, (List<ResolvedColumn<T>?> Cells, double SpacerBefore, double SpacerAfter) cols)
+    {
+        if (slot.Kind == SlotKind.Group)
+        {
+            RenderGroupRow(__builder, slot, row, position);
+            return;
+        }
+        if (slot.Kind == SlotKind.Detail)
+        {
+            RenderDetailRow(__builder, slot, row);
+            return;
+        }
+        var selected = slot.Kind == SlotKind.Data && _selection.IsSelected(slot.Key);
+        var tone = slot.Item is not null ? RowTone?.Invoke(slot.Item) : null;
+        var expanded = slot.View is { HasChildren: true } v ? v.Expanded : (bool?)null;
+        var cls = Css.Of("sl-data-grid__row")
+            .Add("is-odd", row % 2 == 1)
+            .Add("is-selected", selected)
+            .Add("is-toned", tone is not null)
+            .Add(tone is { } t ? Names.Tone(t) : null)
+            .Add("is-flash", IsFlashing(slot.Key))
+            .Add("sl-data-grid__row--skeleton", slot.Kind == SlotKind.Skeleton);
+        <div @key="slot.Key" class="@cls" role="row" part="row" data-key="@slot.Key" aria-rowindex="@RowAriaIndex(row)"
+             aria-selected="@(SelectionMode != GridSelectionMode.None && slot.Kind == SlotKind.Data ? (selected ? "true" : "false") : null)"
+             aria-level="@(ChildrenSelector is not null ? slot.Depth + 1 : null)"
+             aria-expanded="@(expanded is { } e ? (e ? "true" : "false") : null)">
+            @if (SelectionMode == GridSelectionMode.Multi)
+            {
+                @((MarkupString)SelectCellHtml(slot, row, selected))
+            }
+            @if (HasDetail)
+            {
+                @((MarkupString)DetailCellHtml(slot))
+            }
+            @foreach (var c in cols.Cells)
+            {
+                if (c is null)
+                {
+                    <span class="sl-data-grid__spacer" style="width:@GridCells.Px(cols.SpacerBefore)"></span>
+                }
+                else
+                {
+                    var active = _active.Row == row && _active.Column == c.Index;
+                    var editing = active && _edit.Current is { } cur && cur.RowKey == slot.Key && cur.Column == c.Column;
+                    if (NeedsFrames(slot, c, editing))
+                    {
+                        RenderCell(__builder, slot, row, position, c);
+                    }
+                    else
+                    {
+                        @((MarkupString)CellHtml(slot, row, c, active, slot.Kind == SlotKind.Data && _edit.Pending.Count > 0 && _edit.HasPending(slot.Key, c.Field)))
+                    }
+                }
+            }
+            @if (cols.SpacerAfter > 0)
+            {
+                <span class="sl-data-grid__spacer" style="width:@GridCells.Px(cols.SpacerAfter)"></span>
+            }
+        </div>
+    }
+
+    private void RenderCell(RenderTreeBuilder __builder, Slot slot, int row, int position, ResolvedColumn<T> c)
+    {
+        var column = c.Column;
+        var type = column.Type;
+        var active = _active.Row == row && _active.Column == c.Index;
+        var editing = active && _edit.Current is { } cur && cur.RowKey == slot.Key && cur.Column == column;
+        var dirty = slot.Kind == SlotKind.Data && _edit.Pending.Count > 0 && _edit.HasPending(slot.Key, c.Field);
+        var align = column.EffectiveAlign;
+        var cls = PinClasses(Css.Of("sl-data-grid__cell")
+            .Add($"sl-data-grid__cell--{Names.Kebab(type.ToString())}")
+            .Add("sl-data-grid__cell--end", align == GridAlign.End)
+            .Add("sl-data-grid__cell--center", align == GridAlign.Center)
+            .Add("is-active", active)
+            .Add("is-editing", editing)
+            .Add("is-dirty", dirty)
+            .Add("is-invalid", editing && _edit.Current?.Error is not null), c);
+        var tree = ChildrenSelector is not null && c.Index == 0 && slot.View is not null;
+        <div class="@cls" role="gridcell" part="cell" id="@CellId(row, c.Index)" data-field="@c.Field" aria-colindex="@ColIndex(c)"
+             aria-readonly="@(EditMode != GridEditMode.None && !column.Editable ? "true" : null)" style="@PinStyle(c)">
+            @if (tree)
+            {
+                <span style="width:@GridCells.Px(slot.Depth * 20);flex:none"></span>
+                if (slot.View!.HasChildren)
+                {
+                    <button class="sl-data-grid__expander" type="button" tabindex="-1" aria-expanded="@(slot.View.Expanded ? "true" : "false")"
+                            aria-label="@(slot.View.Expanded ? "Collapse" : "Expand")">@Ico("chevron-right")</button>
+                }
+                else
+                {
+                    <span class="sl-data-grid__expander-spacer"></span>
+                }
+            }
+            @if (slot.Kind == SlotKind.Skeleton)
+            {
+                <span class="sl-data-grid__skeleton"></span>
+            }
+            else if (editing)
+            {
+                RenderEditor(__builder, column);
+            }
+            else if (slot.Item is not null)
+            {
+                var value = _edit.Pending.Count > 0 ? _edit.GetValue(slot.Item, slot.Key, column) : column.GetValue(slot.Item);
+                var text = value is null ? "" : column.DisplayText(value);
+                RenderCellContent(__builder, Def(c.Field), column, value, slot.Item, text, slot.Key, row);
+            }
+            @if (editing && _edit.Current?.Error is { } error)
+            {
+                <span class="sl-data-grid__cell-error" role="alert">@error</span>
+            }
+        </div>
+    }
+
+    private void RenderCellContent(RenderTreeBuilder __builder, DataGridColumn<T>? def, GridColumn<T> column, object? value, T item, string text, string key, int row)
+    {
+        if (def?.Template is { } template)
+        {
+            @template(new GridCellContext<T>(item, value, text, column, key, row))
+            return;
+        }
+        var type = column.Type;
+        if (value is null || value is "")
+        {
+            if (type == GridColumnType.Actions) RenderActions(__builder, def, item, key, row);
+            else
+            {
+                <span class="sl-data-grid__muted">—</span>
+            }
+            return;
+        }
+        switch (type)
+        {
+            case GridColumnType.Boolean:
+                if (value is true || text is "true" or "Yes")
+                {
+                    <span class="sl-data-grid__bool" role="img" aria-label="Yes">@Ico("check")</span>
+                }
+                else
+                {
+                    <span class="sl-data-grid__muted" aria-label="No">—</span>
+                }
+                break;
+            case GridColumnType.Enum:
+                var tone = column.EnumTones is { } tones && tones.TryGetValue(text, out var t) ? t : Tone.Neutral;
+                <span class="sl-badge sl-badge--soft @Names.Tone(tone)">@text</span>
+                break;
+            case GridColumnType.Progress:
+                var n = Math.Min(Math.Max(GridValues.ToDouble(value) ?? 0, 0), 100);
+                var ns = n.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                <span class="sl-data-grid__progress">
+                    <span class="sl-progress sl-progress--small sl-tone-accent" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@ns">
+                        <span class="sl-progress__bar" style="--_value:@(ns)%"></span>
+                    </span>
+                    <span class="sl-data-grid__progress-value">@text</span>
+                </span>
+                break;
+            case GridColumnType.Sparkline:
+                var values = GridCells.Series(value);
+                var max = Math.Max(1e-9, values.Count > 0 ? values.Max(Math.Abs) : 0);
+                <span class="sl-data-grid__sparkline" role="img" aria-label="Trend: @string.Join(", ", values.Select(x => x.ToString(System.Globalization.CultureInfo.InvariantCulture)))">
+                    @foreach (var x in values)
+                    {
+                        <span class="sl-data-grid__spark" style="height:@(Math.Max(6, Math.Abs(x) / max * 100).ToString(System.Globalization.CultureInfo.InvariantCulture))%"></span>
+                    }
+                </span>
+                break;
+            case GridColumnType.Actions:
+                RenderActions(__builder, def, item, key, row);
+                break;
+            default:
+                <span class="sl-data-grid__text">@text</span>
+                break;
+        }
+    }
+
+    private void RenderActions(RenderTreeBuilder __builder, DataGridColumn<T>? def, T item, string key, int row)
+    {
+        var actions = def?.Actions;
+        if (actions is not { Count: > 0 }) return;
+        var open = _openActionsKey == key;
+        if (!open)
+        {
+            // SlMenu's closed markup, without a component per row (rows entering the window stay cheap on Blazor Server);
+            // the real menu mounts when opened.
+            <span class="sl-menu sl-data-grid__actions"><span class="sl-menu__trigger"><button class="sl-data-grid__row-action" type="button" aria-label="Row actions"
+                tabindex="-1" aria-haspopup="menu" aria-expanded="false">@Ico("more-horizontal")</button></span></span>
+            return;
+        }
+        <SlMenu Placement="PopoverPlacement.BottomEnd" Class="sl-data-grid__actions" Open="open" OpenChanged="@((bool o) => OnActionsOpenChanged(key, o))"
+                ItemSelected="@((MenuSelectEventArgs a) => OnActionSelected(a, def, item))">
+            <Trigger><button class="sl-data-grid__row-action" type="button" aria-label="Row actions" tabindex="-1">@Ico("more-horizontal")</button></Trigger>
+            <Items>
+                @if (open)
+                {
+                    for (var i = 0; i < actions.Count; i++)
+                    {
+                        var a = actions[i];
+                        if (a.Separator)
+                        {
+                            <SlMenuItem Separator="true" />
+                        }
+                        else
+                        {
+                            <SlMenuItem Value="@i.ToString(System.Globalization.CultureInfo.InvariantCulture)" Label="@a.Label" Icon="@a.Icon" Shortcut="@a.Shortcut"
+                                        Tone="@(a.Tone ?? Tone.Neutral)" Disabled="@(a.Disabled?.Invoke(item) ?? false)" />
+                        }
+                    }
+                }
+            </Items>
+        </SlMenu>
+    }
+
+    private void RenderEditor(RenderTreeBuilder __builder, GridColumn<T> column)
+    {
+        var e = _edit.Current!;
+        var kind = GridCells.EditorKind(column.Type, Def(column.Field)?.Editor);
+        var text = e.DraftText ?? GridCells.EditorText(column, kind, e.Draft);
+        var label = $"Edit {column.DisplayTitle}";
+        if (kind == GridEditorKind.Checkbox)
+        {
+            <input class="sl-data-grid__editor" type="checkbox" aria-label="@label" checked="@(e.Draft is true)" style="width:auto"
+                   @onchange="OnEditorChecked" @onkeydown="OnEditorKeyDown" @onkeydown:stopPropagation="true" @onfocusout="OnEditorBlur"
+                   @onclick:stopPropagation="true" @ondblclick:stopPropagation="true" />
+        }
+        else if (kind == GridEditorKind.Select)
+        {
+            var options = column.EnumOrder ?? FilterOptionsFor(Def(column.Field), column);
+            <select class="sl-data-grid__editor" aria-label="@label" @onchange="OnEditorInput" @onkeydown="OnEditorKeyDown" @onkeydown:stopPropagation="true"
+                    @onfocusout="OnEditorBlur" @onclick:stopPropagation="true" @ondblclick:stopPropagation="true">
+                @foreach (var o in options)
+                {
+                    <option value="@o" selected="@(o == text)">@o</option>
+                }
+            </select>
+        }
+        else
+        {
+            <input class="sl-data-grid__editor" aria-label="@label" type="@(kind == GridEditorKind.Date ? "date" : "text")"
+                   inputmode="@(kind == GridEditorKind.Number ? "decimal" : null)" value="@text" aria-invalid="@(e.Error is not null ? "true" : "false")"
+                   @oninput="OnEditorInput" @onkeydown="OnEditorKeyDown" @onkeydown:stopPropagation="true" @onfocusout="OnEditorBlur"
+                   @onclick:stopPropagation="true" @ondblclick:stopPropagation="true" />
+        }
+    }
+
+    private void RenderGroupRow(RenderTreeBuilder __builder, Slot slot, int row, int position)
+    {
+        var v = slot.View!;
+        var column = v.GroupField is null ? null : EngineColumn(v.GroupField);
+        var active = _active.Row == row;
+        <div @key="slot.Key" class="sl-data-grid__row sl-data-grid__row--group" role="row" part="group-row" data-key="@slot.Key"
+             aria-rowindex="@RowAriaIndex(row)" aria-expanded="@(v.Expanded ? "true" : "false")" aria-level="@(v.Depth + 1)">
+            <div class="@(Css.Of("sl-data-grid__cell sl-data-grid__cell--wide").Add("is-active", active))" role="gridcell"
+                 id="@CellId(row, _active.Column)" aria-colspan="@_layout.Columns.Count"
+                 style="position:sticky;left:0;flex:none;width:@GridCells.Px(_viewportWidth > 0 ? _viewportWidth : 960);padding-left:@GridCells.Px(8 + v.Depth * 20)">
+                <button class="sl-data-grid__expander" type="button" tabindex="-1" aria-expanded="@(v.Expanded ? "true" : "false")"
+                        aria-label="@(v.Expanded ? "Collapse group" : "Expand group")">@Ico("chevron-right")</button>
+                <span class="sl-data-grid__group">
+                    <span class="sl-data-grid__group-label">@(column?.DisplayTitle ?? v.GroupField):</span>
+                    <span>@(string.IsNullOrEmpty(v.GroupKeyText) ? "(empty)" : v.GroupKeyText)</span>
+                    <span class="sl-data-grid__group-count">@GridCells.Number(v.RowCount)</span>
+                    @if (v.Aggregates is { } aggregates)
+                    {
+                        foreach (var (field, value) in aggregates)
+                        {
+                            var c = EngineColumn(field);
+                            if (c is null) continue;
+                            <span class="sl-data-grid__aggregate"><span class="sl-data-grid__aggregate-label">@GridCells.AggregateLabel(c.Aggregate) @c.DisplayTitle</span>@GridCells.AggregateText(c, c.Aggregate, value)</span>
+                        }
+                    }
+                </span>
+            </div>
+        </div>
+    }
+
+    private void RenderDetailRow(RenderTreeBuilder __builder, Slot slot, int row)
+    {
+        <div @key="slot.Key" class="sl-data-grid__row sl-data-grid__row--detail" role="row" data-key="@slot.Key" aria-rowindex="@RowAriaIndex(row)" style="height:@GridCells.Px(DetailHeight)">
+            <div class="sl-data-grid__cell sl-data-grid__cell--wide" role="gridcell" aria-colspan="@_layout.Columns.Count" id="@CellId(row, _active.Column)"
+                 style="position:sticky;left:0;flex:none;width:@GridCells.Px(_viewportWidth > 0 ? _viewportWidth : 960);height:100%;padding:0">
+                <div class="sl-data-grid__detail">
+                    @if (RowDetail is not null && slot.Item is not null)
+                    {
+                        @RowDetail(slot.Item)
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    private void RenderFooter(RenderTreeBuilder __builder, (List<ResolvedColumn<T>?> Cells, double SpacerBefore, double SpacerAfter) cols)
+    {
+        var totals = _result?.Totals;
+        var leading = LeadingWidth;
+        <div class="sl-data-grid__row sl-data-grid__row--footer" role="row" part="footer" aria-rowindex="@RowAriaIndex(SlotCount)"
+             style="width:@GridCells.Px(_layout.TotalWidth + leading);position:sticky" @onkeydown:stopPropagation="true">
+            @if (leading > 0)
+            {
+                <div class="sl-data-grid__cell is-pinned-start" role="gridcell" style="width:@GridCells.Px(leading);left:0"></div>
+            }
+            @foreach (var c in cols.Cells)
+            {
+                if (c is null)
+                {
+                    <span class="sl-data-grid__spacer" style="width:@GridCells.Px(cols.SpacerBefore)"></span>
+                    continue;
+                }
+                var agg = c.Column.Aggregate;
+                object? value = null;
+                totals?.TryGetValue(c.Field, out value);
+                <div class="@PinClasses(Css.Of("sl-data-grid__cell").Add("sl-data-grid__cell--end", c.Column.EffectiveAlign == GridAlign.End), c)" role="gridcell" data-field="@c.Field" style="@PinStyle(c)">
+                    @if (agg != GridAggregate.None)
+                    {
+                        <span class="sl-data-grid__aggregate-label">@GridCells.AggregateLabel(agg)</span>@GridCells.AggregateText(c.Column, agg, value)
+                    }
+                </div>
+            }
+            @if (cols.SpacerAfter > 0)
+            {
+                <span class="sl-data-grid__spacer" style="width:@GridCells.Px(cols.SpacerAfter)"></span>
+            }
+        </div>
+    }
+
+    private void RenderEmpty(RenderTreeBuilder __builder)
+    {
+        var filtered = (_result?.TotalCount ?? 0) > 0;
+        <div class="sl-data-grid__empty" part="empty">
+            @if (EmptyContent is not null)
+            {
+                @EmptyContent
+            }
+            else
+            {
+                <div>
+                    <div class="sl-data-grid__empty-title">@(filtered ? "No matching rows" : "No data")</div>
+                    @if (filtered)
+                    {
+                        <div>Try a different search, or <button class="sl-data-grid__link" type="button" @onclick="@(() => CommitState(_state.ClearFilters(), "Filters cleared"))">clear the filters</button>.</div>
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    private void RenderPager(RenderTreeBuilder __builder)
+    {
+        var total = _cache is not null ? _cache.TotalCount ?? 0 : _result?.ViewRowCount ?? 0;
+        var pages = _cache is not null ? Math.Max(1, (int)Math.Ceiling(total / (double)Math.Max(1, _state.PageSize))) : _result?.PageCount ?? 1;
+        var page = (_cache is not null ? _state.PageIndex : _result?.PageIndex ?? 0) + 1;
+        <div class="sl-data-grid__pager" part="pager">
+            <SlPagination Size="ControlSize.Small" Page="page" PageCount="pages" PageSize="_state.PageSize" PageSizes="PageSizes" TotalCount="total"
+                          PageChanged="OnPageChanged" PageSizeChanged="OnPageSizeChanged" />
+        </div>
+    }
+}

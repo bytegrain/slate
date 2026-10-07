@@ -282,3 +282,276 @@ export function sliderTrack(track, dotnet) {
 export function sliderRelease(track) {
   track?.__slSlider?.dispose();
 }
+
+// ---- Data grid (SlDataGrid) ------------------------------------------------------------------------------------
+// The grid's logic lives in .NET; this only measures, reports scrolling when the rendered window no longer covers the
+// viewport (rAF-throttled), tracks resize/reorder pointer drags, and blocks the browser defaults for grid keys.
+
+const GRID_NAV_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown', '+', '-', ' ', 'Enter', 'F2']);
+
+export function gridInit(viewport, dotnet) {
+  if (!viewport || viewport.__slGrid) return;
+  const root = viewport.closest('.sl-data-grid') ?? viewport.parentElement;
+  const s = { dotnet, band: null, pending: false, raf: 0, idle: 0, flags: '', measured: '', reported: '', resize: null, drag: null, noReorder: new Set(), disposed: false };
+  viewport.__slGrid = s;
+  const call = (method, ...args) => (s.disposed ? Promise.resolve(false) : dotnet.invokeMethodAsync(method, ...args).catch(() => false));
+
+  s.measure = () => {
+    const probe = root.querySelector('.sl-data-grid__probe');
+    const head = root.querySelector('.sl-data-grid__probe--head');
+    const header = viewport.querySelector('.sl-data-grid__header');
+    const density = root.parentElement?.closest('[data-sl-density]')?.getAttribute('data-sl-density');
+    const m = [probe?.offsetHeight || 0, header?.offsetHeight || head?.offsetHeight || 0, viewport.clientWidth, viewport.clientHeight, density === 'comfortable'];
+    const key = m.join(':');
+    if (key === s.measured) return;
+    s.measured = key;
+    call('OnGridMeasure', ...m);
+  };
+
+  const position = () => {
+    const top = viewport.scrollTop, left = viewport.scrollLeft;
+    return { top, left, scrolledX: left > 0, scrollableEnd: left + viewport.clientWidth < viewport.scrollWidth - 1 };
+  };
+  const outside = (p) => {
+    const b = s.band;
+    if (!b) return false;
+    if (b.top !== null && p.top < b.top) return true;
+    if (b.bottom !== null && p.top + b.body > b.bottom) return true;
+    if (b.left !== null && p.left < b.left) return true;
+    if (b.right !== null && p.left > b.right) return true;
+    return false;
+  };
+  s.report = () => {
+    s.raf = 0;
+    if (s.pending) return;
+    const p = position();
+    const key = `${p.top}:${p.left}`;
+    if (key === s.reported && `${p.scrolledX}${p.scrollableEnd}` === s.flags) return;
+    s.reported = key;
+    s.flags = `${p.scrolledX}${p.scrollableEnd}`;
+    s.pending = true;
+    // A render answers with gridSync (new band); the timeout only guards against a lost answer.
+    clearTimeout(s.pendingTimer);
+    s.pendingTimer = setTimeout(() => { s.pending = false; s.check(); }, 1000);
+    call('OnGridScroll', p.top, p.left, p.scrolledX, p.scrollableEnd).then((willRender) => {
+      if (willRender) return;
+      s.pending = false;
+      clearTimeout(s.pendingTimer);
+      s.check();
+    });
+  };
+  s.check = () => {
+    const p = position();
+    if (!s.raf && (outside(p) || `${p.scrolledX}${p.scrollableEnd}` !== s.flags)) s.raf = requestAnimationFrame(s.report);
+  };
+  s.onScroll = () => {
+    const p = position();
+    root.classList.toggle('is-scrolled-x', p.scrolledX);
+    root.classList.toggle('is-scrollable-end', p.scrollableEnd);
+    s.check();
+    // A trailing report keeps .NET's scroll position exact for keyboard navigation once scrolling settles.
+    clearTimeout(s.idle);
+    s.idle = setTimeout(() => { if (!s.raf) s.raf = requestAnimationFrame(s.report); }, 150);
+  };
+
+  s.onKeyDown = (e) => {
+    const t = e.target;
+    const mod = e.ctrlKey || e.metaKey;
+    if (t === viewport) {
+      if (GRID_NAV_KEYS.has(e.key) && !(mod && (e.key === '+' || e.key === '-'))) e.preventDefault();
+      else if (mod && (e.key === 'a' || e.key === 'A' || e.key === 'c' || e.key === 'C')) e.preventDefault();
+    } else if (t?.classList?.contains('sl-data-grid__editor')) {
+      if (e.key === 'Enter' || e.key === 'Tab' || e.key === 'Escape') e.preventDefault();
+    } else if (t?.classList?.contains('sl-data-grid__sort') && e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+      e.preventDefault();
+    }
+  };
+
+  const frame = (fn) => { if (!s.dragRaf) s.dragRaf = requestAnimationFrame(() => { s.dragRaf = 0; fn(); }); };
+  s.onPointerDown = (e) => {
+    if (e.button !== 0) return;
+    const handle = e.target.closest?.('.sl-data-grid__resize');
+    if (handle && viewport.contains(handle)) {
+      const field = handle.closest('[data-field]')?.dataset.field;
+      if (!field) return;
+      e.preventDefault();
+      e.stopPropagation();
+      s.resize = { field, x: e.clientX, dx: 0 };
+      handle.setPointerCapture?.(e.pointerId);
+      return;
+    }
+    const sort = e.target.closest?.('.sl-data-grid__sort');
+    if (sort && viewport.contains(sort)) {
+      const field = sort.closest('[data-field]')?.dataset.field;
+      if (!field || s.noReorder.has(field) || sort.disabled) return;
+      s.drag = { field, x: e.clientX, moved: false, over: null, after: false, bar: false, key: '' };
+      sort.setPointerCapture?.(e.pointerId);
+    }
+  };
+  s.onPointerMove = (e) => {
+    if (s.resize) {
+      s.resize.dx = e.clientX - s.resize.x;
+      const { field, dx } = s.resize;
+      frame(() => call('OnGridResize', field, dx, false));
+      return;
+    }
+    const d = s.drag;
+    if (!d) return;
+    if (!d.moved && Math.abs(e.clientX - d.x) < 5) return;
+    d.moved = true;
+    const bar = root.querySelector('.sl-data-grid__group-bar')?.getBoundingClientRect();
+    d.bar = !!bar && e.clientY >= bar.top && e.clientY <= bar.bottom && e.clientX >= bar.left && e.clientX <= bar.right;
+    d.over = null;
+    if (!d.bar) {
+      for (const cell of viewport.querySelectorAll('.sl-data-grid__header-cell[data-field]')) {
+        const r = cell.getBoundingClientRect();
+        if (e.clientX >= r.left && e.clientX <= r.right) {
+          d.over = cell.dataset.field;
+          d.after = e.clientX > r.left + r.width / 2;
+        }
+      }
+    }
+    const key = `${d.over}|${d.after}|${d.bar}`;
+    if (key !== d.key) {
+      d.key = key;
+      call('OnGridDrag', d.field, d.over, d.after, d.bar, false);
+    }
+  };
+  const suppressClick = () => {
+    const stop = (ev) => { ev.stopPropagation(); ev.preventDefault(); };
+    viewport.addEventListener('click', stop, true);
+    setTimeout(() => viewport.removeEventListener('click', stop, true));
+  };
+  s.onPointerUp = (e) => {
+    if (s.resize) {
+      const { field } = s.resize;
+      const dx = e.type === 'pointercancel' ? 0 : s.resize.dx;
+      s.resize = null;
+      cancelAnimationFrame(s.dragRaf);
+      s.dragRaf = 0;
+      call('OnGridResize', field, dx, true);
+      return;
+    }
+    const d = s.drag;
+    s.drag = null;
+    if (!d || !d.moved) return;
+    suppressClick();
+    const cancel = e.type === 'pointercancel';
+    call('OnGridDrag', d.field, cancel ? null : d.over, d.after, !cancel && d.bar, true);
+  };
+
+  // Row/cell clicks (delegated: rows carry no per-cell handlers). Buttons, inputs and links inside cells handle themselves.
+  const rowOf = (el) => {
+    const ref = el.closest('.sl-data-grid__row')?.querySelector('[id]');
+    const m = ref?.id.match(/-r(\d+)-c(-?\d+)$/);
+    return m ? Number(m[1]) : null;
+  };
+  s.onClick = (e) => {
+    const t = e.target;
+    if (!(t instanceof Element) || !t.closest('.sl-data-grid__rows')) return;
+    const dbl = e.type === 'dblclick';
+    // Commands on the plain markup of rows: checkbox, expanders, the closed row menu.
+    const check = t.closest('.sl-data-grid__check input');
+    const expander = t.closest('.sl-data-grid__expander');
+    const action = t.closest('.sl-data-grid__row-action');
+    if (check || expander || (action && action.getAttribute('aria-expanded') !== 'true')) {
+      if (check) e.preventDefault(); // the checked state comes back from .NET
+      const row = rowOf(t);
+      if (row === null || dbl) return;
+      const command = check ? 'check' : expander ? (expander.closest('.sl-data-grid__cell--select') ? 'detail' : 'toggle') : 'actions';
+      call('OnGridRowCommand', row, command, e.shiftKey);
+      return;
+    }
+    if (t.closest('button, a, input, select, textarea, label, .sl-menu, .sl-data-grid__row--detail')) return;
+    const row = rowOf(t);
+    if (row === null) return;
+    const cell = t.closest('.sl-data-grid__cell[id]');
+    const cm = cell?.id.match(/-c(-?\d+)$/);
+    const column = cell?.classList.contains('sl-data-grid__cell--wide') ? 0 : cm ? Number(cm[1]) : -1;
+    call('OnGridCellClick', row, column, e.ctrlKey || e.metaKey, e.shiftKey, dbl);
+  };
+
+  viewport.addEventListener('scroll', s.onScroll, { passive: true });
+  viewport.addEventListener('click', s.onClick);
+  viewport.addEventListener('dblclick', s.onClick);
+  viewport.addEventListener('keydown', s.onKeyDown, true);
+  viewport.addEventListener('pointerdown', s.onPointerDown, true);
+  viewport.addEventListener('pointermove', s.onPointerMove);
+  viewport.addEventListener('pointerup', s.onPointerUp);
+  viewport.addEventListener('pointercancel', s.onPointerUp);
+  if (typeof ResizeObserver !== 'undefined') {
+    s.observer = new ResizeObserver(() => s.measure());
+    s.observer.observe(viewport);
+  }
+  s.measure();
+}
+
+/** After each grid render: the scroll band the rendered window covers, scroll/focus requests, non-reorderable fields. */
+export function gridSync(viewport, o) {
+  const s = viewport?.__slGrid;
+  if (!s) return;
+  s.band = { top: o.top ?? null, bottom: o.bottom ?? null, body: o.body ?? 0, left: o.left ?? null, right: o.right ?? null };
+  if (o.noReorder) s.noReorder = new Set(o.noReorder);
+  if (o.scrollTop !== null && o.scrollTop !== undefined) viewport.scrollTop = o.scrollTop;
+  if (o.scrollLeft !== null && o.scrollLeft !== undefined) viewport.scrollLeft = o.scrollLeft;
+  if (o.focus === 'editor') {
+    const editor = viewport.querySelector('.sl-data-grid__editor');
+    if (editor && document.activeElement !== editor) {
+      editor.focus({ preventScroll: true });
+      if (editor.type === 'text') { const n = editor.value.length; editor.setSelectionRange?.(n, n); }
+    }
+  } else if (o.focus === 'viewport' && document.activeElement !== viewport) {
+    viewport.focus({ preventScroll: true });
+  }
+  if (o.measure) s.measure();
+  s.pending = false;
+  clearTimeout(s.pendingTimer);
+  s.check();
+}
+
+export function gridDispose(viewport) {
+  const s = viewport?.__slGrid;
+  if (!s) return;
+  s.disposed = true;
+  cancelAnimationFrame(s.raf);
+  clearTimeout(s.idle);
+  s.observer?.disconnect();
+  viewport.removeEventListener('scroll', s.onScroll);
+  viewport.removeEventListener('click', s.onClick);
+  viewport.removeEventListener('dblclick', s.onClick);
+  viewport.removeEventListener('keydown', s.onKeyDown, true);
+  viewport.removeEventListener('pointerdown', s.onPointerDown, true);
+  viewport.removeEventListener('pointermove', s.onPointerMove);
+  viewport.removeEventListener('pointerup', s.onPointerUp);
+  viewport.removeEventListener('pointercancel', s.onPointerUp);
+  delete viewport.__slGrid;
+}
+
+/** Writes text to the clipboard (falls back to a hidden textarea where the async API is unavailable). */
+export async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+    document.body.appendChild(area);
+    area.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch { /* unavailable */ }
+    area.remove();
+    return ok;
+  }
+}
+
+/** Downloads text as a file. */
+export function downloadText(fileName, mime, text) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type: mime }));
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}

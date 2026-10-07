@@ -1,0 +1,728 @@
+@inherits SlateTestContext
+@using System.Diagnostics
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.Extensions.DependencyInjection
+@using Microsoft.Extensions.Logging.Abstractions
+@using Slate.Data
+@using Xunit.Abstractions
+@using Bunit.Rendering
+
+@code {
+    public sealed class Row
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Team { get; set; } = "";
+        public double Score { get; set; }
+        public DateTime Due { get; set; }
+        public bool Active { get; set; }
+        public List<Row>? Children { get; set; }
+    }
+
+    private static readonly string[] Teams = ["Alpha", "Beta", "Gamma"];
+
+    private static List<Row> MakeRows(int count) =>
+        Enumerable.Range(0, count).Select(i => new Row
+        {
+            Id = i, Name = $"Item {i:D5}", Team = Teams[i % 3], Score = i % 100, Due = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddDays(i % 365), Active = i % 2 == 0,
+        }).ToList();
+
+    private readonly ITestOutputHelper _output;
+
+    public DataGridTests(ITestOutputHelper output) => _output = output;
+
+    private List<Row> _rows = MakeRows(1000);
+    private IReadOnlyCollection<Row>? _selected;
+    private GridState? _state;
+    private string[]? _groupBy;
+    private readonly List<GridCellChange<Row>> _committed = [];
+    private readonly List<Row> _activated = [];
+    private readonly List<GridSelectionChangedEventArgs<Row>> _selectionEvents = [];
+
+    private RenderFragment Columns(bool editable = false, bool groups = false) =>
+        @<text>
+            <SlGridColumn T="Row" Field="Id" Title="ID" Width="80" Pinned="GridPin.Start" Type="GridColumnType.Number" Aggregate="GridAggregate.Count" Reorderable="false" />
+            <SlGridColumn T="Row" Field="Name" Title="Name" Width="160" Editable="editable" HeaderGroup="@(groups ? "Info" : null)"
+                          Validate="@(v => string.IsNullOrWhiteSpace(v as string) ? "Name is required" : null)" />
+            <SlGridColumn T="Row" Field="Team" Title="Team" Width="120" Type="GridColumnType.Enum" EnumOrder="Teams" HeaderGroup="@(groups ? "Info" : null)" />
+            <SlGridColumn T="Row" Field="Score" Title="Score" Width="100" Type="GridColumnType.Number" Aggregate="GridAggregate.Sum" Editable="editable" />
+            <SlGridColumn T="Row" Field="Due" Title="Due" Width="120" Type="GridColumnType.Date" />
+            <SlGridColumn T="Row" Field="Active" Title="Active" Width="80" Type="GridColumnType.Boolean" />
+        </text>;
+
+    private (IRenderedComponent<ContainerFragment> Cut, SlDataGrid<Row> Grid) RenderGrid(GridSelectionMode selection = GridSelectionMode.None,
+        GridEditMode edit = GridEditMode.None, bool toolbar = false, bool footer = false, bool groupable = false, bool detail = false, bool groups = false,
+        string? quickFilter = null, GridPagination pagination = GridPagination.None)
+    {
+        var cut = Render(@<SlDataGrid T="Row" Items="_rows" RowKey="r => r.Id" Label="Rows" SelectionMode="selection" EditMode="edit"
+                                      ShowToolbar="toolbar" ShowFooter="footer" Groupable="groupable" QuickFilter="@quickFilter" Pagination="pagination"
+                                      @bind-SelectedItems="_selected" @bind-State="_state" @bind-GroupBy="_groupBy"
+                                      SelectionChanged="e => _selectionEvents.Add(e)" CellEditCommitted="c => _committed.Add(c)" RowActivated="r => _activated.Add(r)"
+                                      RowDetail="@(detail ? Detail : null)"
+                                      Columns="@Columns(edit != GridEditMode.None, groups)" />);
+        return (cut, cut.FindComponent<SlDataGrid<Row>>().Instance);
+    }
+
+    private static readonly RenderFragment<Row> Detail = r => @<p class="detail">Detail @r.Name</p>;
+
+    private static string[] RowKeys(IRenderedComponent<ContainerFragment> cut) =>
+        cut.FindAll(".sl-data-grid__rows > .sl-data-grid__row").Select(r => r.GetAttribute("data-key")!).ToArray();
+
+    // ---- markup contract ----------------------------------------------------------------------------------
+
+    [Fact]
+    public void Renders_the_markup_contract()
+    {
+        var (cut, _) = RenderGrid(GridSelectionMode.Multi, GridEditMode.Cell, toolbar: true, footer: true, groupable: true, detail: true, groups: true);
+        var root = cut.Find(".sl-data-grid");
+        Assert.Equal("base", root.GetAttribute("part"));
+        foreach (var c in new[] { "sl-data-grid--selection-multi", "sl-data-grid--edit-cell", "sl-data-grid--pagination-none" }) Assert.Contains(c, root.ClassList);
+        Assert.Equal(2, cut.FindAll(".sl-data-grid__probe").Count);
+        Assert.NotNull(cut.Find(".sl-data-grid__probe--head"));
+
+        var toolbar = cut.Find(".sl-data-grid__toolbar");
+        Assert.Equal("toolbar", toolbar.GetAttribute("part"));
+        Assert.NotNull(toolbar.QuerySelector(".sl-data-grid__quick-filter"));
+        Assert.Equal("1,000 rows", cut.Find(".sl-data-grid__status").TextContent);
+        Assert.Contains("Drag a column header here", cut.Find(".sl-data-grid__group-bar").TextContent);
+
+        var vp = cut.Find(".sl-data-grid__viewport");
+        Assert.Equal("grid", vp.GetAttribute("role"));
+        Assert.Equal("0", vp.GetAttribute("tabindex"));
+        Assert.Equal("Rows", vp.GetAttribute("aria-label"));
+        Assert.Equal("1003", vp.GetAttribute("aria-rowcount")); // 1000 + 2 header rows + footer
+        Assert.Equal("8", vp.GetAttribute("aria-colcount")); // 6 + select + detail
+        Assert.Equal("true", vp.GetAttribute("aria-multiselectable"));
+        Assert.NotNull(cut.Find(".sl-data-grid__canvas"));
+
+        var header = cut.Find(".sl-data-grid__header");
+        Assert.Equal("header", header.GetAttribute("part"));
+        Assert.Equal("1", cut.Find(".sl-data-grid__header-groups").GetAttribute("aria-rowindex"));
+        Assert.Equal(["", "", "Info", ""], cut.FindAll(".sl-data-grid__header-group").Select(g => g.TextContent).Take(4));
+        Assert.Equal("2", cut.Find(".sl-data-grid__header-row").GetAttribute("aria-rowindex"));
+        var select = cut.Find(".sl-data-grid__header-cell--select");
+        Assert.Contains("is-pinned-start", select.ClassList);
+        Assert.Equal("Select all rows", select.QuerySelector("input")!.GetAttribute("aria-label"));
+
+        var id = cut.Find(".sl-data-grid__header-cell[data-field=Id]");
+        Assert.Equal("header-cell", id.GetAttribute("part"));
+        Assert.Contains("is-pinned-start", id.ClassList);
+        Assert.Contains("is-pinned-edge-start", id.ClassList);
+        Assert.Contains("sl-data-grid__header-cell--end", id.ClassList);
+        Assert.Equal("3", id.GetAttribute("aria-colindex"));
+        Assert.Equal("none", id.GetAttribute("aria-sort"));
+        Assert.Contains("left:80px", id.GetAttribute("style")!); // after the 44px select and 36px detail toggle
+        Assert.NotNull(id.QuerySelector("button.sl-data-grid__sort .sl-data-grid__title"));
+        Assert.Equal("Filter ID", cut.Find(".sl-data-grid__header-cell[data-field=Id] .sl-data-grid__header-button").GetAttribute("aria-label"));
+        Assert.NotNull(cut.Find(".sl-data-grid__header-cell[data-field=Name] .sl-data-grid__resize[role=separator]"));
+
+        var rows = cut.Find(".sl-data-grid__rows");
+        Assert.Equal("body", rows.GetAttribute("part"));
+        Assert.Equal("rowgroup", rows.GetAttribute("role"));
+        var row = cut.Find(".sl-data-grid__rows > .sl-data-grid__row");
+        Assert.Equal("row", row.GetAttribute("part"));
+        Assert.Equal("0", row.GetAttribute("data-key"));
+        Assert.Equal("3", row.GetAttribute("aria-rowindex"));
+        Assert.Equal("false", row.GetAttribute("aria-selected"));
+        var cell = row.QuerySelector(".sl-data-grid__cell[data-field=Name]")!;
+        Assert.Equal("cell", cell.GetAttribute("part"));
+        Assert.Matches(@"-r0-c1$", cell.Id!);
+        Assert.Equal("Item 00000", cell.QuerySelector(".sl-data-grid__text")!.TextContent);
+        Assert.Contains("sl-badge sl-badge--soft sl-tone-neutral", row.QuerySelector("[data-field=Team] span")!.ClassName);
+        Assert.NotNull(row.QuerySelector("[data-field=Active] .sl-data-grid__bool[aria-label=Yes]"));
+        Assert.Contains("sl-data-grid__cell--date", row.QuerySelector("[data-field=Due]")!.ClassList);
+        Assert.Equal("true", row.QuerySelector("[data-field=Team]")!.GetAttribute("aria-readonly"));
+        Assert.NotNull(row.QuerySelector(".sl-data-grid__expander[aria-label='Toggle details']"));
+
+        var foot = cut.Find(".sl-data-grid__row--footer");
+        Assert.Equal("footer", foot.GetAttribute("part"));
+        Assert.Equal("count1,000", foot.QuerySelector("[data-field=Id]")!.TextContent.Replace(" ", ""));
+        Assert.Equal("Σ49500", foot.QuerySelector("[data-field=Score]")!.TextContent.Replace(" ", ""));
+        Assert.Equal("polite", cut.Find(".sl-data-grid__sr-only[role=status]").GetAttribute("aria-live"));
+    }
+
+    [Fact]
+    public void Empty_states_offer_to_clear_filters()
+    {
+        _rows = [];
+        var (cut, _) = RenderGrid();
+        Assert.Equal("No data", cut.Find(".sl-data-grid__empty-title").TextContent);
+        Assert.Equal("empty", cut.Find(".sl-data-grid__empty").GetAttribute("part"));
+
+        _rows = MakeRows(10);
+        var (cut2, grid) = RenderGrid(quickFilter: "zzz");
+        Assert.Equal("No matching rows", cut2.Find(".sl-data-grid__empty-title").TextContent);
+        cut2.Find(".sl-data-grid__empty .sl-data-grid__link").Click();
+        Assert.Equal(10, cut2.FindAll(".sl-data-grid__rows > .sl-data-grid__row").Count);
+        Assert.Equal("", grid.CurrentState.QuickFilter);
+        Assert.Equal("", _state!.QuickFilter);
+    }
+
+    // ---- virtualisation -----------------------------------------------------------------------------------
+
+    [Fact]
+    public async Task Renders_only_the_window_and_rerenders_only_when_it_moves()
+    {
+        _rows = MakeRows(10_000);
+        var (cut, grid) = RenderGrid();
+        // Default viewport 480px − 40px header = 13.75 rows of 32px, plus 8 rows of overscan.
+        Assert.Equal(22, RowKeys(cut).Length);
+        Assert.Equal("0", RowKeys(cut)[0]);
+        Assert.Contains("translateY(40px)", cut.Find(".sl-data-grid__rows").GetAttribute("style")!);
+        Assert.Contains("height:320040px", cut.Find(".sl-data-grid__canvas").GetAttribute("style")!);
+
+        Assert.True(await cut.InvokeAsync(() => grid.OnGridScroll(3200, 0, false, false)));
+        var keys = RowKeys(cut);
+        Assert.Equal("92", keys[0]);
+        Assert.Equal(30, keys.Length);
+        Assert.Contains($"translateY({92 * 32 + 40}px)", cut.Find(".sl-data-grid__rows").GetAttribute("style")!);
+        Assert.Equal("94", cut.Find(".sl-data-grid__rows > .sl-data-grid__row").GetAttribute("aria-rowindex"));
+
+        // Same window: nothing to render (keeps Blazor Server payloads to window shifts only).
+        Assert.False(await cut.InvokeAsync(() => grid.OnGridScroll(3204, 0, false, false)));
+
+        // Measured sizes from slate.js.
+        await cut.InvokeAsync(() => grid.OnGridMeasure(40, 48, 1200, 848, true));
+        Assert.Contains("sl-data-grid--comfortable", cut.Find(".sl-data-grid").ClassList);
+        Assert.Equal("72", RowKeys(cut)[0]); // 3204 / 40 = 80.1 → row 80, minus 8 rows of overscan
+    }
+
+    [Fact]
+    public async Task Wide_grids_virtualise_columns_with_spacers()
+    {
+        var columns = Enumerable.Range(0, 60).Select(i => (DataGridColumn<Row>)new GridColumn<Row> { Field = $"C{i}", Width = 100, Accessor = r => r.Id * 100 + i }).ToList();
+        var cut = Render(@<SlDataGrid T="Row" Items="_rows" ColumnDefinitions="columns" />);
+        var grid = cut.FindComponent<SlDataGrid<Row>>().Instance;
+        var headers = cut.FindAll(".sl-data-grid__header-cell[data-field]");
+        Assert.InRange(headers.Count, 5, 20);
+        Assert.Equal("C0", headers[0].GetAttribute("data-field"));
+        Assert.NotEmpty(cut.FindAll(".sl-data-grid__header-row > .sl-data-grid__spacer"));
+
+        Assert.True(await cut.InvokeAsync(() => grid.OnGridScroll(0, 3000, true, true)));
+        var first = cut.FindAll(".sl-data-grid__header-cell[data-field]")[0].GetAttribute("data-field");
+        Assert.Equal("C26", first); // columns overlapping 3000px − 300px of overscan
+        Assert.Contains("is-scrolled-x", cut.Find(".sl-data-grid").ClassList);
+        Assert.Contains("is-scrollable-end", cut.Find(".sl-data-grid").ClassList);
+        Assert.Equal("C26", cut.Find(".sl-data-grid__rows > .sl-data-grid__row > [data-field]").GetAttribute("data-field"));
+    }
+
+    // ---- sorting, filtering, grouping --------------------------------------------------------------------
+
+    [Fact]
+    public void Header_clicks_sort_and_shift_click_adds_sorts()
+    {
+        _rows = MakeRows(30);
+        var (cut, _) = RenderGrid();
+        cut.Find("[data-field=Score] .sl-data-grid__sort").Click();
+        cut.Find("[data-field=Score] .sl-data-grid__sort").Click();
+        Assert.Equal("descending", cut.Find(".sl-data-grid__header-cell[data-field=Score]").GetAttribute("aria-sort"));
+        Assert.Contains("is-sorted", cut.Find(".sl-data-grid__header-cell[data-field=Score]").ClassList);
+        Assert.Equal("29", RowKeys(cut)[0]);
+
+        cut.Find("[data-field=Team] .sl-data-grid__sort").Click(new MouseEventArgs { ShiftKey = true });
+        Assert.Equal(2, _state!.Sorts.Count);
+        Assert.Equal("2", cut.Find("[data-field=Team] .sl-data-grid__sort-order").TextContent);
+        Assert.Equal("1", cut.Find("[data-field=Score] .sl-data-grid__sort-order").TextContent);
+        Assert.Contains("Sorted by Team", cut.Find(".sl-data-grid__sr-only[role=status]").TextContent);
+    }
+
+    [Fact]
+    public void Filter_popover_applies_a_filter_and_shows_a_chip()
+    {
+        _rows = MakeRows(30);
+        var (cut, _) = RenderGrid(toolbar: true);
+        cut.Find(".sl-data-grid__header-cell[data-field=Name] .sl-popover__anchor").Click();
+        var panel = cut.Find("form.sl-data-grid__panel");
+        Assert.Equal("filter-panel", panel.GetAttribute("part"));
+        Assert.Equal("Filter · Name", panel.QuerySelector(".sl-data-grid__panel-title")!.TextContent);
+        cut.Find("form.sl-data-grid__panel input.sl-field__input:not([role])").Input("00001");
+        cut.Find("form.sl-data-grid__panel").Submit();
+
+        Assert.Equal(new GridFilter("Name", FilterOperator.Contains, "00001"), _state!.Filters.Single());
+        Assert.Equal(["1"], RowKeys(cut));
+        Assert.Equal("Name contains 00001", cut.Find(".sl-data-grid__chip .sl-data-grid__link").TextContent);
+        Assert.Contains("is-filtered", cut.Find(".sl-data-grid__header-cell[data-field=Name]").ClassList);
+        Assert.Equal("1 of 30 rows", cut.Find(".sl-data-grid__status").TextContent);
+
+        cut.Find(".sl-data-grid__chip-remove").Click();
+        Assert.Empty(_state!.Filters);
+        Assert.Empty(cut.FindAll(".sl-data-grid__chips"));
+    }
+
+    [Fact]
+    public void Enum_filters_list_values_and_describe_any_of()
+    {
+        _rows = MakeRows(30);
+        _state = GridState.Empty.SetFilter(new GridFilter("Team", FilterOperator.AnyOf, Values: ["Alpha", "Gamma"]));
+        var (cut, _) = RenderGrid();
+        Assert.Equal("Team: Alpha, Gamma", cut.Find(".sl-data-grid__chip .sl-data-grid__link").TextContent);
+        Assert.Equal(20, RowKeys(cut).Length);
+        cut.Find(".sl-data-grid__chip .sl-data-grid__link").Click();
+        Assert.Equal("Filter · Team", cut.Find("form.sl-data-grid__panel .sl-data-grid__panel-title").TextContent);
+    }
+
+    [Fact]
+    public void Grouping_renders_group_rows_with_counts_and_aggregates()
+    {
+        _rows = MakeRows(12);
+        _groupBy = ["Team"];
+        var (cut, grid) = RenderGrid(groupable: true);
+        var groups = cut.FindAll(".sl-data-grid__row--group");
+        Assert.Equal(3, groups.Count);
+        Assert.Equal("group-row", groups[0].GetAttribute("part"));
+        Assert.Equal("true", groups[0].GetAttribute("aria-expanded"));
+        Assert.Equal("Team:", groups[0].QuerySelector(".sl-data-grid__group-label")!.TextContent);
+        Assert.Equal("4", groups[0].QuerySelector(".sl-data-grid__group-count")!.TextContent);
+        Assert.Equal(["count ID4", "Σ Score18"], groups[0].QuerySelectorAll(".sl-data-grid__aggregate").Select(a => a.TextContent));
+        Assert.Equal("Team", cut.Find(".sl-data-grid__group-bar .sl-data-grid__chip").TextContent.Trim());
+
+        RowCommand(cut, groups[0], "toggle");
+        Assert.Equal("false", cut.FindAll(".sl-data-grid__row--group")[0].GetAttribute("aria-expanded"));
+        Assert.Equal(11, RowKeys(cut).Length);
+
+        cut.Find(".sl-data-grid__group-bar .sl-data-grid__chip-remove").Click();
+        Assert.Empty(_groupBy!);
+        Assert.Empty(cut.FindAll(".sl-data-grid__row--group"));
+        Assert.Empty(grid.CurrentState.GroupBy);
+    }
+
+    [Fact]
+    public async Task Dragging_a_header_reorders_or_groups()
+    {
+        _rows = MakeRows(5);
+        var (cut, grid) = RenderGrid(groupable: true);
+        await cut.InvokeAsync(() => grid.OnGridDrag("Score", "Name", false, false, false));
+        Assert.Contains("is-dragging", cut.Find(".sl-data-grid__header-cell[data-field=Score]").ClassList);
+        Assert.Contains("is-drop-before", cut.Find(".sl-data-grid__header-cell[data-field=Name]").ClassList);
+        await cut.InvokeAsync(() => grid.OnGridDrag("Score", "Name", false, false, true));
+        Assert.Equal(["Id", "Score", "Name", "Team", "Due", "Active"], cut.FindAll(".sl-data-grid__header-cell[data-field]").Select(c => c.GetAttribute("data-field")));
+        Assert.Equal(["Id", "Score", "Name", "Team", "Due", "Active"], _state!.Order);
+
+        await cut.InvokeAsync(() => grid.OnGridDrag("Team", null, false, true, false));
+        Assert.Contains("is-drop-target", cut.Find(".sl-data-grid__group-bar").ClassList);
+        await cut.InvokeAsync(() => grid.OnGridDrag("Team", null, false, true, true));
+        Assert.Equal(["Team"], _groupBy!);
+
+        await cut.InvokeAsync(() => grid.OnGridResize("Name", 40, false));
+        Assert.Contains("width:200px", cut.Find(".sl-data-grid__header-cell[data-field=Name]").GetAttribute("style")!);
+        await cut.InvokeAsync(() => grid.OnGridResize("Name", 60, true));
+        Assert.Equal(220, _state!.Column("Name")!.Width);
+    }
+
+    [Fact]
+    public void Column_menu_offers_the_actions_and_runs_them()
+    {
+        _rows = MakeRows(5);
+        var (cut, _) = RenderGrid(groupable: true);
+        cut.Find(".sl-data-grid__header-cell[data-field=Name] .sl-menu__trigger").Click();
+        var labels = cut.FindAll(".sl-data-grid__header-cell[data-field=Name] .sl-menu-item__label").Select(l => l.TextContent).ToList();
+        Assert.Equal(["Sort ascending", "Sort descending", "Filter…", "Group by Name", "Pin to start", "Pin to end", "Autosize column", "Hide column", "Columns…"], labels);
+        cut.FindAll(".sl-data-grid__header-cell[data-field=Name] [role=menuitem]").First(i => i.TextContent.Contains("Pin to end")).Click();
+        Assert.Equal(GridPin.End, _state!.Column("Name")!.Pinned);
+        Assert.Contains("is-pinned-edge-end", cut.Find(".sl-data-grid__header-cell[data-field=Name]").ClassList);
+    }
+
+    // ---- selection ------------------------------------------------------------------------------------------
+
+    [Fact]
+    public void Clicks_select_rows_with_ctrl_and_shift_and_two_way_selected_items()
+    {
+        _rows = MakeRows(20);
+        var (cut, grid) = RenderGrid(GridSelectionMode.Multi);
+        ClickCell(cut, 1, "Name");
+        ClickCell(cut, 3, "Name", ctrl: true);
+        Assert.Equal([1, 3], _selected!.Select(r => r.Id).Order());
+        ClickCell(cut, 6, "Name", shift: true);
+        Assert.Equal([3, 4, 5, 6], _selected!.Select(r => r.Id).Order());
+        Assert.Equal("4 selected", cut.Find(".sl-data-grid__selection-count").TextContent);
+        Assert.Equal("true", cut.Find(".sl-data-grid__row[data-key='4']").GetAttribute("aria-selected"));
+        Assert.Contains("is-selected", cut.Find(".sl-data-grid__row[data-key='4']").ClassList);
+        Assert.Equal(4, _selectionEvents[^1].Count);
+
+        RowCommand(cut, cut.Find(".sl-data-grid__row[data-key='9']"), "check");
+        Assert.Equal(5, grid.SelectedCount);
+        Assert.NotNull(cut.Find(".sl-data-grid__row[data-key='9'] .sl-data-grid__check input[checked]"));
+        cut.Find(".sl-data-grid__header-cell--select input").Click();
+        Assert.Equal(20, grid.SelectedCount);
+        Assert.Equal("true", cut.Find(".sl-data-grid__header-cell--select input").GetAttribute("aria-checked"));
+        cut.Find(".sl-data-grid__selection-bar .sl-data-grid__link").Click(); // Clear selection
+        Assert.Empty(_selected!);
+
+        // A SelectedItems value from the parent selects those rows.
+        var cut2 = Render(@<SlDataGrid T="Row" Items="_rows" RowKey="r => r.Id" SelectionMode="GridSelectionMode.Multi" SelectedItems="@(new[] { _rows[2] })" Columns="@Columns()" />);
+        Assert.Equal("true", cut2.Find(".sl-data-grid__row[data-key='2']").GetAttribute("aria-selected"));
+        Assert.Equal("mixed", cut2.Find(".sl-data-grid__header-cell--select input").GetAttribute("aria-checked"));
+    }
+
+    /// <summary>What slate.js does for a click on a cell: report its row/column (parsed from the cell id) to the grid.</summary>
+    private static void ClickCell(IRenderedComponent<ContainerFragment> cut, int key, string field, bool ctrl = false, bool shift = false, bool dbl = false)
+    {
+        var m = System.Text.RegularExpressions.Regex.Match(Cell(cut, key, field).Id!, @"-r(\d+)-c(\d+)$");
+        var grid = cut.FindComponent<SlDataGrid<Row>>().Instance;
+        cut.InvokeAsync(() => grid.OnGridCellClick(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), ctrl, shift, dbl)).GetAwaiter().GetResult();
+    }
+
+    /// <summary>What slate.js does for a click on a row's checkbox, expander or menu trigger.</summary>
+    private static void RowCommand(IRenderedComponent<ContainerFragment> cut, AngleSharp.Dom.IElement row, string command, bool shift = false)
+    {
+        var m = System.Text.RegularExpressions.Regex.Match(row.QuerySelector("[id]")!.Id!, @"-r(\d+)-c");
+        var grid = cut.FindComponent<SlDataGrid<Row>>().Instance;
+        cut.InvokeAsync(() => grid.OnGridRowCommand(int.Parse(m.Groups[1].Value), command, shift)).GetAwaiter().GetResult();
+    }
+
+    private static AngleSharp.Dom.IElement Cell(IRenderedComponent<ContainerFragment> cut, int key, string field) =>
+        cut.Find($".sl-data-grid__row[data-key='{key}'] .sl-data-grid__cell[data-field={field}]");
+
+    // ---- keyboard -------------------------------------------------------------------------------------------
+
+    [Fact]
+    public void Keyboard_moves_the_active_cell_selects_and_activates()
+    {
+        _rows = MakeRows(100);
+        var (cut, grid) = RenderGrid(GridSelectionMode.Multi);
+        var vp = () => cut.Find(".sl-data-grid__viewport");
+        vp().KeyDown("ArrowDown");
+        vp().KeyDown("ArrowRight");
+        Assert.EndsWith("-r1-c1", vp().GetAttribute("aria-activedescendant"));
+        Assert.Contains("is-keyboard", cut.Find(".sl-data-grid").ClassList);
+        Assert.Contains("is-active", Cell(cut, 1, "Name").ClassList);
+
+        vp().KeyDown("End");
+        Assert.EndsWith("-r1-c5", vp().GetAttribute("aria-activedescendant"));
+        vp().KeyDown(new KeyboardEventArgs { Key = "End", CtrlKey = true });
+        Assert.EndsWith("-r99-c5", vp().GetAttribute("aria-activedescendant"));
+        Assert.Contains("data-key=\"99\"", cut.Find(".sl-data-grid__rows").InnerHtml); // revealed
+        vp().KeyDown(new KeyboardEventArgs { Key = "Home", CtrlKey = true });
+        vp().KeyDown("PageDown");
+        Assert.EndsWith("-r13-c0", vp().GetAttribute("aria-activedescendant"));
+
+        vp().KeyDown(" ");
+        Assert.True(_selected!.Single().Id == 13);
+        vp().KeyDown(new KeyboardEventArgs { Key = "ArrowDown", ShiftKey = true });
+        vp().KeyDown(new KeyboardEventArgs { Key = "ArrowDown", ShiftKey = true });
+        Assert.Equal([13, 14, 15], _selected!.Select(r => r.Id).Order());
+        vp().KeyDown("Escape");
+        Assert.Empty(_selected!);
+        vp().KeyDown(new KeyboardEventArgs { Key = "a", CtrlKey = true });
+        Assert.Equal(100, grid.SelectedCount);
+
+        vp().KeyDown("Enter");
+        Assert.Equal(15, _activated.Single().Id);
+
+        vp().KeyDown(new KeyboardEventArgs { Key = "ArrowRight", AltKey = true }); // column 0 isn't reorderable
+        vp().KeyDown("ArrowRight");
+        vp().KeyDown(new KeyboardEventArgs { Key = "ArrowRight", AltKey = true });
+        Assert.Equal(["Id", "Team", "Name", "Score", "Due", "Active"], _state!.Order);
+    }
+
+    [Fact]
+    public void Keyboard_expands_and_collapses_tree_rows()
+    {
+        var tree = new List<Row> { new() { Id = 1, Name = "root", Children = [new() { Id = 2, Name = "child", Children = [new() { Id = 3, Name = "leaf" }] }] } };
+        var cut = Render(@<SlDataGrid T="Row" Items="tree" RowKey="r => r.Id" ChildrenSelector="r => r.Children" ShowFooter="true" Columns="@Columns()" />);
+        Assert.Equal("treegrid", cut.Find(".sl-data-grid__viewport").GetAttribute("role"));
+        Assert.Equal(["1", "2", "3"], RowKeys(cut));
+        Assert.Equal("2", cut.Find(".sl-data-grid__row[data-key='2']").GetAttribute("aria-level"));
+        Assert.Contains("width:20px", cut.Find(".sl-data-grid__row[data-key='2'] [data-field=Id] span").GetAttribute("style")!);
+        var vp = cut.Find(".sl-data-grid__viewport");
+        vp.KeyDown("ArrowLeft");
+        Assert.Equal(["1"], RowKeys(cut));
+        Assert.Equal("false", cut.Find(".sl-data-grid__row[data-key='1']").GetAttribute("aria-expanded"));
+        cut.Find(".sl-data-grid__viewport").KeyDown("ArrowRight");
+        Assert.Equal(["1", "2", "3"], RowKeys(cut));
+        RowCommand(cut, cut.Find(".sl-data-grid__row[data-key='2']"), "toggle");
+        Assert.Equal(["1", "2"], RowKeys(cut));
+    }
+
+    // ---- editing ------------------------------------------------------------------------------------------
+
+    [Fact]
+    public void Cell_editing_commits_on_enter_and_validates()
+    {
+        _rows = MakeRows(10);
+        var module = Module;
+        var (cut, _) = RenderGrid(edit: GridEditMode.Cell);
+        ClickCell(cut, 0, "Name");
+        cut.Find(".sl-data-grid__viewport").KeyDown("Enter");
+        var editor = cut.Find(".sl-data-grid__editor");
+        Assert.Equal("Item 00000", editor.GetAttribute("value"));
+        Assert.Equal("Edit Name", editor.GetAttribute("aria-label"));
+        Assert.Contains("is-editing", Cell(cut, 0, "Name").ClassList);
+        Assert.Contains(module.Invocations["gridSync"], i => i.Arguments[1]!.ToString()!.Contains("Focus = editor"));
+
+        editor.Input("");
+        cut.Find(".sl-data-grid__editor").KeyDown("Enter");
+        Assert.Equal("Name is required", cut.Find(".sl-data-grid__cell-error[role=alert]").TextContent);
+        Assert.Contains("is-invalid", Cell(cut, 0, "Name").ClassList);
+
+        cut.Find(".sl-data-grid__editor").Input("Renamed");
+        cut.Find(".sl-data-grid__editor").KeyDown("Enter");
+        Assert.Equal("Renamed", _rows[0].Name);
+        var change = Assert.Single(_committed);
+        Assert.Equal(("Name", "Item 00000", "Renamed"), (change.Field, change.OldValue, change.NewValue));
+        Assert.Empty(cut.FindAll(".sl-data-grid__editor"));
+        Assert.EndsWith("-r1-c1", cut.Find(".sl-data-grid__viewport").GetAttribute("aria-activedescendant")); // Enter moves down
+
+        // Typing starts an edit with that text; number columns parse.
+        cut.Find(".sl-data-grid__viewport").KeyDown("ArrowRight");
+        cut.Find(".sl-data-grid__viewport").KeyDown("ArrowRight");
+        cut.Find(".sl-data-grid__viewport").KeyDown("7");
+        Assert.Equal("7", cut.Find(".sl-data-grid__editor").GetAttribute("value"));
+        cut.Find(".sl-data-grid__editor").KeyDown("Tab");
+        Assert.Equal(7, _rows[1].Score);
+
+        // Tab moved on to Due (read-only): F2 does nothing there. Back on Score, Escape cancels.
+        cut.Find(".sl-data-grid__viewport").KeyDown("F2");
+        Assert.Empty(cut.FindAll(".sl-data-grid__editor"));
+        cut.Find(".sl-data-grid__viewport").KeyDown("ArrowLeft");
+        cut.Find(".sl-data-grid__viewport").KeyDown("F2");
+        cut.Find(".sl-data-grid__editor").Input("123");
+        cut.Find(".sl-data-grid__editor").KeyDown("Escape");
+        Assert.Equal(7, _rows[1].Score);
+        Assert.Empty(cut.FindAll(".sl-data-grid__editor"));
+    }
+
+    [Fact]
+    public void Batch_editing_collects_changes_until_commit()
+    {
+        _rows = MakeRows(10);
+        var (cut, _) = RenderGrid(edit: GridEditMode.Batch);
+        ClickCell(cut, 2, "Score", dbl: true);
+        cut.Find(".sl-data-grid__editor").Input("50");
+        cut.Find(".sl-data-grid__editor").KeyDown("Enter");
+        Assert.Equal(2, _rows[2].Score);
+        Assert.Contains("is-dirty", Cell(cut, 2, "Score").ClassList);
+        Assert.Equal("50", Cell(cut, 2, "Score").TextContent.Trim());
+        Assert.Equal("1 unsaved change", cut.Find(".sl-data-grid__batch-bar .sl-data-grid__batch-count").TextContent);
+
+        cut.FindAll(".sl-data-grid__batch-bar button").Single(b => b.TextContent.Contains("Commit")).Click();
+        Assert.Equal(50, _rows[2].Score);
+        Assert.Empty(cut.FindAll(".sl-data-grid__batch-bar"));
+        Assert.Single(_committed);
+
+        ClickCell(cut, 3, "Score", dbl: true);
+        cut.Find(".sl-data-grid__editor").Input("9");
+        cut.Find(".sl-data-grid__editor").KeyDown("Enter");
+        cut.FindAll(".sl-data-grid__batch-bar button").Single(b => b.TextContent.Contains("Discard")).Click();
+        Assert.Equal(3, _rows[3].Score);
+        Assert.Empty(cut.FindAll(".is-dirty"));
+    }
+
+    // ---- clipboard & export ----------------------------------------------------------------------------
+
+    [Fact]
+    public async Task Ctrl_c_copies_tsv_and_export_downloads_through_js()
+    {
+        _rows = MakeRows(10);
+        var module = Module;
+        var (cut, grid) = RenderGrid(GridSelectionMode.Multi);
+        ClickCell(cut, 1, "Name");
+        ClickCell(cut, 2, "Name", shift: true);
+        cut.Find(".sl-data-grid__viewport").KeyDown(new KeyboardEventArgs { Key = "c", CtrlKey = true });
+        var copied = Assert.Single(module.Invocations["copyText"]);
+        Assert.Equal("1\tItem 00001\tBeta\t1\t2026-01-02\tfalse\n2\tItem 00002\tGamma\t2\t2026-01-03\ttrue", ((string)copied.Arguments[0]!).Replace("\r\n", "\n"));
+
+        cut.Find(".sl-data-grid__viewport").KeyDown(new KeyboardEventArgs { Key = "C", CtrlKey = true, ShiftKey = true });
+        Assert.StartsWith("ID\tName\tTeam", (string)module.Invocations["copyText"][1].Arguments[0]!);
+
+        await cut.InvokeAsync(() => grid.ExportAsync(GridExportFormat.Csv, GridExportScope.Selected));
+        var download = Assert.Single(module.Invocations["downloadText"]);
+        Assert.Equal("Rows.csv", download.Arguments[0]);
+        Assert.Equal("text/csv", download.Arguments[1]);
+        Assert.Equal(3, ((string)download.Arguments[2]!).Trim().Split('\n').Length);
+        Assert.Equal(11, (await grid.ExportTextAsync(GridExportFormat.Tsv)).Trim().Split('\n').Length);
+    }
+
+    // ---- state -----------------------------------------------------------------------------------------
+
+    [Fact]
+    public void State_round_trips_through_json()
+    {
+        _rows = MakeRows(30);
+        _state = GridState.FromJson(GridState.Empty.ToggleSort("Score").ToggleSort("Score").SetQuickFilter("Gamma").ResizeColumn("Name", 222).ToJson());
+        var (cut, _) = RenderGrid();
+        Assert.Equal("29", RowKeys(cut)[0]);
+        Assert.Equal(10, RowKeys(cut).Length);
+        Assert.Contains("width:222px", cut.Find(".sl-data-grid__header-cell[data-field=Name]").GetAttribute("style")!);
+
+        cut.Find("[data-field=Team] .sl-data-grid__sort").Click();
+        var json = _state!.ToJson();
+        Assert.Equal(_state, GridState.FromJson(json));
+        Assert.Equal(["Team"], GridState.FromJson(json).Sorts.Select(s => s.Field));
+
+        _state = GridState.FromJson(json).SetPageSize(5);
+        var (cut2, _) = RenderGrid(pagination: GridPagination.Pages);
+        Assert.Equal(5, RowKeys(cut2).Length);
+        Assert.Equal("pager", cut2.Find(".sl-data-grid__pager").GetAttribute("part"));
+    }
+
+    // ---- server mode ----------------------------------------------------------------------------------
+
+    [Fact]
+    public async Task Server_mode_shows_skeletons_then_loaded_blocks_and_selects_all_matching()
+    {
+        var rows = MakeRows(2500);
+        var cols = new List<GridColumn<Row>> { new() { Field = "Id", Type = GridColumnType.Number }, new() { Field = "Name" }, new() { Field = "Team", Type = GridColumnType.Enum } };
+        var source = new InMemoryGridDataSource<Row>(rows, cols, TimeSpan.FromMilliseconds(400), Time);
+        var defs = cols.Select(c => (DataGridColumn<Row>)c).ToList();
+        var cut = Render(@<SlDataGrid T="Row" DataSource="source" ColumnDefinitions="defs" RowKey="r => r.Id" SelectionMode="GridSelectionMode.Multi" ShowToolbar="true" @bind-State="_state" />);
+        var grid = cut.FindComponent<SlDataGrid<Row>>().Instance;
+
+        Assert.Contains("is-loading", cut.Find(".sl-data-grid").ClassList);
+        Assert.NotNull(cut.Find(".sl-data-grid__loading-bar"));
+        Assert.Equal(22, cut.FindAll(".sl-data-grid__row--skeleton").Count);
+        Assert.NotNull(cut.Find(".sl-data-grid__skeleton"));
+        Assert.Equal("Loading…", cut.Find(".sl-data-grid__status").TextContent);
+
+        Time.Advance(TimeSpan.FromMilliseconds(400));
+        cut.WaitForAssertion(() => Assert.Empty(cut.FindAll(".sl-data-grid__row--skeleton")));
+        Assert.Equal("2,500 rows", cut.Find(".sl-data-grid__status").TextContent);
+        Assert.Equal("2501", cut.Find(".sl-data-grid__viewport").GetAttribute("aria-rowcount"));
+        Assert.Equal("Item 00000", cut.Find(".sl-data-grid__row[data-key='0'] [data-field=Name]").TextContent.Trim());
+
+        // Far scroll: skeletons until the block arrives.
+        await cut.InvokeAsync(() => grid.OnGridScroll(32 * 2000, 0, false, false));
+        Assert.NotEmpty(cut.FindAll(".sl-data-grid__row--skeleton"));
+        Time.Advance(TimeSpan.FromMilliseconds(400));
+        cut.WaitForAssertion(() => Assert.Empty(cut.FindAll(".sl-data-grid__row--skeleton")));
+        cut.Find(".sl-data-grid__header-cell--select input").Click();
+        Assert.Equal(2500, grid.SelectedCount);
+        Assert.Equal("2,500 selected", cut.Find(".sl-data-grid__selection-count").TextContent);
+
+        // A new query (sort) resets the cache and clears the selection.
+        await cut.InvokeAsync(() => grid.OnGridScroll(0, 0, false, false));
+        cut.Find("[data-field=Name] .sl-data-grid__sort").Click();
+        cut.Find("[data-field=Name] .sl-data-grid__sort").Click();
+        Assert.Equal(0, grid.SelectedCount);
+        Assert.NotEmpty(cut.FindAll(".sl-data-grid__row--skeleton"));
+        Time.Advance(TimeSpan.FromMilliseconds(400));
+        cut.WaitForAssertion(() => Assert.Equal("2499", RowKeys(cut)[0]));
+
+        // Select some, then "Select all matching".
+        ClickCell(cut, 2499, "Name");
+        cut.Find(".sl-data-grid__selection-bar .sl-data-grid__link").Click();
+        Assert.Equal(2500, grid.SelectedCount);
+    }
+
+    [Fact]
+    public void Server_mode_pages_through_the_source()
+    {
+        var rows = MakeRows(120);
+        var cols = new List<GridColumn<Row>> { new() { Field = "Id", Type = GridColumnType.Number }, new() { Field = "Name" } };
+        var source = new InMemoryGridDataSource<Row>(rows, cols, TimeSpan.FromMilliseconds(100), Time);
+        var defs = cols.Select(c => (DataGridColumn<Row>)c).ToList();
+        _state = GridState.Empty.SetPageSize(25);
+        var cut = Render(@<SlDataGrid T="Row" DataSource="source" ColumnDefinitions="defs" RowKey="r => r.Id" Pagination="GridPagination.Pages" @bind-State="_state" />);
+        Time.Advance(TimeSpan.FromMilliseconds(100));
+        cut.WaitForAssertion(() => Assert.Equal("0", RowKeys(cut)[0]));
+        Assert.Contains("sl-data-grid--pagination-pages", cut.Find(".sl-data-grid").ClassList);
+        cut.Find(".sl-data-grid__pager [aria-label='Next page']").Click();
+        cut.WaitForAssertion(() => Assert.Equal(1, _state!.PageIndex));
+        Time.Advance(TimeSpan.FromMilliseconds(100));
+        cut.WaitForAssertion(() => Assert.Equal("25", RowKeys(cut)[0]));
+        Assert.Equal("27", cut.Find(".sl-data-grid__rows > .sl-data-grid__row").GetAttribute("aria-rowindex"));
+    }
+
+    // ---- live updates, detail rows, templates ------------------------------------------------------------
+
+    [Fact]
+    public async Task Upserts_replace_rows_by_key_and_flash()
+    {
+        _rows = MakeRows(10);
+        var (cut, grid) = RenderGrid(detail: true);
+        await grid.UpsertAsync([new Row { Id = 3, Name = "Live", Team = "Beta" }]);
+        Assert.Equal("Live", Cell(cut, 3, "Name").TextContent.Trim());
+        Assert.Contains("is-flash", cut.Find(".sl-data-grid__row[data-key='3']").ClassList);
+        Time.Advance(TimeSpan.FromMilliseconds(900));
+        cut.WaitForAssertion(() => Assert.DoesNotContain("is-flash", cut.Find(".sl-data-grid__row[data-key='3']").ClassList));
+
+        Assert.Equal("false", cut.Find(".sl-data-grid__row[data-key='3'] .sl-data-grid__expander").GetAttribute("aria-expanded"));
+        RowCommand(cut, cut.Find(".sl-data-grid__row[data-key='3']"), "detail");
+        var detail = cut.WaitForElement(".sl-data-grid__row--detail");
+        Assert.Equal("Detail Live", detail.QuerySelector(".sl-data-grid__detail .detail")!.TextContent);
+        Assert.Contains("height:160px", detail.GetAttribute("style")!);
+    }
+
+    [Fact]
+    public void Templates_actions_and_row_tones_render()
+    {
+        _rows = MakeRows(3);
+        var ran = new List<int>();
+        IReadOnlyList<GridAction<Row>> actions = [new("Open") { Icon = "external-link", Run = r => { ran.Add(r.Id); return Task.CompletedTask; } }, GridAction<Row>.SeparatorItem, new("Delete") { Tone = Tone.Danger, Disabled = r => r.Id == 0 }];
+        var cut = Render(@<SlDataGrid T="Row" Items="_rows" RowKey="r => r.Id" RowTone="@(r => r.Id == 1 ? Tone.Danger : null)">
+            <Columns>
+                <SlGridColumn Field="Name"><Template><b class="custom">@context.Text!</b></Template></SlGridColumn>
+                <SlGridColumn Field="Score" Type="GridColumnType.Progress" />
+                <SlGridColumn Field="Menu" Type="GridColumnType.Actions" Actions="actions" />
+            </Columns>
+        </SlDataGrid>);
+        Assert.Equal("Item 00000!", cut.Find(".custom").TextContent);
+        var row1 = cut.Find(".sl-data-grid__row[data-key='1']");
+        Assert.Contains("is-toned", row1.ClassList);
+        Assert.Contains("sl-tone-danger", row1.ClassList);
+        Assert.Equal("1", row1.QuerySelector(".sl-progress")!.GetAttribute("aria-valuenow"));
+        Assert.Contains("--_value:1%", row1.QuerySelector(".sl-progress__bar")!.GetAttribute("style")!);
+        Assert.DoesNotContain("sl-data-grid__header-cell--end", cut.Find(".sl-data-grid__header-cell[data-field=Score]").ClassList); // progress titles start-align
+
+        Assert.Equal("menu", row1.QuerySelector(".sl-data-grid__actions .sl-data-grid__row-action")!.GetAttribute("aria-haspopup"));
+        RowCommand(cut, row1, "actions");
+        var items = cut.FindAll(".sl-data-grid__row[data-key='1'] [role=menuitem]");
+        Assert.Equal(2, items.Count);
+        items[0].Click();
+        Assert.Equal([1], ran);
+    }
+
+    // ---- prerender & perf ------------------------------------------------------------------------------
+
+    [Fact]
+    public async Task Prerenders_without_javascript()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<Microsoft.JSInterop.IJSRuntime, ThrowingJs>();
+        services.AddSlate();
+        await using var provider = services.BuildServiceProvider();
+        await using var html = new HtmlRenderer(provider, NullLoggerFactory.Instance);
+        var rows = MakeRows(500);
+        var text = await html.Dispatcher.InvokeAsync(async () =>
+        {
+            var output = await html.RenderComponentAsync<SlDataGrid<Row>>(ParameterView.FromDictionary(new Dictionary<string, object?>
+            {
+                [nameof(SlDataGrid<Row>.Items)] = rows,
+                [nameof(SlDataGrid<Row>.ShowToolbar)] = true,
+                [nameof(SlDataGrid<Row>.Columns)] = Columns(),
+            }));
+            return output.ToHtmlString();
+        });
+        Assert.Contains("sl-data-grid__viewport", text);
+        Assert.Contains("500 rows", text);
+        Assert.Contains("Item 00021", text);
+        Assert.DoesNotContain("Item 00022", text);
+    }
+
+    private sealed class ThrowingJs : Microsoft.JSInterop.IJSRuntime
+    {
+        public ValueTask<TValue> InvokeAsync<TValue>(string identifier, object?[]? args) => throw new InvalidOperationException("JS during prerender");
+        public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[]? args) => throw new InvalidOperationException("JS during prerender");
+    }
+
+    [Fact]
+    public async Task Renders_100k_rows_quickly()
+    {
+        _rows = MakeRows(100_000);
+        var sw = Stopwatch.StartNew();
+        var (cut, grid) = RenderGrid(GridSelectionMode.Multi, toolbar: true, footer: true, groupable: true);
+        var first = sw.Elapsed;
+        Assert.Equal(22, RowKeys(cut).Length);
+        Assert.Equal("100,000 rows", cut.Find(".sl-data-grid__status").TextContent);
+
+        sw.Restart();
+        cut.Find("[data-field=Score] .sl-data-grid__sort").Click();
+        var sort = sw.Elapsed;
+        sw.Restart();
+        for (var i = 1; i <= 50; i++) await cut.InvokeAsync(() => grid.OnGridScroll(i * 32 * 30, 0, false, false));
+        var scroll = sw.Elapsed / 50;
+        _output.WriteLine($"100k rows: pipeline + first window {first.TotalMilliseconds:0} ms; sort {sort.TotalMilliseconds:0} ms; window shift {scroll.TotalMilliseconds:0.0} ms");
+        Assert.True(first < TimeSpan.FromSeconds(5), $"first render took {first}");
+        Assert.True(scroll < TimeSpan.FromMilliseconds(100), $"window shift took {scroll}");
+    }
+}

@@ -1,0 +1,196 @@
+@page "/data-grid"
+@implements IDisposable
+@inject ISnackbarService Snackbar
+@using System.Diagnostics
+@using Slate.Data
+<PageTitle>Data grid · Slate</PageTitle>
+
+<div class="demo-page">
+    <PageHeader Title="Data grid">100,000 rows, virtualised. Shift+click to multi-sort, filter from any header, drag a header to the group bar, pin and resize columns, edit in batch, Ctrl+C to copy — every behaviour runs on the same engine as Slate.Core.</PageHeader>
+
+    <SlCard Flush="true">
+        <div class="demo-grid-toggles">
+            <SlSegmented T="int" Items="Sizes" Value="_rows" ValueChanged="Load" ItemText="@(n => $"{n / 1000}k")" Size="ControlSize.Small" Label="Rows" />
+            <SlSwitch Size="ControlSize.Small" Label="Striped" @bind-Checked="_striped" />
+            <SlSwitch Size="ControlSize.Small" Label="Borders" @bind-Checked="_bordered" />
+            <SlSwitch Size="ControlSize.Small" Label="Totals" @bind-Checked="_footer" />
+            <SlSwitch Size="ControlSize.Small" Label="Batch editing" @bind-Checked="_batch" />
+            <SlSwitch Size="ControlSize.Small" Label="Live updates" Checked="_live" CheckedChanged="SetLive" />
+            <SlButton Size="ControlSize.Small" Variant="ButtonVariant.Ghost" StartIcon="group" Click="ToggleGroup">Group by status</SlButton>
+            <SlButton Size="ControlSize.Small" Variant="ButtonVariant.Ghost" StartIcon="refresh" Click="ResetView">Reset view</SlButton>
+            <span class="demo-grid-perf">@_perf</span>
+        </div>
+        <SlDataGrid @ref="_grid" T="Deployment" Items="_data" RowKey="d => d.Id" Label="Deployments" SelectionMode="GridSelectionMode.Multi"
+                    EditMode="@(_batch ? GridEditMode.Batch : GridEditMode.Cell)" ShowToolbar="true" ShowFooter="_footer" Groupable="true"
+                    Striped="_striped" Bordered="_bordered" @bind-GroupBy="_groupBy" @bind-State="_state" RowTone="RowTone"
+                    RowActivated="@((Deployment d) => Snackbar.Add($"Opened {d.Id}"))" CellEditCommitted="OnEdited"
+                    Style="height: 620px; border: 0; border-radius: 0; box-shadow: none">
+            <SelectionActions>
+                <SlButton Size="ControlSize.Small" Variant="ButtonVariant.Soft" Tone="Tone.Neutral" StartIcon="refresh">Redeploy</SlButton>
+                <SlButton Size="ControlSize.Small" Variant="ButtonVariant.Soft" Tone="Tone.Danger" StartIcon="trash">Archive</SlButton>
+            </SelectionActions>
+            <Columns>
+                <SlGridColumn Field="Id" Title="Deployment" Width="156" Pinned="GridPin.Start" Reorderable="false" Aggregate="GridAggregate.Count" />
+                <SlGridColumn Field="Service" Title="Service" Width="150" HeaderGroup="Target" Editable="true"
+                              Validate="@(v => string.IsNullOrWhiteSpace(v as string) ? "Service is required" : null)" />
+                <SlGridColumn Field="Region" Title="Region" Width="140" HeaderGroup="Target" Type="GridColumnType.Enum" EnumOrder="GridDemoData.Regions" Editable="true" />
+                <SlGridColumn Field="Env" Title="Environment" Width="150" HeaderGroup="Target" Type="GridColumnType.Enum" EnumOrder="GridDemoData.Envs" EnumTones="GridDemoData.EnvTones" />
+                <SlGridColumn Field="Status" Title="Status" Width="128" Type="GridColumnType.Enum" EnumOrder="GridDemoData.Statuses" EnumTones="GridDemoData.StatusTones"
+                              Editable="true" Description="Current pipeline state" />
+                <SlGridColumn Field="Owner" Title="Owner" Width="180" Editable="true">
+                    <Template><span class="sl-data-grid__media"><SlAvatar Size="ControlSize.Small" Name="@context.Text" />@context.Text</span></Template>
+                </SlGridColumn>
+                <SlGridColumn Field="Progress" Title="Progress" Width="160" Type="GridColumnType.Progress" Aggregate="GridAggregate.Avg" Format="0" />
+                <SlGridColumn Field="Latency" Title="p95 latency" Width="132" Type="GridColumnType.Sparkline" Sortable="false" Filterable="false" Searchable="false" />
+                <SlGridColumn Field="Duration" Title="Duration (s)" Width="124" Type="GridColumnType.Number" Format="#,##0" Aggregate="GridAggregate.Sum" HeaderGroup="Metrics"
+                              Editable="true" Validate="@(v => v is double n && n < 0 ? "Must be positive" : null)" />
+                <SlGridColumn Field="Errors" Title="Errors" Width="96" Type="GridColumnType.Number" Aggregate="GridAggregate.Sum" HeaderGroup="Metrics" />
+                <SlGridColumn Field="Cost" Title="Cost ($)" Width="112" Type="GridColumnType.Number" Format="#,##0.00" Aggregate="GridAggregate.Sum" HeaderGroup="Metrics" Editable="true" />
+                <SlGridColumn Field="Started" Title="Started" Width="170" Type="GridColumnType.Date" Format="yyyy-MM-dd HH:mm" Aggregate="GridAggregate.Max" />
+                <SlGridColumn Field="Commit" Title="Commit" Width="104" />
+                <SlGridColumn Field="Canary" Title="Canary" Width="92" Type="GridColumnType.Boolean" Align="GridAlign.Center" Editable="true" />
+                <SlGridColumn Field="Actions" Title="" Width="52" Type="GridColumnType.Actions" Pinned="GridPin.End" Accessor="_ => null" Sortable="false" Filterable="false"
+                              Resizable="false" Searchable="false" Reorderable="false" Hideable="false" Actions="_actions" />
+            </Columns>
+            <RowDetail>
+                <dl class="sl-data-grid__fields">
+                    <div><dt>Service</dt><dd>@context.Service · @context.Region</dd></div>
+                    <div><dt>Commit</dt><dd>@context.Commit</dd></div>
+                    <div><dt>Owner</dt><dd>@context.Owner</dd></div>
+                    <div><dt>Duration</dt><dd>@context.Duration.ToString("#,##0") s</dd></div>
+                    <div><dt>Errors</dt><dd>@context.Errors</dd></div>
+                    <div><dt>Started</dt><dd>@context.Started.ToString("yyyy-MM-dd HH:mm") UTC</dd></div>
+                </dl>
+            </RowDetail>
+        </SlDataGrid>
+    </SlCard>
+
+    <SlGrid Spacing="4" Style="margin-top: var(--sl-space-4)">
+        <SlItem Xs="12" Xl="6">
+            <SlCard Title="Server mode" Subtitle="Remote data source · 400 ms latency · infinite scroll with skeleton rows">
+                <SlSegmented T="GridPagination" Items="ServerPaging" @bind-Value="_serverPaging" ItemText="@(p => p == GridPagination.Pages ? "Pages" : "Infinite scroll")"
+                             Size="ControlSize.Small" Label="Paging" />
+                <SlDataGrid T="AuditEvent" DataSource="_audit" ColumnDefinitions="GridDemoData.AuditColumns" RowKey="e => e.Seq" Label="Audit log"
+                            SelectionMode="GridSelectionMode.Multi" Pagination="_serverPaging" Style="height: 360px; margin-top: var(--sl-space-3)" />
+            </SlCard>
+        </SlItem>
+        <SlItem Xs="12" Xl="6">
+            <SlCard Title="Tree data" Subtitle="Hierarchical rows · aggregates in the footer">
+                <SlDataGrid T="RepoNode" Items="_tree" RowKey="n => n.Path" ChildrenSelector="n => n.Children" Label="Repository size" ShowFooter="true"
+                            Style="height: 404px; margin-top: var(--sl-space-3)">
+                    <Columns>
+                        <SlGridColumn Field="Name" Title="Name" Flex="1" MinWidth="180">
+                            <Template><span class="sl-data-grid__media"><SlIcon Name="@(context.Item.Kind == "folder" ? "folder" : "file")" />@context.Item.Name</span></Template>
+                        </SlGridColumn>
+                        <SlGridColumn Field="Size" Title="Size" Width="100" Type="GridColumnType.Number" Aggregate="GridAggregate.Sum" Formatter="GridDemoData.FormatBytes" />
+                        <SlGridColumn Field="Files" Title="Files" Width="72" Type="GridColumnType.Number" Aggregate="GridAggregate.Sum" />
+                        <SlGridColumn Field="Modified" Title="Modified" Width="112" Type="GridColumnType.Date" Format="yyyy-MM-dd" />
+                    </Columns>
+                </SlDataGrid>
+            </SlCard>
+        </SlItem>
+    </SlGrid>
+</div>
+
+@code {
+    private static readonly int[] Sizes = [1_000, 10_000, 100_000];
+    private static readonly GridPagination[] ServerPaging = [GridPagination.None, GridPagination.Pages];
+
+    private SlDataGrid<Deployment>? _grid;
+    private Deployment[] _data = [];
+    private int _rows = 100_000;
+    private bool _striped, _bordered, _footer = true, _batch = true, _live;
+    private string[] _groupBy = [];
+    private GridState _state = GridState.Empty;
+    private string _perf = "";
+    private long _renderStart;
+    private System.Threading.Timer? _timer;
+    private IReadOnlyList<GridAction<Deployment>> _actions = [];
+
+    private GridPagination _serverPaging = GridPagination.None;
+    private readonly InMemoryGridDataSource<AuditEvent> _audit =
+        new(GridDemoData.Audit(25_000), GridDemoData.AuditColumns.Select(c => c.Column).ToList(), TimeSpan.FromMilliseconds(400));
+    private readonly RepoNode[] _tree = GridDemoData.Tree();
+
+    protected override void OnInitialized()
+    {
+        _actions =
+        [
+            new("Redeploy") { Icon = "refresh", Run = Redeploy, Disabled = d => d.Status == "Running" },
+            new("Copy ID") { Icon = "copy", Run = d => { Snackbar.Add($"Copied {d.Id}"); return Task.CompletedTask; } },
+            new("View logs") { Icon = "external-link", Run = d => { Snackbar.Info($"Opening logs for {d.Id}"); return Task.CompletedTask; } },
+            GridAction<Deployment>.SeparatorItem,
+            new("Archive") { Icon = "trash", Tone = Tone.Danger, Run = d => { Snackbar.Warning($"{d.Id} archived"); return Task.CompletedTask; } },
+        ];
+        Load(_rows);
+    }
+
+    private void Load(int count)
+    {
+        _rows = count;
+        var t0 = Stopwatch.GetTimestamp();
+        _data = GridDemoData.Deployments(count);
+        var generated = Stopwatch.GetElapsedTime(t0).TotalMilliseconds;
+        _perf = $"{count:#,##0} rows · generated {generated:0} ms";
+        _renderStart = Stopwatch.GetTimestamp();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (_renderStart == 0) return;
+        var ms = Stopwatch.GetElapsedTime(_renderStart).TotalMilliseconds;
+        _renderStart = 0;
+        _perf += $" · first render {ms:0} ms";
+        StateHasChanged();
+    }
+
+    private static Tone? RowTone(Deployment d) => d.Status == "Failed" && d.Env == "production" ? Tone.Danger : null;
+
+    private async Task Redeploy(Deployment d)
+    {
+        var next = d with { Status = "Running", Progress = 3, Started = DateTime.UtcNow };
+        var i = Array.IndexOf(_data, d);
+        if (i >= 0) _data[i] = next;
+        if (_grid is not null) await _grid.UpsertAsync([next]);
+        Snackbar.Success($"Redeploying {d.Id}");
+    }
+
+    private void OnEdited(GridCellChange<Deployment> change)
+    {
+        if (!_batch) Snackbar.Success($"Saved {change.Field} = {change.NewValue}");
+    }
+
+    private void ToggleGroup() => _groupBy = _groupBy.Contains("Status") ? [] : ["Status"];
+
+    private void ResetView()
+    {
+        _state = _state with { Columns = [], Order = [], Sorts = [], Filters = [], QuickFilter = "", GroupBy = [], ToggledGroups = [], ExpandedDetails = [] };
+        _groupBy = [];
+    }
+
+    // Live updates: a handful of the first 60 deployments tick forward every second.
+    private void SetLive(bool on)
+    {
+        _live = on;
+        _timer?.Dispose();
+        _timer = on ? new System.Threading.Timer(_ => _ = InvokeAsync(TickLive), null, 1000, 1000) : null;
+    }
+
+    private async Task TickLive()
+    {
+        if (_grid is null || _data.Length == 0) return;
+        var r = Random.Shared;
+        var changed = new List<Deployment>();
+        for (var n = 0; n < 6; n++)
+        {
+            var i = r.Next(Math.Min(_data.Length, 60));
+            var d = _data[i];
+            var progress = Math.Min(100, d.Progress + Math.Round(5 + r.NextDouble() * 20));
+            _data[i] = d with { Progress = progress, Status = progress >= 100 ? "Succeeded" : "Running", Latency = [.. d.Latency.Skip(1), Math.Round(40 + r.NextDouble() * 160)] };
+            changed.Add(_data[i]);
+        }
+        await _grid.UpsertAsync(changed);
+    }
+
+    public void Dispose() => _timer?.Dispose();
+}

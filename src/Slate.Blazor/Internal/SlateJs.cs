@@ -74,6 +74,23 @@ public sealed class SlateJs(IJSRuntime js) : IAsyncDisposable, IDisposable
     public async ValueTask SliderReleaseAsync(ElementReference track) =>
         await (await Module).InvokeVoidAsync("sliderRelease", track);
 
+    // ---- Data grid ----
+
+    public async ValueTask GridInitAsync<T>(ElementReference viewport, DotNetObjectReference<T> callback) where T : class =>
+        await (await Module).InvokeVoidAsync("gridInit", viewport, callback);
+
+    public async ValueTask GridSyncAsync(ElementReference viewport, object options) =>
+        await (await Module).InvokeVoidAsync("gridSync", viewport, options);
+
+    public async ValueTask GridDisposeAsync(ElementReference viewport) =>
+        await (await Module).InvokeVoidAsync("gridDispose", viewport);
+
+    public async ValueTask<bool> CopyTextAsync(string text) =>
+        await (await Module).InvokeAsync<bool>("copyText", text);
+
+    public async ValueTask DownloadTextAsync(string fileName, string mimeType, string text) =>
+        await (await Module).InvokeVoidAsync("downloadText", fileName, mimeType, text);
+
     /// <summary>Synchronous scopes (some hosts and tests) can't await JS; the module is released with the page.</summary>
     public void Dispose() => _module = null;
 
