@@ -101,6 +101,15 @@ internal sealed class GridRowAutomationPeer(GridRowView owner, DataGrid grid) : 
 
     protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.DataItem;
 
+    protected override List<AutomationPeer>? GetChildrenCore()
+    {
+        var children = base.GetChildrenCore() ?? [];
+        foreach (var cell in Row.Cells)
+            if (UIElementAutomationPeer.CreatePeerForElement(cell) is { } peer && !children.Contains(peer))
+                children.Add(peer);
+        return children;
+    }
+
     protected override string GetNameCore()
     {
         if (Row.Row is not { } row) return "";
