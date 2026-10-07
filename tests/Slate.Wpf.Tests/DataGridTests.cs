@@ -281,8 +281,11 @@ public class DataGridTests
         var cellProvider = grid.GetItem(80, 2); // scrolls into view on demand
         var surface = g.Surface;
         var row = surface?.RowView(80);
+        var field = g.CurrentLayout.Columns[2].Field;
+        var cell = row?.Cell(field);
+        var targetCellPeer = cell is null ? null : UIElementAutomationPeer.CreatePeerForElement(cell);
         Assert.True(cellProvider is not null,
-            $"row={row?.Index.ToString() ?? "not realized"}, cell={row?.Cell(g.CurrentLayout.Columns[2].Field) is not null}, offset={surface?.VerticalOffset}, window={surface?.WindowRange}");
+            $"row={row?.Index.ToString() ?? "not realized"}, cell={cell is not null}, visible={cell?.IsVisible}, loaded={cell?.IsLoaded}, source={cell is not null && PresentationSource.FromVisual(cell) is not null}, peer={targetCellPeer?.GetType().Name ?? "null"}, offset={surface?.VerticalOffset}, window={surface?.WindowRange}");
         var table = (ITableProvider)peer.GetPattern(PatternInterface.Table)!;
         Assert.Equal(g.CurrentLayout.Columns.Count, table.GetColumnHeaders().Length);
 
