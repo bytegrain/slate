@@ -2465,4 +2465,26 @@
       </Setter.Value>
     </Setter>
   </Style>
+  <!-- DataGrid: the visual tree inside PART_Root is built in code (Controls/DataGrid); the template is the frame. -->
+  <Style TargetType="sl:DataGrid">
+    <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
+    <Setter Property="Background" Value="{DynamicResource Sl.Component.Grid.Background.Brush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Sl.Component.Grid.Border.Brush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="FontFamily" Value="{DynamicResource Sl.Font.Family.Ui}" />
+    <Setter Property="FontSize" Value="{DynamicResource Sl.Font.Size.Sm}" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="SnapsToDevicePixels" Value="True" />
+    <Setter Property="MinHeight" Value="160" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="sl:DataGrid">
+          <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{DynamicResource Sl.Component.Grid.Radius.Corner}">
+            <Decorator x:Name="PART_Root" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
 </ResourceDictionary>

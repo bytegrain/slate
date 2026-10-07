@@ -54,6 +54,7 @@
           <sl:SectionHeader Content="Examples" Margin="8,8,0,0" />
           <ListBox x:Name="Examples" Style="{DynamicResource Sl.NavList}" SelectionChanged="OnNavigate" Padding="8,0">
             <sl:NavItem Icon="folder" Content="File browser" Tag="Files" />
+            <sl:NavItem Icon="columns" Content="Data grid" Tag="DataGrid" />
           </ListBox>
         </StackPanel>
       </DockPanel>

@@ -16,7 +16,7 @@ public partial class ConformanceTests
     private static readonly JsonElement Api = JsonDocument.Parse(File.ReadAllText(Path.Combine(Root, "design", "api", "components.json"))).RootElement;
 
     /// <summary>Components another track owns; everything else in the contract is required, whatever its "status".</summary>
-    private static readonly HashSet<string> NotYetRequired = ["DataGrid"];
+    private static readonly HashSet<string> NotYetRequired = [];
 
     /// <summary>
     /// Which WPF type implements each component, from its "xamlType" in components.json ("sl:X" = Slate control,

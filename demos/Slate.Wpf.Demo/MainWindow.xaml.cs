@@ -17,6 +17,7 @@ public partial class MainWindow : SlateWindow
         ["Theming"] = () => new ThemingPage(),
         ["Playground"] = () => new PlaygroundPage(),
         ["Files"] = () => new FileBrowserPage(),
+        ["DataGrid"] = () => new DataGridPage(),
     };
 
     private bool _syncingNav;

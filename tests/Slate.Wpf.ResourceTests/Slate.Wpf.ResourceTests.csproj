@@ -17,6 +17,12 @@
     <ProjectReference Include="..\..\src\Slate.Wpf\Slate.Wpf.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true"
                       SetTargetFramework="TargetFramework=net10.0-windows" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- The DataGrid's engine wiring is plain C# (no WPF types): compile it here so it is tested on every OS. -->
+    <ProjectReference Include="..\..\src\Slate.Core\Slate.Core.csproj" />
+    <Compile Include="..\..\src\Slate.Wpf\Controls\DataGrid\GridController.cs" Link="Linked\GridController.cs" />
+    <Compile Include="..\..\src\Slate.Wpf\Controls\DataGrid\GridKeys.cs" Link="Linked\GridKeys.cs" />
+  </ItemGroup>
   <PropertyGroup>
     <!-- Lets the test locate the matching build of Slate.Wpf. -->
     <SlateConfiguration>$(Configuration)</SlateConfiguration>

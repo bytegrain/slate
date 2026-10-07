@@ -1,0 +1,94 @@
+<UserControl x:Class="Slate.Wpf.Demo.Pages.DataGridPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sl="https://slate.dev/wpf">
+  <DockPanel Margin="24,16,24,24">
+    <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+      <TextBlock Text="Data grid" FontSize="{DynamicResource Sl.Font.Size.Xl}" FontWeight="{DynamicResource Sl.Font.Weight.Semibold}" />
+      <TextBlock Style="{DynamicResource Sl.Text.Secondary}" TextWrapping="Wrap" Margin="0,4,0,0"
+                 Text="Virtualised rows and columns, pinning, multi-sort (Shift+click), typed filters, grouping (drag a header to the group bar), batch editing, CSV/TSV export and the grid keyboard model. Ctrl+C copies the selection as TSV." />
+    </StackPanel>
+
+    <sl:Tabs KeepAlive="True" Value="deployments">
+      <sl:Tab Key="deployments" Label="Deployments · 100k" Icon="layers">
+        <DockPanel>
+          <sl:Stack DockPanel.Dock="Top" Direction="Row" Spacing="2" Align="Center" Margin="0,8,0,8">
+            <TextBlock x:Name="Summary" Style="{DynamicResource Sl.Text.Secondary}" VerticalAlignment="Center" />
+            <sl:Spacer />
+            <ToggleButton x:Name="LiveToggle" Content="Live updates" sl:Sl.StartIcon="play" Click="OnLiveToggled" />
+            <Button Content="Save layout" sl:Sl.StartIcon="pin" Click="OnSaveLayout" />
+            <Button Content="Restore layout" sl:Sl.Variant="Ghost" Click="OnRestoreLayout" />
+          </sl:Stack>
+          <sl:DataGrid x:Name="Deployments" SelectionMode="Multi" EditMode="Batch" ShowToolbar="True" ShowFooter="True" Groupable="True"
+                       Striped="False" DetailHeight="120" StateChanged="OnGridStateChanged" SelectionChanged="OnSelectionChanged"
+                       RowActivated="OnRowActivated" AutomationProperties.Name="Deployments">
+            <sl:DataGrid.ToolbarContent>
+              <TextBlock Style="{DynamicResource Sl.Text.Tertiary}" Text="Double-click a Service or Duration cell to edit" VerticalAlignment="Center" />
+            </sl:DataGrid.ToolbarContent>
+            <sl:DataGrid.SelectionActions>
+              <StackPanel Orientation="Horizontal">
+                <Button Content="Redeploy" sl:Sl.Size="Small" sl:Sl.StartIcon="refresh" Click="OnRedeploy" />
+                <Button Content="Cancel" sl:Sl.Size="Small" sl:Sl.Variant="Ghost" sl:Sl.Tone="Danger" sl:Sl.StartIcon="x" Margin="4,0,0,0" Click="OnCancelSelected" />
+              </StackPanel>
+            </sl:DataGrid.SelectionActions>
+            <sl:DataGrid.RowDetail>
+              <DataTemplate>
+                <StackPanel Margin="0,12">
+                  <TextBlock FontWeight="{DynamicResource Sl.Font.Weight.Semibold}">
+                    <Run Text="{Binding Service, Mode=OneWay}" /><Run Text=" · " /><Run Text="{Binding Commit, Mode=OneWay}" />
+                  </TextBlock>
+                  <TextBlock Style="{DynamicResource Sl.Text.Secondary}" Text="{Binding Message}" Margin="0,4,0,0" />
+                  <TextBlock Style="{DynamicResource Sl.Text.Mono}" Text="{Binding Log}" Margin="0,8,0,0" />
+                </StackPanel>
+              </DataTemplate>
+            </sl:DataGrid.RowDetail>
+            <sl:GridColumn Field="Id" Title="#" Type="Number" Width="84" Pinned="Start" Format="0" />
+            <sl:GridColumn Field="Service" Width="170" Pinned="Start" Editable="True" />
+            <sl:GridColumn Field="Status" Type="Enum" Width="120" EnumOrder="Queued, Building, Ready, Failed, Cancelled"
+                           EnumTones="Queued=Neutral, Building=Info, Ready=Success, Failed=Danger, Cancelled=Warning" />
+            <sl:GridColumn Field="Region" Type="Enum" Width="120" />
+            <sl:GridColumn Field="Branch" Width="160" />
+            <sl:GridColumn Field="Commit" Width="100" Searchable="True" />
+            <sl:GridColumn Field="Author" Width="140" />
+            <sl:GridColumn Field="Started" Type="Date" Width="170" Format="yyyy-MM-dd HH:mm" />
+            <sl:GridColumn Field="Duration" Title="Duration (s)" Type="Number" Width="130" Format="#,##0.0" Aggregate="Avg" Editable="True" />
+            <sl:GridColumn Field="Progress" Type="Progress" Width="170" Format="0%" />
+            <sl:GridColumn Field="Cpu" Title="CPU (5 min)" Type="Sparkline" Width="130" Sortable="False" Filterable="False" />
+            <sl:GridColumn Field="Cost" Title="Cost ($)" Type="Number" Width="110" Format="#,##0.00" Aggregate="Sum" />
+            <sl:GridColumn Field="Canary" Type="Boolean" Width="90" />
+            <sl:GridColumn Field="Instances" Type="Number" Width="100" Aggregate="Sum" />
+            <sl:GridColumn Field="Actions" Title="" Type="Actions" Width="56" Pinned="End" Sortable="False" Filterable="False" Resizable="False" Hideable="False" Searchable="False" />
+          </sl:DataGrid>
+        </DockPanel>
+      </sl:Tab>
+
+      <sl:Tab Key="server" Label="Server mode" Icon="refresh">
+        <DockPanel>
+          <sl:Stack DockPanel.Dock="Top" Direction="Row" Spacing="2" Align="Center" Margin="0,8,0,8">
+            <TextBlock Style="{DynamicResource Sl.Text.Secondary}" VerticalAlignment="Center"
+                       Text="250,000 rows behind a simulated 300 ms API. Scroll for skeleton rows and infinite loading, or switch to pages." />
+            <sl:Spacer />
+            <ToggleButton x:Name="PagesToggle" Content="Use pages" Click="OnPagesToggled" />
+          </sl:Stack>
+          <sl:DataGrid x:Name="Server" SelectionMode="Multi" Pagination="Infinite" PageSize="100" ShowToolbar="True" AutomationProperties.Name="Server orders">
+            <sl:GridColumn Field="Id" Title="Order" Type="Number" Width="100" Pinned="Start" Format="0" />
+            <sl:GridColumn Field="Customer" Width="200" />
+            <sl:GridColumn Field="Status" Type="Enum" Width="120" EnumOrder="Pending, Paid, Shipped, Refunded"
+                           EnumTones="Paid=Success, Shipped=Info, Refunded=Danger" />
+            <sl:GridColumn Field="Placed" Type="Date" Width="140" Format="yyyy-MM-dd" />
+            <sl:GridColumn Field="Total" Type="Number" Width="120" Format="#,##0.00" />
+          </sl:DataGrid>
+        </DockPanel>
+      </sl:Tab>
+
+      <sl:Tab Key="tree" Label="Tree data" Icon="folder">
+        <sl:DataGrid x:Name="Tree" SelectionMode="Single" Margin="0,8,0,0" ShowFooter="True" Bordered="True" AutomationProperties.Name="Project files">
+          <sl:GridColumn Field="Name" Width="320" />
+          <sl:GridColumn Field="Kind" Type="Enum" Width="120" EnumTones="Folder=Accent" />
+          <sl:GridColumn Field="Size" Title="Size (KB)" Type="Number" Width="120" Format="#,##0" Aggregate="Sum" />
+          <sl:GridColumn Field="Modified" Type="Date" Width="150" Format="yyyy-MM-dd" />
+        </sl:DataGrid>
+      </sl:Tab>
+    </sl:Tabs>
+  </DockPanel>
+</UserControl>
