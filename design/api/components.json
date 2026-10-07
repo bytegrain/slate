@@ -671,7 +671,7 @@
     "Spinner": {
       "web": "sl-spinner",
       "blazor": "SlSpinner",
-      "xaml": "WPF: sl:Spinner · Avalonia: sl:LoadingSpinner",
+      "xaml": "WPF: sl:Spinner \u00b7 Avalonia: sl:LoadingSpinner",
       "options": {
         "Size": {
           "kind": "param",
@@ -1121,7 +1121,6 @@
         "empty",
         "pager"
       ],
-      "status": "planned",
       "xamlType": "sl:DataGrid"
     },
     "Select": {
@@ -1465,7 +1464,7 @@
         "Presets": {
           "kind": "param",
           "type": "IEnumerable<DatePreset>",
-          "note": "Today, Last 7 days…"
+          "note": "Today, Last 7 days\u2026"
         },
         "Label": {
           "kind": "param",
@@ -1633,7 +1632,7 @@
     "Slider": {
       "web": "sl-slider",
       "blazor": "SlSlider",
-      "xaml": "WPF: sl:Slider · Avalonia: Slider + sl:Sl.*",
+      "xaml": "WPF: sl:Slider \u00b7 Avalonia: Slider + sl:Sl.*",
       "options": {
         "Value": {
           "kind": "param",
