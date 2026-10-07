@@ -68,7 +68,14 @@ public sealed class DataGridAutomationPeer(DataGrid owner) : FrameworkElementAut
             Dispatcher.PushFrame(frame);
         });
         view = Grid.Surface?.RowView(row);
-        return view?.Cell(field) is { } cell && CreatePeerForElement(cell) is { } peer ? ProviderFromPeer(peer) : null;
+        if (view?.Cell(field) is not { } cell)
+            return null;
+
+        // The row and its virtualized cells may have been realized after their automation peers cached children.
+        // Refresh both levels before asking WPF to connect the cell peer into the UIA provider tree.
+        CreatePeerForElement(view)?.ResetChildrenCache();
+        ResetChildrenCache();
+        return CreatePeerForElement(cell) is { } peer ? ProviderFromPeer(peer) : null;
     }
 
     // ---- ITableProvider ----
