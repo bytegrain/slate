@@ -125,3 +125,37 @@ Decisions worth knowing:
 - Parity is enforced by `tests/fixtures/data-grid.json` (C# writes it; `SLATE_UPDATE_FIXTURES=1 dotnet test` to
   regenerate) and `packages/web/test/grid-engine.test.ts`. Perf budgets: 100k rows sort+filter+quick filter
   < 150 ms, grouping < 200 ms (`SLATE_PERF_FACTOR` relaxes on slow CI).
+
+## Renderer notes
+
+Lessons from the first renderer (`sl-data-grid`, `packages/web/src/components/data-grid.ts`); the markup and class
+contract is in `css-classes.md#datagrid`. Blazor reuses that markup verbatim; WPF/Avalonia reuse the behaviour.
+
+- **One scroll container.** The header is `position: sticky; top: 0` inside the same viewport as the rows, so horizontal
+  scrolling needs no sync. The canvas is sized to the full grid; only the window of rows is rendered inside an
+  absolutely positioned body moved by `translateY(windowTop + headerHeight)`. Pinned cells are `position: sticky`
+  with `left`/`right` = `StickyOffset` and an opaque background. The footer is sticky to the bottom.
+- **Measure, don't assume.** Row height comes from a hidden probe styled like a row (density tokens), header height
+  from the rendered header (one or two rows with header groups). Measure on structural changes only — never in the
+  scroll path, where reading `offsetHeight` forces a synchronous layout every frame (that alone cost ~10 ms/frame).
+- **Recycle rows by position.** Keyed rows destroy and recreate every row (and every custom element in it) on a jump;
+  recycling cut a random-jump re-render from ~46 ms to ~4 ms. Nothing may live in row DOM: selection, active cell,
+  dirty/invalid, flash and expansion are all derived from the engine and the key on each render.
+- **Keep per-render work O(window).** The pipeline result is memoised by (items, version, state JSON); anything that
+  scans all matching keys (select-all tri-state, detail offsets) is memoised on the result identity. Scroll handling
+  is throttled to one update per animation frame.
+- **Leading pseudo-columns** (select 44px, detail toggle 36px) sit before the data columns, pinned start; they are not
+  in `GridState` and not addressed by `moveCell` column indices, but they are counted in `aria-colcount/colindex`.
+- **Focus model.** The viewport is the only tab stop; the active cell is announced via `aria-activedescendant`
+  (cell ids `{gridId}-r{row}-c{col}`). The focus ring shows only after keyboard input (`is-keyboard`). Editors are
+  real inputs that take focus and hand it back on commit/cancel.
+- **Server mode** renders `GridRowCache` slots: missing rows are skeletons, `EnsureRange` follows the rendered window,
+  a new `GridQuery` (sort/filter/quick filter) resets the cache and clears the selection; select-all becomes
+  `SelectAllMatching(total)`. Grouping and tree data are client-mode only.
+- **Group and detail rows** are one wide cell, sticky at `left: 0` and exactly viewport-wide, so their content stays
+  visible while the columns scroll.
+- **Editable plain-field columns** (no accessor/setter) get a renderer-provided setter that writes the field; columns
+  with an accessor must supply a setter to be editable.
+- **Perf (web).** `node packages/web/scripts/grid-perf.mjs` drives headless Edge/Chrome over 100k rows (flick, random
+  jumps, horizontal sweep) and reports frame intervals and the grid's update cost; `test/data-grid.test.ts` holds a
+  coarse happy-dom budget (`SLATE_PERF_FACTOR`).

@@ -47,6 +47,7 @@
             <sl-nav-item href="#navigation" icon="menu" label="Navigation"></sl-nav-item>
             <sl-nav-item href="#overlays" icon="layers" label="Overlays &amp; menus"></sl-nav-item>
             <sl-nav-item href="#tree" icon="folder" label="Tree view"></sl-nav-item>
+            <sl-nav-item href="#data-grid" icon="columns" label="Data grid" trailing="100k"></sl-nav-item>
             <sl-nav-item href="#display" icon="user" label="Avatar &amp; skeleton"></sl-nav-item>
             <sl-nav-item href="#playground" icon="settings" label="Playground"></sl-nav-item>
             <div class="sl-nav__heading">Systems</div>
@@ -541,9 +542,44 @@
             </sl-grid>
           </section>
 
+          <!-- Data grid -->
+          <section class="demo-section" id="data-grid">
+            <div class="demo-section__head"><span class="demo-num">W5</span><sl-text variant="h3" as="h2">Data grid</sl-text><sl-text tone="secondary">100,000 rows, virtualised. Shift+click to multi-sort, filter from any header, drag a header to the group bar, pin and resize columns, edit in batch, Ctrl+C to copy — every behaviour runs on the same engine as Slate.Core.</sl-text></div>
+            <sl-card flush>
+              <div class="demo-grid-toggles" id="grid-toggles">
+                <sl-segmented id="grid-size" size="small" label="Rows"></sl-segmented>
+                <sl-switch size="small" data-toggle="striped" label="Striped"></sl-switch>
+                <sl-switch size="small" data-toggle="bordered" label="Borders"></sl-switch>
+                <sl-switch size="small" data-toggle="showFooter" label="Totals" checked></sl-switch>
+                <sl-switch size="small" data-toggle="batch" label="Batch editing" checked></sl-switch>
+                <sl-switch size="small" data-toggle="live" label="Live updates"></sl-switch>
+                <sl-button size="small" variant="ghost" id="grid-group" start-icon="group">Group by status</sl-button>
+                <sl-button size="small" variant="ghost" id="grid-reset" start-icon="refresh">Reset view</sl-button>
+                <span class="demo-grid-perf" id="grid-perf"></span>
+              </div>
+              <sl-data-grid id="demo-grid" label="Deployments" selection-mode="multi" edit-mode="batch" show-toolbar show-footer groupable style="height: 620px; border: 0; border-radius: 0; box-shadow: none">
+                <sl-button slot="selection-actions" size="small" variant="soft" tone="neutral" start-icon="refresh">Redeploy</sl-button>
+                <sl-button slot="selection-actions" size="small" variant="soft" tone="danger" start-icon="trash">Archive</sl-button>
+              </sl-data-grid>
+            </sl-card>
+            <sl-grid spacing="4" style="margin-top: var(--sl-space-4)">
+              <sl-grid-item xs="12" xl="6">
+                <sl-card title="Server mode" subtitle="Remote data source · 400 ms latency · infinite scroll with skeleton rows">
+                  <sl-segmented id="server-paging" size="small" label="Paging"></sl-segmented>
+                  <sl-data-grid id="demo-grid-server" label="Audit log" selection-mode="multi" style="height: 360px; margin-top: var(--sl-space-3)"></sl-data-grid>
+                </sl-card>
+              </sl-grid-item>
+              <sl-grid-item xs="12" xl="6">
+                <sl-card title="Tree data" subtitle="Hierarchical rows · aggregates in the footer">
+                  <sl-data-grid id="demo-grid-tree" label="Repository size" show-footer style="height: 404px; margin-top: var(--sl-space-3)"></sl-data-grid>
+                </sl-card>
+              </sl-grid-item>
+            </sl-grid>
+          </section>
+
           <!-- Display -->
           <section class="demo-section" id="display">
-            <div class="demo-section__head"><span class="demo-num">W5</span><sl-text variant="h3" as="h2">Avatar &amp; skeleton</sl-text><sl-text tone="secondary">Initials and tones are derived from the name identically on every platform.</sl-text></div>
+            <div class="demo-section__head"><span class="demo-num">W6</span><sl-text variant="h3" as="h2">Avatar &amp; skeleton</sl-text><sl-text tone="secondary">Initials and tones are derived from the name identically on every platform.</sl-text></div>
             <sl-card>
               <sl-stack spacing="5">
                 <sl-stack direction="row" spacing="3" align="center" wrap>

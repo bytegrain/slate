@@ -645,3 +645,134 @@ Focus is roving: arrows move it and select, and Home/End jump to the ends. Fires
 - **Accessibility:** the host is `aria-hidden`.
 - **Motion:** the shimmer is disabled under reduced motion.
 - **Tokens:** `component.skeleton.background` (the shimmer highlight is `color.background.surface`).
+
+## DataGrid
+
+Styles: `packages/web/src/styles/datagrid.css` (bundled into `slate.css`; adopted by `sl-data-grid`'s shadow root).
+Every colour, size and radius comes from `--sl-component-grid-*` and the shared tokens; the private custom properties
+(`--_row-h`, `--_head-h`, `--_pad-x`, `--_bg`, `--_line`, `--_base`, `--_tint`) are internal. Behaviour is the
+engine's (`docs/design/data-grid.md`); this is only the markup renderers must emit.
+
+```html
+<div class="sl-data-grid [sl-data-grid--comfortable] [sl-data-grid--striped] [sl-data-grid--bordered]
+            sl-data-grid--selection-none|single|multi sl-data-grid--edit-none|cell|batch
+            sl-data-grid--pagination-none|pages [is-keyboard] [is-loading] [is-scrolled-x] [is-scrollable-end]" part="base">
+  <span class="sl-data-grid__probe" aria-hidden="true"></span>                    <!-- measures the row height -->
+  <span class="sl-data-grid__probe sl-data-grid__probe--head" aria-hidden="true"></span>
+
+  <!-- One of: selection bar (rows selected) or toolbar -->
+  <div class="sl-data-grid__selection-bar" role="toolbar" aria-label="Selection">
+    <span class="sl-data-grid__selection-count">3 selected</span>
+    <button class="sl-data-grid__link">Select all 25,000 matching</button>       <!-- server mode -->
+    <slot name="selection-actions"/>  <span class="sl-data-grid__toolbar-spacer"></span>
+    <button class="sl-data-grid__link">Clear selection</button>
+  </div>
+  <div class="sl-data-grid__toolbar" role="toolbar" part="toolbar">
+    <sl-text-field class="sl-data-grid__quick-filter" type="search"/>
+    <span class="sl-data-grid__status">1,204 of 100,000 rows</span>
+    <slot name="toolbar-content"/>  <span class="sl-data-grid__toolbar-spacer"></span>
+    density button · column chooser popover (part="column-chooser") · export menu
+  </div>
+  <div class="sl-data-grid__chips"><span class="sl-data-grid__bar-label">Filters</span>
+    <span class="sl-data-grid__chip">Environment: production<button class="sl-data-grid__chip-remove" aria-label="Remove filter …"></button></span>
+    <button class="sl-data-grid__link">Clear all</button></div>
+  <div class="sl-data-grid__group-bar [is-drop-target]"><span class="sl-data-grid__bar-label">Group by</span>
+    <span class="sl-data-grid__chip">Status<button class="sl-data-grid__chip-remove"></button></span> | <span>Drag a column header here…</span></div>
+  <div class="sl-data-grid__batch-bar" role="status"><span class="sl-data-grid__batch-count">2 unsaved changes</span> Discard · Commit</div>
+
+  <div class="sl-data-grid__viewport" role="grid|treegrid" tabindex="0" aria-label="…" aria-rowcount="100003"
+       aria-colcount="16" [aria-multiselectable="true"] aria-activedescendant="{gridId}-r{row}-c{col}">
+    <div class="sl-data-grid__canvas" style="width:{totalWidth}px;height:{rows×rowHeight + header + footer}px">
+      <div class="sl-data-grid__header" role="rowgroup" part="header">                         <!-- sticky top -->
+        <div class="sl-data-grid__header-groups" role="row" aria-rowindex="1">                    <!-- only with headerGroup -->
+          <div class="sl-data-grid__header-group [is-pinned-start]" style="width:…">Target</div>…</div>
+        <div class="sl-data-grid__header-row" role="row" aria-rowindex="1|2">
+          <div class="sl-data-grid__header-cell sl-data-grid__header-cell--select is-pinned-start" role="columnheader">
+            <label class="sl-checkbox"><input type="checkbox" aria-label="Select all rows" [indeterminate]></label></div>
+          <div class="sl-data-grid__header-cell [sl-data-grid__header-cell--end] [is-sorted] [is-filtered] [is-dragging]
+                      [is-drop-before|is-drop-after] [is-pinned-start|end] [is-pinned-edge-start|end]"
+               role="columnheader" part="header-cell" data-field="cost" aria-colindex="3" aria-sort="ascending|descending|none"
+               style="width:112px;[left|right:{stickyOffset}px]">
+            <button class="sl-data-grid__sort"><span class="sl-data-grid__title">Cost</span>
+              <span class="sl-data-grid__sort-icon">arrow-up<span class="sl-data-grid__sort-order">2</span></span></button>
+            <span class="sl-data-grid__header-actions">                                       <!-- overlays the title end -->
+              <button class="sl-data-grid__header-button [is-active]" aria-label="Filter Cost">filter</button>  <!-- sl-popover anchor -->
+              <button class="sl-data-grid__header-button" aria-label="Cost column menu">more-horizontal</button> <!-- sl-menu trigger -->
+            </span>
+            <span class="sl-data-grid__resize [is-resizing]" role="separator" aria-orientation="vertical"></span>
+          </div>…
+        </div>
+      </div>
+      <div class="sl-data-grid__rows" role="rowgroup" part="body" style="transform:translateY({windowTop + headerHeight}px)">
+        <div class="sl-data-grid__row [is-odd] [is-selected] [is-flash] [is-toned sl-tone-{tone}] [sl-data-grid__row--skeleton]"
+             role="row" part="row" data-key="…" aria-rowindex="…" [aria-selected] [aria-level] [aria-expanded]>
+          <div class="sl-data-grid__cell sl-data-grid__cell--select is-pinned-start" role="gridcell" style="width:44px;left:0">
+            <label class="sl-checkbox sl-data-grid__check"><input type="checkbox" tabindex="-1"></label></div>
+          <div class="sl-data-grid__cell sl-data-grid__cell--select is-pinned-start" style="width:36px;left:44px">   <!-- row detail -->
+            <button class="sl-data-grid__expander" aria-expanded="false" aria-label="Toggle details"></button></div>
+          <div class="sl-data-grid__cell sl-data-grid__cell--{type} [--end|--center] [is-active] [is-editing] [is-dirty]
+                      [is-invalid] [is-pinned-start|end] [is-pinned-edge-start|end]"
+               role="gridcell" part="cell" id="{gridId}-r{row}-c{col}" aria-colindex="…" style="width:…">
+            text: <span class="sl-data-grid__text">…</span>       empty: <span class="sl-data-grid__muted">—</span>
+            tree: <span class="sl-data-grid__expander-spacer" style="width:{depth×20}px"/><button class="sl-data-grid__expander">
+            enum: <span class="sl-badge sl-badge--soft sl-tone-{enumTones[text]}">Running</span>
+            boolean: <span class="sl-data-grid__bool" role="img" aria-label="Yes">check</span>
+            progress: <span class="sl-data-grid__progress"><span class="sl-progress sl-progress--small sl-tone-accent" role="progressbar">
+                        <span class="sl-progress__bar" style="--_value:42%"></span></span><span class="sl-data-grid__progress-value">42</span></span>
+            sparkline: <span class="sl-data-grid__sparkline" role="img"><span class="sl-data-grid__spark" style="height:60%"></span>…</span>
+            actions: sl-menu with <button class="sl-data-grid__row-action" aria-label="Row actions">more-horizontal</button>
+            skeleton: <span class="sl-data-grid__skeleton"></span>
+            editing: <input class="sl-data-grid__editor" aria-invalid> | <select class="sl-data-grid__editor">
+                     <span class="sl-data-grid__cell-error" role="alert">Must be positive</span>
+            custom (`cell`): anything; helpers <span class="sl-data-grid__media">icon/avatar + text</span>,
+                     <dl class="sl-data-grid__fields"><div><dt>…</dt><dd>…</dd></div></dl> (for detail templates)
+          </div>…
+          <span class="sl-data-grid__spacer" style="width:…"></span>                            <!-- column virtualisation -->
+        </div>
+        <div class="sl-data-grid__row sl-data-grid__row--group" role="row" part="group-row" aria-expanded aria-level>
+          <div class="sl-data-grid__cell sl-data-grid__cell--wide" aria-colspan="…" style="position:sticky;left:0;width:{viewportWidth}px">
+            <button class="sl-data-grid__expander" aria-expanded="true"></button>
+            <span class="sl-data-grid__group"><span class="sl-data-grid__group-label">Status:</span><span>Running</span>
+              <span class="sl-data-grid__group-count">8,258</span>
+              <span class="sl-data-grid__aggregate"><span class="sl-data-grid__aggregate-label">Σ Cost</span>166,777.30</span>…</span></div></div>
+        <div class="sl-data-grid__row sl-data-grid__row--detail" role="row" style="height:{detailHeight}px">
+          <div class="sl-data-grid__cell sl-data-grid__cell--wide" style="position:sticky;left:0;width:{viewportWidth}px">
+            <div class="sl-data-grid__detail">…template…</div></div></div>
+      </div>
+      <div class="sl-data-grid__row sl-data-grid__row--footer" role="row" part="footer">                       <!-- sticky bottom -->
+        <div class="sl-data-grid__cell …"><span class="sl-data-grid__aggregate"><span class="sl-data-grid__aggregate-label">Σ</span>3,969,748</span></div>…</div>
+    </div>
+    <div class="sl-data-grid__loading-bar sl-progress sl-progress--indeterminate"></div>                  <!-- loading -->
+    <div class="sl-data-grid__empty" part="empty"><span class="sl-data-grid__empty-title">No rows match</span>
+      <slot name="empty-content"/> <button class="sl-data-grid__link">Clear filters</button></div>
+  </div>
+  <div class="sl-data-grid__pager" part="pager"><sl-pagination/></div>                                     <!-- pagination=pages -->
+  <div class="sl-data-grid__sr-only" role="status" aria-live="polite">Sorted by Cost, descending</div>
+</div>
+```
+- **Popovers:** the filter editor is `<form class="sl-data-grid__panel" part="filter-panel">` with
+  `.sl-data-grid__panel-title`, labelled fields (condition select or segmented for booleans; text field / date picker /
+  multi-select by column kind) and `.sl-data-grid__panel-actions` (Clear · Apply). The column chooser is the same panel
+  with `.sl-data-grid__chooser-item` checkbox rows.
+- **Leading pseudo-columns:** checkbox (44px, `selectionMode=multi`) then detail toggle (36px, row detail set) are
+  pinned start before the first real column; real pinned-start offsets add their width. They are not in `GridState`
+  (column indices in state, `moveCell` and copy/export ignore them) but they are counted by `aria-colcount` /
+  `aria-colindex`, so the first data column is `aria-colindex` = leading columns + 1.
+- **Alignment:** `--end` cells/headers follow `col.align` (numbers and progress default to end), except progress
+  *headers*, which stay start-aligned because the bar fills from the start (an end title is clipped first by a
+  pinned-end section). Body and footer cells carry `data-field`, like header cells.
+- **Sizing:** every cell has an inline `width` from `resolveColumns`; pinned cells get `left` (start) or `right` (end)
+  = `StickyOffset` (+ leading width). The edge cell of each pinned section carries `is-pinned-edge-*`, which draws
+  `component.grid.pinnedShadow` only while the root has `is-scrolled-x` (start) / `is-scrollable-end` (end).
+  Pinned cells have an opaque background (`linear-gradient(var(--_tint)) , var(--_base)`) so tints survive.
+- **Rows:** the window is `computeViewport(scrollTop, viewport − header, rowHeight, rows, overscan 8)`; rows are
+  recycled by position (not keyed) — state lives in classes and the engine, never in row DOM. Variable heights only
+  for detail rows (`detailHeight`). `aria-rowindex` = header rows + page offset + index + 1.
+- **States:** `is-active` draws the 2px `component.grid.activeCell` ring only under `.is-keyboard` with the viewport
+  focused; `is-selected` adds `component.grid.selectionIndicator` as a 2px inset on the first cell; `is-dirty` is a
+  warning corner; `is-invalid` a danger border; `is-flash` fades `selection.background` (none under reduced motion).
+- **Focus:** a single tab stop (the viewport); the active cell is `aria-activedescendant`. Editors take DOM focus and
+  return it on commit/cancel.
+- **Events (web):** `sl-state-changed {state, json}`, `sl-selection-changed {keys, items, count, allMatching}`,
+  `sl-row-activated {item, key}`, `sl-cell-edit-committed {item, field, oldValue, newValue}`, `sl-copy {text, rows}`,
+  `sl-export {format, scope, text}` (cancelable).

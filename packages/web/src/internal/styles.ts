@@ -17,6 +17,7 @@ import navigationCss from '../styles/navigation.css?inline';
 import calendarCss from '../styles/calendar.css?inline';
 import treeCss from '../styles/tree.css?inline';
 import widgetsCss from '../styles/widgets.css?inline';
+import datagridCss from '../styles/datagrid.css?inline';
 
 /*
  * Components adopt the exact stylesheets that make up slate.css, so a web component and the same
@@ -41,6 +42,7 @@ export const styles = {
   calendar: unsafeCSS(calendarCss),
   tree: unsafeCSS(treeCss),
   widgets: unsafeCSS(widgetsCss),
+  datagrid: unsafeCSS(datagridCss),
 } satisfies Record<string, CSSResult>;
 
 /** Reset applied inside every shadow root. */

@@ -55,6 +55,10 @@ const partFixtures: Record<string, string[]> = {
   Menu: ['<sl-menu></sl-menu>', '<sl-menu-item label="A" shortcut="⌘K"></sl-menu-item>', '<sl-menu-item separator></sl-menu-item>'],
   Tabs: ['<sl-tabs></sl-tabs>', '<sl-tab key="a" label="A"></sl-tab>', '<sl-tab-panel key="a"></sl-tab-panel>'],
   DatePicker: ['<sl-date-picker presets=\'[{"label":"Today","kind":"today"}]\'></sl-date-picker>'],
+  DataGrid: [
+    `<sl-data-grid show-toolbar show-footer pagination="pages" group-by='["s"]' columns='[{"field":"a","aggregate":"sum"},{"field":"s"}]' items='[{"a":1,"s":"x"}]'></sl-data-grid>`,
+    '<sl-data-grid></sl-data-grid>',
+  ],
   TreeView: [
     '<sl-tree-view selection-mode="checkbox" expanded=\'["a"]\' items=\'[{"id":"a","label":"A","icon":"folder","children":[{"id":"b","label":"B"}]}]\'></sl-tree-view>',
   ],
@@ -96,7 +100,9 @@ function renderedMarkup(el: Element): string {
 afterEach(cleanup);
 
 describe('canonical component API (design/api/components.json)', () => {
-  for (const [name, spec] of Object.entries(api.components).filter(([, s]) => (s as { status?: string }).status !== 'planned')) {
+  // DataGrid is still "planned" for the other platforms but already implemented on the web.
+  const implementedHere = new Set(['DataGrid']);
+  for (const [name, spec] of Object.entries(api.components).filter(([n, s]) => (s as { status?: string }).status !== 'planned' || implementedHere.has(n))) {
     const tag = rootTag(spec.web);
 
     describe(`${name} → <${tag}>`, () => {

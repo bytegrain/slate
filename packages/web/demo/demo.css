@@ -299,3 +299,20 @@ body {
   border: var(--sl-border-width-hairline) dashed var(--sl-color-border-strong);
   border-radius: var(--sl-radius-lg);
 }
+
+/* ---- data grid demo ---- */
+.demo-grid-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sl-space-3) var(--sl-space-4);
+  padding: var(--sl-space-3) var(--sl-space-4);
+  border-bottom: var(--sl-border-width-hairline) solid var(--sl-color-border-default);
+}
+
+.demo-grid-perf {
+  margin-left: auto;
+  font-family: var(--sl-font-family-mono);
+  font-size: var(--sl-font-size-2xs);
+  color: var(--sl-color-text-tertiary);
+}

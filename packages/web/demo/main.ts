@@ -16,6 +16,7 @@ import {
   type SnackbarPosition,
 } from '../src/index';
 import componentsJson from '../../../design/api/components.json?raw';
+import { setupDataGridDemo } from './data-grid-demo';
 
 const provider = document.getElementById('provider') as SlProvider;
 
@@ -542,3 +543,5 @@ if (packages) {
   packages.expanded = ['npm', 'nuget'];
   packages.selectedItems = ['web', 'core-pkg'];
 }
+
+setupDataGridDemo(new URLSearchParams(location.search));

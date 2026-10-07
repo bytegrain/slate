@@ -12,6 +12,7 @@ import { SlTextField } from './components/text-field';
 import { SlCheckbox, SlRadio, SlRadioGroup, SlSwitch } from './components/selection';
 import { SlSnackbarHost } from './components/snackbar-host';
 import { SlDialog } from './components/dialog';
+import { SlDataGrid } from './components/data-grid';
 import { configureDefaults as configureCoreDefaults, type DefaultsPatch, type SlateDefaults } from './core/defaults';
 import { snackbar } from './services/snackbar';
 
@@ -44,6 +45,7 @@ export const elements = {
   'sl-radio-group': SlRadioGroup,
   'sl-snackbar-host': SlSnackbarHost,
   'sl-dialog': SlDialog,
+  'sl-data-grid': SlDataGrid,
 } as const;
 
 /** Registers every element (idempotent). Called automatically on import. */
@@ -85,6 +87,7 @@ export {
   SlRadioGroup,
   SlSnackbarHost,
   SlDialog,
+  SlDataGrid,
 };
 
 export type { ThemeMode, Density } from './components/provider';
@@ -93,6 +96,7 @@ export type { BadgeTone, TextVariant, TextTone } from './components/display';
 export { severityTone } from './components/display';
 export type { DrawerVariant, ContainerSize, ResponsiveBreakpoint } from './components/layout';
 export type { DialogTone } from './components/dialog';
+export type { DataGridColumn, DataGridAction, DataGridCellContext } from './components/data-grid';
 
 // Configuration vocabulary, defaults and runtime themes (docs/design/configurability.md).
 export type {
@@ -201,6 +205,7 @@ export {
 declare global {
   interface HTMLElementTagNameMap {
     'sl-provider': SlProvider;
+    'sl-data-grid': SlDataGrid;
     'sl-app-shell': SlAppShell;
     'sl-app-bar': SlAppBar;
     'sl-drawer': SlDrawer;
