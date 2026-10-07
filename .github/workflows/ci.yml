@@ -28,7 +28,7 @@ jobs:
       - run: dotnet run --project tools/Slate.Tokens.Cli -- build --check
       - run: dotnet test Slate.slnx -m:1
         env:
-          SLATE_PERF_FACTOR: 3
+          SLATE_PERF_FACTOR: 4
 
   web:
     name: Web

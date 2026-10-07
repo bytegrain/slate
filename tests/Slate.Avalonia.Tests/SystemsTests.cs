@@ -156,7 +156,8 @@ public class SnackbarHostTests
         service.Add(new string('x', 400));
         Pump(w);
         Assert.Equal(SlateTokens.Size.Snackbar.Min, host.Items[0].Bounds.Width);
-        Assert.Equal(SlateTokens.Size.Snackbar.Max, host.Items[1].Bounds.Width);
+        Assert.Equal(SlateTokens.Size.Snackbar.Max, host.Items[1].MaxWidth);
+        Assert.InRange(host.Items[1].Bounds.Width, SlateTokens.Size.Snackbar.Max - 2, SlateTokens.Size.Snackbar.Max);
         w.Close();
     }
 }

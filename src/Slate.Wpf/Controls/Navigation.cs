@@ -630,6 +630,7 @@ public class SegmentedControl : Control
         nameof(ValueChanged), RoutingStrategy.Bubble, typeof(RoutedPropertyChangedEventHandler<object?>), typeof(SegmentedControl));
 
     private ListBox? _list;
+    private KeyEventHandler? _listKeyDownHandler;
 
     static SegmentedControl()
     {
@@ -664,14 +665,16 @@ public class SegmentedControl : Control
         if (_list is not null)
         {
             _list.SelectionChanged -= OnListSelectionChanged;
-            _list.PreviewKeyDown -= OnListKeyDown;
+            if (_listKeyDownHandler is not null)
+                _list.RemoveHandler(UIElement.PreviewKeyDownEvent, _listKeyDownHandler);
         }
         base.OnApplyTemplate();
         _list = GetTemplateChild(PartList) as ListBox;
         if (_list is not null)
         {
             _list.SelectionChanged += OnListSelectionChanged;
-            _list.PreviewKeyDown += OnListKeyDown;
+            _listKeyDownHandler = OnListKeyDown;
+            _list.AddHandler(UIElement.PreviewKeyDownEvent, _listKeyDownHandler, handledEventsToo: true);
         }
         SyncSelected();
     }

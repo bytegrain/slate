@@ -305,7 +305,7 @@ public class Menu : Control
     public const string PartTrigger = "PART_Trigger";
 
     public static readonly DependencyProperty TriggerProperty = DependencyProperty.Register(
-        nameof(Trigger), typeof(object), typeof(Menu), new FrameworkPropertyMetadata(null));
+        nameof(Trigger), typeof(object), typeof(Menu), new FrameworkPropertyMetadata(null, (d, _) => ((Menu)d).SyncMode()));
 
     public static readonly DependencyProperty PlacementProperty = DependencyProperty.Register(
         nameof(Placement), typeof(PopoverPlacement), typeof(Menu), new FrameworkPropertyMetadata(PopoverPlacement.BottomStart));
@@ -321,6 +321,7 @@ public class Menu : Control
 
     private readonly ContextMenu _menu = new();
     private FrameworkElement? _trigger;
+    private FrameworkElement? ContextTrigger => Trigger as FrameworkElement ?? _trigger;
 
     static Menu()
     {
@@ -373,17 +374,17 @@ public class Menu : Control
         {
             _menu.Placement = PlacementMode.MousePoint;
             _menu.CustomPopupPlacementCallback = null;
-            if (_trigger is not null)
-                _trigger.ContextMenu = _menu;
+            if (ContextTrigger is { } contextTrigger)
+                contextTrigger.ContextMenu = _menu;
         }
         else
         {
-            if (_trigger is not null && ReferenceEquals(_trigger.ContextMenu, _menu))
-                _trigger.ClearValue(ContextMenuProperty);
+            if (ContextTrigger is { } contextTrigger && ReferenceEquals(contextTrigger.ContextMenu, _menu))
+                contextTrigger.ClearValue(ContextMenuProperty);
             _menu.Placement = PlacementMode.Custom;
             _menu.CustomPopupPlacementCallback = PopupPositions.Callback(() => Placement, () => 4);
         }
-        _menu.PlacementTarget = _trigger;
+        _menu.PlacementTarget = ContextTrigger;
     }
 
     private static void OnOpenChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -392,11 +393,11 @@ public class Menu : Control
         var open = (bool)e.NewValue;
         if (m._menu.IsOpen != open)
         {
-            m._menu.PlacementTarget = m._trigger;
+            m._menu.PlacementTarget = m.ContextTrigger;
             m._menu.IsOpen = open;
         }
-        if (m._trigger is not null)
-            AutomationProperties.SetItemStatus(m._trigger, open ? "expanded" : "collapsed");
+        if (m.ContextTrigger is { } trigger)
+            AutomationProperties.SetItemStatus(trigger, open ? "expanded" : "collapsed");
         m.RaiseEvent(new RoutedPropertyChangedEventArgs<bool>((bool)e.OldValue, open, OpenChangedEvent));
     }
 
