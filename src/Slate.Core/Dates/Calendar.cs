@@ -74,7 +74,7 @@ public sealed record DatePreset(string Label, DatePresetKind Kind);
 
 /// <summary>
 /// The calendar model behind Slate's date picker: a fixed 6×7 month grid with per-day state, keyboard
-/// navigation that skips disabled days, range picking and presets. Mirrored exactly by @slate/web.
+/// navigation that skips disabled days, range picking and presets. Mirrored exactly by @bytegrain/slate-web.
 /// </summary>
 public static class CalendarModel
 {

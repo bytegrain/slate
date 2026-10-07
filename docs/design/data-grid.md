@@ -6,7 +6,7 @@ identical across Web, Blazor, WPF and Avalonia. Name: **DataGrid** (`sl-data-gri
 ## Architecture
 
 ```
-Slate.Core.Data (C#)  ⇄  @slate/web src/core/grid (TS port, fixture-identical)
+Slate.Core.Data (C#)  ⇄  @bytegrain/slate-web src/core/grid (TS port, fixture-identical)
   GridColumn / GridState / DataPipeline / SelectionModel / GridNavigator / EditSession / IGridDataSource / export
         │  (pure, platform-free, unit tested incl. performance budgets)
         ▼
@@ -90,7 +90,7 @@ All of it via `component.grid.*` tokens.
 ## Engine API
 
 C# lives in `src/Slate.Core/Data` (namespace `Slate.Data`); the TypeScript port in `packages/web/src/core/grid`
-(exported as the `grid` namespace from `@slate/web`, plus `DataPipeline`, `GridRowCache`, `createGridState`, … at top
+(exported as the `grid` namespace from `@bytegrain/slate-web`, plus `DataPipeline`, `GridRowCache`, `createGridState`, … at top
 level). Contract enums (`GridColumnType`, `SortDirection`, `GridPin`, `GridAggregate`, `GridSelectionMode`,
 `GridPagination`) are in the root `Slate` namespace; engine enums (`GridEditMode`, `FilterOperator`, `GridAlign`,
 `GridRowKind`, `GridKey`, `GridNavAction`, `SelectAllState`) in `Slate.Data`. TS uses the camelCase string values.

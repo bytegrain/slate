@@ -8,7 +8,7 @@
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
     "test:e2e": "playwright test",
-    "dev": "npm run dev --workspace @slate/web"
+    "dev": "npm run dev --workspace @bytegrain/slate-web"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0"

@@ -6,7 +6,7 @@ namespace Slate.Core.Tests;
 
 /// <summary>
 /// Writes/validates tests/fixtures/theme-builder.json: ThemeBuilder outputs for a fixed set of options.
-/// @slate/web's TypeScript port asserts it produces exactly the same values, so every platform derives
+/// @bytegrain/slate-web's TypeScript port asserts it produces exactly the same values, so every platform derives
 /// identical themes. Regenerate with SLATE_UPDATE_FIXTURES=1 dotnet test.
 /// </summary>
 public class ThemeFixtureTests

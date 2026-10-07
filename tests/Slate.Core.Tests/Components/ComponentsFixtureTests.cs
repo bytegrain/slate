@@ -9,7 +9,7 @@ namespace Slate.Core.Tests.Components;
 
 /// <summary>
 /// Writes/validates tests/fixtures/components.json: inputs and expected outputs for the wave-2 component logic
-/// (positioning, calendar, list navigation, typeahead, filtering, tree, pagination, avatar, slider). @slate/web's
+/// (positioning, calendar, list navigation, typeahead, filtering, tree, pagination, avatar, slider). @bytegrain/slate-web's
 /// TypeScript port asserts it reproduces every result exactly. Regenerate with SLATE_UPDATE_FIXTURES=1 dotnet test.
 /// </summary>
 public class ComponentsFixtureTests
@@ -272,7 +272,7 @@ public class ComponentsFixtureTests
     {
         string[] labels =
         [
-            "Slate.Avalonia", "Slate.Blazor", "Slate.Core", "Slate.Wpf", "@slate/web", "Avalonia Desktop", "Blazor WebAssembly",
+            "Slate.Avalonia", "Slate.Blazor", "Slate.Core", "Slate.Wpf", "@bytegrain/slate-web", "Avalonia Desktop", "Blazor WebAssembly",
             "Café Crème", "crème brûlée", "Zoë's Desktop Tools", "data-grid", "DataGrid Pro", "Grid", "Grind", "日本語 テキスト", "emoji 😀 icons", "",
         ];
         var filter = new JsonArray();
@@ -311,7 +311,7 @@ public class ComponentsFixtureTests
     [
         new("src", "src", [
             new("core", "Slate.Core", [new("tokens", "SlateTokens.g.cs"), new("queue", "SnackbarQueue.cs"), new("stack", "DialogStack.cs")]),
-            new("web", "@slate/web", [new("button", "button.ts"), new("grid", "data-grid.ts"), new("theme", "théme.ts")]),
+            new("web", "@bytegrain/slate-web", [new("button", "button.ts"), new("grid", "data-grid.ts"), new("theme", "théme.ts")]),
             new("wpf", "Slate.Wpf", Lazy: true),
         ]),
         new("docs", "docs", [new("readme", "README.md"), new("design", "design", [new("color", "color.md"), new("grid-doc", "data-grid.md")])]),

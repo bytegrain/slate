@@ -16,7 +16,7 @@ if (imports.length === 0) throw new Error('No @import entries found in src/style
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 const parts = [
-  `/*! @slate/web ${pkg.version} — Alloy design system. Fonts: SIL OFL 1.1 (see fonts/). */`,
+  `/*! @bytegrain/slate-web ${pkg.version} — Alloy design system. Fonts: SIL OFL 1.1 (see fonts/). */`,
   readFileSync(join(styles, 'fonts.css'), 'utf8'),
   ...imports.map((file) => `/* ---- ${file} ---- */\n${readFileSync(join(styles, file), 'utf8')}`),
 ];

@@ -1,8 +1,8 @@
 /**
- * @slate/web — the Alloy design system as framework-agnostic web components.
+ * @bytegrain/slate-web — the Alloy design system as framework-agnostic web components.
  *
- *   import '@slate/web/slate.css';      // tokens, fonts, base + class-based component styles
- *   import { snackbar, dialog } from '@slate/web';   // registers every <sl-*> element
+ *   import '@bytegrain/slate-web/slate.css';      // tokens, fonts, base + class-based component styles
+ *   import { snackbar, dialog } from '@bytegrain/slate-web';   // registers every <sl-*> element
  */
 import { SlProvider } from './components/provider';
 import { SlAppBar, SlAppShell, SlCard, SlContainer, SlDivider, SlDrawer, SlGrid, SlGridItem, SlNavItem, SlSpacer, SlStack, SlToolbar } from './components/layout';

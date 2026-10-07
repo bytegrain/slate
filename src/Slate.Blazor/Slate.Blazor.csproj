@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>Slate.Blazor</RootNamespace>
     <PackageId>Slate.Blazor</PackageId>
-    <Description>Slate for Blazor: Razor components rendering the Alloy design system (styles from @slate/web), with layout, forms, snackbars and dialogs.</Description>
+    <Description>Slate for Blazor: Razor components rendering the Alloy design system (styles from @bytegrain/slate-web), with layout, forms, snackbars and dialogs.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
@@ -28,12 +28,12 @@
   </ItemGroup>
 
   <!--
-    The visuals come only from @slate/web. Before static web assets are collected, copy dist/slate.css and
+    The visuals come only from @bytegrain/slate-web. Before static web assets are collected, copy dist/slate.css and
     dist/fonts into wwwroot (git-ignored). If the web package hasn't been built, build it with npm.
   -->
   <Target Name="SlateCopyWebAssets" BeforeTargets="BeforeBuild;ResolveProjectStaticWebAssets" Condition="'$(SlateSkipWebAssets)' != 'true'">
-    <Exec Condition="!Exists('$(SlateWebDist)slate.css')" Command="npm run build -w @slate/web" WorkingDirectory="$(SlateWebRoot)" />
-    <Error Condition="!Exists('$(SlateWebDist)slate.css')" Text="Slate.Blazor needs packages/web/dist/slate.css. Run 'npm install &amp;&amp; npm run build -w @slate/web' in the repository root." />
+    <Exec Condition="!Exists('$(SlateWebDist)slate.css')" Command="npm run build -w @bytegrain/slate-web" WorkingDirectory="$(SlateWebRoot)" />
+    <Error Condition="!Exists('$(SlateWebDist)slate.css')" Text="Slate.Blazor needs packages/web/dist/slate.css. Run 'npm install &amp;&amp; npm run build -w @bytegrain/slate-web' in the repository root." />
     <ItemGroup>
       <_SlateWebFiles Include="$(SlateWebDist)slate.css" />
       <_SlateFontFiles Include="$(SlateWebDist)fonts\*.*" />

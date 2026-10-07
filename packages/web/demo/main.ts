@@ -537,7 +537,7 @@ if (files) {
 const packages = document.getElementById('demo-tree-check') as Treeish | null;
 if (packages) {
   packages.items = [
-    { id: 'npm', label: 'npm', icon: 'layers', children: [{ id: 'web', label: '@slate/web' }] },
+    { id: 'npm', label: 'npm', icon: 'layers', children: [{ id: 'web', label: '@bytegrain/slate-web' }] },
     { id: 'nuget', label: 'NuGet', icon: 'layers', children: [{ id: 'core-pkg', label: 'Slate.Core' }, { id: 'blazor-pkg', label: 'Slate.Blazor' }, { id: 'wpf-pkg', label: 'Slate.Wpf' }, { id: 'ava-pkg', label: 'Slate.Avalonia' }] },
   ];
   packages.expanded = ['npm', 'nuget'];

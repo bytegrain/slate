@@ -18,7 +18,7 @@ table". He prefers to see real rendering (screenshots of demos) rather than test
 design/tokens (DTCG: primitives, light/dark semantic, components)  design/icons/icons.json  design/api/components.json
         └── tools/Slate.Tokens generator ──► CSS · WPF XAML · Avalonia XAML · C# (SlateTokens/SlateIcons) · TS icons · resolved JSON
 src/Slate.Core   tokens + platform-free engines (+ identical TS port in packages/web/src/core, fixture-proven)
-packages/web     @slate/web: class-based CSS (dist/slate.css, works without JS) + Lit custom elements (sl-*)
+packages/web     @bytegrain/slate-web: class-based CSS (dist/slate.css, works without JS) + Lit custom elements (sl-*)
 src/Slate.Blazor Razor components rendering the web markup contract (docs/design/css-classes.md)
 src/Slate.Wpf    implicit styles for native controls + Slate controls (net10.0-windows)
 src/Slate.Avalonia  SlateTheme over FluentTheme + Slate controls (Avalonia 12.1.3)
@@ -85,16 +85,17 @@ Test counts at handoff: tokens 116 · core 590 · web 578 · Blazor 390 · Avalo
 5. Blazor TreeView rebuilds when `Items` is a new reference (callers must pass a stable collection).
 6. Breakpoint values are duplicated in web CSS media queries (CSS vars can't be used there) — consider a
    generator test asserting they match the tokens.
-7. `@slate/web` form tests use a fake ElementInternals (happy-dom); no real-browser Playwright suite yet.
-8. Package names (`@slate/web`, `Slate.*`) are placeholders — availability on npm/NuGet not checked.
+7. Web form-associated controls still use fake `ElementInternals` in unit tests; Playwright currently smoke-tests Web and Blazor demos in Chromium.
+8. NuGet publishing to private GitHub Packages and public npm publishing are configured; the first tagged publish still needs to be verified.
 9. No LICENSE file yet (fonts are OFL; licence files in design/fonts).
 
 ## Suggested next steps (owner said "keep it up"; these were proposed)
 
 1. **CI**: GitHub Actions — token `--check`, all .NET suites, npm test/build, a **Windows runner for WPF UI
    tests**, Playwright real-browser tests for web/Blazor.
-2. **Packaging**: NuGet (Slate.Core, Slate.Blazor incl. static assets, Slate.Wpf, Slate.Avalonia) and npm
-   (`@slate/web` with dist/slate.css + fonts); versioning; README per package (exist, need polish).
+2. **Packaging**: tag-triggered publishing is configured for private GitHub Packages NuGet (Slate.Core,
+   Slate.Blazor incl. static assets, Slate.Wpf, Slate.Avalonia) and public npm (`@bytegrain/slate-web` with
+   dist/slate.css + fonts). Configure npm trusted publishing and verify the first tagged release.
 3. **Docs site** generated from components.json + tokens.resolved.json (+ live web components).
 4. **More components** on the same contract: command palette, toasts with progress, file upload, number
    input, rich text, charts (use the dataviz guidance), kanban/board.

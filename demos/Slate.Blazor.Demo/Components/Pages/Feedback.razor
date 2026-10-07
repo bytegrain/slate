@@ -82,7 +82,7 @@
 
     private void Burst()
     {
-        string[] packages = ["@slate/web", "Slate.Core", "Slate.Blazor", "Slate.Wpf", "Slate.Avalonia", "Slate.Tokens"];
+        string[] packages = ["@bytegrain/slate-web", "Slate.Core", "Slate.Blazor", "Slate.Wpf", "Slate.Avalonia", "Slate.Tokens"];
         foreach (var p in packages) Snackbar.Add(new SnackbarOptions { Message = $"{p} published", Severity = Severity.Success });
     }
 }

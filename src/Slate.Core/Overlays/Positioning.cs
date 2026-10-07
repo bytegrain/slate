@@ -43,7 +43,7 @@ public sealed record PositionResult(OverlayRect Rect, PopoverPlacement Placement
 
 /// <summary>
 /// Platform-independent popover/menu/tooltip placement (flip, shift, size constraint). Every Slate platform
-/// uses this so overlays land in the same place everywhere; @slate/web has an identical TypeScript port.
+/// uses this so overlays land in the same place everywhere; @bytegrain/slate-web has an identical TypeScript port.
 /// </summary>
 public static class PopoverPositioner
 {

@@ -1,15 +1,15 @@
-# @slate/web
+# @bytegrain/slate-web
 
 The **Alloy** design system as framework-agnostic web components (Lit) plus a class-based stylesheet.
 Generated from the same design source as Slate.Blazor, Slate.Wpf and Slate.Avalonia.
 
 ```bash
-npm install @slate/web
+npm install @bytegrain/slate-web
 ```
 
 ```js
-import '@slate/web/slate.css';        // tokens, fonts, base + every component style
-import { snackbar, dialog } from '@slate/web';   // registers all <sl-*> elements
+import '@bytegrain/slate-web/slate.css';        // tokens, fonts, base + every component style
+import { snackbar, dialog } from '@bytegrain/slate-web';   // registers all <sl-*> elements
 ```
 
 ```html
@@ -68,7 +68,7 @@ Tokens and icons under `src/**/generated` come from `design/` — regenerate wit
 Every component follows the canonical API in `design/api/components.json` (see `docs/design/configurability.md`):
 
 ```js
-import { configureDefaults, createTheme } from '@slate/web';
+import { configureDefaults, createTheme } from '@bytegrain/slate-web';
 
 // App-wide defaults: unset options on every component use these.
 configureDefaults({ button: { size: 'small' }, field: { variant: 'filled' }, snackbar: { position: 'top-center' } });

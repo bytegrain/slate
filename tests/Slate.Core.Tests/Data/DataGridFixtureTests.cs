@@ -9,7 +9,7 @@ using Row = Dictionary<string, object?>;
 
 /// <summary>
 /// Writes/validates tests/fixtures/data-grid.json: a deterministic dataset, column specs and scenario results produced
-/// by the C# engine. @slate/web's TypeScript port must reproduce every result exactly.
+/// by the C# engine. @bytegrain/slate-web's TypeScript port must reproduce every result exactly.
 /// Regenerate with SLATE_UPDATE_FIXTURES=1 dotnet test.
 /// </summary>
 public class DataGridFixtureTests

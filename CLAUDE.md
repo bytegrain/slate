@@ -19,7 +19,7 @@ shipped as four native packages (Web/Lit, Blazor, WPF, Avalonia) generated from 
   calendar, typeahead, tree, pagination, slider, avatar) is in `src/Slate.Core` with an identical TypeScript
   port in `packages/web/src/core`. Parity is proven by fixtures in `tests/fixtures/*.json` written by
   Slate.Core tests and asserted by Vitest. Change both sides together, then regenerate:
-  `SLATE_UPDATE_FIXTURES=1 dotnet test tests/Slate.Core.Tests` (and `npm run sync:theme -w @slate/web` after
+  `SLATE_UPDATE_FIXTURES=1 dotnet test tests/Slate.Core.Tests` (and `npm run sync:theme -w @bytegrain/slate-web` after
   token changes that affect themes).
 - **Renderers contain no logic of their own** — they draw state from the engines and forward input.
 - **Blazor renders the web package's markup.** Visuals come only from `packages/web/dist/slate.css`
@@ -41,7 +41,7 @@ dotnet test tests/Slate.Blazor.Tests                          # 390 (bUnit)
 dotnet test tests/Slate.Avalonia.Tests                        # 516 (headless, xunit v3)
 dotnet test tests/Slate.Wpf.ResourceTests                     # 160 (runs on macOS)
 dotnet test tests/Slate.Wpf.Tests                             # Windows only (skipped elsewhere)
-npm test            # @slate/web Vitest, 578
+npm test            # @bytegrain/slate-web Vitest, 578
 npm run build       # lib + dist/slate.css + demo
 npm run dev         # web demo (Vite)
 dotnet run --project demos/Slate.Blazor.Demo

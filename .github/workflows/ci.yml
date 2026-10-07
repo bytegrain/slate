@@ -58,3 +58,98 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+
+  publish-nuget:
+    name: Publish NuGet packages
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [dotnet, web, browser]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build
+      - name: Resolve release version
+        id: version
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          version="${TAG_NAME#v}"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "Tag must be vMAJOR.MINOR.PATCH[-prerelease], got: $TAG_NAME" >&2
+            exit 1
+          fi
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+      - name: Pack NuGet packages
+        env:
+          PACKAGE_VERSION: ${{ steps.version.outputs.value }}
+        run: dotnet pack Slate.slnx --configuration Release -m:1 -p:Version="$PACKAGE_VERSION"
+      - name: Publish NuGet packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PACKAGE_VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          source="https://nuget.pkg.github.com/bytegrain/index.json"
+          for package in Core Blazor Wpf Avalonia; do
+            file="src/Slate.${package}/bin/Release/Slate.${package}.${PACKAGE_VERSION}.nupkg"
+            dotnet nuget push "$file" --source "$source" --api-key "$GITHUB_TOKEN" --skip-duplicate
+          done
+
+  publish-npm:
+    name: Publish public npm package
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [dotnet, web, browser]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          scope: '@bytegrain'
+      - run: npm install --global 'npm@^11.21.0'
+      - run: npm ci
+      - run: npm run build
+      - name: Resolve release version
+        id: version
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          version="${TAG_NAME#v}"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "Tag must be vMAJOR.MINOR.PATCH[-prerelease], got: $TAG_NAME" >&2
+            exit 1
+          fi
+          if [[ "$version" == *-* ]]; then npm_tag=preview; else npm_tag=latest; fi
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+          echo "npm_tag=$npm_tag" >> "$GITHUB_OUTPUT"
+      - name: Set npm package version
+        env:
+          PACKAGE_VERSION: ${{ steps.version.outputs.value }}
+        run: npm version "$PACKAGE_VERSION" --workspace @bytegrain/slate-web --no-git-tag-version
+      - name: Check whether this version is already published
+        id: npm-version
+        env:
+          PACKAGE_VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          if npm view "@bytegrain/slate-web@$PACKAGE_VERSION" version >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Publish npm package with trusted publishing
+        if: steps.npm-version.outputs.published != 'true'
+        env:
+          NPM_TAG: ${{ steps.version.outputs.npm_tag }}
+        run: npm publish --workspace @bytegrain/slate-web --access public --tag "$NPM_TAG"

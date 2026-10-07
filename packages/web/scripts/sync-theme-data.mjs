@@ -41,7 +41,7 @@ export const themeAliases: Readonly<Record<'light' | 'dark', TokenPairs>> = {
 if (process.argv.includes('--check')) {
   const current = existsSync(target) ? readFileSync(target, 'utf8') : '';
   if (current !== content) {
-    console.error('src/core/theme/data.generated.ts is stale — run: npm run sync:theme -w @slate/web');
+    console.error('src/core/theme/data.generated.ts is stale — run: npm run sync:theme -w @bytegrain/slate-web');
     process.exit(1);
   }
   console.log('theme data up to date');

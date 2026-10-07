@@ -2,7 +2,7 @@
 
 Systems are app-wide services, not components you place. Each platform exposes them the idiomatic way
 (service via DI in Blazor/WPF/Avalonia, a JS API on web) but the **behaviour is defined once** — in
-`Slate.Core` (`SnackbarQueue`, `DialogStack`) and mirrored in `@slate/web` against the same test cases.
+`Slate.Core` (`SnackbarQueue`, `DialogStack`) and mirrored in `@bytegrain/slate-web` against the same test cases.
 
 ## Snackbars
 
@@ -13,7 +13,7 @@ snackbar.Add(new SnackbarOptions {
     Severity = Severity.Success, Action = SnackbarAction.Create("Undo", Restore) });
 ```
 ```js
-import { snackbar } from '@slate/web';
+import { snackbar } from '@bytegrain/slate-web';
 snackbar.show({ message: 'Saved' });
 ```
 

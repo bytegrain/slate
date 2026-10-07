@@ -13,7 +13,7 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: 'npm run dev --workspace @slate/web -- --host 127.0.0.1',
+      command: 'npm run dev --workspace @bytegrain/slate-web -- --host 127.0.0.1',
       url: 'http://127.0.0.1:5173',
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,

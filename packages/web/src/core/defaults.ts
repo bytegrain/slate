@@ -48,7 +48,7 @@ export function getDefaults(): Readonly<SlateDefaults> {
 /**
  * Merges new defaults (per group) and re-renders connected components that rely on them.
  *   configureDefaults({ button: { size: 'small' }, field: { variant: 'filled' } });
- * Snackbar defaults are applied by @slate/web's snackbar service (see index.ts).
+ * Snackbar defaults are applied by @bytegrain/slate-web's snackbar service (see index.ts).
  */
 export function configureDefaults(patch: DefaultsPatch): Readonly<SlateDefaults> {
   const next = { ...current };

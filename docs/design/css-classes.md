@@ -1,6 +1,6 @@
 # CSS class & markup contract
 
-`@slate/web` ships `dist/slate.css`: tokens, fonts, base styles and every component style as plain classes.
+`@bytegrain/slate-web` ships `dist/slate.css`: tokens, fonts, base styles and every component style as plain classes.
 It works without JavaScript. **Slate.Blazor renders exactly this markup**, and the web components render the
 same markup inside their shadow roots, so one stylesheet defines the look everywhere. Option names and values
 come from [`design/api/components.json`](../../design/api/components.json); see [configurability](configurability.md).

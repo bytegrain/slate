@@ -23,7 +23,7 @@ docs/design/                 Written rules: principles, colour, type, layout, co
 
 | Package | Kind | Built on | Notes |
 |---|---|---|---|
-| `@slate/web` | npm | Lit web components + CSS | Framework-agnostic. `slate.css` is usable without JS. |
+| `@bytegrain/slate-web` | npm | Lit web components + CSS | Framework-agnostic. `slate.css` is usable without JS. |
 | `Slate.Core` | NuGet, net10.0 | — | Tokens, icons, and the platform-independent engines: `SnackbarQueue`, `DialogStack`, breakpoints. No UI dependencies. |
 | `Slate.Blazor` | NuGet, Razor class library | Slate.Core + the web CSS | Razor components that render the same markup/classes as the web package. |
 | `Slate.Wpf` | NuGet, net10.0-windows | Slate.Core | Implicit styles for native controls + Slate controls (shell, snackbar host, dialog host). |
@@ -71,7 +71,7 @@ design/          tokens + icons (source of truth)
 docs/            architecture and design rules
 tools/           Slate.Tokens (generator library) + Slate.Tokens.Cli
 src/             Slate.Core, Slate.Blazor, Slate.Wpf, Slate.Avalonia
-packages/web     @slate/web (Lit) + its demo
+packages/web     @bytegrain/slate-web (Lit) + its demo
 demos/           Blazor, WPF and Avalonia demo apps
 tests/           one test project per .NET project
 ```

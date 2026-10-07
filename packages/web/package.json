@@ -1,9 +1,16 @@
 {
-  "name": "@slate/web",
+  "name": "@bytegrain/slate-web",
   "version": "0.1.0-preview",
   "description": "Slate web components and CSS — the Alloy design system for any web framework.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bytegrain/slate.git"
+  },
   "type": "module",
   "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
   "main": "./dist/slate.js",
   "module": "./dist/slate.js",
   "types": "./dist/types/index.d.ts",

@@ -5,7 +5,7 @@ language — precise, calm and built for professional software. One design sourc
 
 | Platform | Package | Status |
 |---|---|---|
-| Web (any framework) | `@slate/web` — Lit web components + CSS | ✅ preview |
+| Web (any framework) | `@bytegrain/slate-web` — Lit web components + CSS | ✅ preview |
 | Blazor | `Slate.Blazor` | ✅ preview |
 | WPF | `Slate.Wpf` | ✅ preview — compiles everywhere, UI unverified until run on Windows |
 | Avalonia | `Slate.Avalonia` | ✅ preview |
@@ -22,6 +22,7 @@ target sizes) or theme parity.
 
 - Design rules: [`docs/design`](docs/design/README.md)
 - Architecture: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+- Publishing and package restore: [`docs/packaging.md`](docs/packaging.md)
 
 ## Working on Slate
 

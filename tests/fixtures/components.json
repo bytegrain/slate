@@ -7679,7 +7679,7 @@
       "Slate.Blazor",
       "Slate.Core",
       "Slate.Wpf",
-      "@slate/web",
+      "@bytegrain/slate-web",
       "Avalonia Desktop",
       "Blazor WebAssembly",
       "Café Crème",
@@ -7922,7 +7922,7 @@
             "score": 2,
             "ranges": [
               [
-                1,
+                11,
                 5
               ]
             ]
@@ -8229,6 +8229,16 @@
             ]
           },
           {
+            "index": 4,
+            "score": 1,
+            "ranges": [
+              [
+                5,
+                1
+              ]
+            ]
+          },
+          {
             "index": 11,
             "score": 1,
             "ranges": [
@@ -8346,7 +8356,7 @@
           },
           {
             "id": "web",
-            "label": "@slate/web",
+            "label": "@bytegrain/slate-web",
             "lazy": false,
             "children": [
               {

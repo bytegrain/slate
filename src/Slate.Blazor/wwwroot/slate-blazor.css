@@ -1,5 +1,5 @@
 /*
-  Slate.Blazor glue — the only CSS this package adds on top of @slate/web's slate.css.
+  Slate.Blazor glue — the only CSS this package adds on top of @bytegrain/slate-web's slate.css.
   Keep it tiny; anything visual belongs in packages/web/src/styles.
 */
 

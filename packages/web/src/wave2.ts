@@ -1,6 +1,6 @@
 /**
  * Wave-2 components: overlays, navigation, pickers and display widgets (design/api/components.json).
- * Registered on import, like the rest of @slate/web.
+ * Registered on import, like the rest of @bytegrain/slate-web.
  */
 import { SlPopover, SlTooltip } from './components/popover';
 import { SlMenu, SlMenuItem } from './components/menu';

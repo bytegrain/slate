@@ -1,6 +1,6 @@
 # Slate.Blazor
 
-The Alloy design system as Razor components. Visuals come entirely from `@slate/web`'s `slate.css`
+The Alloy design system as Razor components. Visuals come entirely from `@bytegrain/slate-web`'s `slate.css`
 (shipped in this package under `_content/Slate.Blazor/`), so Blazor renders exactly the markup in
 [`docs/design/css-classes.md`](../../docs/design/css-classes.md). Option names follow the canonical API in
 [`design/api/components.json`](../../design/api/components.json) (checked by `ConformanceTests`).
@@ -56,4 +56,4 @@ Blazor spellings of canonical names: the default content region is `ChildContent
 names (`Click`, `Dismissed`, `ValueChanged`, `CheckedChanged`, `DrawerOpenChanged`).
 
 Building: the project copies `packages/web/dist/slate.css` and fonts into `wwwroot` before each build (running
-`npm run build -w @slate/web` if needed). Set `SlateSkipWebAssets=true` to skip.
+`npm run build -w @bytegrain/slate-web` if needed). Set `SlateSkipWebAssets=true` to skip.
