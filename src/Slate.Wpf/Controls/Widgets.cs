@@ -38,8 +38,8 @@ public class Slider : RangeBase
     public static readonly DependencyProperty StepProperty = DependencyProperty.Register(
         nameof(Step), typeof(double), typeof(Slider), new FrameworkPropertyMetadata(1.0, (d, _) => ((Slider)d).Sync()));
 
-    public static readonly DependencyProperty TicksProperty = DependencyProperty.Register(
-        nameof(Ticks), typeof(bool), typeof(Slider), new FrameworkPropertyMetadata(false, (d, _) => ((Slider)d).Sync()));
+    public static readonly DependencyProperty ShowTicksProperty = DependencyProperty.Register(
+        nameof(ShowTicks), typeof(bool), typeof(Slider), new FrameworkPropertyMetadata(false, (d, _) => ((Slider)d).Sync()));
 
     public static readonly DependencyProperty ShowValueProperty = Sl.ShowValueProperty.AddOwner(typeof(Slider));
     public static readonly DependencyProperty LabelProperty = Sl.LabelProperty.AddOwner(typeof(Slider));
@@ -78,7 +78,7 @@ public class Slider : RangeBase
     public double Step { get => (double)GetValue(StepProperty); set => SetValue(StepProperty, value); }
 
     /// <summary>Tick marks at each step (when there are at most 50).</summary>
-    public bool Ticks { get => (bool)GetValue(TicksProperty); set => SetValue(TicksProperty, value); }
+    public bool ShowTicks { get => (bool)GetValue(ShowTicksProperty); set => SetValue(ShowTicksProperty, value); }
 
     public bool ShowValue { get => (bool)GetValue(ShowValueProperty); set => SetValue(ShowValueProperty, value); }
     public string? Label { get => (string?)GetValue(LabelProperty); set => SetValue(LabelProperty, value); }
@@ -182,7 +182,7 @@ public class Slider : RangeBase
         if (_ticks is not null)
         {
             var count = Step > 0 ? (int)Math.Round((Maximum - Minimum) / Step) : 0;
-            _ticks.Positions = Ticks && count is > 0 and <= 50
+            _ticks.Positions = ShowTicks && count is > 0 and <= 50
                 ? Enumerable.Range(0, count + 1).Select(i => ThumbSize / 2 + lane * i / count).ToArray()
                 : [];
         }

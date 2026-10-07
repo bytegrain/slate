@@ -2425,10 +2425,10 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="sl:TreeView">
-          <sl:TreeList x:Name="PART_List" ItemsSource="{TemplateBinding Rows}" Background="Transparent" BorderThickness="0"
+          <sl:TreeViewRows x:Name="PART_List" ItemsSource="{TemplateBinding Rows}" Background="Transparent" BorderThickness="0"
                    ItemContainerStyle="{StaticResource Sl.TreeRow}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
                    ScrollViewer.HorizontalScrollBarVisibility="Disabled" AutomationProperties.Name="{TemplateBinding AutomationProperties.Name}">
-            <sl:TreeList.ItemTemplate>
+            <sl:TreeViewRows.ItemTemplate>
               <DataTemplate>
                 <StackPanel Orientation="Horizontal" Margin="{Binding Indent, Converter={x:Static sl:LeftThicknessConverter.Instance}}">
                   <Button x:Name="PART_Expander" Style="{DynamicResource Sl.TreeExpander}" Margin="0,0,4,0" />
@@ -2459,8 +2459,8 @@
                   </DataTrigger>
                 </DataTemplate.Triggers>
               </DataTemplate>
-            </sl:TreeList.ItemTemplate>
-          </sl:TreeList>
+            </sl:TreeViewRows.ItemTemplate>
+          </sl:TreeViewRows>
         </ControlTemplate>
       </Setter.Value>
     </Setter>

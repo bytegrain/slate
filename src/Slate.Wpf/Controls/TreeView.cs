@@ -443,12 +443,12 @@ public class TreeView : Control
 }
 
 /// <summary>The row host of <see cref="TreeView"/>: a list whose items present to UI Automation as tree items.</summary>
-public class TreeList : ListBox
+public class TreeViewRows : ListBox
 {
-    protected override System.Windows.Automation.Peers.AutomationPeer OnCreateAutomationPeer() => new TreeListAutomationPeer(this);
+    protected override System.Windows.Automation.Peers.AutomationPeer OnCreateAutomationPeer() => new TreeViewRowsAutomationPeer(this);
 }
 
-internal sealed class TreeListAutomationPeer(TreeList owner) : System.Windows.Automation.Peers.ListBoxAutomationPeer(owner)
+internal sealed class TreeViewRowsAutomationPeer(TreeViewRows owner) : System.Windows.Automation.Peers.ListBoxAutomationPeer(owner)
 {
     protected override System.Windows.Automation.Peers.AutomationControlType GetAutomationControlTypeCore() =>
         System.Windows.Automation.Peers.AutomationControlType.Tree;

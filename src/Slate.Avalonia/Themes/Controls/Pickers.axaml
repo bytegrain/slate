@@ -223,7 +223,7 @@
     </Style>
   </ControlTheme>
 
-  <ControlTheme x:Key="{x:Type sl:MonthCalendar}" TargetType="sl:MonthCalendar">
+  <ControlTheme x:Key="{x:Type sl:CalendarView}" TargetType="sl:CalendarView">
     <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
     <Setter Property="Template">
       <ControlTemplate>
@@ -248,8 +248,8 @@
     </Style>
   </ControlTheme>
 
-  <!-- DateField: a TextField with a calendar toggle and a popover calendar (or an inline calendar). -->
-  <ControlTheme x:Key="{x:Type sl:DateField}" TargetType="sl:DateField">
+  <!-- DatePicker: a TextField with a calendar toggle and a popover calendar (or an inline calendar). -->
+  <ControlTheme x:Key="{x:Type sl:DatePicker}" TargetType="sl:DatePicker">
     <Setter Property="HorizontalAlignment" Value="Stretch" />
     <Setter Property="Template">
       <ControlTemplate>
@@ -268,7 +268,7 @@
                     BorderBrush="{DynamicResource Sl.Brush.Border.Default}" BorderThickness="1"
                     CornerRadius="{DynamicResource Sl.Component.Popover.Radius.Corner}"
                     BoxShadow="{DynamicResource Sl.Component.Popover.Shadow}" Padding="{DynamicResource Sl.Thickness.3}">
-              <sl:MonthCalendar Name="PART_Calendar" Value="{TemplateBinding Value, Mode=TwoWay}" Range="{TemplateBinding Range, Mode=TwoWay}"
+              <sl:CalendarView Name="PART_Calendar" Value="{TemplateBinding Value, Mode=TwoWay}" Range="{TemplateBinding Range, Mode=TwoWay}"
                                 Selection="{TemplateBinding Selection}" Min="{TemplateBinding Min}" Max="{TemplateBinding Max}"
                                 DisabledDates="{TemplateBinding DisabledDates}" FirstDayOfWeek="{TemplateBinding FirstDayOfWeek}"
                                 Presets="{TemplateBinding Presets}" Today="{TemplateBinding Today}" />
@@ -283,7 +283,7 @@
           <Border Background="{DynamicResource Sl.Brush.Background.Surface}" BorderBrush="{DynamicResource Sl.Brush.Border.Default}"
                   BorderThickness="1" CornerRadius="{DynamicResource Sl.CornerRadius.Lg}" Padding="{DynamicResource Sl.Thickness.3}"
                   HorizontalAlignment="Left">
-            <sl:MonthCalendar Name="PART_Calendar" Value="{TemplateBinding Value, Mode=TwoWay}" Range="{TemplateBinding Range, Mode=TwoWay}"
+            <sl:CalendarView Name="PART_Calendar" Value="{TemplateBinding Value, Mode=TwoWay}" Range="{TemplateBinding Range, Mode=TwoWay}"
                               Selection="{TemplateBinding Selection}" Min="{TemplateBinding Min}" Max="{TemplateBinding Max}"
                               DisabledDates="{TemplateBinding DisabledDates}" FirstDayOfWeek="{TemplateBinding FirstDayOfWeek}"
                               Presets="{TemplateBinding Presets}" Today="{TemplateBinding Today}" />

@@ -41,10 +41,13 @@ Runtime switches: `SlateTheme.Current.Mode` (Light/Dark/System), `.Density`, `.R
 Buttons combine `Variant` (Outlined, Solid, Soft, Ghost, Link) × `Tone` (Neutral, Accent, Success, Warning, Danger, Info):
 the primary action is `sl:Sl.Variant="Solid" sl:Sl.Tone="Accent"`. Plain classes still work (`Classes="solid tone-accent"`).
 
-Avalonia spellings that differ from the canonical API (design/api/components.json): `Container.ContainerMaxWidth` and
-`DialogContent.DialogMaxWidth` (canonical `MaxWidth` clashes with `Layoutable.MaxWidth`); native controls keep their own
-`IsChecked`, `IsEnabled`, `Maximum`, `IsIndeterminate`, `ShowProgressText`. `tests/Slate.Avalonia.Tests/ConformanceTests.cs`
-checks every option against the contract.
+XAML spellings are recorded in design/api/components.json (`xamlType`, and `xaml`/`avalonia` per option) and shared
+with Slate.Wpf. Slate controls keep the contract names in the `sl:` namespace — `sl:Menu`, `sl:DatePicker` (+ `sl:CalendarView`),
+`sl:TreeView` — distinct from Avalonia's own `Menu`, `DatePicker` and `TreeView` (in C#, alias them, e.g.
+`using TreeView = Slate.Avalonia.Controls.TreeView;`). Options whose canonical name clashes with an existing member use the
+same alias on both XAML platforms: `ContainerMaxWidth`, `DialogMaxWidth`, `AsContextMenu`, `TooltipPlacement`, `DisplayName`,
+`Minimum`/`Maximum`, `ShowTicks`; native controls keep `IsChecked`, `IsEnabled`, `IsIndeterminate`, `ShowProgressText`.
+`tests/Slate.Avalonia.Tests/ConformanceTests.cs` reads those spellings from the JSON and checks every option.
 
 ## How the theme is built
 

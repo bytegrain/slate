@@ -1,9 +1,14 @@
 using System.Reflection;
 using System.Text.Json;
 using Avalonia;
+using Avalonia.Headless.XUnit;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Slate.Avalonia.Controls;
+// Slate controls share their contract names with Avalonia built-ins (sl:Menu, sl:DatePicker, sl:TreeView).
+using Menu = Slate.Avalonia.Controls.Menu;
+using DatePicker = Slate.Avalonia.Controls.DatePicker;
+using TreeView = Slate.Avalonia.Controls.TreeView;
 
 namespace Slate.Avalonia.Tests;
 
@@ -11,6 +16,8 @@ namespace Slate.Avalonia.Tests;
 /// Checks Slate.Avalonia against the canonical component API (design/api/components.json): every option exists
 /// under its canonical name with the canonical value set. Native controls map a few options onto their own
 /// properties (IsChecked, IsEnabled…); everything else lives on the Slate control or the <see cref="Sl"/> attached properties.
+/// Runs on the headless UI thread like every other test here: reflecting over Avalonia/Slate types from a thread-pool
+/// thread while UI-thread tests initialise the same statics intermittently deadlocked the test run.
 /// </summary>
 public class ConformanceTests
 {
@@ -27,70 +34,45 @@ public class ConformanceTests
         throw new FileNotFoundException("design/api/components.json not found above the test output.");
     }
 
-    /// <summary>The Avalonia type implementing each component; Native = options come from Sl.* attached properties.</summary>
-    private static readonly Dictionary<string, (Type Type, bool Native)> Targets = new()
+    /// <summary>
+    /// The Avalonia type implementing a component, from its "xamlType" in components.json: "sl:X" is the Slate control
+    /// Slate.Avalonia.Controls.X; a bare name is Avalonia's native control (Native = options come from Sl.* attached properties).
+    /// </summary>
+    private static (Type Type, bool Native) TargetOf(string component)
     {
-        ["Button"] = (typeof(Button), true),
-        ["TextField"] = (typeof(TextField), false),
-        ["Checkbox"] = (typeof(CheckBox), true),
-        ["Switch"] = (typeof(Switch), false),
-        ["RadioGroup"] = (typeof(RadioGroup), false),
-        ["Alert"] = (typeof(Alert), false),
-        ["Badge"] = (typeof(Badge), false),
-        ["Progress"] = (typeof(ProgressBar), true),
-        ["Spinner"] = (typeof(LoadingSpinner), false),
-        ["Card"] = (typeof(Card), false),
-        ["AppShell"] = (typeof(AppShell), false),
-        ["AppBar"] = (typeof(AppBar), false),
-        ["NavItem"] = (typeof(NavItem), false),
-        ["Container"] = (typeof(Container), false),
-        ["Stack"] = (typeof(Stack), false),
-        ["SnackbarHost"] = (typeof(SnackbarHost), false),
-        ["Dialog"] = (typeof(DialogContent), false),
+        var spec = Api.GetProperty("components").GetProperty(component);
+        var name = ForAvalonia(spec, "xamlType") ?? throw new InvalidOperationException($"{component} has no xamlType in components.json");
+        return name.StartsWith("sl:", StringComparison.Ordinal)
+            ? (typeof(Sl).Assembly.GetType("Slate.Avalonia.Controls." + name[3..]) ?? throw new InvalidOperationException($"{component}: {name} not found in Slate.Avalonia"), false)
+            : (typeof(Button).Assembly.GetType("Avalonia.Controls." + name) ?? throw new InvalidOperationException($"{component}: Avalonia.Controls.{name} not found"), true);
+    }
 
-        // Wave 2 (Avalonia spellings for names Avalonia already uses: DropdownMenu, DateField, TreeList).
-        ["Select"] = (typeof(Select), false),
-        ["Menu"] = (typeof(DropdownMenu), false),
-        ["Tabs"] = (typeof(Tabs), false),
-        ["Tooltip"] = (typeof(Tooltip), false),
-        ["Popover"] = (typeof(Popover), false),
-        ["DatePicker"] = (typeof(DateField), false),
-        ["TreeView"] = (typeof(TreeList), false),
-        ["SegmentedControl"] = (typeof(SegmentedControl), false),
-        ["Slider"] = (typeof(global::Avalonia.Controls.Slider), true),
-        ["Avatar"] = (typeof(Avatar), false),
-        ["Breadcrumbs"] = (typeof(Breadcrumbs), false),
-        ["Pagination"] = (typeof(Pagination), false),
-        ["Skeleton"] = (typeof(Skeleton), false),
-    };
-
-    /// <summary>Canonical options that map onto a framework-native member.</summary>
-    private static readonly Dictionary<string, string> NativeMembers = new()
+    /// <summary>
+    /// The Avalonia spelling of an option: its "avalonia" override, else its "xaml" alias (shared with WPF), else the
+    /// global "xamlConventions" entry (Disabled → IsEnabled), else the canonical name.
+    /// </summary>
+    private static string SpellingOf(string component, string option)
     {
-        ["Checked"] = "IsChecked",
-        ["Disabled"] = "IsEnabled",
-        ["Max"] = "Maximum",
-        ["Min"] = "Minimum",
-        ["Indeterminate"] = "IsIndeterminate",
-        ["ShowValue"] = "ShowProgressText",
-        ["CheckedChanged"] = "IsCheckedChanged",
-    };
+        var spec = Api.GetProperty("components").GetProperty(component).GetProperty("options").GetProperty(option);
+        if (spec.TryGetProperty("avalonia", out var a)) return a.GetString()!;
+        if (spec.TryGetProperty("xaml", out var x)) return x.GetString()!;
+        if (Api.TryGetProperty("xamlConventions", out var c) && c.TryGetProperty(option, out var conv)) return conv.GetString()!;
+        return option;
+    }
 
-    /// <summary>Documented spelling differences (docs/design/configurability.md, Avalonia notes).</summary>
-    private static readonly Dictionary<(string Component, string Option), string> Renames = new()
-    {
-        [("Container", "MaxWidth")] = "ContainerMaxWidth", // Layoutable.MaxWidth (double) already exists
-        [("Dialog", "MaxWidth")] = "DialogMaxWidth",    // ditto
-        [("Checkbox", "Label")] = "Content",            // native CheckBox label is its content
-        [("Menu", "ContextMenu")] = "AsContextMenu",    // Control.ContextMenu already exists
-        [("Avatar", "Name")] = "DisplayName",           // StyledElement.Name already exists
-        [("Slider", "Ticks")] = "ShowTicks",            // Slider.Ticks (tick values) already exists
-    };
+    /// <summary>A string, or the "avalonia" member of a { "wpf": …, "avalonia": … } object.</summary>
+    private static string? ForAvalonia(JsonElement element, string key) =>
+        !element.TryGetProperty(key, out var v) ? null
+        : v.ValueKind == JsonValueKind.String ? v.GetString()
+        : v.TryGetProperty("avalonia", out var a) ? a.GetString() : null;
+
+    private static IEnumerable<JsonProperty> RequiredComponents =>
+        Api.GetProperty("components").EnumerateObject().Where(c => !(c.Value.TryGetProperty("status", out var st) && st.GetString() == "planned"));
 
     public static TheoryData<string, string> Options()
     {
         var data = new TheoryData<string, string>();
-        foreach (var component in Api.GetProperty("components").EnumerateObject().Where(c => !(c.Value.TryGetProperty("status", out var st) && st.GetString() == "planned")))
+        foreach (var component in RequiredComponents)
         foreach (var option in component.Value.GetProperty("options").EnumerateObject())
         {
             if (option.Value.TryGetProperty("platforms", out var platforms)
@@ -101,17 +83,17 @@ public class ConformanceTests
         return data;
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Every_component_in_the_contract_has_an_avalonia_target() =>
-        Assert.All(Api.GetProperty("components").EnumerateObject().Where(c => !(c.Value.TryGetProperty("status", out var st) && st.GetString() == "planned")), c => Assert.True(Targets.ContainsKey(c.Name), $"No Avalonia target for {c.Name}"));
+        Assert.All(RequiredComponents, c => Assert.NotNull(TargetOf(c.Name).Type));
 
-    [Theory, MemberData(nameof(Options))]
+    [AvaloniaTheory, MemberData(nameof(Options))]
     public void Option_exists_with_the_canonical_type(string component, string option)
     {
         var spec = Api.GetProperty("components").GetProperty(component).GetProperty("options").GetProperty(option);
         var kind = spec.GetProperty("kind").GetString();
-        var (type, native) = Targets[component];
-        var name = Renames.GetValueOrDefault((component, option)) ?? (NativeMembers.TryGetValue(option, out var n) && HasMember(type, n) ? n : option);
+        var (type, native) = TargetOf(component);
+        var name = SpellingOf(component, option);
 
         if (kind == "event")
         {
@@ -140,7 +122,8 @@ public class ConformanceTests
         }
     }
 
-    [Fact]
+
+    [AvaloniaFact]
     public void Core_enums_match_the_contract_value_sets()
     {
         var core = typeof(SlateTokens).Assembly;

@@ -231,7 +231,7 @@
           <sl:ResponsiveGrid Spacing="5">
             <sl:Slider sl:ResponsiveGrid.Md="6" Label="Volume" Value="40" Maximum="100" ShowValue="True" ValueChanged="OnSlider" />
             <sl:Slider sl:ResponsiveGrid.Md="6" Label="Price range" Minimum="0" Maximum="500" Step="10" Value="80" RangeEnd="320" ShowValue="True" />
-            <sl:Slider sl:ResponsiveGrid.Md="6" Label="Rating" Minimum="1" Maximum="5" Step="1" Value="3" Ticks="True" ShowValue="True" Tone="Warning" />
+            <sl:Slider sl:ResponsiveGrid.Md="6" Label="Rating" Minimum="1" Maximum="5" Step="1" Value="3" ShowTicks="True" ShowValue="True" Tone="Warning" />
             <sl:Slider sl:ResponsiveGrid.Md="6" Label="Danger zone" Value="70" Maximum="100" Tone="Danger" />
             <sl:Slider sl:ResponsiveGrid.Md="6" Label="Success" Value="90" Maximum="100" Tone="Success" Step="0.5" ShowValue="True" />
             <sl:Slider sl:ResponsiveGrid.Md="6" Label="Disabled" Value="30" Maximum="100" IsEnabled="False" />

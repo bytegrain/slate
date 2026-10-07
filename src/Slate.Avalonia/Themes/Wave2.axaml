@@ -44,7 +44,7 @@
     <Setter Property="BoxShadow" Value="0 0 0 0 Transparent" />
   </Style>
 
-  <!-- MonthCalendar weekday header -->
+  <!-- CalendarView weekday header -->
   <Style Selector="TextBlock.weekday">
     <Setter Property="FontFamily" Value="{DynamicResource Sl.Font.Family.Mono}" />
     <Setter Property="FontSize" Value="11" />

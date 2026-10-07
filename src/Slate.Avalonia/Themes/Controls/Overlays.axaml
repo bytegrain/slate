@@ -26,8 +26,8 @@
     </Setter>
   </ControlTheme>
 
-  <!-- DropdownMenu: just the trigger; the menu itself is a native ContextMenu (themed below). -->
-  <ControlTheme x:Key="{x:Type sl:DropdownMenu}" TargetType="sl:DropdownMenu">
+  <!-- Menu: just the trigger; the menu itself is a native ContextMenu (themed below). -->
+  <ControlTheme x:Key="{x:Type sl:Menu}" TargetType="sl:Menu">
     <Setter Property="Template">
       <ControlTemplate>
         <ContentPresenter Name="PART_Trigger" Content="{TemplateBinding Trigger}" />
@@ -35,7 +35,7 @@
     </Setter>
   </ControlTheme>
 
-  <!-- Menus (ContextMenu, DropdownMenu, submenus): popover surface, 4px padding, item rows from Sl.Component.Menu.*. -->
+  <!-- Menus (ContextMenu, Menu, submenus): popover surface, 4px padding, item rows from Sl.Component.Menu.*. -->
   <ControlTheme x:Key="{x:Type ContextMenu}" TargetType="ContextMenu">
     <Setter Property="Background" Value="{DynamicResource Sl.Component.Popover.Background.Brush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource Sl.Brush.Border.Default}" />

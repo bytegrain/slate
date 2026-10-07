@@ -1,5 +1,5 @@
 {
-  "$description": "Canonical component API. Every platform must expose each option under its canonical name (spelled per docs/design/configurability.md#spelling) with these values. Platform conformance tests read this file. 'kind': param = value option, bool = flag, slot = content region, event = notification. 'platforms' limits an option to some platforms (default: all). Components with \"status\": \"planned\" are specified but not yet required by conformance tests.",
+  "$description": "Canonical component API. Every platform must expose each option under its canonical name (spelled per docs/design/configurability.md#spelling) with these values. Platform conformance tests read this file. 'kind': param = value option, bool = flag, slot = content region, event = notification. 'platforms' limits an option to some platforms (default: all). Components with \"status\": \"planned\" are specified but not yet required by conformance tests. XAML (WPF + Avalonia): 'xamlType' names the implementing type ('sl:' = Slate control, otherwise the framework's native control configured through sl:Sl.* attached properties); an option's 'xaml' gives its spelling on both XAML platforms when the canonical name clashes with an existing framework member, and 'wpf'/'avalonia' override it for one platform (framework-native members). 'xamlConventions' applies to every component. Conformance tests read all of these, so XAML spellings cannot drift.",
   "common": {
     "$description": "Applies to every component below unless it says otherwise.",
     "styling": "Blazor: Class, Style, AdditionalAttributes. Web: host class/style, ::part(name) for every part listed, component CSS variables. XAML: native Classes/Style/Theme, named PART_* template parts, Sl.Component.* resources."
@@ -281,7 +281,8 @@
         "start",
         "end",
         "spinner"
-      ]
+      ],
+      "xamlType": "Button"
     },
     "TextField": {
       "web": "sl-text-field",
@@ -393,7 +394,8 @@
         "error",
         "prefix",
         "suffix"
-      ]
+      ],
+      "xamlType": "sl:TextField"
     },
     "Checkbox": {
       "web": "sl-checkbox",
@@ -403,11 +405,13 @@
         "Checked": {
           "kind": "param",
           "type": "bool?",
-          "note": "Null = indeterminate."
+          "note": "Null = indeterminate.",
+          "xaml": "IsChecked"
         },
         "Label": {
           "kind": "param",
-          "type": "string"
+          "type": "string",
+          "avalonia": "Content"
         },
         "Description": {
           "kind": "param",
@@ -432,7 +436,9 @@
           "kind": "bool"
         },
         "CheckedChanged": {
-          "kind": "event"
+          "kind": "event",
+          "wpf": "Checked",
+          "avalonia": "IsCheckedChanged"
         }
       },
       "parts": [
@@ -440,7 +446,8 @@
         "box",
         "label",
         "description"
-      ]
+      ],
+      "xamlType": "CheckBox"
     },
     "Switch": {
       "web": "sl-switch",
@@ -449,7 +456,8 @@
       "options": {
         "Checked": {
           "kind": "param",
-          "type": "bool"
+          "type": "bool",
+          "xaml": "IsChecked"
         },
         "Label": {
           "kind": "param",
@@ -482,7 +490,9 @@
           "kind": "bool"
         },
         "CheckedChanged": {
-          "kind": "event"
+          "kind": "event",
+          "wpf": "Checked",
+          "avalonia": "IsCheckedChanged"
         }
       },
       "parts": [
@@ -491,7 +501,8 @@
         "thumb",
         "label",
         "description"
-      ]
+      ],
+      "xamlType": "sl:Switch"
     },
     "RadioGroup": {
       "web": "sl-radio-group",
@@ -527,7 +538,8 @@
         "ValueChanged": {
           "kind": "event"
         }
-      }
+      },
+      "xamlType": "sl:RadioGroup"
     },
     "Alert": {
       "web": "sl-alert",
@@ -580,7 +592,8 @@
         "message",
         "actions",
         "close"
-      ]
+      ],
+      "xamlType": "sl:Alert"
     },
     "Badge": {
       "web": "sl-badge",
@@ -612,7 +625,8 @@
         "Content": {
           "kind": "slot"
         }
-      }
+      },
+      "xamlType": "sl:Badge"
     },
     "Progress": {
       "web": "sl-progress",
@@ -626,10 +640,12 @@
         "Max": {
           "kind": "param",
           "type": "double",
-          "default": 100
+          "default": 100,
+          "xaml": "Maximum"
         },
         "Indeterminate": {
-          "kind": "bool"
+          "kind": "bool",
+          "xaml": "IsIndeterminate"
         },
         "Tone": {
           "kind": "param",
@@ -646,14 +662,16 @@
           "type": "string"
         },
         "ShowValue": {
-          "kind": "bool"
+          "kind": "bool",
+          "avalonia": "ShowProgressText"
         }
-      }
+      },
+      "xamlType": "ProgressBar"
     },
     "Spinner": {
       "web": "sl-spinner",
       "blazor": "SlSpinner",
-      "xaml": "LoadingSpinner (Avalonia) / Spinner (WPF)",
+      "xaml": "WPF: sl:Spinner · Avalonia: sl:LoadingSpinner",
       "options": {
         "Size": {
           "kind": "param",
@@ -669,6 +687,10 @@
           "kind": "param",
           "type": "string"
         }
+      },
+      "xamlType": {
+        "wpf": "sl:Spinner",
+        "avalonia": "sl:LoadingSpinner"
       }
     },
     "Card": {
@@ -726,7 +748,8 @@
         "actions",
         "body",
         "footer"
-      ]
+      ],
+      "xamlType": "sl:Card"
     },
     "AppShell": {
       "web": "sl-app-shell",
@@ -763,7 +786,8 @@
         "DrawerOpenChanged": {
           "kind": "event"
         }
-      }
+      },
+      "xamlType": "sl:AppShell"
     },
     "AppBar": {
       "web": "sl-app-bar",
@@ -787,7 +811,8 @@
         "Actions": {
           "kind": "slot"
         }
-      }
+      },
+      "xamlType": "sl:AppBar"
     },
     "NavItem": {
       "web": "sl-nav-item",
@@ -824,7 +849,8 @@
         "Click": {
           "kind": "event"
         }
-      }
+      },
+      "xamlType": "sl:NavItem"
     },
     "Container": {
       "web": "sl-container",
@@ -842,7 +868,8 @@
           "kind": "bool",
           "default": true
         }
-      }
+      },
+      "xamlType": "sl:Container"
     },
     "Stack": {
       "web": "sl-stack",
@@ -872,7 +899,8 @@
         "Wrap": {
           "kind": "bool"
         }
-      }
+      },
+      "xamlType": "sl:Stack"
     },
     "SnackbarHost": {
       "web": "sl-snackbar-host",
@@ -889,7 +917,8 @@
           "type": "string",
           "default": "Notifications"
         }
-      }
+      },
+      "xamlType": "sl:SnackbarHost"
     },
     "Dialog": {
       "web": "sl-dialog",
@@ -952,7 +981,8 @@
         "body",
         "footer",
         "close"
-      ]
+      ],
+      "xamlType": "sl:DialogContent"
     },
     "DataGrid": {
       "web": "sl-data-grid",
@@ -1091,7 +1121,8 @@
         "empty",
         "pager"
       ],
-      "status": "planned"
+      "status": "planned",
+      "xamlType": "sl:DataGrid"
     },
     "Select": {
       "web": "sl-select",
@@ -1204,12 +1235,13 @@
         "option",
         "group",
         "empty"
-      ]
+      ],
+      "xamlType": "sl:Select"
     },
     "Menu": {
       "web": "sl-menu + sl-menu-item",
       "blazor": "SlMenu / SlMenuItem",
-      "xaml": "Menu/ContextMenu styles + MenuItem sl:Sl.*",
+      "xaml": "sl:Menu (items are native MenuItem + sl:Sl.*)",
       "options": {
         "Trigger": {
           "kind": "slot",
@@ -1230,7 +1262,8 @@
         },
         "ContextMenu": {
           "kind": "bool",
-          "note": "Open on right-click / Shift+F10 at pointer."
+          "note": "Control.ContextMenu / FrameworkElement.ContextMenu already exist.",
+          "xaml": "AsContextMenu"
         },
         "OpenChanged": {
           "kind": "event"
@@ -1253,12 +1286,13 @@
         "item",
         "separator",
         "shortcut"
-      ]
+      ],
+      "xamlType": "sl:Menu"
     },
     "Tabs": {
       "web": "sl-tabs + sl-tab + sl-tab-panel",
       "blazor": "SlTabs / SlTab",
-      "xaml": "TabControl + TabItem sl:Sl.*",
+      "xaml": "sl:Tabs (native TabControl/TabItem also styled)",
       "options": {
         "Value": {
           "kind": "param",
@@ -1303,12 +1337,13 @@
         "indicator",
         "panel",
         "overflow"
-      ]
+      ],
+      "xamlType": "sl:Tabs"
     },
     "Tooltip": {
       "web": "sl-tooltip",
       "blazor": "SlTooltip",
-      "xaml": "ToolTip style + sl:Sl.Shortcut",
+      "xaml": "sl:Tooltip (native ToolTip + sl:Sl.Shortcut also styled)",
       "options": {
         "Text": {
           "kind": "param",
@@ -1324,7 +1359,9 @@
         "Placement": {
           "kind": "param",
           "type": "PopoverPlacement",
-          "default": "top"
+          "default": "top",
+          "xaml": "TooltipPlacement",
+          "note": "WPF's ToolTip.Placement (PlacementMode) already exists."
         },
         "Delay": {
           "kind": "param",
@@ -1335,7 +1372,8 @@
         "Disabled": {
           "kind": "bool"
         }
-      }
+      },
+      "xamlType": "sl:Tooltip"
     },
     "Popover": {
       "web": "sl-popover",
@@ -1381,12 +1419,13 @@
       "parts": [
         "panel",
         "arrow"
-      ]
+      ],
+      "xamlType": "sl:Popover"
     },
     "DatePicker": {
       "web": "sl-date-picker",
       "blazor": "SlDatePicker",
-      "xaml": "DatePicker (Slate)",
+      "xaml": "sl:DatePicker (+ sl:CalendarView)",
       "options": {
         "Value": {
           "kind": "param",
@@ -1426,7 +1465,7 @@
         "Presets": {
           "kind": "param",
           "type": "IEnumerable<DatePreset>",
-          "note": "Today, Last 7 days\u2026"
+          "note": "Today, Last 7 days…"
         },
         "Label": {
           "kind": "param",
@@ -1478,12 +1517,13 @@
         "grid",
         "day",
         "presets"
-      ]
+      ],
+      "xamlType": "sl:DatePicker"
     },
     "TreeView": {
       "web": "sl-tree-view",
       "blazor": "SlTreeView<T>",
-      "xaml": "TreeView style + Slate TreeView features",
+      "xaml": "sl:TreeView",
       "options": {
         "Items": {
           "kind": "param",
@@ -1549,7 +1589,8 @@
         "label",
         "checkbox",
         "children"
-      ]
+      ],
+      "xamlType": "sl:TreeView"
     },
     "SegmentedControl": {
       "web": "sl-segmented",
@@ -1586,12 +1627,13 @@
         "ValueChanged": {
           "kind": "event"
         }
-      }
+      },
+      "xamlType": "sl:SegmentedControl"
     },
     "Slider": {
       "web": "sl-slider",
       "blazor": "SlSlider",
-      "xaml": "Slider + sl:Sl.*",
+      "xaml": "WPF: sl:Slider · Avalonia: Slider + sl:Sl.*",
       "options": {
         "Value": {
           "kind": "param",
@@ -1605,12 +1647,14 @@
         "Min": {
           "kind": "param",
           "type": "double",
-          "default": 0
+          "default": 0,
+          "xaml": "Minimum"
         },
         "Max": {
           "kind": "param",
           "type": "double",
-          "default": 100
+          "default": 100,
+          "xaml": "Maximum"
         },
         "Step": {
           "kind": "param",
@@ -1618,7 +1662,9 @@
           "default": 1
         },
         "Ticks": {
-          "kind": "bool"
+          "kind": "bool",
+          "xaml": "ShowTicks",
+          "note": "Avalonia Slider.Ticks (tick values) already exists."
         },
         "ShowValue": {
           "kind": "bool"
@@ -1638,6 +1684,10 @@
         "ValueChanged": {
           "kind": "event"
         }
+      },
+      "xamlType": {
+        "wpf": "sl:Slider",
+        "avalonia": "Slider"
       }
     },
     "Avatar": {
@@ -1648,7 +1698,8 @@
         "Name": {
           "kind": "param",
           "type": "string",
-          "note": "Initials + deterministic tone."
+          "note": "StyledElement.Name / FrameworkElement.Name already exist.",
+          "xaml": "DisplayName"
         },
         "Image": {
           "kind": "param",
@@ -1667,7 +1718,8 @@
           "kind": "param",
           "type": "online|away|busy|offline|null"
         }
-      }
+      },
+      "xamlType": "sl:Avatar"
     },
     "Breadcrumbs": {
       "web": "sl-breadcrumbs",
@@ -1691,7 +1743,8 @@
         "ItemClick": {
           "kind": "event"
         }
-      }
+      },
+      "xamlType": "sl:Breadcrumbs"
     },
     "Pagination": {
       "web": "sl-pagination",
@@ -1735,7 +1788,8 @@
         "PageSizeChanged": {
           "kind": "event"
         }
-      }
+      },
+      "xamlType": "sl:Pagination"
     },
     "Skeleton": {
       "web": "sl-skeleton",
@@ -1764,7 +1818,11 @@
           "kind": "bool",
           "default": true
         }
-      }
+      },
+      "xamlType": "sl:Skeleton"
     }
+  },
+  "xamlConventions": {
+    "Disabled": "IsEnabled"
   }
 }

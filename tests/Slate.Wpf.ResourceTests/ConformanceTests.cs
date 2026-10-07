@@ -15,65 +15,40 @@ public partial class ConformanceTests
     private static readonly string Root = XamlResourceTests.RepoRoot;
     private static readonly JsonElement Api = JsonDocument.Parse(File.ReadAllText(Path.Combine(Root, "design", "api", "components.json"))).RootElement;
 
-    /// <summary>Which WPF type implements each component, and whether it is a native control configured through sl:Sl.*.</summary>
-    private static readonly Dictionary<string, (string Type, bool Native)> Implementations = new()
-    {
-        ["Button"] = ("Button", true),
-        ["TextField"] = ("sl:TextField", false),
-        ["Checkbox"] = ("CheckBox", true),
-        ["Switch"] = ("sl:Switch", false),
-        ["RadioGroup"] = ("sl:RadioGroup", false),
-        ["Alert"] = ("sl:Alert", false),
-        ["Badge"] = ("sl:Badge", false),
-        ["Progress"] = ("ProgressBar", true),
-        ["Spinner"] = ("sl:Spinner", false),
-        ["Card"] = ("sl:Card", false),
-        ["AppShell"] = ("sl:AppShell", false),
-        ["AppBar"] = ("sl:AppBar", false),
-        ["NavItem"] = ("sl:NavItem", false),
-        ["Container"] = ("sl:Container", false),
-        ["Stack"] = ("sl:Stack", false),
-        ["SnackbarHost"] = ("sl:SnackbarHost", false),
-        ["Dialog"] = ("sl:DialogContent", false),
-        ["Select"] = ("sl:Select", false),
-        ["Menu"] = ("sl:Menu", false),
-        ["Tabs"] = ("sl:Tabs", false),
-        ["Tooltip"] = ("sl:Tooltip", false),
-        ["Popover"] = ("sl:Popover", false),
-        ["DatePicker"] = ("sl:DatePicker", false),
-        ["TreeView"] = ("sl:TreeView", false),
-        ["SegmentedControl"] = ("sl:SegmentedControl", false),
-        ["Slider"] = ("sl:Slider", false),
-        ["Avatar"] = ("sl:Avatar", false),
-        ["Breadcrumbs"] = ("sl:Breadcrumbs", false),
-        ["Pagination"] = ("sl:Pagination", false),
-        ["Skeleton"] = ("sl:Skeleton", false),
-    };
-
     /// <summary>Components another track owns; everything else in the contract is required, whatever its "status".</summary>
     private static readonly HashSet<string> NotYetRequired = ["DataGrid"];
 
     /// <summary>
-    /// Documented WPF spellings (src/Slate.Wpf/README.md): framework-native names, and options whose canonical name
-    /// collides with an inherited FrameworkElement member of a different type.
+    /// Which WPF type implements each component, from its "xamlType" in components.json ("sl:X" = Slate control,
+    /// a bare name = WPF's native control configured through sl:Sl.*).
     /// </summary>
-    private static readonly Dictionary<string, string> Spellings = new()
+    private static readonly Dictionary<string, (string Type, bool Native)> Implementations =
+        Api.GetProperty("components").EnumerateObject()
+           .Where(c => !NotYetRequired.Contains(c.Name))
+           .ToDictionary(c => c.Name, c =>
+           {
+               var type = ForWpf(c.Value, "xamlType") ?? throw new InvalidOperationException($"{c.Name} has no xamlType in components.json");
+               return (type, !type.StartsWith("sl:", StringComparison.Ordinal));
+           });
+
+    /// <summary>
+    /// The WPF spelling of an option: its "wpf" override, else its "xaml" alias (shared with Avalonia), else the global
+    /// "xamlConventions" entry (Disabled → IsEnabled), else the canonical name. All read from components.json.
+    /// </summary>
+    private static string SpellingOf(string component, string option)
     {
-        ["*.Disabled"] = "IsEnabled",
-        ["Checkbox.Checked"] = "IsChecked",
-        ["Checkbox.CheckedChanged"] = "Checked",
-        ["Switch.Checked"] = "IsChecked",
-        ["Switch.CheckedChanged"] = "Checked",
-        ["Progress.Max"] = "Maximum",
-        ["Progress.Indeterminate"] = "IsIndeterminate",
-        ["Container.MaxWidth"] = "ContainerMaxWidth",
-        ["Dialog.MaxWidth"] = "DialogMaxWidth",
-        ["Menu.ContextMenu"] = "AsContextMenu",
-        ["Tooltip.Placement"] = "TooltipPlacement",
-        ["Avatar.Name"] = "DisplayName",
-        ["Slider.Min"] = "Minimum",
-        ["Slider.Max"] = "Maximum",
-    };
+        var spec = Api.GetProperty("components").GetProperty(component).GetProperty("options").GetProperty(option);
+        if (spec.TryGetProperty("wpf", out var w)) return w.GetString()!;
+        if (spec.TryGetProperty("xaml", out var x)) return x.GetString()!;
+        if (Api.TryGetProperty("xamlConventions", out var c) && c.TryGetProperty(option, out var conv)) return conv.GetString()!;
+        return option;
+    }
+
+    /// <summary>A string, or the "wpf" member of a { "wpf": …, "avalonia": … } object.</summary>
+    private static string? ForWpf(JsonElement element, string key) =>
+        !element.TryGetProperty(key, out var v) ? null
+        : v.ValueKind == JsonValueKind.String ? v.GetString()
+        : v.TryGetProperty("wpf", out var w) ? w.GetString() : null;
 
     public static TheoryData<string> Components => new(Implementations.Keys);
 
@@ -115,7 +90,7 @@ public partial class ConformanceTests
 
         foreach (var (option, spec) in OptionsOf(component))
         {
-            var name = Spellings.GetValueOrDefault($"{component}.{option}") ?? Spellings.GetValueOrDefault($"*.{option}") ?? option;
+            var name = SpellingOf(component, option);
             var onType = WpfMetadata.HasMember(type, name);
             var attached = native && sl.GetMethod("Get" + name, BindingFlags.Public | BindingFlags.Static) is not null;
             if (!onType && !attached)

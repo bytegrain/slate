@@ -356,7 +356,7 @@ public class Breadcrumbs : TemplatedControl
 
             if (visible[i] is not { } item)
             {
-                var more = new DropdownMenu { Trigger = MoreButton() };
+                var more = new Menu { Trigger = MoreButton() };
                 foreach (var hidden in Collapsed)
                 {
                     var mi = new MenuItem { Header = hidden.Label };

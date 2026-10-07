@@ -207,44 +207,44 @@ public class Popover : TemplatedControl
 }
 
 /// <summary>
-/// A menu opened from a <see cref="Trigger"/> (docs: Menu). Items are native <see cref="MenuItem"/>s and
+/// A menu opened from a <see cref="Trigger"/> (<c>sl:Menu</c>; distinct from <see cref="global::Avalonia.Controls.Menu"/>). Items are native <see cref="MenuItem"/>s and
 /// <see cref="Separator"/>s (styled by Slate; use <c>sl:Sl.StartIcon</c>, <c>sl:Sl.Shortcut</c>, <c>sl:Sl.Tone</c>,
 /// <c>ToggleType</c>/<c>IsChecked</c> and nested items for submenus). With <see cref="ContextMenu"/> the menu opens on
 /// right-click / Shift+F10 at the pointer instead. Placed with Slate positioning.
 /// </summary>
 [TemplatePart("PART_Trigger", typeof(ContentPresenter))]
 [PseudoClasses(":open")]
-public class DropdownMenu : TemplatedControl
+public class Menu : TemplatedControl
 {
-    public static readonly StyledProperty<object?> TriggerProperty = AvaloniaProperty.Register<DropdownMenu, object?>(nameof(Trigger));
+    public static readonly StyledProperty<object?> TriggerProperty = AvaloniaProperty.Register<Menu, object?>(nameof(Trigger));
 
     public static readonly StyledProperty<PopoverPlacement> PlacementProperty =
-        AvaloniaProperty.Register<DropdownMenu, PopoverPlacement>(nameof(Placement), PopoverPlacement.BottomStart);
+        AvaloniaProperty.Register<Menu, PopoverPlacement>(nameof(Placement), PopoverPlacement.BottomStart);
 
     public static readonly StyledProperty<bool> OpenProperty =
-        AvaloniaProperty.Register<DropdownMenu, bool>(nameof(Open), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
+        AvaloniaProperty.Register<Menu, bool>(nameof(Open), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
 
     /// <summary>
     /// Open on right-click (and Shift+F10 / the context-menu key) at the pointer instead of on activation.
     /// Canonical option <c>ContextMenu</c>; spelled AsContextMenu because Control.ContextMenu already exists.
     /// </summary>
-    public static readonly StyledProperty<bool> AsContextMenuProperty = AvaloniaProperty.Register<DropdownMenu, bool>(nameof(AsContextMenu));
+    public static readonly StyledProperty<bool> AsContextMenuProperty = AvaloniaProperty.Register<Menu, bool>(nameof(AsContextMenu));
 
     public static readonly RoutedEvent<RoutedEventArgs> OpenChangedEvent =
-        RoutedEvent.Register<DropdownMenu, RoutedEventArgs>(nameof(OpenChanged), RoutingStrategies.Bubble);
+        RoutedEvent.Register<Menu, RoutedEventArgs>(nameof(OpenChanged), RoutingStrategies.Bubble);
 
     private readonly global::Avalonia.Controls.ContextMenu _menu = new();
     private ContentPresenter? _trigger;
     private bool _syncing;
 
-    static DropdownMenu()
+    static Menu()
     {
-        FocusableProperty.OverrideDefaultValue<DropdownMenu>(false);
-        OpenProperty.Changed.AddClassHandler<DropdownMenu>((m, e) => m.SetOpen(e.GetNewValue<bool>()));
-        AsContextMenuProperty.Changed.AddClassHandler<DropdownMenu>((m, _) => m.AttachMode());
+        FocusableProperty.OverrideDefaultValue<Menu>(false);
+        OpenProperty.Changed.AddClassHandler<Menu>((m, e) => m.SetOpen(e.GetNewValue<bool>()));
+        AsContextMenuProperty.Changed.AddClassHandler<Menu>((m, _) => m.AttachMode());
     }
 
-    public DropdownMenu()
+    public Menu()
     {
         _menu.Opened += (_, _) => Sync(true);
         _menu.Closed += (_, _) => Sync(false);
@@ -260,7 +260,7 @@ public class DropdownMenu : TemplatedControl
     public ItemCollection Items => _menu.Items;
 
     /// <summary>The native menu that hosts <see cref="Items"/>.</summary>
-    public global::Avalonia.Controls.ContextMenu Menu => _menu;
+    public global::Avalonia.Controls.ContextMenu MenuPopup => _menu;
 
     public event EventHandler<RoutedEventArgs>? OpenChanged
     {
@@ -343,8 +343,9 @@ public class Tooltip : Decorator
     public static readonly StyledProperty<string?> TextProperty = AvaloniaProperty.Register<Tooltip, string?>(nameof(Text));
     public static readonly StyledProperty<object?> ContentProperty = AvaloniaProperty.Register<Tooltip, object?>(nameof(Content));
     public static readonly StyledProperty<string?> ShortcutProperty = AvaloniaProperty.Register<Tooltip, string?>(nameof(Shortcut));
-    public static readonly StyledProperty<PopoverPlacement> PlacementProperty =
-        AvaloniaProperty.Register<Tooltip, PopoverPlacement>(nameof(Placement), PopoverPlacement.Top);
+    /// <summary>Canonical <c>Placement</c>; spelled TooltipPlacement on both XAML platforms (WPF's ToolTip.Placement exists).</summary>
+    public static readonly StyledProperty<PopoverPlacement> TooltipPlacementProperty =
+        AvaloniaProperty.Register<Tooltip, PopoverPlacement>(nameof(TooltipPlacement), PopoverPlacement.Top);
     public static readonly StyledProperty<int> DelayProperty = AvaloniaProperty.Register<Tooltip, int>(nameof(Delay), 500);
     public static readonly StyledProperty<bool> DisabledProperty = AvaloniaProperty.Register<Tooltip, bool>(nameof(Disabled));
 
@@ -365,7 +366,7 @@ public class Tooltip : Decorator
     public string? Text { get => GetValue(TextProperty); set => SetValue(TextProperty, value); }
     public object? Content { get => GetValue(ContentProperty); set => SetValue(ContentProperty, value); }
     public string? Shortcut { get => GetValue(ShortcutProperty); set => SetValue(ShortcutProperty, value); }
-    public PopoverPlacement Placement { get => GetValue(PlacementProperty); set => SetValue(PlacementProperty, value); }
+    public PopoverPlacement TooltipPlacement { get => GetValue(TooltipPlacementProperty); set => SetValue(TooltipPlacementProperty, value); }
     public int Delay { get => GetValue(DelayProperty); set => SetValue(DelayProperty, value); }
     public bool Disabled { get => GetValue(DisabledProperty); set => SetValue(DisabledProperty, value); }
 
@@ -388,7 +389,7 @@ public class Tooltip : Decorator
         ToolTip.SetTip(child, Tip);
         ToolTip.SetShowDelay(child, Delay);
         ToolTip.SetPlacement(child, PlacementMode.Custom);
-        ToolTip.SetCustomPopupPlacementCallback(child, SlatePlacement.Callback(child, () => Placement, () => 6));
+        ToolTip.SetCustomPopupPlacementCallback(child, SlatePlacement.Callback(child, () => TooltipPlacement, () => 6));
         if (Text is not null && AutomationProperties.GetHelpText(child) is null)
             AutomationProperties.SetHelpText(child, Text);
     }

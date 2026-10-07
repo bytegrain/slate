@@ -17,10 +17,10 @@ using Slate.Collections;
 
 namespace Slate.Avalonia.Controls;
 
-/// <summary>A visible row of a <see cref="TreeList"/> (data for the row container).</summary>
-public sealed class TreeListRowData(TreeList owner, TreeRow row, object item)
+/// <summary>A visible row of a <see cref="TreeView"/> (data for the row container).</summary>
+public sealed class TreeViewRowData(TreeView owner, TreeRow row, object item)
 {
-    public TreeList Owner { get; } = owner;
+    public TreeView Owner { get; } = owner;
     public TreeRow Row { get; } = row;
     public object Item { get; } = item;
     public string Id => Row.Id;
@@ -28,7 +28,7 @@ public sealed class TreeListRowData(TreeList owner, TreeRow row, object item)
 }
 
 /// <summary>
-/// Hierarchical list (docs: TreeView; Avalonia spelling TreeList because Avalonia.Controls.TreeView exists).
+/// Slate tree (<c>sl:TreeView</c>; distinct from <see cref="global::Avalonia.Controls.TreeView"/>).
 /// Flattened and virtualised; keyboard per the tree pattern (Up/Down, Home/End, Right expands/enters, Left
 /// collapses/leaves, * expands siblings, typeahead, Space selects/checks, Enter activates); single, multi or
 /// checkbox (tri-state) selection; <see cref="Filter"/> keeps ancestors of matches; lazy <see cref="LoadChildren"/>.
@@ -36,30 +36,30 @@ public sealed class TreeListRowData(TreeList owner, TreeRow row, object item)
 /// </summary>
 [TemplatePart("PART_Items", typeof(ItemsControl))]
 [PseudoClasses(":dense")]
-public class TreeList : TemplatedControl
+public class TreeView : TemplatedControl
 {
-    public static readonly StyledProperty<IEnumerable?> ItemsProperty = AvaloniaProperty.Register<TreeList, IEnumerable?>(nameof(Items));
-    public static readonly StyledProperty<Func<object, IEnumerable?>?> ChildrenSelectorProperty = AvaloniaProperty.Register<TreeList, Func<object, IEnumerable?>?>(nameof(ChildrenSelector));
-    public static readonly StyledProperty<Func<object, bool>?> HasChildrenProperty = AvaloniaProperty.Register<TreeList, Func<object, bool>?>(nameof(HasChildren));
-    public static readonly StyledProperty<Func<object, Task<IEnumerable>>?> LoadChildrenProperty = AvaloniaProperty.Register<TreeList, Func<object, Task<IEnumerable>>?>(nameof(LoadChildren));
-    public static readonly StyledProperty<Func<object, string>?> ItemTextProperty = AvaloniaProperty.Register<TreeList, Func<object, string>?>(nameof(ItemText));
-    public static readonly StyledProperty<Func<object, string?>?> ItemIconProperty = AvaloniaProperty.Register<TreeList, Func<object, string?>?>(nameof(ItemIcon));
-    public static readonly StyledProperty<IDataTemplate?> ItemTemplateProperty = AvaloniaProperty.Register<TreeList, IDataTemplate?>(nameof(ItemTemplate));
-    public static readonly StyledProperty<TreeSelectionMode> SelectionModeProperty = AvaloniaProperty.Register<TreeList, TreeSelectionMode>(nameof(SelectionMode), TreeSelectionMode.Single);
+    public static readonly StyledProperty<IEnumerable?> ItemsProperty = AvaloniaProperty.Register<TreeView, IEnumerable?>(nameof(Items));
+    public static readonly StyledProperty<Func<object, IEnumerable?>?> ChildrenSelectorProperty = AvaloniaProperty.Register<TreeView, Func<object, IEnumerable?>?>(nameof(ChildrenSelector));
+    public static readonly StyledProperty<Func<object, bool>?> HasChildrenProperty = AvaloniaProperty.Register<TreeView, Func<object, bool>?>(nameof(HasChildren));
+    public static readonly StyledProperty<Func<object, Task<IEnumerable>>?> LoadChildrenProperty = AvaloniaProperty.Register<TreeView, Func<object, Task<IEnumerable>>?>(nameof(LoadChildren));
+    public static readonly StyledProperty<Func<object, string>?> ItemTextProperty = AvaloniaProperty.Register<TreeView, Func<object, string>?>(nameof(ItemText));
+    public static readonly StyledProperty<Func<object, string?>?> ItemIconProperty = AvaloniaProperty.Register<TreeView, Func<object, string?>?>(nameof(ItemIcon));
+    public static readonly StyledProperty<IDataTemplate?> ItemTemplateProperty = AvaloniaProperty.Register<TreeView, IDataTemplate?>(nameof(ItemTemplate));
+    public static readonly StyledProperty<TreeSelectionMode> SelectionModeProperty = AvaloniaProperty.Register<TreeView, TreeSelectionMode>(nameof(SelectionMode), TreeSelectionMode.Single);
     public static readonly StyledProperty<IList?> SelectedItemsProperty =
-        AvaloniaProperty.Register<TreeList, IList?>(nameof(SelectedItems), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
+        AvaloniaProperty.Register<TreeView, IList?>(nameof(SelectedItems), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
     public static readonly StyledProperty<IList?> ExpandedProperty =
-        AvaloniaProperty.Register<TreeList, IList?>(nameof(Expanded), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
-    public static readonly StyledProperty<string?> FilterProperty = AvaloniaProperty.Register<TreeList, string?>(nameof(Filter));
-    public static readonly StyledProperty<bool> DenseProperty = AvaloniaProperty.Register<TreeList, bool>(nameof(Dense));
+        AvaloniaProperty.Register<TreeView, IList?>(nameof(Expanded), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
+    public static readonly StyledProperty<string?> FilterProperty = AvaloniaProperty.Register<TreeView, string?>(nameof(Filter));
+    public static readonly StyledProperty<bool> DenseProperty = AvaloniaProperty.Register<TreeView, bool>(nameof(Dense));
 
-    public static readonly RoutedEvent<RoutedEventArgs> SelectionChangedEvent = RoutedEvent.Register<TreeList, RoutedEventArgs>(nameof(SelectionChanged), RoutingStrategies.Bubble);
-    public static readonly RoutedEvent<RoutedEventArgs> ItemActivatedEvent = RoutedEvent.Register<TreeList, RoutedEventArgs>(nameof(ItemActivated), RoutingStrategies.Bubble);
+    public static readonly RoutedEvent<RoutedEventArgs> SelectionChangedEvent = RoutedEvent.Register<TreeView, RoutedEventArgs>(nameof(SelectionChanged), RoutingStrategies.Bubble);
+    public static readonly RoutedEvent<RoutedEventArgs> ItemActivatedEvent = RoutedEvent.Register<TreeView, RoutedEventArgs>(nameof(ItemActivated), RoutingStrategies.Bubble);
 
     private static readonly ConditionalWeakTable<object, string> Ids = new();
     private static long _nextId;
 
-    private readonly ObservableCollection<TreeListRowData> _rows = [];
+    private readonly ObservableCollection<TreeViewRowData> _rows = [];
     private readonly HashSet<string> _expanded = [];
     private readonly HashSet<string> _selected = [];
     private readonly Typeahead _typeahead = new();
@@ -70,16 +70,16 @@ public class TreeList : TemplatedControl
     private string? _anchor;
     private bool _syncing;
 
-    static TreeList()
+    static TreeView()
     {
-        FocusableProperty.OverrideDefaultValue<TreeList>(true);
+        FocusableProperty.OverrideDefaultValue<TreeView>(true);
         foreach (var p in new AvaloniaProperty[] { ItemsProperty, ChildrenSelectorProperty, HasChildrenProperty })
-            p.Changed.AddClassHandler<TreeList>((t, _) => t.Rebuild());
-        FilterProperty.Changed.AddClassHandler<TreeList>((t, _) => t.ApplyFilter());
-        ExpandedProperty.Changed.AddClassHandler<TreeList>((t, _) => t.ReadExpanded());
-        SelectedItemsProperty.Changed.AddClassHandler<TreeList>((t, _) => t.ReadSelected());
-        DenseProperty.Changed.AddClassHandler<TreeList>((t, e) => t.PseudoClasses.Set(":dense", e.GetNewValue<bool>()));
-        SelectionModeProperty.Changed.AddClassHandler<TreeList>((t, _) => t.Render());
+            p.Changed.AddClassHandler<TreeView>((t, _) => t.Rebuild());
+        FilterProperty.Changed.AddClassHandler<TreeView>((t, _) => t.ApplyFilter());
+        ExpandedProperty.Changed.AddClassHandler<TreeView>((t, _) => t.ReadExpanded());
+        SelectedItemsProperty.Changed.AddClassHandler<TreeView>((t, _) => t.ReadSelected());
+        DenseProperty.Changed.AddClassHandler<TreeView>((t, e) => t.PseudoClasses.Set(":dense", e.GetNewValue<bool>()));
+        SelectionModeProperty.Changed.AddClassHandler<TreeView>((t, _) => t.Render());
     }
 
     public IEnumerable? Items { get => GetValue(ItemsProperty); set => SetValue(ItemsProperty, value); }
@@ -99,7 +99,7 @@ public class TreeList : TemplatedControl
     public event EventHandler<RoutedEventArgs>? ItemActivated { add => AddHandler(ItemActivatedEvent, value); remove => RemoveHandler(ItemActivatedEvent, value); }
 
     /// <summary>Visible rows in display order.</summary>
-    public IReadOnlyList<TreeListRowData> Rows => _rows;
+    public IReadOnlyList<TreeViewRowData> Rows => _rows;
 
     /// <summary>The keyboard-focused item (the active row).</summary>
     public object? FocusedItem => _focus is { } id && _model is not null ? _model.Node(id) : null;
@@ -118,7 +118,7 @@ public class TreeList : TemplatedControl
         if (_itemsControl is not null)
         {
             _itemsControl.ItemsSource = _rows;
-            _itemsControl.ItemTemplate = new FuncDataTemplate<TreeListRowData>((row, _) => new TreeListRow(), supportsRecycling: true);
+            _itemsControl.ItemTemplate = new FuncDataTemplate<TreeViewRowData>((row, _) => new TreeViewRow(), supportsRecycling: true);
         }
         Rebuild();
     }
@@ -178,7 +178,7 @@ public class TreeList : TemplatedControl
         if (_model is null) return;
         var rows = _model.Flatten(_expanded, _visible);
         _rows.Clear();
-        foreach (var r in rows) _rows.Add(new TreeListRowData(this, r, _model.Node(r.Id)));
+        foreach (var r in rows) _rows.Add(new TreeViewRowData(this, r, _model.Node(r.Id)));
         if (_focus is null || rows.All(r => r.Id != _focus)) _focus = rows.FirstOrDefault()?.Id;
         RefreshRows();
     }
@@ -186,7 +186,7 @@ public class TreeList : TemplatedControl
     internal void RefreshRows()
     {
         if (_itemsControl is null) return;
-        foreach (var row in _itemsControl.GetRealizedContainers().Select(c => c is ContentPresenter p ? p.Child : c).OfType<TreeListRow>())
+        foreach (var row in _itemsControl.GetRealizedContainers().Select(c => c is ContentPresenter p ? p.Child : c).OfType<TreeViewRow>())
             row.Refresh();
     }
 
@@ -197,7 +197,7 @@ public class TreeList : TemplatedControl
 
     // ---- interaction ---------------------------------------------------------------------------------------
 
-    internal void RowPressed(TreeListRowData row, KeyModifiers modifiers, int clickCount)
+    internal void RowPressed(TreeViewRowData row, KeyModifiers modifiers, int clickCount)
     {
         Focus();
         _focus = row.Id;
@@ -401,22 +401,22 @@ public class TreeList : TemplatedControl
         finally { _syncing = false; }
     }
 
-    private sealed class TreePeer(TreeList owner) : ControlAutomationPeer(owner)
+    private sealed class TreePeer(TreeView owner) : ControlAutomationPeer(owner)
     {
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Tree;
     }
 }
 
-/// <summary>Row container of a <see cref="TreeList"/>: indent, expander, optional checkbox, icon and label.</summary>
+/// <summary>Row container of a <see cref="TreeView"/>: indent, expander, optional checkbox, icon and label.</summary>
 [TemplatePart("PART_Expander", typeof(Button))]
 [TemplatePart("PART_Check", typeof(CheckBox))]
 [PseudoClasses(":selected", ":focused-row", ":expanded", ":leaf", ":loading", ":checkbox")]
-public class TreeListRow : TemplatedControl
+public class TreeViewRow : TemplatedControl
 {
-    public static readonly StyledProperty<double> IndentProperty = AvaloniaProperty.Register<TreeListRow, double>(nameof(Indent));
-    public static readonly StyledProperty<string?> IconProperty = AvaloniaProperty.Register<TreeListRow, string?>(nameof(Icon));
-    public static readonly StyledProperty<object?> LabelProperty = AvaloniaProperty.Register<TreeListRow, object?>(nameof(Label));
-    public static readonly StyledProperty<bool?> CheckedProperty = AvaloniaProperty.Register<TreeListRow, bool?>(nameof(Checked));
+    public static readonly StyledProperty<double> IndentProperty = AvaloniaProperty.Register<TreeViewRow, double>(nameof(Indent));
+    public static readonly StyledProperty<string?> IconProperty = AvaloniaProperty.Register<TreeViewRow, string?>(nameof(Icon));
+    public static readonly StyledProperty<object?> LabelProperty = AvaloniaProperty.Register<TreeViewRow, object?>(nameof(Label));
+    public static readonly StyledProperty<bool?> CheckedProperty = AvaloniaProperty.Register<TreeViewRow, bool?>(nameof(Checked));
 
     private Button? _expander;
     private CheckBox? _check;
@@ -426,7 +426,7 @@ public class TreeListRow : TemplatedControl
     public object? Label { get => GetValue(LabelProperty); set => SetValue(LabelProperty, value); }
     public bool? Checked { get => GetValue(CheckedProperty); set => SetValue(CheckedProperty, value); }
 
-    private TreeListRowData? Data => DataContext as TreeListRowData;
+    private TreeViewRowData? Data => DataContext as TreeViewRowData;
 
     protected override void OnDataContextChanged(EventArgs e)
     {
@@ -481,7 +481,7 @@ public class TreeListRow : TemplatedControl
 
     protected override AutomationPeer OnCreateAutomationPeer() => new RowPeer(this);
 
-    private sealed class RowPeer(TreeListRow owner) : ControlAutomationPeer(owner), IExpandCollapseProvider, ISelectionItemProvider
+    private sealed class RowPeer(TreeViewRow owner) : ControlAutomationPeer(owner), IExpandCollapseProvider, ISelectionItemProvider
     {
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.TreeItem;
 

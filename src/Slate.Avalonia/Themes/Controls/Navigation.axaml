@@ -139,8 +139,8 @@
     </Style>
   </ControlTheme>
 
-  <!-- TreeList (Sl.Component.Tree.*): virtualised rows with indent, expander, optional checkbox, icon and label. -->
-  <ControlTheme x:Key="{x:Type sl:TreeList}" TargetType="sl:TreeList">
+  <!-- TreeView (Sl.Component.Tree.*): virtualised rows with indent, expander, optional checkbox, icon and label. -->
+  <ControlTheme x:Key="{x:Type sl:TreeView}" TargetType="sl:TreeView">
     <Setter Property="Foreground" Value="{DynamicResource Sl.Brush.Text.Primary}" />
     <Setter Property="FontSize" Value="13.5" />
     <Setter Property="FocusAdorner" Value="{x:Null}" />
@@ -159,7 +159,7 @@
     </Setter>
   </ControlTheme>
 
-  <ControlTheme x:Key="{x:Type sl:TreeListRow}" TargetType="sl:TreeListRow">
+  <ControlTheme x:Key="{x:Type sl:TreeViewRow}" TargetType="sl:TreeViewRow">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Height" Value="{DynamicResource Sl.Component.Tree.ItemHeight}" />
     <Setter Property="Cursor" Value="Hand" />

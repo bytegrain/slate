@@ -13,10 +13,10 @@
       <sl:Card Title="Menu" Subtitle="↓ or click opens · arrows move · → submenu · Esc closes · right-click the panel for a context menu">
         <sl:Stack Spacing="3">
           <sl:Stack Direction="Row" Wrap="True">
-            <sl:DropdownMenu x:Name="Actions">
-              <sl:DropdownMenu.Trigger>
+            <sl:Menu x:Name="Actions">
+              <sl:Menu.Trigger>
                 <Button Content="Actions" sl:Sl.EndIcon="chevron-down" />
-              </sl:DropdownMenu.Trigger>
+              </sl:Menu.Trigger>
               <MenuItem Header="Rename" sl:Sl.StartIcon="pencil" sl:Sl.Shortcut="F2" />
               <MenuItem Header="Duplicate" sl:Sl.StartIcon="copy" sl:Sl.Shortcut="⌘D" />
               <MenuItem Header="Move to">
@@ -27,27 +27,27 @@
               <MenuItem Header="Locked (disabled)" IsEnabled="False" />
               <Separator />
               <MenuItem Header="Delete" sl:Sl.StartIcon="trash" sl:Sl.Tone="Danger" sl:Sl.Shortcut="⌫" />
-            </sl:DropdownMenu>
-            <sl:DropdownMenu Placement="TopEnd">
-              <sl:DropdownMenu.Trigger>
+            </sl:Menu>
+            <sl:Menu Placement="TopEnd">
+              <sl:Menu.Trigger>
                 <Button sl:Sl.StartIcon="more-horizontal" sl:Sl.Label="More" sl:Sl.Variant="Ghost" />
-              </sl:DropdownMenu.Trigger>
+              </sl:Menu.Trigger>
               <MenuItem Header="Opens above, end-aligned" />
               <MenuItem Header="Export" sl:Sl.StartIcon="download" />
-            </sl:DropdownMenu>
+            </sl:Menu>
           </sl:Stack>
-          <sl:DropdownMenu AsContextMenu="True">
-            <sl:DropdownMenu.Trigger>
+          <sl:Menu AsContextMenu="True">
+            <sl:Menu.Trigger>
               <Border Height="72" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource Sl.Brush.Border.Default}"
                       Background="{DynamicResource Sl.Brush.Background.Subtle}" Focusable="True">
                 <TextBlock Text="Right-click (or Shift+F10) here" HorizontalAlignment="Center" VerticalAlignment="Center"
                            Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
               </Border>
-            </sl:DropdownMenu.Trigger>
+            </sl:Menu.Trigger>
             <MenuItem Header="Cut" sl:Sl.Shortcut="⌘X" />
             <MenuItem Header="Copy" sl:Sl.StartIcon="copy" sl:Sl.Shortcut="⌘C" />
             <MenuItem Header="Paste" sl:Sl.Shortcut="⌘V" />
-          </sl:DropdownMenu>
+          </sl:Menu>
           <TextBlock x:Name="MenuStatus" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
         </sl:Stack>
       </sl:Card>
@@ -85,9 +85,9 @@
       <sl:Card Title="Tooltip" Subtitle="Hover or focus · shortcut chip · placement · delay">
         <sl:Stack Direction="Row" Wrap="True">
           <sl:Tooltip Text="Copy link" Shortcut="⌘C"><Button sl:Sl.StartIcon="copy" sl:Sl.Label="Copy link" /></sl:Tooltip>
-          <sl:Tooltip Text="Opens below" Placement="Bottom"><Button Content="Bottom" /></sl:Tooltip>
-          <sl:Tooltip Text="Right, no delay" Placement="Right" Delay="0"><Button Content="Right · instant" /></sl:Tooltip>
-          <sl:Tooltip Placement="Top">
+          <sl:Tooltip Text="Opens below" TooltipPlacement="Bottom"><Button Content="Bottom" /></sl:Tooltip>
+          <sl:Tooltip Text="Right, no delay" TooltipPlacement="Right" Delay="0"><Button Content="Right · instant" /></sl:Tooltip>
+          <sl:Tooltip TooltipPlacement="Top">
             <sl:Tooltip.Content>
               <StackPanel Spacing="2"><TextBlock Text="Rich content" FontWeight="SemiBold" /><TextBlock Text="Any content works." /></StackPanel>
             </sl:Tooltip.Content>

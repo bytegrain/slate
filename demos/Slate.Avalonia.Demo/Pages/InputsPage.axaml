@@ -26,11 +26,11 @@
 
       <sl:Card Title="Date picker" Subtitle="Arrows move by day/week · PageUp/Down month · Shift+Page year · Home/End week · type a date to parse it">
         <sl:ResponsiveGrid Spacing="3">
-          <sl:DateField x:Name="Due" sl:ResponsiveGrid.Md="4" Label="Due date" Placeholder="yyyy-MM-dd" Format="yyyy-MM-dd" HelperText="Weekends are disabled" Clearable="True" />
-          <sl:DateField x:Name="Window" sl:ResponsiveGrid.Md="4" Label="Release window" Selection="Range" HelperText="Range with presets" />
-          <sl:DateField sl:ResponsiveGrid.Md="4" Label="Filled · small" Variant="Filled" Size="Small" Error="Pick a date" />
-          <sl:DateField x:Name="InlineCal" sl:ResponsiveGrid.Md="6" Inline="True" Selection="Range" />
-          <sl:DateField x:Name="InlineSingle" sl:ResponsiveGrid.Md="6" Inline="True" FirstDayOfWeek="Sunday" />
+          <sl:DatePicker x:Name="Due" sl:ResponsiveGrid.Md="4" Label="Due date" Placeholder="yyyy-MM-dd" Format="yyyy-MM-dd" HelperText="Weekends are disabled" Clearable="True" />
+          <sl:DatePicker x:Name="Window" sl:ResponsiveGrid.Md="4" Label="Release window" Selection="Range" HelperText="Range with presets" />
+          <sl:DatePicker sl:ResponsiveGrid.Md="4" Label="Filled · small" Variant="Filled" Size="Small" Error="Pick a date" />
+          <sl:DatePicker x:Name="InlineCal" sl:ResponsiveGrid.Md="6" Inline="True" Selection="Range" />
+          <sl:DatePicker x:Name="InlineSingle" sl:ResponsiveGrid.Md="6" Inline="True" FirstDayOfWeek="Sunday" />
         </sl:ResponsiveGrid>
       </sl:Card>
 

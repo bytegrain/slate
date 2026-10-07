@@ -10,6 +10,10 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using Slate.Avalonia.Controls;
+// Slate controls share their contract names with Avalonia built-ins (sl:Menu, sl:DatePicker, sl:TreeView).
+using Menu = Slate.Avalonia.Controls.Menu;
+using DatePicker = Slate.Avalonia.Controls.DatePicker;
+using TreeView = Slate.Avalonia.Controls.TreeView;
 using Slate.Collections;
 using Slate.Dates;
 using static Slate.Avalonia.Tests.TestHelpers;
@@ -298,18 +302,18 @@ public class PopoverAndMenuTests
         Slate.Avalonia.Sl.SetShortcut(rename, "F2");
         var delete = new MenuItem { Header = "Delete" };
         Slate.Avalonia.Sl.SetTone(delete, Tone.Danger);
-        var menu = new DropdownMenu { Trigger = trigger, Items = { rename, new Separator(), delete } };
+        var menu = new Menu { Trigger = trigger, Items = { rename, new Separator(), delete } };
         var w = Wave2Helpers.Host(menu);
 
         w.Click(trigger);
         Assert.True(menu.Open);
-        Assert.True(menu.Menu.IsOpen);
+        Assert.True(menu.MenuPopup.IsOpen);
         Assert.IsType<Icon>(rename.Icon);
         Assert.Contains("tone-danger", delete.Classes);
 
         menu.Open = false;
         Pump(w);
-        Assert.False(menu.Menu.IsOpen);
+        Assert.False(menu.MenuPopup.IsOpen);
 
         trigger.Focus();
         w.Press(Key.Down);
@@ -322,10 +326,10 @@ public class PopoverAndMenuTests
     public void Context_menu_mode_attaches_to_the_trigger()
     {
         var trigger = new Border { Width = 100, Height = 40 };
-        var menu = new DropdownMenu { Trigger = trigger, AsContextMenu = true, Items = { new MenuItem { Header = "Copy" } } };
+        var menu = new Menu { Trigger = trigger, AsContextMenu = true, Items = { new MenuItem { Header = "Copy" } } };
         var w = Wave2Helpers.Host(menu);
         var presenter = menu.Part<global::Avalonia.Controls.Presenters.ContentPresenter>("PART_Trigger");
-        Assert.Same(menu.Menu, presenter.ContextMenu);
+        Assert.Same(menu.MenuPopup, presenter.ContextMenu);
         menu.AsContextMenu = false;
         Pump(w);
         Assert.Null(presenter.ContextMenu);
@@ -485,7 +489,7 @@ public class DateTests
     [AvaloniaFact]
     public void Calendar_renders_42_days_and_marks_today()
     {
-        var cal = new MonthCalendar { Today = Today, FirstDayOfWeek = DayOfWeek.Monday };
+        var cal = new CalendarView { Today = Today, FirstDayOfWeek = DayOfWeek.Monday };
         var w = Wave2Helpers.Host(cal);
         cal.ShowMonth(2026, 10);
         Pump(w);
@@ -500,7 +504,7 @@ public class DateTests
     [AvaloniaFact]
     public void Keyboard_navigation_moves_days_and_pages_months()
     {
-        var cal = new MonthCalendar { Today = Today, Value = Today };
+        var cal = new CalendarView { Today = Today, Value = Today };
         var w = Wave2Helpers.Host(cal);
         cal.FocusDay();
         Pump(w);
@@ -522,7 +526,7 @@ public class DateTests
     [AvaloniaFact]
     public void Min_and_disabled_dates_are_not_selectable()
     {
-        var cal = new MonthCalendar { Today = Today, Min = Today, DisabledDates = d => d.DayOfWeek == DayOfWeek.Sunday };
+        var cal = new CalendarView { Today = Today, Min = Today, DisabledDates = d => d.DayOfWeek == DayOfWeek.Sunday };
         var w = Wave2Helpers.Host(cal);
         cal.ShowMonth(2026, 10);
         Pump(w);
@@ -536,7 +540,7 @@ public class DateTests
     [AvaloniaFact]
     public void Range_selection_picks_start_then_end()
     {
-        var cal = new MonthCalendar { Today = Today, Selection = DateSelection.Range };
+        var cal = new CalendarView { Today = Today, Selection = DateSelection.Range };
         var w = Wave2Helpers.Host(cal);
         cal.Pick(new DateOnly(2026, 10, 12));
         Assert.Equal(new DateRange(new DateOnly(2026, 10, 12), null), cal.Range);
@@ -550,7 +554,7 @@ public class DateTests
     [AvaloniaFact]
     public void Date_field_parses_typed_dates_and_formats_values()
     {
-        var field = new DateField { Format = "yyyy-MM-dd", Label = "Due" };
+        var field = new DatePicker { Format = "yyyy-MM-dd", Label = "Due" };
         var w = Wave2Helpers.Host(field);
         DateOnly? last = null;
         field.ValueChanged += (_, _) => last = field.Value;
@@ -574,7 +578,7 @@ public class DateTests
     [AvaloniaFact]
     public void Date_field_ranges_parse_and_respect_bounds()
     {
-        var field = new DateField { Format = "yyyy-MM-dd", Selection = DateSelection.Range, Max = new DateOnly(2026, 12, 31) };
+        var field = new DatePicker { Format = "yyyy-MM-dd", Selection = DateSelection.Range, Max = new DateOnly(2026, 12, 31) };
         var w = Wave2Helpers.Host(field);
         field.Text = "2026-10-01 – 2026-10-10";
         field.Commit();
@@ -589,7 +593,7 @@ public class DateTests
     [AvaloniaFact]
     public void Presets_resolve_relative_to_today()
     {
-        var cal = new MonthCalendar { Today = Today, Selection = DateSelection.Range, Presets = CalendarModel.DefaultPresets };
+        var cal = new CalendarView { Today = Today, Selection = DateSelection.Range, Presets = CalendarModel.DefaultPresets };
         var w = Wave2Helpers.Host(cal);
         Assert.Equal(CalendarModel.DefaultPresets.Count, cal.Part<StackPanel>("PART_Presets").Children.Count);
         cal.ApplyPreset(CalendarModel.DefaultPresets.First(p => p.Kind == DatePresetKind.Last7Days));
@@ -600,7 +604,7 @@ public class DateTests
     [AvaloniaFact]
     public void Picking_in_the_popup_updates_the_field_and_closes()
     {
-        var field = new DateField { Format = "yyyy-MM-dd", Today = Today };
+        var field = new DatePicker { Format = "yyyy-MM-dd", Today = Today };
         var w = Wave2Helpers.Host(field);
         field.IsDropDownOpen = true;
         Pump(w);
@@ -615,7 +619,7 @@ public class DateTests
     [AvaloniaFact]
     public void Inline_renders_the_calendar_without_a_field()
     {
-        var field = new DateField { Inline = true, Today = Today };
+        var field = new DatePicker { Inline = true, Today = Today };
         var w = Wave2Helpers.Host(field);
         Assert.NotNull(field.Calendar);
         Assert.Null(field.FindPart<TextField>("PART_Field"));
@@ -634,7 +638,7 @@ public class TreeListTests
         new("README.md"),
     ];
 
-    private static TreeList Build(TreeSelectionMode mode = TreeSelectionMode.Single) => new()
+    private static TreeView Build(TreeSelectionMode mode = TreeSelectionMode.Single) => new()
     {
         Items = Roots,
         ChildrenSelector = n => ((Node)n).Children,
@@ -643,7 +647,7 @@ public class TreeListTests
         Height = 400,
     };
 
-    private static string[] Visible(TreeList t) => t.Rows.Select(r => t.TextOf(r.Item)).ToArray();
+    private static string[] Visible(TreeView t) => t.Rows.Select(r => t.TextOf(r.Item)).ToArray();
 
     [AvaloniaFact]
     public void Keyboard_expands_moves_and_collapses()
@@ -692,7 +696,7 @@ public class TreeListTests
         w.Press(Key.Down);  // Dates
         w.Press(Key.Space);
 
-        var row = tree.GetVisualDescendants().OfType<TreeListRow>().Single(r => r.Label as string == "Slate.Core");
+        var row = tree.GetVisualDescendants().OfType<TreeViewRow>().Single(r => r.Label as string == "Slate.Core");
         Assert.Null(row.Checked); // indeterminate: one of two children checked
         Assert.Contains(tree.SelectedItems!.Cast<object>(), n => ((Node)n).Name == "Dates");
         w.Close();
@@ -715,7 +719,7 @@ public class TreeListTests
     [AvaloniaFact]
     public async Task Lazy_children_load_on_expand()
     {
-        var tree = new TreeList
+        var tree = new TreeView
         {
             Items = new[] { new Node("remote") },
             HasChildren = _ => true,
@@ -749,7 +753,7 @@ public class TreeListTests
     {
         var tree = Build();
         var w = Wave2Helpers.Host(tree);
-        var row = tree.GetVisualDescendants().OfType<TreeListRow>().First();
+        var row = tree.GetVisualDescendants().OfType<TreeViewRow>().First();
         var peer = ControlAutomationPeer.CreatePeerForElement(row);
         Assert.Equal(AutomationControlType.TreeItem, peer.GetAutomationControlType());
         Assert.Equal(global::Avalonia.Automation.ExpandCollapseState.Collapsed, Assert.IsAssignableFrom<IExpandCollapseProvider>(peer).ExpandCollapseState);
@@ -881,7 +885,7 @@ public class BreadcrumbsAndPaginationTests
         var crumbs = new Breadcrumbs { Items = items, MaxItems = 3 };
         var w = Wave2Helpers.Host(crumbs);
         Assert.Equal(["Level 2", "Level 3", "Level 4"], crumbs.Collapsed.Select(c => c.Label));
-        Assert.Single(crumbs.Part<StackPanel>("PART_Items").Children.OfType<DropdownMenu>());
+        Assert.Single(crumbs.Part<StackPanel>("PART_Items").Children.OfType<Menu>());
         w.Close();
     }
 

@@ -11,7 +11,7 @@ using Slate.Dates;
 
 namespace Slate.Avalonia.Controls;
 
-/// <summary>A day cell in a <see cref="MonthCalendar"/>.</summary>
+/// <summary>A day cell in a <see cref="CalendarView"/>.</summary>
 [PseudoClasses(":today", ":outside", ":selected", ":range-start", ":range-end", ":in-range", ":preview")]
 public class DayButton : Button
 {
@@ -37,7 +37,7 @@ public class DayButton : Button
 }
 
 /// <summary>
-/// The calendar grid behind <see cref="DateField"/> (also usable on its own): 6×7 month grid, ISO weeks, keyboard
+/// The calendar grid behind <see cref="DatePicker"/> (also usable on its own): 6×7 month grid, ISO weeks, keyboard
 /// navigation (arrows, Home/End, PageUp/Down months, Shift+PageUp/Down years) that skips disabled days, single or
 /// range selection with hover preview, and optional presets. All logic comes from Slate.Core's CalendarModel.
 /// </summary>
@@ -47,25 +47,25 @@ public class DayButton : Button
 [TemplatePart("PART_Next", typeof(Button))]
 [TemplatePart("PART_Presets", typeof(StackPanel))]
 [PseudoClasses(":has-presets")]
-public class MonthCalendar : TemplatedControl
+public class CalendarView : TemplatedControl
 {
     public static readonly StyledProperty<DateOnly?> ValueProperty =
-        AvaloniaProperty.Register<MonthCalendar, DateOnly?>(nameof(Value), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
+        AvaloniaProperty.Register<CalendarView, DateOnly?>(nameof(Value), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
     public static readonly StyledProperty<DateRange?> RangeProperty =
-        AvaloniaProperty.Register<MonthCalendar, DateRange?>(nameof(Range), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
-    public static readonly StyledProperty<DateSelection> SelectionProperty = AvaloniaProperty.Register<MonthCalendar, DateSelection>(nameof(Selection));
-    public static readonly StyledProperty<DateOnly?> MinProperty = AvaloniaProperty.Register<MonthCalendar, DateOnly?>(nameof(Min));
-    public static readonly StyledProperty<DateOnly?> MaxProperty = AvaloniaProperty.Register<MonthCalendar, DateOnly?>(nameof(Max));
-    public static readonly StyledProperty<Func<DateOnly, bool>?> DisabledDatesProperty = AvaloniaProperty.Register<MonthCalendar, Func<DateOnly, bool>?>(nameof(DisabledDates));
-    public static readonly StyledProperty<DayOfWeek?> FirstDayOfWeekProperty = AvaloniaProperty.Register<MonthCalendar, DayOfWeek?>(nameof(FirstDayOfWeek));
-    public static readonly StyledProperty<IEnumerable<DatePreset>?> PresetsProperty = AvaloniaProperty.Register<MonthCalendar, IEnumerable<DatePreset>?>(nameof(Presets));
+        AvaloniaProperty.Register<CalendarView, DateRange?>(nameof(Range), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
+    public static readonly StyledProperty<DateSelection> SelectionProperty = AvaloniaProperty.Register<CalendarView, DateSelection>(nameof(Selection));
+    public static readonly StyledProperty<DateOnly?> MinProperty = AvaloniaProperty.Register<CalendarView, DateOnly?>(nameof(Min));
+    public static readonly StyledProperty<DateOnly?> MaxProperty = AvaloniaProperty.Register<CalendarView, DateOnly?>(nameof(Max));
+    public static readonly StyledProperty<Func<DateOnly, bool>?> DisabledDatesProperty = AvaloniaProperty.Register<CalendarView, Func<DateOnly, bool>?>(nameof(DisabledDates));
+    public static readonly StyledProperty<DayOfWeek?> FirstDayOfWeekProperty = AvaloniaProperty.Register<CalendarView, DayOfWeek?>(nameof(FirstDayOfWeek));
+    public static readonly StyledProperty<IEnumerable<DatePreset>?> PresetsProperty = AvaloniaProperty.Register<CalendarView, IEnumerable<DatePreset>?>(nameof(Presets));
 
     /// <summary>"Today" for highlighting and presets; defaults to the system date (settable for tests and demos).</summary>
-    public static readonly StyledProperty<DateOnly?> TodayProperty = AvaloniaProperty.Register<MonthCalendar, DateOnly?>(nameof(Today));
+    public static readonly StyledProperty<DateOnly?> TodayProperty = AvaloniaProperty.Register<CalendarView, DateOnly?>(nameof(Today));
 
-    public static readonly StyledProperty<DateOnly> FocusedDateProperty = AvaloniaProperty.Register<MonthCalendar, DateOnly>(nameof(FocusedDate));
+    public static readonly StyledProperty<DateOnly> FocusedDateProperty = AvaloniaProperty.Register<CalendarView, DateOnly>(nameof(FocusedDate));
 
-    public static readonly RoutedEvent<RoutedEventArgs> DatePickedEvent = RoutedEvent.Register<MonthCalendar, RoutedEventArgs>(nameof(DatePicked), RoutingStrategies.Bubble);
+    public static readonly RoutedEvent<RoutedEventArgs> DatePickedEvent = RoutedEvent.Register<CalendarView, RoutedEventArgs>(nameof(DatePicked), RoutingStrategies.Bubble);
 
     private readonly DayButton[] _days = new DayButton[CalendarModel.Rows * 7];
     private readonly TextBlock[] _weekdays = new TextBlock[7];
@@ -76,16 +76,16 @@ public class MonthCalendar : TemplatedControl
     private int _year;
     private int _month;
 
-    static MonthCalendar()
+    static CalendarView()
     {
-        FocusableProperty.OverrideDefaultValue<MonthCalendar>(false);
+        FocusableProperty.OverrideDefaultValue<CalendarView>(false);
         foreach (var p in new AvaloniaProperty[] { ValueProperty, RangeProperty, SelectionProperty, MinProperty, MaxProperty, DisabledDatesProperty, FirstDayOfWeekProperty, TodayProperty })
-            p.Changed.AddClassHandler<MonthCalendar>((c, _) => c.Render());
-        PresetsProperty.Changed.AddClassHandler<MonthCalendar>((c, _) => c.BuildPresets());
-        ValueProperty.Changed.AddClassHandler<MonthCalendar>((c, e) => { if (e.GetNewValue<DateOnly?>() is { } d) c.ShowMonthOf(d); });
+            p.Changed.AddClassHandler<CalendarView>((c, _) => c.Render());
+        PresetsProperty.Changed.AddClassHandler<CalendarView>((c, _) => c.BuildPresets());
+        ValueProperty.Changed.AddClassHandler<CalendarView>((c, e) => { if (e.GetNewValue<DateOnly?>() is { } d) c.ShowMonthOf(d); });
     }
 
-    public MonthCalendar()
+    public CalendarView()
     {
         var today = EffectiveToday;
         _year = today.Year;
@@ -282,7 +282,7 @@ public class MonthCalendar : TemplatedControl
 }
 
 /// <summary>
-/// Date picker (docs: DatePicker; Avalonia spelling DateField because Avalonia.Controls.DatePicker exists): a text
+/// Slate date picker (<c>sl:DatePicker</c>; distinct from <see cref="global::Avalonia.Controls.DatePicker"/>): a text
 /// field that accepts typed dates (<see cref="Format"/> or the culture's short pattern; ranges as "start – end")
 /// plus a calendar popup, or an <see cref="Inline"/> calendar. Single or range <see cref="Selection"/>, min/max,
 /// disabled dates and presets.
@@ -290,66 +290,66 @@ public class MonthCalendar : TemplatedControl
 [TemplatePart("PART_Field", typeof(TextField))]
 [TemplatePart("PART_Toggle", typeof(Button))]
 [TemplatePart("PART_Popup", typeof(Popup))]
-[TemplatePart("PART_Calendar", typeof(MonthCalendar))]
+[TemplatePart("PART_Calendar", typeof(CalendarView))]
 [PseudoClasses(":inline", ":open")]
-public class DateField : TemplatedControl
+public class DatePicker : TemplatedControl
 {
     public static readonly StyledProperty<DateOnly?> ValueProperty =
-        AvaloniaProperty.Register<DateField, DateOnly?>(nameof(Value), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
+        AvaloniaProperty.Register<DatePicker, DateOnly?>(nameof(Value), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
     public static readonly StyledProperty<DateRange?> RangeProperty =
-        AvaloniaProperty.Register<DateField, DateRange?>(nameof(Range), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
-    public static readonly StyledProperty<DateSelection> SelectionProperty = AvaloniaProperty.Register<DateField, DateSelection>(nameof(Selection));
-    public static readonly StyledProperty<DateOnly?> MinProperty = AvaloniaProperty.Register<DateField, DateOnly?>(nameof(Min));
-    public static readonly StyledProperty<DateOnly?> MaxProperty = AvaloniaProperty.Register<DateField, DateOnly?>(nameof(Max));
-    public static readonly StyledProperty<Func<DateOnly, bool>?> DisabledDatesProperty = AvaloniaProperty.Register<DateField, Func<DateOnly, bool>?>(nameof(DisabledDates));
-    public static readonly StyledProperty<DayOfWeek?> FirstDayOfWeekProperty = AvaloniaProperty.Register<DateField, DayOfWeek?>(nameof(FirstDayOfWeek));
-    public static readonly StyledProperty<string?> FormatProperty = AvaloniaProperty.Register<DateField, string?>(nameof(Format));
-    public static readonly StyledProperty<IEnumerable<DatePreset>?> PresetsProperty = AvaloniaProperty.Register<DateField, IEnumerable<DatePreset>?>(nameof(Presets));
-    public static readonly StyledProperty<string?> LabelProperty = AvaloniaProperty.Register<DateField, string?>(nameof(Label));
-    public static readonly StyledProperty<string?> PlaceholderProperty = AvaloniaProperty.Register<DateField, string?>(nameof(Placeholder));
-    public static readonly StyledProperty<string?> HelperTextProperty = AvaloniaProperty.Register<DateField, string?>(nameof(HelperText));
-    public static readonly StyledProperty<string?> ErrorProperty = AvaloniaProperty.Register<DateField, string?>(nameof(Error));
-    public static readonly StyledProperty<FieldVariant> VariantProperty = AvaloniaProperty.Register<DateField, FieldVariant>(nameof(Variant));
-    public static readonly StyledProperty<ControlSize> SizeProperty = AvaloniaProperty.Register<DateField, ControlSize>(nameof(Size), ControlSize.Medium);
-    public static readonly StyledProperty<bool> ClearableProperty = AvaloniaProperty.Register<DateField, bool>(nameof(Clearable));
-    public static readonly StyledProperty<bool> InlineProperty = AvaloniaProperty.Register<DateField, bool>(nameof(Inline));
-    public static readonly StyledProperty<DateOnly?> TodayProperty = AvaloniaProperty.Register<DateField, DateOnly?>(nameof(Today));
+        AvaloniaProperty.Register<DatePicker, DateRange?>(nameof(Range), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
+    public static readonly StyledProperty<DateSelection> SelectionProperty = AvaloniaProperty.Register<DatePicker, DateSelection>(nameof(Selection));
+    public static readonly StyledProperty<DateOnly?> MinProperty = AvaloniaProperty.Register<DatePicker, DateOnly?>(nameof(Min));
+    public static readonly StyledProperty<DateOnly?> MaxProperty = AvaloniaProperty.Register<DatePicker, DateOnly?>(nameof(Max));
+    public static readonly StyledProperty<Func<DateOnly, bool>?> DisabledDatesProperty = AvaloniaProperty.Register<DatePicker, Func<DateOnly, bool>?>(nameof(DisabledDates));
+    public static readonly StyledProperty<DayOfWeek?> FirstDayOfWeekProperty = AvaloniaProperty.Register<DatePicker, DayOfWeek?>(nameof(FirstDayOfWeek));
+    public static readonly StyledProperty<string?> FormatProperty = AvaloniaProperty.Register<DatePicker, string?>(nameof(Format));
+    public static readonly StyledProperty<IEnumerable<DatePreset>?> PresetsProperty = AvaloniaProperty.Register<DatePicker, IEnumerable<DatePreset>?>(nameof(Presets));
+    public static readonly StyledProperty<string?> LabelProperty = AvaloniaProperty.Register<DatePicker, string?>(nameof(Label));
+    public static readonly StyledProperty<string?> PlaceholderProperty = AvaloniaProperty.Register<DatePicker, string?>(nameof(Placeholder));
+    public static readonly StyledProperty<string?> HelperTextProperty = AvaloniaProperty.Register<DatePicker, string?>(nameof(HelperText));
+    public static readonly StyledProperty<string?> ErrorProperty = AvaloniaProperty.Register<DatePicker, string?>(nameof(Error));
+    public static readonly StyledProperty<FieldVariant> VariantProperty = AvaloniaProperty.Register<DatePicker, FieldVariant>(nameof(Variant));
+    public static readonly StyledProperty<ControlSize> SizeProperty = AvaloniaProperty.Register<DatePicker, ControlSize>(nameof(Size), ControlSize.Medium);
+    public static readonly StyledProperty<bool> ClearableProperty = AvaloniaProperty.Register<DatePicker, bool>(nameof(Clearable));
+    public static readonly StyledProperty<bool> InlineProperty = AvaloniaProperty.Register<DatePicker, bool>(nameof(Inline));
+    public static readonly StyledProperty<DateOnly?> TodayProperty = AvaloniaProperty.Register<DatePicker, DateOnly?>(nameof(Today));
 
     public static readonly StyledProperty<bool> IsDropDownOpenProperty =
-        AvaloniaProperty.Register<DateField, bool>(nameof(IsDropDownOpen), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
+        AvaloniaProperty.Register<DatePicker, bool>(nameof(IsDropDownOpen), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
 
     /// <summary>The text shown in the field (formatted value, or what the user is typing).</summary>
     public static readonly StyledProperty<string?> TextProperty =
-        AvaloniaProperty.Register<DateField, string?>(nameof(Text), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
+        AvaloniaProperty.Register<DatePicker, string?>(nameof(Text), defaultBindingMode: global::Avalonia.Data.BindingMode.TwoWay);
 
     /// <summary>Error shown when typed text can't be parsed (cleared once it parses); <see cref="Error"/> wins.</summary>
-    public static readonly DirectProperty<DateField, string?> ParseErrorProperty =
-        AvaloniaProperty.RegisterDirect<DateField, string?>(nameof(ParseError), f => f.ParseError);
+    public static readonly DirectProperty<DatePicker, string?> ParseErrorProperty =
+        AvaloniaProperty.RegisterDirect<DatePicker, string?>(nameof(ParseError), f => f.ParseError);
 
     /// <summary>The error shown under the field: <see cref="Error"/>, else <see cref="ParseError"/>.</summary>
-    public static readonly DirectProperty<DateField, string?> DisplayErrorProperty =
-        AvaloniaProperty.RegisterDirect<DateField, string?>(nameof(DisplayError), f => f.DisplayError);
+    public static readonly DirectProperty<DatePicker, string?> DisplayErrorProperty =
+        AvaloniaProperty.RegisterDirect<DatePicker, string?>(nameof(DisplayError), f => f.DisplayError);
 
-    public static readonly RoutedEvent<RoutedEventArgs> ValueChangedEvent = RoutedEvent.Register<DateField, RoutedEventArgs>(nameof(ValueChanged), RoutingStrategies.Bubble);
-    public static readonly RoutedEvent<RoutedEventArgs> RangeChangedEvent = RoutedEvent.Register<DateField, RoutedEventArgs>(nameof(RangeChanged), RoutingStrategies.Bubble);
+    public static readonly RoutedEvent<RoutedEventArgs> ValueChangedEvent = RoutedEvent.Register<DatePicker, RoutedEventArgs>(nameof(ValueChanged), RoutingStrategies.Bubble);
+    public static readonly RoutedEvent<RoutedEventArgs> RangeChangedEvent = RoutedEvent.Register<DatePicker, RoutedEventArgs>(nameof(RangeChanged), RoutingStrategies.Bubble);
 
     private TextField? _field;
     private Popup? _popup;
-    private MonthCalendar? _calendar;
+    private CalendarView? _calendar;
     private string? _parseError;
     private string? _displayError;
     private bool _updatingText;
 
-    static DateField()
+    static DatePicker()
     {
-        ValueProperty.Changed.AddClassHandler<DateField>((f, _) => { f.SyncText(); f.RaiseEvent(new RoutedEventArgs(ValueChangedEvent)); });
-        RangeProperty.Changed.AddClassHandler<DateField>((f, _) => { f.SyncText(); f.RaiseEvent(new RoutedEventArgs(RangeChangedEvent)); });
-        FormatProperty.Changed.AddClassHandler<DateField>((f, _) => f.SyncText());
-        SelectionProperty.Changed.AddClassHandler<DateField>((f, _) => f.SyncText());
-        InlineProperty.Changed.AddClassHandler<DateField>((f, e) => f.PseudoClasses.Set(":inline", e.GetNewValue<bool>()));
-        IsDropDownOpenProperty.Changed.AddClassHandler<DateField>((f, e) => f.OnOpenChanged(e.GetNewValue<bool>()));
-        ErrorProperty.Changed.AddClassHandler<DateField>((f, _) => f.DisplayError = f.Error ?? f.ParseError);
-        ParseErrorProperty.Changed.AddClassHandler<DateField>((f, _) => f.DisplayError = f.Error ?? f.ParseError);
+        ValueProperty.Changed.AddClassHandler<DatePicker>((f, _) => { f.SyncText(); f.RaiseEvent(new RoutedEventArgs(ValueChangedEvent)); });
+        RangeProperty.Changed.AddClassHandler<DatePicker>((f, _) => { f.SyncText(); f.RaiseEvent(new RoutedEventArgs(RangeChangedEvent)); });
+        FormatProperty.Changed.AddClassHandler<DatePicker>((f, _) => f.SyncText());
+        SelectionProperty.Changed.AddClassHandler<DatePicker>((f, _) => f.SyncText());
+        InlineProperty.Changed.AddClassHandler<DatePicker>((f, e) => f.PseudoClasses.Set(":inline", e.GetNewValue<bool>()));
+        IsDropDownOpenProperty.Changed.AddClassHandler<DatePicker>((f, e) => f.OnOpenChanged(e.GetNewValue<bool>()));
+        ErrorProperty.Changed.AddClassHandler<DatePicker>((f, _) => f.DisplayError = f.Error ?? f.ParseError);
+        ParseErrorProperty.Changed.AddClassHandler<DatePicker>((f, _) => f.DisplayError = f.Error ?? f.ParseError);
     }
 
     public DateOnly? Value { get => GetValue(ValueProperty); set => SetValue(ValueProperty, value); }
@@ -378,7 +378,7 @@ public class DateField : TemplatedControl
     public event EventHandler<RoutedEventArgs>? ValueChanged { add => AddHandler(ValueChangedEvent, value); remove => RemoveHandler(ValueChangedEvent, value); }
     public event EventHandler<RoutedEventArgs>? RangeChanged { add => AddHandler(RangeChangedEvent, value); remove => RemoveHandler(RangeChangedEvent, value); }
 
-    public MonthCalendar? Calendar => _calendar;
+    public CalendarView? Calendar => _calendar;
 
     /// <summary>The date pattern in use: <see cref="Format"/> or the current culture's short date.</summary>
     public string EffectiveFormat => Format ?? DateText.ShortPattern(CultureInfo.CurrentCulture);
@@ -389,7 +389,7 @@ public class DateField : TemplatedControl
         if (_calendar is not null) _calendar.DatePicked -= OnDatePicked;
         _field = e.NameScope.Find<TextField>("PART_Field");
         _popup = e.NameScope.Find<Popup>("PART_Popup");
-        _calendar = e.NameScope.Find<MonthCalendar>("PART_Calendar");
+        _calendar = e.NameScope.Find<CalendarView>("PART_Calendar");
         if (e.NameScope.Find<Button>("PART_Toggle") is { } toggle)
             toggle.Click += (_, ev) => { IsDropDownOpen = !IsDropDownOpen; ev.Handled = true; };
 

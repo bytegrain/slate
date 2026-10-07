@@ -58,12 +58,12 @@
         <sl:Card sl:ResponsiveGrid.Md="6" Title="Tree" Subtitle="→ expand / child · ← collapse / parent · Enter activates · type to jump · lazy folder">
           <sl:Stack Spacing="3">
             <TextBox x:Name="TreeFilter" PlaceholderText="Filter files" sl:Sl.StartIcon="search" />
-            <sl:TreeList x:Name="Files" Height="280" />
+            <sl:TreeView x:Name="Files" Height="280" />
             <TextBlock x:Name="TreeStatus" Foreground="{DynamicResource Sl.Brush.Text.Secondary}" />
           </sl:Stack>
         </sl:Card>
         <sl:Card sl:ResponsiveGrid.Md="6" Title="Tree · checkboxes" Subtitle="Space toggles · parents show mixed state · dense rows">
-          <sl:TreeList x:Name="Checks" Height="320" SelectionMode="Checkbox" Dense="True" />
+          <sl:TreeView x:Name="Checks" Height="320" SelectionMode="Checkbox" Dense="True" />
         </sl:Card>
       </sl:ResponsiveGrid>
     </sl:Stack>

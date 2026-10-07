@@ -33,6 +33,7 @@ public class SnackbarHost : ContentControl
     private StackPanel? _items;
     private readonly Dictionary<long, SnackbarItem> _views = new();
     private DispatcherTimer? _progressTimer;
+    private bool _attached;
 
     static SnackbarHost()
     {
@@ -68,15 +69,36 @@ public class SnackbarHost : ContentControl
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
-        _progressTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background, (_, _) => UpdateProgress());
-        _progressTimer.Start();
+        _attached = true;
+        UpdateTimer();
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
-        _progressTimer?.Stop();
-        _progressTimer = null;
+        _attached = false;
+        UpdateTimer();
+    }
+
+    /// <summary>
+    /// The progress-line timer only runs while a timed snackbar is on screen: an idle host (every SlateWindow has one)
+    /// must not wake the UI thread ten times a second. It also kept the dispatcher queue from ever draining, which hung
+    /// headless tests that pump the dispatcher after a heavy restyle.
+    /// </summary>
+    private void UpdateTimer()
+    {
+        var needed = _attached && _views.Values.Any(v => v.Snackbar.Duration is not null);
+        if (needed && _progressTimer is null)
+        {
+            var timer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background, (_, _) => UpdateProgress());
+            timer.Start();
+            _progressTimer = timer;
+        }
+        else if (!needed && _progressTimer is not null)
+        {
+            _progressTimer.Stop();
+            _progressTimer = null;
+        }
     }
 
     private void OnServiceChanged(ISnackbarService? oldService, ISnackbarService? newService)
@@ -142,6 +164,8 @@ public class SnackbarHost : ContentControl
                 _items.Children.Insert(Math.Min(i, _items.Children.Count), view);
             }
         }
+
+        UpdateTimer();
     }
 
     private void UpdateProgress()

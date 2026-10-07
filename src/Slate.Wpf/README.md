@@ -46,7 +46,8 @@ Options follow the canonical names in `design/api/components.json` (see `docs/de
   returns to Alloy. Custom themes are rebuilt for the current base after `Mode` changes.
 - Component tokens are `DynamicResource` keys `Sl.Component.<Component>.<Token>[.Brush|.Corner|.Thickness|.Effect]`.
 
-WPF spellings that differ from the contract (WPF already owns the name):
+WPF spellings that differ from the contract (WPF already owns the name). They are recorded in
+design/api/components.json (`xamlType`, `xaml`/`wpf` per option), shared with Slate.Avalonia, and read by the conformance tests:
 
 | Contract | WPF |
 | --- | --- |
@@ -55,6 +56,13 @@ WPF spellings that differ from the contract (WPF already owns the name):
 | `Max` | `Maximum` |
 | `Indeterminate` | `IsIndeterminate` |
 | `MaxWidth` | `Container.ContainerMaxWidth`, `DialogContent.DialogMaxWidth` |
+| `Menu.ContextMenu` | `AsContextMenu` |
+| `Tooltip.Placement` | `TooltipPlacement` |
+| `Avatar.Name` | `DisplayName` |
+| `Slider.Min` / `Max` / `Ticks` | `Minimum` / `Maximum` / `ShowTicks` |
+
+Slate controls keep the contract names in the `sl:` namespace (`sl:Menu`, `sl:DatePicker`, `sl:TreeView`, `sl:Slider`…),
+distinct from WPF's own types of the same name; alias them in C# where both namespaces are imported.
 
 ## Controls
 
