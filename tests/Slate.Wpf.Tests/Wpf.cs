@@ -11,6 +11,7 @@ namespace Slate.Wpf.Tests;
 internal static class Wpf
 {
     private static readonly Lazy<Dispatcher> UiDispatcher = new(Start);
+    private static readonly List<Window> RealizedWindows = [];
 
     public static SlateTheme Theme { get; private set; } = null!;
 
@@ -54,6 +55,10 @@ internal static class Wpf
                 error = ExceptionDispatchInfo.Capture(ex);
                 return default!;
             }
+            finally
+            {
+                CloseRealizedWindows();
+            }
         });
         error?.Throw();
         return result;
@@ -73,9 +78,17 @@ internal static class Wpf
             WindowStyle = WindowStyle.None,
             Content = element,
         };
+        RealizedWindows.Add(window);
         window.Show();
         Pump();
         return element;
+    }
+
+    private static void CloseRealizedWindows()
+    {
+        foreach (var window in RealizedWindows.AsEnumerable().Reverse().ToArray())
+            window.Close();
+        RealizedWindows.Clear();
     }
 
     /// <summary>Processes queued dispatcher work (layout, bindings, BeginInvoke).</summary>

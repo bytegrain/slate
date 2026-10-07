@@ -331,7 +331,6 @@ public class Menu : Control
 
     public Menu()
     {
-        AddLogicalChild(_menu);
         _menu.Opened += (_, _) => SetCurrentValue(OpenProperty, true);
         _menu.Closed += (_, _) => SetCurrentValue(OpenProperty, false);
         AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler(OnTriggerClick));
@@ -356,15 +355,6 @@ public class Menu : Control
 
     /// <summary>The ContextMenu that renders the items (exposed for styling and tests).</summary>
     public ContextMenu Popup => _menu;
-
-    protected override System.Collections.IEnumerator LogicalChildren =>
-        new object[] { _menu }.Concat(base.LogicalChildren is { } e ? Enumerate(e) : []).GetEnumerator();
-
-    private static IEnumerable<object> Enumerate(System.Collections.IEnumerator e)
-    {
-        while (e.MoveNext())
-            yield return e.Current!;
-    }
 
     public override void OnApplyTemplate()
     {

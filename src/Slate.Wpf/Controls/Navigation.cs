@@ -104,6 +104,7 @@ public class Tabs : TabControl
     protected override void OnSelectionChanged(SelectionChangedEventArgs e)
     {
         base.OnSelectionChanged(e);
+        SyncKeepAlive();
         if (_syncing)
             return;
         _syncing = true;
@@ -115,7 +116,6 @@ public class Tabs : TabControl
         {
             _syncing = false;
         }
-        SyncKeepAlive();
     }
 
     private string? KeyOf(object? item)
@@ -673,6 +673,7 @@ public class SegmentedControl : Control
             _list.SelectionChanged += OnListSelectionChanged;
             _list.PreviewKeyDown += OnListKeyDown;
         }
+        SyncSelected();
     }
 
     private void BuildSegments()
@@ -683,8 +684,13 @@ public class SegmentedControl : Control
         SyncSelected();
     }
 
-    private void SyncSelected() =>
-        SetValue(SelectedSegmentPropertyKey, Segments.FirstOrDefault(s => Equals(s.Item, Value)));
+    private void SyncSelected()
+    {
+        var selected = Segments.FirstOrDefault(s => Equals(s.Item, Value));
+        SetValue(SelectedSegmentPropertyKey, selected);
+        if (_list is not null && !ReferenceEquals(_list.SelectedItem, selected))
+            _list.SelectedItem = selected;
+    }
 
     private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {

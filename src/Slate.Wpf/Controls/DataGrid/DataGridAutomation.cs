@@ -54,6 +54,7 @@ public sealed class DataGridAutomationPeer(DataGrid owner) : FrameworkElementAut
             Grid.RevealRow(row);
             Grid.RevealColumn(column);
             Grid.UpdateLayout();
+            Grid.Surface?.UpdateLayout();
             view = Grid.Surface?.RowView(row);
         }
         return view?.Cell(field) is { } cell && CreatePeerForElement(cell) is { } peer ? ProviderFromPeer(peer) : null;

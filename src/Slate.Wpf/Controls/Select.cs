@@ -130,6 +130,7 @@ public class Select : Control, IFieldChrome
     public static readonly RoutedEvent SearchChangedEvent = EventManager.RegisterRoutedEvent(nameof(SearchChanged), RoutingStrategy.Bubble, typeof(RoutedPropertyChangedEventHandler<string>), typeof(Select));
 
     private readonly Typeahead _typeahead = new();
+    private readonly HashSet<string> _createdValues = new(StringComparer.Ordinal);
     private Popup? _popup;
     private ListBox? _list;
     private TextBox? _search;
@@ -215,7 +216,9 @@ public class Select : Control, IFieldChrome
 
     // ---- model ----
 
-    private string TextOf(object? item) => item is null ? "" : ItemText?.Invoke(item) ?? item.ToString() ?? "";
+    private string TextOf(object? item) => item is null ? ""
+        : item is string created && _createdValues.Contains(created) ? created
+        : ItemText?.Invoke(item) ?? item.ToString() ?? "";
 
     private List<object> AllItems() => Items?.Cast<object>().ToList() ?? [];
 
@@ -228,6 +231,7 @@ public class Select : Control, IFieldChrome
     internal void RebuildOptions()
     {
         var items = AllItems();
+        _createdValues.RemoveWhere(value => items.Any(item => Equals(item, value)));
         var texts = items.Select(TextOf).ToList();
         var query = Searchable ? SearchText : "";
 
@@ -354,6 +358,8 @@ public class Select : Control, IFieldChrome
         try
         {
             var item = option.Item;
+            if (option.IsCreate && item is string created)
+                _createdValues.Add(created);
             if (Multiple)
             {
                 var values = SelectedItems().ToList();

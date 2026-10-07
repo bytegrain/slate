@@ -633,7 +633,7 @@
         await grid.UpsertAsync([new Row { Id = 3, Name = "Live", Team = "Beta" }]);
         Assert.Equal("Live", Cell(cut, 3, "Name").TextContent.Trim());
         Assert.Contains("is-flash", cut.Find(".sl-data-grid__row[data-key='3']").ClassList);
-        Time.Advance(TimeSpan.FromMilliseconds(900));
+        await cut.InvokeAsync(() => Time.Advance(TimeSpan.FromMilliseconds(900)));
         cut.WaitForAssertion(() => Assert.DoesNotContain("is-flash", cut.Find(".sl-data-grid__row[data-key='3']").ClassList));
 
         Assert.Equal("false", cut.Find(".sl-data-grid__row[data-key='3'] .sl-data-grid__expander").GetAttribute("aria-expanded"));

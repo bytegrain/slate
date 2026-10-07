@@ -208,6 +208,7 @@ public class ConfigurabilityTests
             RadiusScale = 2,
             Overrides = new Dictionary<string, string> { ["component.card.radius"] = "20px" },
         };
+        Assert.Equal(new CornerRadius(12), Application.Current.FindResource("Sl.Component.Button.Radius.Corner"));
         var b = RealizeButton();
         Assert.Equal(12, Sl.GetActualCornerRadius(b).TopLeft);
         Assert.Equal(new CornerRadius(20), Application.Current.FindResource("Sl.Component.Card.Radius.Corner"));

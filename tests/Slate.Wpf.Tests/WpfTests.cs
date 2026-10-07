@@ -16,6 +16,13 @@ public class ThemeTests
     private static Color BrushColor(string key) => ((SolidColorBrush)Application.Current.FindResource(key)).Color;
 
     [Fact]
+    public void Realized_windows_are_closed_after_each_run()
+    {
+        Wpf.Run(() => Wpf.Realize(new Button { Content = "temporary" }));
+        Assert.Equal(0, Wpf.Run(() => Application.Current.Windows.Count));
+    }
+
+    [Fact]
     public void Light_theme_resolves_generated_tokens() => Wpf.Run(() =>
     {
         Assert.Equal(Color.FromRgb(0xF6, 0xF7, 0xF9), BrushColor("Sl.Brush.Background.Canvas"));

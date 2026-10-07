@@ -27,6 +27,8 @@ jobs:
       - run: npm ci
       - run: dotnet run --project tools/Slate.Tokens.Cli -- build --check
       - run: dotnet test Slate.slnx -m:1
+        env:
+          SLATE_PERF_FACTOR: 3
 
   web:
     name: Web
