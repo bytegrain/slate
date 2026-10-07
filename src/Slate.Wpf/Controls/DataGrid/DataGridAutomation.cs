@@ -26,16 +26,18 @@ public sealed class DataGridAutomationPeer(DataGrid owner) : FrameworkElementAut
     protected override List<AutomationPeer>? GetChildrenCore()
     {
         var children = base.GetChildrenCore();
-        if (children is null) return null;
         // Flatten the scroll viewer so rows are direct children of the grid.
         var flat = new List<AutomationPeer>();
-        foreach (var child in children)
+        foreach (var child in children ?? [])
         {
             if (child is ScrollViewerAutomationPeer scroller)
                 flat.AddRange(scroller.GetChildren() ?? []);
             else
                 flat.Add(child);
         }
+        foreach (var row in Grid.Surface?.RealizedRows ?? [])
+            if (CreatePeerForElement(row) is { } peer && !flat.Contains(peer))
+                flat.Add(peer);
         return flat;
     }
 
