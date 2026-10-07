@@ -605,7 +605,7 @@
     }
 
     [Fact]
-    public void Server_mode_pages_through_the_source()
+    public async Task Server_mode_pages_through_the_source()
     {
         var rows = MakeRows(120);
         var cols = new List<GridColumn<Row>> { new() { Field = "Id", Type = GridColumnType.Number }, new() { Field = "Name" } };
@@ -613,12 +613,12 @@
         var defs = cols.Select(c => (DataGridColumn<Row>)c).ToList();
         _state = GridState.Empty.SetPageSize(25);
         var cut = Render(@<SlDataGrid T="Row" DataSource="source" ColumnDefinitions="defs" RowKey="r => r.Id" Pagination="GridPagination.Pages" @bind-State="_state" />);
-        Time.Advance(TimeSpan.FromMilliseconds(100));
+        await cut.InvokeAsync(() => Time.Advance(TimeSpan.FromMilliseconds(100)));
         cut.WaitForAssertion(() => Assert.Equal("0", RowKeys(cut)[0]));
         Assert.Contains("sl-data-grid--pagination-pages", cut.Find(".sl-data-grid").ClassList);
         cut.Find(".sl-data-grid__pager [aria-label='Next page']").Click();
         cut.WaitForAssertion(() => Assert.Equal(1, _state!.PageIndex));
-        Time.Advance(TimeSpan.FromMilliseconds(100));
+        await cut.InvokeAsync(() => Time.Advance(TimeSpan.FromMilliseconds(100)));
         cut.WaitForAssertion(() => Assert.Equal("25", RowKeys(cut)[0]));
         Assert.Equal("27", cut.Find(".sl-data-grid__rows > .sl-data-grid__row").GetAttribute("aria-rowindex"));
     }

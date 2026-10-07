@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
+using System.Windows.Threading;
 using Slate.Data;
 
 namespace Slate.Wpf;
@@ -53,10 +54,15 @@ public sealed class DataGridAutomationPeer(DataGrid owner) : FrameworkElementAut
         {
             Grid.RevealRow(row);
             Grid.RevealColumn(column);
+        }
+        // UIA asks for an off-screen cell synchronously; process the queued WPF layout/load work before
+        // asking the row for its recycled cell peer, otherwise ProviderFromPeer can return null.
+        Grid.Dispatcher.Invoke(() =>
+        {
             Grid.UpdateLayout();
             Grid.Surface?.UpdateLayout();
-            view = Grid.Surface?.RowView(row);
-        }
+        }, DispatcherPriority.ApplicationIdle);
+        view = Grid.Surface?.RowView(row);
         return view?.Cell(field) is { } cell && CreatePeerForElement(cell) is { } peer ? ProviderFromPeer(peer) : null;
     }
 
