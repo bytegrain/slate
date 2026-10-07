@@ -4,6 +4,7 @@ using System.Windows.Automation;
 using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
 using System.Windows.Controls;
+using System.Windows.Interop;
 using System.Windows.Input;
 using Slate.Data;
 
@@ -273,27 +274,18 @@ public class DataGridTests
     public void Automation_exposes_grid_table_and_selection_patterns() => Wpf.Run(() =>
     {
         var g = Grid(100);
-        // UIA providers must be connected through the hosting window before a grid peer can return element providers.
-        var windowPeer = UIElementAutomationPeer.CreatePeerForElement(Window.GetWindow(g)!);
-        Assert.NotNull(windowPeer);
-        windowPeer.GetChildren();
         var peer = (DataGridAutomationPeer)UIElementAutomationPeer.CreatePeerForElement(g);
         Assert.Equal(AutomationControlType.DataGrid, peer.GetAutomationControlType());
         var grid = (IGridProvider)peer.GetPattern(PatternInterface.Grid)!;
         Assert.Equal(100, grid.RowCount);
         Assert.Equal(g.CurrentLayout.Columns.Count, grid.ColumnCount);
-        var cellProvider = grid.GetItem(80, 2); // scrolls into view on demand
-        var surface = g.Surface;
-        var row = surface?.RowView(80);
-        var field = g.CurrentLayout.Columns[2].Field;
-        var cell = row?.Cell(field);
-        var targetCellPeer = cell is null ? null : UIElementAutomationPeer.CreatePeerForElement(cell);
-        var rawProvider = targetCellPeer is null ? null : peer.Provider(targetCellPeer);
-        var targetRowPeer = row is null ? null : UIElementAutomationPeer.CreatePeerForElement(row);
-        var rootChildren = peer.GetChildren() ?? [];
-        var rowChildren = targetRowPeer?.GetChildren() ?? [];
-        Assert.True(cellProvider is not null,
-            $"row={row?.Index.ToString() ?? "not realized"}, cell={cell is not null}, visible={cell?.IsVisible}, loaded={cell?.IsLoaded}, source={cell is not null && PresentationSource.FromVisual(cell) is not null}, peer={targetCellPeer?.GetType().Name ?? "null"}, provider={rawProvider is not null}, rootHasRow={targetRowPeer is not null && rootChildren.Contains(targetRowPeer)}, rowHasCell={targetCellPeer is not null && rowChildren.Contains(targetCellPeer)}, offset={surface?.VerticalOffset}, window={surface?.WindowRange}");
+        var window = Window.GetWindow(g)!;
+        var root = AutomationElement.FromHandle(new WindowInteropHelper(window).Handle);
+        var gridElement = root.FindFirst(TreeScope.Descendants,
+            new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.DataGrid));
+        Assert.NotNull(gridElement);
+        var gridPattern = (GridPattern)gridElement.GetCurrentPattern(GridPattern.Pattern);
+        Assert.NotNull(gridPattern.GetItem(80, 2)); // UIA scrolls the virtualized cell into view on demand
         var table = (ITableProvider)peer.GetPattern(PatternInterface.Table)!;
         Assert.Equal(g.CurrentLayout.Columns.Count, table.GetColumnHeaders().Length);
 
