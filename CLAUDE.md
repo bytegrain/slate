@@ -2,8 +2,6 @@
 
 Slate is a cross-platform component library and design framework built on the **Alloy** design language,
 shipped as four native packages (Web/Lit, Blazor, WPF, Avalonia) generated from one design source.
-**Read `docs/HANDOFF.md` first** — it has the current state, decisions, known issues and next steps.
-
 ## Ground rules
 
 - **The design source is the single source of truth.** Never hand-edit generated files:

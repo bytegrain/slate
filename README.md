@@ -11,8 +11,6 @@ language — precise, calm and built for professional software. One design sourc
 | Avalonia | `Slate.Avalonia` | ✅ preview |
 | Shared .NET core | `Slate.Core` | ✅ |
 
-Current state, decisions and next steps: [`docs/HANDOFF.md`](docs/HANDOFF.md). Agent instructions: [`CLAUDE.md`](CLAUDE.md).
-
 ## The design source
 
 `design/` is the single source of truth: DTCG design tokens (light + dark themes, compact + comfortable

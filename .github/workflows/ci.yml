@@ -139,7 +139,7 @@ jobs:
       - name: Set npm package version
         env:
           PACKAGE_VERSION: ${{ steps.version.outputs.value }}
-        run: npm version "$PACKAGE_VERSION" --workspace @bytegrain/slate-web --no-git-tag-version
+        run: npm version "$PACKAGE_VERSION" --workspace @bytegrain/slate-web --no-git-tag-version --allow-same-version
       - name: Check whether this version is already published
         id: npm-version
         env:

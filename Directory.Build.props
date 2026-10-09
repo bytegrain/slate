@@ -12,7 +12,7 @@
     <Authors>Slate contributors</Authors>
     <Product>Slate</Product>
     <Description>Slate — the Alloy design system for Web, Blazor, WPF and Avalonia.</Description>
-    <VersionPrefix>0.1.0</VersionPrefix>
+    <VersionPrefix>0.1.1</VersionPrefix>
     <VersionSuffix>preview</VersionSuffix>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>

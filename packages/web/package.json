@@ -1,6 +1,6 @@
 {
   "name": "@bytegrain/slate-web",
-  "version": "0.1.0-preview",
+  "version": "0.1.1-preview",
   "description": "Slate web components and CSS — the Alloy design system for any web framework.",
   "repository": {
     "type": "git",
