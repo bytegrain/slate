@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/slate-web-demo.png" alt="Slate web component explorer showing Alloy colour tokens, typography, and theme controls" width="100%" />
+  <img src="docs/assets/slate-web-demo.png" alt="Slate web component explorer showing the same Alloy interface in light and dark themes, divided diagonally" width="100%" />
 </p>
 
 Slate is a component library built on **Alloy**, a calm, precise design language for professional software. Use framework-independent web components and CSS, or build native-feeling interfaces with Blazor, WPF, and Avalonia.
